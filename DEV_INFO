@@ -1,0 +1,95 @@
+
+
+
+
+
+
+https://blog.cloudflare.com/pin-and-unpin-in-rust/
+https://blog.logrocket.com/jwt-authentication-in-rust/
+https://github.com/hyperium/hyper/blob/master/examples/http_proxy.rs
+https://bparli.medium.com/adventures-in-rust-and-load-balancers-73a0bc61a192
+https://dzone.com/articles/rust-based-load-balancing-proxy-server-with-async
+https://github.com/NicolasLM/nucleon
+https://github.com/bparli/convey
+https://github.com/hyperium/hyper/blob/master/examples/http_proxy.rs
+https://truelayer.com/blog/grpc-load-balancing-in-rust
+https://medium.com/load-balancer-series/writing-a-http-load-balancer-in-python-using-tdd-theoretical-concepts-fb6dab3e879b
+https://doc.rust-lang.org/rust-by-example/macros.html
+https://doc.rust-lang.org/book/ch19-06-macros.html
+https://doc.rust-lang.org/reference/procedural-macros.html
+http://zderadicka.eu/hyper-websocket/
+https://rust-unofficial.github.io/patterns/
+https://rustwasm.github.io/docs/book/introduction.html
+https://danielkeep.github.io/practical-intro-to-macros.html
+https://blog.logrocket.com/macros-in-rust-a-tutorial-with-examples/
+https://blog.logrocket.com/procedural-macros-in-rust/
+https://doc.rust-lang.org/reference/attributes.html
+http://gradebot.org/doc/ipur/trait.html
+https://cheats.rs/#behind-the-scenes
+https://doc.rust-lang.org/beta/unstable-book/language-features/generators.html
+https://stackoverflow.com/questions/28127165/how-to-convert-struct-to-u8
+https://stackoverflow.com/questions/2490912/what-are-pinned-objects
+https://rust-lang.github.io/async-book/01_getting_started/01_chapter.html
+https://github.com/zupzup/warp-websockets-example
+https://github.com/tokio-rs/tokio/tree/master/examples
+https://blog.softwaremill.com/multithreading-in-rust-with-mpsc-multi-producer-single-consumer-channels-db0fc91ae3fa
+https://danielkeep.github.io/tlborm/book/
+https://cetra3.github.io/blog/implementing-a-jobq/
+https://cetra3.github.io/blog/implementing-a-jobq-with-tokio/
+https://docs.rs/tokio/1.12.0/tokio/sync/index.html
+https://tokio.rs/tokio/tutorial/channels
+https://docs.rs/tokio-stream/0.1.7/tokio_stream/
+https://doc.rust-lang.org/std/marker/struct.PhantomData.html
+https://doc.rust-lang.org/std/pin/index.html
+https://doc.rust-lang.org/std/sync/struct.Arc.html
+https://doc.rust-lang.org/std/rc/struct.Rc.html
+https://doc.rust-lang.org/std/sync/struct.Mutex.html
+https://doc.rust-lang.org/std/sync/struct.RwLock.html
+https://doc.rust-lang.org/std/cell/struct.RefMut.html
+https://doc.rust-lang.org/std/cell/struct.RefCell.html
+https://doc.rust-lang.org/std/rc/struct.Weak.html
+
+
+
+
+
+
+last program_id: 3EThD5DWMfAcbwCdqpqxjusxmvPiaGDPFdHhFxgyLpBF
+BIP39 passphrase: BIP39
+public key: BcUvCEaMACCsTZktZKVfzpiTF4EXGrLNk4BncCZ52yAQ
+private key: canal clump smoke purpose bubble tired electric company shop law width what
+https://learn.figment.io/tutorials/build-a-crowdfunding-platform-on-solana
+https://learn.figment.io/tutorials/build-a-blog-dapp-using-anchor
+https://docs.solana.com/terminology
+https://solana.com/developers
+https://medium.com/chorus-one/solana-staking-economics-primer-91143e5c9c79
+https://docs.solana.com/developing/programming-model/calling-between-programs
+https://www.youtube.com/watch?v=gA7hFdq2h9Q&ab_channel=DavidChoi
+https://www.youtube.com/watch?v=lkLliOjkB2c&ab_channel=DeathDisco
+https://www.youtube.com/watch?v=Jz5v_u75xk8&ab_channel=DavidChoi
+https://www.youtube.com/watch?v=L4WWQzOBNIg&ab_channel=ZappyCode
+https://www.youtube.com/watch?v=wVPGJ_CZTAw&ab_channel=DavidChoi
+https://www.youtube.com/watch?v=35RO0lAEIxE
+https://proprivacy.com/vpn/guides/setup-vpn-server-linux
+https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/#instruction-rs-part-2
+https://www.startonsolana.com/
+https://learn.figment.io/protocols/solana
+https://solanacookbook.com/#contributing
+https://docs.metaplex.com/
+
+
+
+
+
+
+
+macro attribute and derive like on fields, modules and functions
+jwt and runtime object clients and mode
+https://www.mongodb.com/developer/quickstart/rust-crud-tutorial/
+set username and password for mongodb in production
+export mongodb collections and postman apis
+
+
+
+
+

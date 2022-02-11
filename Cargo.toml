@@ -1,0 +1,31 @@
+
+
+[workspace]
+
+members = [
+    "auth",
+    "suproxy",
+    "coiniXerr",
+    "ayoub",
+]
+
+
+[profile.dev.package.auth]
+opt-level = 0
+[profile.release.package.auth]
+opt-level = 3
+
+[profile.dev.package.suproxy]
+opt-level = 0
+[profile.release.package.suproxy]
+opt-level = 3
+
+[profile.dev.package.coiniXerr]
+opt-level = 0
+[profile.release.package.coiniXerr]
+opt-level = 3
+
+[profile.dev.package.ayoub]
+opt-level = 0
+[profile.release.package.ayoub]
+opt-level = 3
