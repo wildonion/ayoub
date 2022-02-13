@@ -21,7 +21,7 @@ bytes = "1"
 hex = "0.4.3"
 dotenv = "0.15.0"
 log = "0.4"
-jsonwebtoken = "7"
+jsonwebtoken = "8"
 mongodb = "2.1.0"
 rust-argon2 = "1.0.0"
 

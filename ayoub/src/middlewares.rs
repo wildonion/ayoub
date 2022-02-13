@@ -3,4 +3,4 @@
 
 
 use crate::constants;
-use crate::schemas::user::RegInfo;
+use crate::schemas::user::RegisterRequest;

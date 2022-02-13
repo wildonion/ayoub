@@ -79,14 +79,14 @@ impl Api{
 
 
 #[derive(Clone)]
-pub struct LoadBalancer;
+pub struct LoadBalancer; // TODO
 
 #[derive(Clone)]
 pub struct Runtime{ 
     pub id: Uuid,
     pub clients: Vec<SocketAddr>,
     pub storage: Option<Arc<Storage>>,
-    pub load_balancer: Option<LoadBalancer>, // NOTE - clients -request-> middleware server -request-> main servers
+    pub load_balancer: Option<LoadBalancer>, // NOTE - clients -request-> middleware server -request-> main servers - TODO
 }
 
 impl Runtime{ 

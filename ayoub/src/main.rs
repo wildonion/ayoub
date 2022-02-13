@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     let host = env::var("HOST").expect("⚠️ no host variable set");
     let port = env::var("AYOUB_PORT").expect("⚠️ no port variable set");
     let server_addr = format!("{}:{}", host, port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port);
+    // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ COMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
     
     

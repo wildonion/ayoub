@@ -9,7 +9,7 @@ pub mod user_token{
     
     use serde::{Deserialize, Serialize};
     use std::env;
-    use crate::entities::users::model::LoginInfo;
+    use crate::entities::users::model::LoginRequest;
     use chrono::Utc;
     use jsonwebtoken::{
         EncodingKey, 
@@ -29,7 +29,7 @@ pub mod user_token{
     }
     
     impl UserToken{
-        pub fn generate_token(login: &LoginInfo) -> String{
+        pub fn generate_token(login: &LoginRequest) -> String{
             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
             let payload = UserToken{
                 iat: now,

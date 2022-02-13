@@ -26,7 +26,7 @@ use liber;
 ///////////// =============================================== INSERTABLE STRUCTS ===============================================
 #[derive(Insertable)]
 #[table_name = "users"]
-pub struct LoginInfo {
+pub struct LoginRequest {
     pub access_level: i16,
     pub id: i32,
     pub username: String,
@@ -186,7 +186,7 @@ impl QueryableUser{
         }
     }
 
-    pub async fn login(login: Login) -> Option<LoginInfo>{
+    pub async fn login(login: Login) -> Option<LoginRequest>{
         let conn = pg::connection().await.unwrap();
         if let Ok(user_to_verify) = users::table
             .filter(users::username.eq(&login.username_or_email))
@@ -205,7 +205,7 @@ impl QueryableUser{
                         }
                         let access_token_str = QueryableUser::generate_access_token().await;
                         if QueryableUser::update_access_token_to_db(&user_to_verify.username, &access_token_str).await{
-                            let login_info = LoginInfo{
+                            let login_info = LoginRequest{
                                 id: user_to_verify.id,
                                 access_level: user_to_verify.access_level,
                                 username: user_to_verify.username,
@@ -215,7 +215,7 @@ impl QueryableUser{
                         }   
                     }
                 } else{
-                    let login_info = LoginInfo{id: user_to_verify.id, access_level: user_to_verify.access_level, username: user_to_verify.username, access_token: user_to_verify.access_token};
+                    let login_info = LoginRequest{id: user_to_verify.id, access_level: user_to_verify.access_level, username: user_to_verify.username, access_token: user_to_verify.access_token};
                     return Some(login_info);
                 }
             }

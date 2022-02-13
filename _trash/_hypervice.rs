@@ -91,7 +91,7 @@ impl<C: Sync + Send + 'static> Service<Request<Body>> for Svc<C>{ //-- C is the 
                     
                     let data: serde_json::Value = serde_json::from_reader(whole_body_bytes.reader()).unwrap(); //-- making a serde value from the buffer which is an IO stream of json coming from the client
                     let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json
-                    let deserialize_from_json_into_struct: ctx::auth::RegInfo = serde_json::from_str(&json).unwrap();
+                    let deserialize_from_json_into_struct: ctx::auth::RegisterRequest = serde_json::from_str(&json).unwrap();
                     let username = deserialize_from_json_into_struct.username;
                     let phone = deserialize_from_json_into_struct.phone;
 
@@ -104,8 +104,8 @@ impl<C: Sync + Send + 'static> Service<Request<Body>> for Svc<C>{ //-- C is the 
 
 
 
-                    let response_body = ctx::app::Response::<ctx::auth::RegInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is RegInfo struct
-                        data: Some(deserialize_from_json_into_struct), //-- deserialize_from_json_into_struct is of type RegInfo struct 
+                    let response_body = ctx::app::Response::<ctx::auth::RegisterRequest>{ //-- we have to specify a generic type for data field in Response struct which in our case is RegisterRequest struct
+                        data: Some(deserialize_from_json_into_struct), //-- deserialize_from_json_into_struct is of type RegisterRequest struct 
                         message: ACCESS_GRANTED,
                         status: 200,
                     };
