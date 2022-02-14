@@ -11,7 +11,7 @@
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
-use crate::controllers::auth::{home, check_token, login, signup, not_found};
+use crate::controllers::auth::{home, not_found};
 
 
 
@@ -30,11 +30,8 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::GET, "/auth")              => home(app).await,
-        (&Method::POST, "/auth/login")       => login(app_storage, app).await,
-        (&Method::POST, "/auth/signup")      => signup(app_storage, app).await,
-        (&Method::POST, "/auth/check-token") => check_token(app_storage, app).await,
-        _                                    => not_found().await
+        (&Method::GET, "/event") => home(app).await,
+        _                        => not_found().await
     }
 
 }

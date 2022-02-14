@@ -5,7 +5,8 @@
 
 
 
-use crate::constants;
+
+
 use futures::Future;
 use std::net::SocketAddr;
 use mongodb::Client;
@@ -13,7 +14,7 @@ use uuid::Uuid;
 use std::sync::Arc;
 use serde::{Serialize, Deserialize};
 use tokio::sync::oneshot::Receiver;
-use hyper::{Body, Method, StatusCode};
+use hyper::Body;
 use log::{info, error};
 
 
@@ -78,10 +79,10 @@ impl Api{
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LoadBalancer; // TODO
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Runtime{ 
     pub id: Uuid,
     pub clients: Vec<SocketAddr>,
@@ -123,7 +124,7 @@ impl Runtime{
 }
 
 
-#[derive(Clone)] //-- can't bound Copy trait cause engine and url are String which are heap data structure 
+#[derive(Clone, Debug)] //-- can't bound Copy trait cause engine and url are String which are heap data structure 
 pub struct Db{
     pub mode: Mode,
     pub engine: Option<String>,
@@ -159,7 +160,7 @@ impl Db{
 
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Storage{
     pub id: Uuid,
     pub db: Option<Db>, //-- we could have no db at all
@@ -167,7 +168,7 @@ pub struct Storage{
 
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Mode{
     On,
     Off,

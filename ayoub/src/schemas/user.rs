@@ -109,7 +109,7 @@ pub struct RegisterResponse{ // NOTE - those Option values can be None tho
 |
 */
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TokenRequest{
+pub struct CheckTokenRequest{
     pub access_token: String,
 }
 

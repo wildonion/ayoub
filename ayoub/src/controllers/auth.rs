@@ -99,15 +99,16 @@ pub async fn home(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Er
 //
 // -------------------------------------------------------------------------
 pub async fn check_token(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+    
+    
     api.post("/auth/check-token", |req, res| async move{
-
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json
-                match serde_json::from_str::<schemas::user::TokenRequest>(&json){ //-- the generic type of from_str() method is LoginRequest struct - mapping (deserializing) the json into the LoginRequest struct
+                match serde_json::from_str::<schemas::user::CheckTokenRequest>(&json){ //-- the generic type of from_str() method is LoginRequest struct - mapping (deserializing) the json into the LoginRequest struct
                     Ok(token_request) => { //-- we got the username and password inside the login route
 
                         
