@@ -5,7 +5,7 @@
 
 
 
-
+// TODO - macro attribute and derive like on fields, modules and functions
 #![cfg(not(feature = "no-entrypoint"))] //-- inner attribute is the only way to place attributes on the crate by writing them in the root of it - this crate only gets compiled if the feature is not no-entrypoint
 #[cfg(all(feature = "bloody-panic", target_arch = "bpf"))] //-- outter attribute only on bpf target and the can be on enum and struct fields
 #[no_mangle]

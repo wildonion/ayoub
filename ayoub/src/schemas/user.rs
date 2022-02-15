@@ -137,8 +137,7 @@ impl RegisterRequest{
         let salt = env::var("SECRET_KEY").expect("⚠️ no secret key variable set");
         let salt_bytes = salt.as_bytes();
         let password_bytes = raw_password.as_bytes();
-        let config = Config::default();
-        argon2::hash_encoded(password_bytes, salt_bytes, &config)
+        argon2::hash_encoded(password_bytes, salt_bytes, &Config::default())
     }
 
 }

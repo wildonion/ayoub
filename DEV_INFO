@@ -81,10 +81,6 @@ https://docs.metaplex.com/
 
 
 
-
-
 https://www.mongodb.com/developer/quickstart/rust-crud-tutorial/
 http://whitfin.io/building-simple-apis-with-hyper-and-usher/
-macro attribute and derive like on fields, modules and functions
-set username and password for mongodb in production
-export mongodb collections and postman apis
+export mongodb collections and postman apis and all TODOs
