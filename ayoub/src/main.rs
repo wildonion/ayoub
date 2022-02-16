@@ -183,7 +183,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
             routers::auth::register(db.clone(), api) //-- registering app storage and the api on the auth router
         });
         async move { 
-            // runtime_sender.send(rt.clone()).await.unwrap(); // NOTE - we must implement Debug trait for all sub types of Runtime struct because of unwrap() ------------------- TODO
+            runtime_sender.send(rt.clone()).await.unwrap(); // NOTE - we must implement Debug trait for all sub types of Runtime struct because of unwrap()
             Ok::<_, constants::GenericError>(registered_service) 
         }
     });
@@ -198,11 +198,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     // -------------------------------- waiting to receive the runtime object from up side the channel
     //
     // -----------------------------------------------------------------------------------------------------------------
-    // while let Some(runtime) = runtime_receiver.recv().await{ //-- waiting to receive the runtime object - we must define the receiver of the runtime channel as mutable cause reading is a mutable operation 
-    //     let rt_obj = runtime.lock().unwrap();
-    //     info!("runtime object id {} - {}", rt_obj.id, chrono::Local::now().naive_local());
-    //     info!("total clients {} - {}", rt_obj.clients.len(), chrono::Local::now().naive_local());
-    // }
+    while let Some(runtime) = runtime_receiver.recv().await{ //-- waiting to receive the runtime object - we must define the receiver of the runtime channel as mutable cause reading is a mutable operation 
+        let rt_obj = runtime.lock().unwrap();
+        info!("runtime object id {} - {}", rt_obj.id, chrono::Local::now().naive_local());
+        info!("total clients {} - {}", rt_obj.clients.len(), chrono::Local::now().naive_local());
+    }
     
 
 
@@ -222,6 +222,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
+
     
 
 
@@ -234,6 +235,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     }
     
     
+
+
+
     // sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty
 
 
