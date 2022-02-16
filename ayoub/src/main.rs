@@ -51,7 +51,6 @@ use uuid::Uuid;
 use std::env;
 use log::{info, error};
 use tokio::sync::oneshot;
-use tokio::sync::mpsc;
 use hyper::{server::{Server, conn::AddrStream}, Response};
 use hyper::service::{make_service_fn, service_fn};
 use crate::contexts as ctx;
@@ -97,12 +96,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     let server_addr = format!("{}:{}", host, port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let (runtime_sender, mut runtime_receiver) = mpsc::channel::<Arc<Mutex<ctx::app::Runtime>>>(io_buffer_size); //-- io_buffer_size is the number of total bytes we can send and have through and inside the channel
+
+
+
     
     
-    
-    
-    
+
 
 
     
@@ -175,35 +174,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
         let db = db.clone(); //-- db is not a variable in which its state changes during the runtime cause it's like a pointer which is pointing to the database actually thus we can clone it whenever we want
         let rt = arced_runtime.clone(); //-- clone is a deep copy so we don't have the old memory location (heap) of runtime object inside the rt variable 
         rt.as_ref().lock().unwrap().add_client(addr); //-- as_ref() method will borrow the original value inside the wrapped type (Result or Option) 
-        let runtime_sender = runtime_sender.clone(); //-- sending runtime object through the mpsc job queue channel to down side of the channel
         let registered_service = service_fn(move |req| {
             info!("building auth service for client {} - {}", addr, chrono::Local::now().naive_local());
             let api = ctx::app::Api::new(Some(req), Some(Response::builder()), addr);
             info!("bridging between current service and its controller - {}", chrono::Local::now().naive_local());
             routers::auth::register(db.clone(), api) //-- registering app storage and the api on the auth router
         });
-        async move { 
-            runtime_sender.send(rt.clone()).await.unwrap(); // NOTE - we must implement Debug trait for all sub types of Runtime struct because of unwrap()
-            Ok::<_, constants::GenericError>(registered_service) 
-        }
+        async move { Ok::<_, constants::GenericError>(registered_service) }
     });
 
 
-    
-
-
-
-
-
-    // -------------------------------- waiting to receive the runtime object from up side the channel
-    //
-    // -----------------------------------------------------------------------------------------------------------------
-    while let Some(runtime) = runtime_receiver.recv().await{ //-- waiting to receive the runtime object - we must define the receiver of the runtime channel as mutable cause reading is a mutable operation 
-        let rt_obj = runtime.lock().unwrap();
-        info!("runtime object id {} - {}", rt_obj.id, chrono::Local::now().naive_local());
-        info!("total clients {} - {}", rt_obj.clients.len(), chrono::Local::now().naive_local());
-    }
-    
 
 
 
@@ -238,7 +218,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
-    // sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty
+    sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty
 
 
 
