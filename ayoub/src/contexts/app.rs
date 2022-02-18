@@ -8,10 +8,8 @@
 
 
 use futures::Future;
-use std::net::SocketAddr;
 use mongodb::Client;
 use uuid::Uuid;
-use std::sync::Arc;
 use serde::{Serialize, Deserialize};
 use tokio::sync::oneshot::Receiver;
 use hyper::Body;
@@ -24,12 +22,11 @@ use log::{info, error};
 
 
 
-
+#[derive(Debug)]
 pub struct Api{
     pub name: String,
     pub req: Option<hyper::Request<Body>>,
     pub res: Option<hyper::http::response::Builder>,
-    pub peer: SocketAddr, //-- current peer that is calling this api
 }
 
 
@@ -45,12 +42,11 @@ impl Api{
     //        for hyper Request and Response structs error.
     // ---------------------------------------------------------------------------------------------------------------------
 
-    pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>, peer: SocketAddr) -> Self{
+    pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>) -> Self{
         Api{
             name: String::from(""),
             req: request,
             res: response,
-            peer,
         }
     }
     
@@ -80,48 +76,9 @@ impl Api{
 
 
 #[derive(Clone, Debug)]
-pub struct LoadBalancer; // TODO
+pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
 
-#[derive(Clone, Debug)]
-pub struct Runtime{ 
-    pub id: Uuid,
-    pub clients: Vec<SocketAddr>,
-    pub storage: Option<Arc<Storage>>,
-    pub load_balancer: Option<LoadBalancer>, // NOTE - clients -request-> middleware server -request-> main servers - TODO
-}
 
-impl Runtime{ 
-    
-    pub async fn new(storage: Option<Arc<Storage>>) -> Runtime{
-        Runtime{
-            id: Uuid::new_v4(),
-            clients: vec![],
-            storage,
-            load_balancer: None,
-        }
-    }
-
-    pub fn add_client(&mut self, client: SocketAddr) -> Self{
-        self.clients.push(client);
-        Runtime{
-            id: self.id,
-            clients: self.clients.clone(), //-- clients here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self 
-            storage: self.storage.clone(), //-- storage here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self
-            load_balancer: self.load_balancer.clone(), //-- this is behind a mutable reference and Copy trait is not implemented for LoadBalancer struct thus we have to clone it 
-        }
-    }
-
-    pub fn remove_client(&mut self, client_index: usize) -> Self{
-        self.clients.remove(client_index);
-        Runtime{
-            id: self.id,
-            clients: self.clients.clone(),
-            storage: self.storage.clone(),
-            load_balancer: self.load_balancer.clone(),
-        }
-    }
-
-}
 
 
 #[derive(Clone, Debug)] //-- can't bound Copy trait cause engine and url are String which are heap data structure 

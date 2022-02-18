@@ -112,7 +112,7 @@ async fn main() -> std::io::Result<()>{
     let listener = TcpListener::bind(format!("{}:{}", host, coiniXerr_tcp_port)).await.unwrap();
     let pool = scheduler::ThreadPool::new(10); //-- spawning 10 threads in overall per incoming stream to handle all incoming transactions from every stream concurrently and simultaneously
     let (stream_sender, mut stream_receiver) = mpsc::channel::<(TcpStream, Uuid, Arc<Mutex<RuntimeInfo>>, Arc<Mutex<Addr<Validator>>>)>(buffer_size); //-- mpsc channel to send the incoming stream, the generated uuid of the runtime info object and the runtime info object itself to multiple threads through the channel for each incoming connection from the socket
-    let (transaction_sender, mut transaction_receiver) = mpsc::channel::<Arc<Mutex<Transaction>>>(buffer_size); //-- transaction mempool channel - mpsc channel to send all transactions of all peers' stream to down side of the channel asynchronously for mining process
+    let (transaction_sender, mut transaction_receiver) = mpsc::channel::<Arc<Mutex<Transaction>>>(buffer_size); //-- transaction mempool channel using mpsc channel to send all transactions of all peers' stream to down side of the channel asynchronously for mining process - buffer_size is the number of total bytes we can send and have through and inside the channel
     println!("-> {} - server is up", chrono::Local::now().naive_local());
     
     

@@ -7,6 +7,8 @@
 
 
 
+Coded by
+
 
 
  █     █░ ██▓ ██▓    ▓█████▄  ▒█████   ███▄    █  ██▓ ▒█████   ███▄    █ 
@@ -22,17 +24,6 @@
 
 
 
-
-     -----------------------
-    | Runtime struct fields
-    |-----------------------
-    |
-    | -> id of the runtime
-    | -> mode of the runtime
-    | -> clients
-    | -> current storage attched to runtime object
-    | -> load balancer algorithm
-
 */
 
 
@@ -45,6 +36,11 @@ mod contexts;
 mod schemas;
 mod controllers;
 mod routers;
+mod services;
+
+
+
+
 use std::{net::SocketAddr, sync::{Arc, Mutex}};
 use dotenv::dotenv;
 use uuid::Uuid;
@@ -54,7 +50,7 @@ use tokio::sync::oneshot;
 use hyper::{server::{Server, conn::AddrStream}, Response};
 use hyper::service::{make_service_fn, service_fn};
 use crate::contexts as ctx;
-
+use crate::services::auth;
 
 
 
@@ -147,41 +143,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
-    // -------------------------------- building runtime object
-    //
-    // NOTE - runtime object has a add_client() method in which a peer address will be pushed 
-    //        into the clients vector thus its first argument must be defined as &mut self 
-    //        and in order to push inside other threads we must put the runtime object inside a Mutex.
-    // -------------------------------------------------------------------------------------------------------
-    info!("initializing ayoub runtime - {}", chrono::Local::now().naive_local());
-    let runtime = ctx::app::Runtime::new(db.clone()).await; //-- building a new runtime with specified db engine
-    let arced_runtime = Arc::new(Mutex::new(runtime)); 
-
-
-
-
-
     
 
 
 
-    // -------------------------------- making current service
+    // -------------------------------- building auth service
     //
     // ---------------------------------------------------------------------
-    let auth_service = make_service_fn(move |conn: &AddrStream| {
-        info!("making service function - {}", chrono::Local::now().naive_local());
-        let addr = conn.remote_addr();
-        let db = db.clone(); //-- db is not a variable in which its state changes during the runtime cause it's like a pointer which is pointing to the database actually thus we can clone it whenever we want
-        let rt = arced_runtime.clone(); //-- clone is a deep copy so we don't have the old memory location (heap) of runtime object inside the rt variable 
-        rt.as_ref().lock().unwrap().add_client(addr); //-- as_ref() method will borrow the original value inside the wrapped type (Result or Option) 
-        let registered_service = service_fn(move |req| {
-            info!("building auth service for client {} - {}", addr, chrono::Local::now().naive_local());
-            let api = ctx::app::Api::new(Some(req), Some(Response::builder()), addr);
-            info!("bridging between current service and its controller - {}", chrono::Local::now().naive_local());
-            routers::auth::register(db.clone(), api) //-- registering app storage and the api on the auth router
-        });
-        async move { Ok::<_, constants::GenericError>(registered_service) }
-    });
+    let auth_services = services::auth::AuthSvc{
+        id: Uuid::new_v4(),
+        storage: db.clone(),
+        clients: vec![],
+    };
 
 
 
@@ -190,12 +163,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
-    
 
     // -------------------------------- server and signal message setup
     //
     // -------------------------------------------------------------------------
-    let server = Server::bind(&server_addr).serve(auth_service);
+    let server = Server::bind(&server_addr).serve(auth_services);
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel 
     let graceful = server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
 

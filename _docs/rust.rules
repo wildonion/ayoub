@@ -186,3 +186,7 @@ Sugar Memories:
     [+] &self is a pointer to all struct fields and mutating the struct fields is done using &mut self (a mutable pointer to struct fields) 
     [+] if you want to add a pointer with lifetime use &'a Type and if you don't want the lifetime use *const Type (raw pointer)
     [+] struct can own its field like there is not pointer to a type like &'s str and we'll pass self to its first parameter method or it can owned a borrowed field like &'s str
+    [+] we can solve futures by awaiting on them to solve impl Future<Output=()>
+    [+] we have to put the heap data types inside the Box like closures and traits
+    [+] pointer to the heap to borrow the data inside the heap cause we don't have a specific size at compile time for the heap data structures
+    [+] async message passing (share clonable data) between threads using channels
