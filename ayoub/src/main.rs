@@ -143,18 +143,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
-    
-
 
 
     // -------------------------------- building auth service
     //
     // ---------------------------------------------------------------------
-    let auth_services = services::auth::AuthSvc{
-        id: Uuid::new_v4(),
-        storage: db.clone(),
-        clients: vec![],
-    };
+    let auth_services = services::auth::AuthSvc::new(db.clone(), vec![]).await;
 
 
 
@@ -190,20 +184,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
-    sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty
-
-
-
     // TODO - if the number of clients reached too many requests shutdown the server
-    // TODO - we can also distribute incoming requests from clients between multiple ayoub instances (load balancer)
+    sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
+    // sender.send(1); //-- freez feature
 
 
-    
-    
-    // TODO - add freez feature
-    // TODO - detach db from the runtime object (set its storage field to None and db mode to off)
-    // ...
-    // sender.send(1);
+
 
 
 

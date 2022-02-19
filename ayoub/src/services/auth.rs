@@ -35,10 +35,10 @@ pub struct AuthSvc{
 
 impl AuthSvc{ 
     
-    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Api) -> AuthSvc{
+    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, clients: Vec<SocketAddr>) -> AuthSvc{
         AuthSvc{
             id: Uuid::new_v4(),
-            clients: vec![],
+            clients,
             storage,        
         }
     }
@@ -65,7 +65,7 @@ impl AuthSvc{
 
 impl<T> Service<T> for AuthSvc{
 
-    type Response = Svc; //-- the response type is a Svc object which handles routing processes
+    type Response = Svc; //-- the response type is an object of type Svc which handles routing processes
     type Error = hyper::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
     
@@ -95,7 +95,7 @@ impl<T> Service<T> for AuthSvc{
 
 
 
-pub struct Svc{
+pub struct Svc{ //-- a struct to handle all incoming requests asynchronousely
     pub id: Uuid,
     pub clients: Vec<SocketAddr>,
     pub storage: Option<Arc<ctx::app::Storage>>,
