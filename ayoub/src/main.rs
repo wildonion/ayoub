@@ -142,14 +142,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
 
 
 
-    // -------------------------------- building current service
+    // -------------------------------- building services
     //
     // ---------------------------------------------------------------------
-    let current_service = match current_service.as_str(){
-        "auth" => services::auth::AuthSvc::new(db.clone(), vec![]).await,
-        "fishuman" => services::fishuman::FishumanSvc::new(db.clone(), vec![]).await,
-        _ => services::auth::AuthSvc::new(db.clone(), vec![]).await,
-    };
+    let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
+    let fishuman_service = services::fishuman::FishumanSvc::new(db.clone(), vec![]).await;
 
 
 
@@ -162,9 +159,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     // -------------------------------- server and signal message setup
     //
     // -------------------------------------------------------------------------
-    let server = Server::bind(&server_addr).serve(current_service);
+    let auth_server = Server::bind(&server_addr).serve(auth_serivce);
+    let fishuman_server = Server::bind(&server_addr).serve(fishuman_service);
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel 
-    let graceful = server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
+    let graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
 
 
 
