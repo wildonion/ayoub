@@ -110,7 +110,7 @@ pub async fn check_token(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json
                 match serde_json::from_str::<schemas::user::CheckTokenRequest>(&json){ //-- the generic type of from_str() method is LoginRequest struct - mapping (deserializing) the json into the LoginRequest struct
-                    Ok(token_request) => { //-- we got the username and password inside the login route
+                    Ok(token_request) => { //-- we got the token string inside the check-token route
 
                         
                         match utils::jwt::deconstruct(token_request.access_token.as_str()).await{
