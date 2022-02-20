@@ -13,6 +13,10 @@ use std::env;
 
 
 
+
+
+
+
 /*
   ----------------------------------------------------------------------------------------
 | this struct will be used to deserialize register info json from client into this struct
@@ -61,6 +65,7 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
     pub role: String, // NOTE - dev, admin, user
     pub status: u8, // NOTE - 1 means active ; 0 means suspended
     pub created_at: Option<chrono::NaiveDateTime>,
+    pub updated_at: Option<chrono::NaiveDateTime>,
 }
 
 

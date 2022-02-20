@@ -41,17 +41,14 @@ mod services;
 
 
 
-use std::{net::SocketAddr, sync::{Arc, Mutex}};
+use std::{net::SocketAddr, sync::Arc};
 use dotenv::dotenv;
 use uuid::Uuid;
 use std::env;
 use log::{info, error};
 use tokio::sync::oneshot;
-use hyper::{server::{Server, conn::AddrStream}, Response};
-use hyper::service::{make_service_fn, service_fn};
+use hyper::server::Server;
 use crate::contexts as ctx;
-use crate::services::auth;
-
 
 
 

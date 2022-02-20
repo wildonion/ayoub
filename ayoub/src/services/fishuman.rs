@@ -2,8 +2,6 @@
 
 
 
-
-
 use crate::routers;
 use crate::contexts as ctx;
 use std::future::Future;
@@ -27,16 +25,16 @@ use std::net::SocketAddr;
 
 
 #[derive(Clone, Debug)]
-pub struct AuthSvc{ 
+pub struct FishumanSvc{ 
     pub id: Uuid,
     pub clients: Vec<SocketAddr>,
     pub storage: Option<Arc<ctx::app::Storage>>, //-- we can have empty sotrage
 }
 
-impl AuthSvc{ 
+impl FishumanSvc{ 
     
-    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, clients: Vec<SocketAddr>) -> AuthSvc{
-        AuthSvc{
+    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, clients: Vec<SocketAddr>) -> FishumanSvc{
+        FishumanSvc{
             id: Uuid::new_v4(),
             clients,
             storage,        
@@ -45,7 +43,7 @@ impl AuthSvc{
 
     pub fn add_client(&mut self, client: SocketAddr) -> Self{ // NOTE - runtime object has a add_client() method in which a peer address will be pushed into the clients vector thus its first argument must be defined as &mut self and in order to push inside other threads we must put the runtime object inside a Mutex.
         self.clients.push(client);
-        AuthSvc{
+        FishumanSvc{
             id: self.id,
             clients: self.clients.clone(), //-- clients here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self 
             storage: self.storage.clone(), //-- storage here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self
@@ -54,7 +52,7 @@ impl AuthSvc{
 
     pub fn remove_client(&mut self, client_index: usize) -> Self{
         self.clients.remove(client_index);
-        AuthSvc{
+        FishumanSvc{
             id: self.id,
             clients: self.clients.clone(),
             storage: self.storage.clone(),
@@ -63,7 +61,7 @@ impl AuthSvc{
 
 }
 
-impl<T> Service<T> for AuthSvc{
+impl<T> Service<T> for FishumanSvc{
 
     type Response = Svc; //-- the response type is an object of type Svc which handles routing processes
     type Error = hyper::Error;
@@ -117,7 +115,7 @@ impl Service<Request<Body>> for Svc{
 
     fn call(&mut self, req: Request<Body>) -> Self::Future{ //-- Body is the generic type of the Request struct
         let api = ctx::app::Api::new(Some(req), Some(Response::builder()));
-        let res = routers::auth::register(self.storage.clone(), api); //-- registering auth routers for the auth service - register method returns a result of hyper response based on calling one of the available routes
+        let res = routers::fishuman::register(self.storage.clone(), api); //-- registering fishuman routers for the fishuman service - register method returns a result of hyper response based on calling one of the available routes
         Box::pin(async{ //-- returning the future response pinned to memory to solve later using .await - we can't mutate self.* in here cause the lifetime of the self must be static across a .await  
             res.await
         })

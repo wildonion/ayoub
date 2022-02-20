@@ -30,7 +30,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::GET, "/event") => home(app).await,
+        (&Method::GET, "/fishuman/proposal/add") => home(app).await,
         _                        => not_found().await
     }
 

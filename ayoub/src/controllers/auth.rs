@@ -61,7 +61,23 @@ pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
 //
 // -------------------------------------------------------------------------
 pub async fn home(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
-    api.get("/auth", |req, res| async move{
+    api.get("/auth/home", |req, res| async move{
+        
+
+        
+        let req_header = req.headers();
+        let token = if req_header.contains_key("authorization"){
+            &req_header["authorization"].to_str().unwrap()[7..]
+        } else{
+            ""
+        };
+
+
+        // let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+        
+        
+
+        ////////////////////////////////// multi threading ops
         let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
         info!("inside the native thread");
             let async_task = tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model - 
@@ -71,21 +87,52 @@ pub async fn home(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Er
                 ////////
             });
         });
-        let response_body = ctx::app::Response::<ctx::app::Nill>{
-            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-            message: WELCOME,
-            status: 200,
-        };
-        let response_body_json = serde_json::to_string(&response_body).unwrap();
-        Ok(
-            res
-                .status(StatusCode::OK)
-                .header(header::CONTENT_TYPE, "application/json")
-                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
-                .unwrap()
-        )
+        //////////////////////////////////
+        
+        
+
+        match utils::jwt::deconstruct(token).await{
+            Ok(decoded_token) => {
+                
+                
+                let _id = decoded_token.claims._id;
+                let username = decoded_token.claims.username;
+                let greeting = format!("Welcome {}", username);
+                
+
+                let response_body = ctx::app::Response::<String>{ //-- we have to specify a generic type for data field in Response struct which in our case is String type
+                    data: Some(greeting), //-- deserialize_from_json_into_struct is of type UserInfo struct 
+                    message: ACCESS_GRANTED,
+                    status: 200,
+                };
+                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                Ok(
+                    res
+                        .status(StatusCode::OK)
+                        .header(header::CONTENT_TYPE, "application/json")
+                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .unwrap() 
+                )
+            },
+            Err(e) => { //-- this is the error of can't decode the token
+                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                    message: &e.to_string(), //-- take a reference to the string error
+                    status: 500,
+                };
+                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                Ok(
+                    res
+                        .status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .header(header::CONTENT_TYPE, "application/json")
+                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .unwrap() 
+                )
+            },
+        }
     }).await
 }
+
 
 
 
@@ -203,7 +250,7 @@ pub async fn check_token(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
                     },
                 }
             },
-            Err(e) => {
+            Err(e) => { //-- serde from_reader error
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
                     message: &e.to_string(), //-- take a reference to the string error
@@ -375,6 +422,7 @@ pub async fn login(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Res
         } 
     }).await
 }
+
 
 
 
