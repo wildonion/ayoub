@@ -25,16 +25,16 @@ use std::net::SocketAddr;
 
 
 #[derive(Clone, Debug)]
-pub struct FishumanSvc{ 
+pub struct EventSvc{ 
     pub id: Uuid,
     pub clients: Vec<SocketAddr>,
     pub storage: Option<Arc<ctx::app::Storage>>, //-- we can have empty sotrage
 }
 
-impl FishumanSvc{ 
+impl EventSvc{ 
     
-    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, clients: Vec<SocketAddr>) -> FishumanSvc{
-        FishumanSvc{
+    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, clients: Vec<SocketAddr>) -> EventSvc{
+        EventSvc{
             id: Uuid::new_v4(),
             clients,
             storage,        
@@ -43,7 +43,7 @@ impl FishumanSvc{
 
     pub fn add_client(&mut self, client: SocketAddr) -> Self{ // NOTE - runtime object has a add_client() method in which a peer address will be pushed into the clients vector thus its first argument must be defined as &mut self and in order to push inside other threads we must put the runtime object inside a Mutex.
         self.clients.push(client);
-        FishumanSvc{
+        EventSvc{
             id: self.id,
             clients: self.clients.clone(), //-- clients here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self 
             storage: self.storage.clone(), //-- storage here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self
@@ -52,7 +52,7 @@ impl FishumanSvc{
 
     pub fn remove_client(&mut self, client_index: usize) -> Self{
         self.clients.remove(client_index);
-        FishumanSvc{
+        EventSvc{
             id: self.id,
             clients: self.clients.clone(),
             storage: self.storage.clone(),
@@ -61,7 +61,7 @@ impl FishumanSvc{
 
 }
 
-impl<T> Service<T> for FishumanSvc{
+impl<T> Service<T> for EventSvc{
 
     type Response = Svc; //-- the response type is an object of type Svc which handles routing processes
     type Error = hyper::Error;

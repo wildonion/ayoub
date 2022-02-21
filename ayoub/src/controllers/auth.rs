@@ -4,9 +4,7 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::utils;
-use crate::constants::{ACCESS_GRANTED, ACCESS_DENIED,
-                      NOTFOUND_ROUTE, DO_LOGIN, DO_SIGNUP, 
-                      WELCOME, UNAUTHORISED, REGISTERED};
+use crate::constants::*;
 use std::thread;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- based on orphan rule it'll be needed to call the reader() method on the whole_body buffer
@@ -34,7 +32,7 @@ use mongodb::Client;
 pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
     let res = Response::builder(); //-- creating a new response cause we didn't find any available route
     let response_body = ctx::app::Response::<ctx::app::Nill>{
-        message: NOTFOUND_ROUTE,
+        message: NOT_FOUND_ROUTE,
         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
         status: 404,
     };

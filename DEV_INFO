@@ -5,8 +5,6 @@
 
 
 https://blog.cloudflare.com/pin-and-unpin-in-rust/
-https://blog.logrocket.com/jwt-authentication-in-rust/
-https://github.com/hyperium/hyper/blob/master/examples/http_proxy.rs
 https://bparli.medium.com/adventures-in-rust-and-load-balancers-73a0bc61a192
 https://dzone.com/articles/rust-based-load-balancing-proxy-server-with-async
 https://github.com/NicolasLM/nucleon

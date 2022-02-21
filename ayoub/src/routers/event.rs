@@ -11,7 +11,7 @@
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
-use crate::controllers::auth::{home, not_found};
+use crate::controllers::event::{add_proposal, get_all_proposals, cast_vote_proposal, expire_proposal, not_found};
 
 
 
@@ -30,8 +30,11 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::GET, "/event/proposal/add") => home(app).await,
-        _                        => not_found().await
+        (&Method::POST, "/proposal/add")           => add_proposal(app_storage, app).await,
+        (&Method::GET, "/proposal/get/availables") => get_all_proposals(app_storage, app).await, //-- get all none expired proposals
+        (&Method::POST, "/proposal/cast-vote")     => cast_vote_proposal(app_storage, app).await,
+        (&Method::POST, "/proposal/set-expire")    => expire_proposal(app_storage, app).await,
+        _                                          => not_found().await
     }
 
 }
