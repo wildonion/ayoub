@@ -3,4 +3,4 @@
 
 
 pub mod auth;
-pub mod fishuman;
+pub mod event;

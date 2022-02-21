@@ -148,7 +148,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     //
     // ---------------------------------------------------------------------
     let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
-    let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
+    let event_service = services::event::FishumanSvc::new(db.clone(), vec![]).await;
 
 
 
