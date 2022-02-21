@@ -32,13 +32,13 @@ pub mod jwt{
 
 
     pub async fn construct(payload: Claims) -> Result<String, jsonwebtoken::errors::Error>{
-        let encoding_key = env::var("SECRET_KEY").expect("⚠️ no secret key variable set");
+        let encoding_key = env::var("JWT_SECRET_KEY").expect("⚠️ no secret key variable set");
         let token = encode(&Header::new(Algorithm::HS512), &payload, &EncodingKey::from_secret(encoding_key.as_bytes()));
         token
     }
 
     pub async fn deconstruct(token: &str) -> Result<TokenData<Claims>, jsonwebtoken::errors::Error>{
-        let encoding_key = env::var("SECRET_KEY").expect("⚠️ no secret key variable set");
+        let encoding_key = env::var("JWT_SECRET_KEY").expect("⚠️ no secret key variable set");
         let decoded_token = decode::<Claims>(token, &DecodingKey::from_secret(encoding_key.as_bytes()), &Validation::new(Algorithm::HS512));
         decoded_token
     }
