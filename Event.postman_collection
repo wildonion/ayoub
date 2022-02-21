@@ -1,0 +1,109 @@
+{
+	"info": {
+		"_postman_id": "4f0bbd4a-0003-4a91-9eb8-6a0fab9a1398",
+		"name": "Fishuman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add Proposal",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Fishuman Price\",\r\n    \"content\": \"Do you agree on increasing fishumans' price?\",\r\n    \"creator_wallet_address\": \"0xa7792E64b6F4787ee4Db4b2Ac8d7d8EC708cd186\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{fishuman}}/proposal/add",
+					"host": [
+						"{{fishuman}}"
+					],
+					"path": [
+						"proposal",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Available Proposals",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{fishuman}}/proposal/get/availables",
+					"host": [
+						"{{fishuman}}"
+					],
+					"path": [
+						"proposal",
+						"get",
+						"availables"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cast Vote Proposal",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"_id\": \"6214108f5c1d7cafd761e1e1\",\r\n    \"voter\": {\r\n        \"fishuman_owner_wallet_address\": \"0x364Ab8AFEe441016a30b0178C6E2511d8d43b3D8\",\r\n        \"is_upvote\": true,\r\n        \"score\": 4\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{fishuman}}/proposal/cast-vote",
+					"host": [
+						"{{fishuman}}"
+					],
+					"path": [
+						"proposal",
+						"cast-vote"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Expire Proposal",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"_id\": \"6213ef57c6fe093d1a20efb5\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{fishuman}}/proposal/set-expire",
+					"host": [
+						"{{fishuman}}"
+					],
+					"path": [
+						"proposal",
+						"set-expire"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
