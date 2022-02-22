@@ -17,9 +17,9 @@ use mongodb::bson::{oid::ObjectId};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Voter{
-    pub event_owner_wallet_address: String,
+    pub fishuman_owner_wallet_address: String,
     pub is_upvote: bool,
-    pub score: u32, // NOTE - this is the number of events that this owner owns
+    pub score: u32, // NOTE - this is the number of fishumans that this owner owns
 }
 
 
@@ -37,6 +37,8 @@ pub struct ProposalAddRequest{
     pub title: String,
     pub content: String,
     pub creator_wallet_address: String,
+    pub upvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the upvotes inside the request body, we'll fill it inside the server
+    pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server
     pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on using cast-vote route
     pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a proposal reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new proposal object
@@ -50,6 +52,8 @@ pub struct ProposalInfo{
     pub _id: Option<ObjectId>,
     pub title: String,
     pub content: String,
+    pub upvotes: Option<u16>,
+    pub downvotes: Option<u16>,
     pub voters: Option<Vec<Voter>>,
     pub is_expired: Option<bool>,
     pub expire_at: Option<i64>,
