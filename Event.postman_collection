@@ -58,7 +58,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"_id\": \"6214108f5c1d7cafd761e1e1\",\r\n    \"voter\": {\r\n        \"fishuman_owner_wallet_address\": \"0x364Ab8AFEe441016a30b0178C6E2511d8d43b3D8\",\r\n        \"is_upvote\": true,\r\n        \"score\": 4\r\n    }\r\n}",
+					"raw": "{\r\n    \"_id\": \"6214108f5c1d7cafd761e1e1\",\r\n    \"voter\": {\r\n        \"fishuman_owner_wallet_address\": \"0x364Ab8AFEe441016a30b0178C6E2511d8d47b3D8\",\r\n        \"is_upvote\": false,\r\n        \"score\": 4\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -104,6 +104,33 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "fishuman",
+			"value": "https://api.fishuman.com:8282",
+			"type": "string"
 		}
 	]
 }
