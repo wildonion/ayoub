@@ -106,38 +106,38 @@ async fn main() -> std::io::Result<()>{
     // // -------------------------------- app storage setup
     // //
     // // ---------------------------------------------------------------------
-    // let db = if db_engine.as_str() == "mongodb"{
-    //     info!("switching to mongodb - {}", chrono::Local::now().naive_local());
-    //     match ctx::app::Db::new().await{ //-- passing '_ as the lifetime of engine and url field which are string slices or pointers to a part of the String
-    //         Ok(mut init_db) => {
-    //             init_db.engine = Some(db_engine);
-    //             init_db.url = Some(db_addr);
-    //             info!("getting mongodb instance - {}", chrono::Local::now().naive_local());
-    //             let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db after calling this method cause self as the first argument will move the instance after calling the related method
-    //             Some( //-- putting the Arc-ed db inside the Option
-    //                 Arc::new( //-- cloning app_storage to move it between threads
-    //                     ctx::app::Storage{ //-- defining db context 
-    //                         id: Uuid::new_v4(),
-    //                         db: Some(
-    //                             ctx::app::Db{
-    //                                 mode: init_db.mode,
-    //                                 instance: Some(mongodb_instance),
-    //                                 engine: init_db.engine,
-    //                                 url: init_db.url,
-    //                             }
-    //                         ),
-    //                     }
-    //                 )
-    //             )
-    //         },
-    //         Err(e) => {
-    //             error!("init db error {} - {}", e, chrono::Local::now().naive_local());
-    //             todo!()
-    //         }
-    //     }
-    // } else{
-    //     todo!()
-    // };
+    let db = if db_engine.as_str() == "mongodb"{
+        info!("switching to mongodb - {}", chrono::Local::now().naive_local());
+        match ctx::app::Db::new().await{ //-- passing '_ as the lifetime of engine and url field which are string slices or pointers to a part of the String
+            Ok(mut init_db) => {
+                init_db.engine = Some(db_engine);
+                init_db.url = Some(db_addr);
+                info!("getting mongodb instance - {}", chrono::Local::now().naive_local());
+                let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db after calling this method cause self as the first argument will move the instance after calling the related method
+                Some( //-- putting the Arc-ed db inside the Option
+                    Arc::new( //-- cloning app_storage to move it between threads
+                        ctx::app::Storage{ //-- defining db context 
+                            id: Uuid::new_v4(),
+                            db: Some(
+                                ctx::app::Db{
+                                    mode: init_db.mode,
+                                    instance: Some(mongodb_instance),
+                                    engine: init_db.engine,
+                                    url: init_db.url,
+                                }
+                            ),
+                        }
+                    )
+                )
+            },
+            Err(e) => {
+                error!("init db error {} - {}", e, chrono::Local::now().naive_local());
+                todo!()
+            }
+        }
+    } else{
+        todo!()
+    };
 
 
     
@@ -154,10 +154,10 @@ async fn main() -> std::io::Result<()>{
     // ---------------------------------------------------------------------
     HttpServer::new(move || {
         App::new()
+            .app_data(db.clone()) //-- clone the mongodb to movie it between actix routes and threads
             .service(
                 web::scope("/proposal")
                             .configure(apis::fishuman::register)
-                            // .data(web::Data::new(db.clone())) //-- clone the mongodb to movie it between actix routes and threads
             )
             .wrap(Logger::default())
     })
