@@ -1,6 +1,29 @@
 
 
 
+last program_id: 3EThD5DWMfAcbwCdqpqxjusxmvPiaGDPFdHhFxgyLpBF
+BIP39 passphrase: BIP39
+public key: BcUvCEaMACCsTZktZKVfzpiTF4EXGrLNk4BncCZ52yAQ
+private key: canal clump smoke purpose bubble tired electric company shop law width what
+https://learn.figment.io/tutorials/build-a-crowdfunding-platform-on-solana
+https://learn.figment.io/tutorials/build-a-blog-dapp-using-anchor
+https://docs.solana.com/terminology
+https://solana.com/developers
+https://medium.com/chorus-one/solana-staking-economics-primer-91143e5c9c79
+https://docs.solana.com/developing/programming-model/calling-between-programs
+https://www.youtube.com/watch?v=gA7hFdq2h9Q&ab_channel=DavidChoi
+https://www.youtube.com/watch?v=lkLliOjkB2c&ab_channel=DeathDisco
+https://www.youtube.com/watch?v=Jz5v_u75xk8&ab_channel=DavidChoi
+https://www.youtube.com/watch?v=L4WWQzOBNIg&ab_channel=ZappyCode
+https://www.youtube.com/watch?v=wVPGJ_CZTAw&ab_channel=DavidChoi
+https://www.youtube.com/watch?v=35RO0lAEIxE
+https://proprivacy.com/vpn/guides/setup-vpn-server-linux
+https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/#instruction-rs-part-2
+https://www.startonsolana.com/
+https://learn.figment.io/protocols/solana
+https://solanacookbook.com/#contributing
+https://docs.metaplex.com/
+
 
 
 
@@ -52,33 +75,7 @@ https://doc.rust-lang.org/std/rc/struct.Weak.html
 
 
 
-last program_id: 3EThD5DWMfAcbwCdqpqxjusxmvPiaGDPFdHhFxgyLpBF
-BIP39 passphrase: BIP39
-public key: BcUvCEaMACCsTZktZKVfzpiTF4EXGrLNk4BncCZ52yAQ
-private key: canal clump smoke purpose bubble tired electric company shop law width what
-https://learn.figment.io/tutorials/build-a-crowdfunding-platform-on-solana
-https://learn.figment.io/tutorials/build-a-blog-dapp-using-anchor
-https://docs.solana.com/terminology
-https://solana.com/developers
-https://medium.com/chorus-one/solana-staking-economics-primer-91143e5c9c79
-https://docs.solana.com/developing/programming-model/calling-between-programs
-https://www.youtube.com/watch?v=gA7hFdq2h9Q&ab_channel=DavidChoi
-https://www.youtube.com/watch?v=lkLliOjkB2c&ab_channel=DeathDisco
-https://www.youtube.com/watch?v=Jz5v_u75xk8&ab_channel=DavidChoi
-https://www.youtube.com/watch?v=L4WWQzOBNIg&ab_channel=ZappyCode
-https://www.youtube.com/watch?v=wVPGJ_CZTAw&ab_channel=DavidChoi
-https://www.youtube.com/watch?v=35RO0lAEIxE
-https://proprivacy.com/vpn/guides/setup-vpn-server-linux
-https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/#instruction-rs-part-2
-https://www.startonsolana.com/
-https://learn.figment.io/protocols/solana
-https://solanacookbook.com/#contributing
-https://docs.metaplex.com/
-
-
-
-
-
-https://www.mongodb.com/developer/quickstart/rust-crud-tutorial/
-https://users.rust-lang.org/t/using-hyper-how-to-get-url-query-string-params/23768/3
 macros and attribute like macros
+pass by reference and pass by value
+if the Copy trait was implemented the data it bounds to won't move by passing by value
+and we can a 

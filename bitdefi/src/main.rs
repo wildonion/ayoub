@@ -60,8 +60,7 @@ use actix_web::{web, App, HttpServer, middleware::Logger};
 
 
 
-
-// NOTE - Error, Send and Sync are traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory  
+// NOTE - Error, Send and Sync are traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take space inside the memory  
 
 
 #[actix_web::main]
@@ -154,7 +153,7 @@ async fn main() -> std::io::Result<()>{
     // ---------------------------------------------------------------------
     HttpServer::new(move || {
         App::new()
-            .app_data(db.clone()) //-- clone the mongodb to movie it between actix routes and threads
+            .app_data(db.clone()) //-- clone the mongodb to move it between actix routes and threads
             .service(
                 web::scope("/proposal")
                             .configure(apis::fishuman::register)
