@@ -76,6 +76,3 @@ https://doc.rust-lang.org/std/rc/struct.Weak.html
 
 
 macros and attribute like macros
-pass by reference and pass by value
-if the Copy trait was implemented the data it bounds to won't move by passing by value
-and we can a 
