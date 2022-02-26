@@ -1,9 +1,13 @@
+
+
+
+
+
 use std::env;
 use std::sync::Arc;
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
-use actix_web::http;
 use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- based on orphan rule it'll be needed to call the reader() method on the whole_body buffer
@@ -45,11 +49,9 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                 status: 302,
             };
             Ok(
-                HttpResponse::Found()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .json(response_body)
-                    .into_body() //-- call this method in order not to get failed to fetch in client side
+                HttpResponse::Found().json(
+                    response_body
+                ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
         }, 
         None => { //-- means we didn't find any document related to this title and we have to create a new proposaL
@@ -75,11 +77,9 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                         status: 201,
                     };
                     Ok(
-                        HttpResponse::Created()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header(http::header::CONTENT_TYPE, "application/json")
-                            .json(response_body)
-                            .into_body() //-- call this method in order not to get failed to fetch in client side
+                        HttpResponse::Created().json(
+                            response_body
+                        ).into_body() //-- call this method in order not to get failed to fetch in client side
                     )
                 },
                 Err(e) => {
@@ -89,11 +89,9 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                         status: 406,
                     };
                     Ok(
-                        HttpResponse::NotAcceptable()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header(http::header::CONTENT_TYPE, "application/json")
-                            .json(response_body)
-                            .into_body() //-- call this method in order not to get failed to fetch in client side
+                        HttpResponse::NotAcceptable().json(
+                            response_body
+                        ).into_body() //-- call this method in order not to get failed to fetch in client side
                     )
                 }
             }
@@ -139,11 +137,9 @@ async fn get_all_proposals(req: HttpRequest) -> Result<HttpResponse, Error>{
                 status: 200,
             };
             Ok(
-                HttpResponse::Ok()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .json(response_body)
-                    .into_body() //-- call this method in order not to get failed to fetch in client side
+                HttpResponse::Ok().json(
+                    response_body
+                ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
         },
         Err(e) => {
@@ -153,11 +149,9 @@ async fn get_all_proposals(req: HttpRequest) -> Result<HttpResponse, Error>{
                 status: 500,
             };
             Ok(
-                HttpResponse::InternalServerError()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .json(response_body)
-                    .into_body() //-- call this method in order not to get failed to fetch in client side
+                HttpResponse::InternalServerError().json(
+                    response_body
+                ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
         },
     }
@@ -205,11 +199,9 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
                         status: 200,
                     };
                     Ok(
-                        HttpResponse::Ok()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header(http::header::CONTENT_TYPE, "application/json")
-                            .json(response_body)
-                            .into_body() //-- call this method in order not to get failed to fetch in client side
+                        HttpResponse::Ok().json(
+                            response_body
+                        ).into_body() //-- call this method in order not to get failed to fetch in client side
                     )
                 },
                 Err(e) => {
@@ -219,11 +211,9 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
                         status: 500,
                     };
                     Ok(
-                        HttpResponse::InternalServerError()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header(http::header::CONTENT_TYPE, "application/json")
-                            .json(response_body)
-                            .into_body() //-- call this method in order not to get failed to fetch in client side
+                        HttpResponse::InternalServerError().json(
+                            response_body
+                        ).into_body() //-- call this method in order not to get failed to fetch in client side
                     )
                 },
             }
@@ -235,11 +225,9 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
                 status: 404,
             };
             Ok(
-                HttpResponse::NotFound()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .json(response_body)
-                    .into_body() //-- call this method in order not to get failed to fetch in client side
+                HttpResponse::NotFound().json(
+                    response_body
+                ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
         },
     }
@@ -273,11 +261,9 @@ async fn expire_proposal(req: HttpRequest, exp_info: web::Json<schemas::fishuman
                 status: 200,
             };
             Ok(
-                HttpResponse::Ok()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .json(response_body)
-                    .into_body() //-- call this method in order not to get failed to fetch in client side
+                HttpResponse::Ok().json(
+                    response_body
+                ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
         }, 
         None => { //-- means we didn't find any document related to this title and we have to tell the user to create a new proposaL
@@ -287,11 +273,9 @@ async fn expire_proposal(req: HttpRequest, exp_info: web::Json<schemas::fishuman
                 status: 404,
             };
             Ok(
-                HttpResponse::NotFound()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .json(response_body)
-                    .into_body() //-- call this method in order not to get failed to fetch in client side
+                HttpResponse::NotFound().json(
+                    response_body
+                ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
         },
     }
