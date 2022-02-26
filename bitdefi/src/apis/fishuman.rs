@@ -49,7 +49,8 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                 status: 302,
             };
             Ok(
-                HttpResponse::Found().json(
+                HttpResponse::Found()
+                .json(
                     response_body
                 ).into_body() //-- call this method in order not to get failed to fetch in client side
             )
