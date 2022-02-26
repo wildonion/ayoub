@@ -48,7 +48,6 @@ use std::env;
 use log::{info, error};
 use crate::contexts as ctx;
 use actix_web::{web, App, HttpServer, middleware::Logger};
-use actix_cors::Cors;
 
 
 
@@ -159,7 +158,6 @@ async fn main() -> std::io::Result<()>{
                             .configure(apis::fishuman::register)
             )
             .wrap(Logger::default())
-            .wrap(Cors::permissive())
     })
     .bind(fishuman_server_addr).unwrap()
     .run()
