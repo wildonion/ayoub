@@ -13,7 +13,6 @@ pub mod db{
     use std::{sync::Arc, env};
     use crate::contexts as ctx;
     use log::{info, error};
-    use mongodb::sync::Client;
     use uuid::Uuid;
 
 
