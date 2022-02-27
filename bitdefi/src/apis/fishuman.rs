@@ -8,6 +8,7 @@ use std::sync::Arc;
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use crate::utils;
 use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- based on orphan rule it'll be needed to call the reader() method on the whole_body buffer
@@ -27,20 +28,14 @@ use actix_web::{Error, HttpRequest, HttpResponse, Result, get, post, web};
 #[post("/add")]
 async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishuman::ProposalAddRequest>) -> Result<HttpResponse, Error>{
     
-    // let storage = req.app_data::<web::Data<Option<Arc<ctx::app::Storage>>>>().unwrap(); //-- unwrapping the db inside the web data structure which is passed inside the app_data() method
-    // let app_storage = match storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
-    //     ctx::app::Mode::On => storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
-    //     ctx::app::Mode::Off => None, //-- no db is available cause it's off
-    // };
-
-    let db_host = env::var("DB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("DB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let app_storage = Client::with_uri_str(db_addr).unwrap();
+    let conn = utils::db::connection().await;
+    let app_storage = match conn.as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
+        ctx::app::Mode::On => conn.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
+        ctx::app::Mode::Off => None, //-- no db is available cause it's off
+    };
 
     let proposal_info = proposal_info.into_inner();    
-    let proposals = app_storage.database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
+    let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
     match proposals.find_one(doc!{"title": proposal_info.clone().title}, None).unwrap(){ //-- finding proposal based on proposal title
         Some(proposal_doc) => { //-- deserializing BSON into the ProposalInfo struct
             let response_body = ctx::app::Response::<schemas::fishuman::ProposalInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is ProposalInfo struct
@@ -56,7 +51,7 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
             )
         }, 
         None => { //-- means we didn't find any document related to this title and we have to create a new proposaL
-            let proposals = app_storage.database("fishuman").collection::<schemas::fishuman::ProposalAddRequest>("proposals");
+            let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalAddRequest>("proposals");
             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
             let exp_time = now + env::var("PROPOSAL_EXPIRATION").expect("⚠️ found no proposal expiration time").parse::<i64>().unwrap();
             let new_proposal = schemas::fishuman::ProposalAddRequest{
@@ -105,20 +100,14 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
 #[get("/get/availables")]
 async fn get_all_proposals(req: HttpRequest) -> Result<HttpResponse, Error>{
 
-    // let storage = req.app_data::<web::Data<Option<Arc<ctx::app::Storage>>>>().unwrap(); //-- unwrapping the db inside the web data structure which is passed inside the app_data() method
-    // let app_storage = match storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
-    //     ctx::app::Mode::On => storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
-    //     ctx::app::Mode::Off => None, //-- no db is available cause it's off
-    // };
-
-    let db_host = env::var("DB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("DB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let app_storage = Client::with_uri_str(db_addr).unwrap();
+    let conn = utils::db::connection().await;
+    let app_storage = match conn.as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
+        ctx::app::Mode::On => conn.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
+        ctx::app::Mode::Off => None, //-- no db is available cause it's off
+    };
 
     let filter = doc! { "is_expired": false }; //-- filtering all none expired proposals
-    let proposals = app_storage.database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch and deserialize all proposal infos or documents from BSON into the ProposalInfo struct
+    let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch and deserialize all proposal infos or documents from BSON into the ProposalInfo struct
     let mut available_proposals = schemas::fishuman::AvailableProposals{
         proposals: vec![],
     };
@@ -163,21 +152,15 @@ async fn get_all_proposals(req: HttpRequest) -> Result<HttpResponse, Error>{
 #[post("/cast-vote")]
 async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fishuman::CastVoteRequest>) -> Result<HttpResponse, Error>{
     
-    // let storage = req.app_data::<web::Data<Option<Arc<ctx::app::Storage>>>>().unwrap(); //-- unwrapping the db inside the web data structure which is passed inside the app_data() method //-- unwrapping the db inside the web data structure which is passed inside the app_data() method
-    // let app_storage = match storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
-    //     ctx::app::Mode::On => storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
-    //     ctx::app::Mode::Off => None, //-- no db is available cause it's off
-    // };
-
-    let db_host = env::var("DB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("DB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let app_storage = Client::with_uri_str(db_addr).unwrap();
+    let conn = utils::db::connection().await;
+    let app_storage = match conn.as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
+        ctx::app::Mode::On => conn.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
+        ctx::app::Mode::Off => None, //-- no db is available cause it's off
+    };
 
     let vote_info = vote_info.into_inner();
     let proposal_id = ObjectId::parse_str(vote_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string 
-    let proposals = app_storage.database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
+    let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
     match proposals.find_one(doc!{"_id": proposal_id}, None).unwrap(){ //-- finding proposal based on proposal title and id
         Some(proposal_doc) => { //-- deserializing BSON into the ProposalInfo struct
             let mut upvotes = proposal_doc.upvotes.unwrap(); //-- trait Copy is implemented for u16 thus we don't loose the ownership when we move them into a new scope
@@ -239,21 +222,15 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
 #[post("/set-expire")]
 async fn expire_proposal(req: HttpRequest, exp_info: web::Json<schemas::fishuman::ExpireProposalRequest>) -> Result<HttpResponse, Error>{
     
-    // let storage = req.app_data::<web::Data<Option<Arc<ctx::app::Storage>>>>().unwrap(); //-- unwrapping the db inside the web data structure which is passed inside the app_data() method
-    // let app_storage = match storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
-    //     ctx::app::Mode::On => storage.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
-    //     ctx::app::Mode::Off => None, //-- no db is available cause it's off
-    // };
-
-    let db_host = env::var("DB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("DB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let app_storage = Client::with_uri_str(db_addr).unwrap();
+    let conn = utils::db::connection().await;
+    let app_storage = match conn.as_ref().unwrap().db.as_ref().unwrap().mode{ //-- here as_ref() method convert &Option<T> to Option<&T>
+        ctx::app::Mode::On => conn.as_ref().as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached - instance.as_ref() will return the Option<&Client>
+        ctx::app::Mode::Off => None, //-- no db is available cause it's off
+    };
 
     let exp_info = exp_info.into_inner();
     let proposal_id = ObjectId::parse_str(exp_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-    let proposals = app_storage.database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
+    let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
     match proposals.find_one_and_update(doc!{"_id": proposal_id}, doc!{"$set": {"is_expired": true}}, None).unwrap(){ //-- finding proposal based on proposal id
         Some(proposal_doc) => { //-- deserializing BSON into the ProposalInfo struct
             let response_body = ctx::app::Response::<schemas::fishuman::ProposalInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is ProposalInfo struct

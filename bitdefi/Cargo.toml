@@ -1,5 +1,5 @@
 [package]
-name = "fishuman"
+name = "bitdefi"
 version = "0.1.0"
 edition = "2021"
 
@@ -28,5 +28,5 @@ rust-argon2 = "1.0.0"
 
 
 [[bin]]
-name = "fishuman"
+name = "bitdefi"
 path = "src/main.rs"
