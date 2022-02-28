@@ -34,7 +34,7 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
         ctx::app::Mode::Off => None, //-- no db is available cause it's off
     };
 
-    let proposal_info = proposal_info.into_inner();    
+    let proposal_info = proposal_info.into_inner(); //-- into_inner() will deconstruct to an inner value and return T    
     let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
     match proposals.find_one(doc!{"title": proposal_info.clone().title}, None).unwrap(){ //-- finding proposal based on proposal title
         Some(proposal_doc) => { //-- deserializing BSON into the ProposalInfo struct
@@ -158,7 +158,7 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
         ctx::app::Mode::Off => None, //-- no db is available cause it's off
     };
 
-    let vote_info = vote_info.into_inner();
+    let vote_info = vote_info.into_inner(); //-- into_inner() will deconstruct to an inner value and return T
     let proposal_id = ObjectId::parse_str(vote_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string 
     let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
     match proposals.find_one(doc!{"_id": proposal_id}, None).unwrap(){ //-- finding proposal based on proposal title and id
@@ -228,7 +228,7 @@ async fn expire_proposal(req: HttpRequest, exp_info: web::Json<schemas::fishuman
         ctx::app::Mode::Off => None, //-- no db is available cause it's off
     };
 
-    let exp_info = exp_info.into_inner();
+    let exp_info = exp_info.into_inner(); //-- into_inner() will deconstruct to an inner value and return T
     let proposal_id = ObjectId::parse_str(exp_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
     let proposals = app_storage.unwrap().database("fishuman").collection::<schemas::fishuman::ProposalInfo>("proposals"); //-- selecting proposals collection to fetch all proposal infos into the ProposalInfo struct
     match proposals.find_one_and_update(doc!{"_id": proposal_id}, doc!{"$set": {"is_expired": true}}, None).unwrap(){ //-- finding proposal based on proposal id

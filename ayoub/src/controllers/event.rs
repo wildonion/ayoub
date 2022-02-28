@@ -39,7 +39,7 @@ pub async fn add_proposal(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
     
     api.post("/proposal/add", |req, res| async move{
         
-        info!("calling /proposal/add - {}", chrono::Local::now().naive_local());
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){
@@ -175,7 +175,7 @@ pub async fn get_all_proposals(db: Option<&Client>, api: ctx::app::Api) -> Resul
     
     api.post("/proposal/get/availables", |req, res| async move{
         
-        info!("calling /proposal/get/availables - {}", chrono::Local::now().naive_local());
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
         ////////////////////////////////// DB Ops
                         
@@ -245,7 +245,7 @@ pub async fn cast_vote_proposal(db: Option<&Client>, api: ctx::app::Api) -> Resu
     
     api.post("/proposal/cast-vote", |req, res| async move{
         
-        info!("calling /proposal/cast-vote - {}", chrono::Local::now().naive_local());
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){
@@ -381,7 +381,7 @@ pub async fn expire_proposal(db: Option<&Client>, api: ctx::app::Api) -> Result<
 
     api.post("/proposal/set-expire", |req, res| async move{
 
-        info!("calling /proposal/set-expire - {}", chrono::Local::now().naive_local());
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){
