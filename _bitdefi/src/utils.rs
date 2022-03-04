@@ -62,7 +62,7 @@ pub mod db{
             todo!()
         };
 
-        db
+        db //-- is of type Option<Arc<Storage>>
 
     }
 

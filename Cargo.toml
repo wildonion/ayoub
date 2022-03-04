@@ -6,8 +6,6 @@ members = [
     "auth",
     "suproxy",
     "coiniXerr",
-    "ayoub",
-    "bitdefi",
 ]
 
 
@@ -24,14 +22,4 @@ opt-level = 3
 [profile.dev.package.coiniXerr]
 opt-level = 0
 [profile.release.package.coiniXerr]
-opt-level = 3
-
-[profile.dev.package.ayoub]
-opt-level = 0
-[profile.release.package.ayoub]
-opt-level = 3
-
-[profile.dev.package.bitdefi]
-opt-level = 0
-[profile.release.package.bitdefi]
 opt-level = 3
