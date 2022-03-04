@@ -17,7 +17,7 @@ pub mod manager{
     pub struct Event{
         id: Uuid,
         last_call: i64, // last call timestamp  
-    };
+    }
 
 
 }
