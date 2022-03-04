@@ -5,8 +5,31 @@
 
 
 
+// TODO - macros and attribute like macros
+// TODO - vector of || async move{} of events for an event manager struct 
+// TODO - call new event every 5 seconds from vector of event of closures 
+
+pub mod manager{
+
+    use uuid::Uuid;
 
 
+    pub struct Event{
+        id: Uuid,
+        last_call: i64, // last call timestamp  
+    };
+
+
+}
+
+
+
+
+pub trait void{
+    type Input;
+    type Output;
+
+}
 
 
 
@@ -32,13 +55,13 @@ pub mod jwt{
 
 
     pub async fn construct(payload: Claims) -> Result<String, jsonwebtoken::errors::Error>{
-        let encoding_key = env::var("SECRET_KEY").expect("⚠️ no secret key variable set");
+        let encoding_key = env::var("JWT_SECRET_KEY").expect("⚠️ no secret key variable set");
         let token = encode(&Header::new(Algorithm::HS512), &payload, &EncodingKey::from_secret(encoding_key.as_bytes()));
         token
     }
 
     pub async fn deconstruct(token: &str) -> Result<TokenData<Claims>, jsonwebtoken::errors::Error>{
-        let encoding_key = env::var("SECRET_KEY").expect("⚠️ no secret key variable set");
+        let encoding_key = env::var("JWT_SECRET_KEY").expect("⚠️ no secret key variable set");
         let decoded_token = decode::<Claims>(token, &DecodingKey::from_secret(encoding_key.as_bytes()), &Validation::new(Algorithm::HS512));
         decoded_token
     }
