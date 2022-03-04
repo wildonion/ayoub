@@ -32,6 +32,9 @@ use mongodb::Client;
 //
 // -------------------------------------------------------------------------
 pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
+    
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+
     let res = Response::builder(); //-- creating a new response cause we didn't find any available route
     let response_body = ctx::app::Response::<ctx::app::Nill>{
         message: NOTFOUND_ROUTE,
@@ -61,9 +64,10 @@ pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
 //
 // -------------------------------------------------------------------------
 pub async fn home(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+    
     api.get("/auth/home", |req, res| async move{
         
-
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
         
         let req_header = req.headers();
         let token = if req_header.contains_key("authorization"){
@@ -150,6 +154,8 @@ pub async fn check_token(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
     
     
     api.post("/auth/check-token", |req, res| async move{
+
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){
@@ -284,6 +290,8 @@ pub async fn login(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Res
 
 
     api.post("/auth/login", |req, res| async move{
+
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){
@@ -439,6 +447,8 @@ pub async fn signup(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
 
 
     api.post("/auth/signup", |req, res| async move{    
+        
+        info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
         
         let whole_body_bytes = hyper::body::aggregate(req.into_body()).await.unwrap(); //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all futures stream or chunks which is utf8 bytes - since we don't know the end yet, we can't simply stream the chunks as they arrive (cause all futures stream or chunks which are called chunks are arrived asynchronously), so here we do `.await` on the future, waiting on concatenating the full body after all chunks arrived then afterwards the content can be reversed
         match serde_json::from_reader(whole_body_bytes.reader()){
