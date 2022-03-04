@@ -76,3 +76,8 @@ https://doc.rust-lang.org/std/rc/struct.Weak.html
 
 
 macros and attribute like macros
+vector of || async move{} of events for an event manager struct  
+pub trait void {}
+call new event every 5 seconds from vector of event of closures 
+
+

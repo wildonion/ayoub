@@ -47,7 +47,7 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                 HttpResponse::Found()
                 .json(
                     response_body
-                ).into_body() //-- call this method in order not to get failed to fetch in client side
+                ).into_body()
             )
         }, 
         None => { //-- means we didn't find any document related to this title and we have to create a new proposaL
@@ -75,7 +75,7 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                     Ok(
                         HttpResponse::Created().json(
                             response_body
-                        ).into_body() //-- call this method in order not to get failed to fetch in client side
+                        ).into_body()
                     )
                 },
                 Err(e) => {
@@ -87,7 +87,7 @@ async fn add_proposal(req: HttpRequest, proposal_info: web::Json<schemas::fishum
                     Ok(
                         HttpResponse::NotAcceptable().json(
                             response_body
-                        ).into_body() //-- call this method in order not to get failed to fetch in client side
+                        ).into_body()
                     )
                 }
             }
@@ -129,7 +129,7 @@ async fn get_all_proposals(req: HttpRequest) -> Result<HttpResponse, Error>{
             Ok(
                 HttpResponse::Ok().json(
                     response_body
-                ).into_body() //-- call this method in order not to get failed to fetch in client side
+                ).into_body()
             )
         },
         Err(e) => {
@@ -141,7 +141,7 @@ async fn get_all_proposals(req: HttpRequest) -> Result<HttpResponse, Error>{
             Ok(
                 HttpResponse::InternalServerError().json(
                     response_body
-                ).into_body() //-- call this method in order not to get failed to fetch in client side
+                ).into_body()
             )
         },
     }
@@ -185,7 +185,7 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
                     Ok(
                         HttpResponse::Ok().json(
                             response_body
-                        ).into_body() //-- call this method in order not to get failed to fetch in client side
+                        ).into_body()
                     )
                 },
                 Err(e) => {
@@ -197,7 +197,7 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
                     Ok(
                         HttpResponse::InternalServerError().json(
                             response_body
-                        ).into_body() //-- call this method in order not to get failed to fetch in client side
+                        ).into_body()
                     )
                 },
             }
@@ -211,7 +211,7 @@ async fn cast_vote_proposal(req: HttpRequest, vote_info: web::Json<schemas::fish
             Ok(
                 HttpResponse::NotFound().json(
                     response_body
-                ).into_body() //-- call this method in order not to get failed to fetch in client side
+                ).into_body()
             )
         },
     }
@@ -241,7 +241,7 @@ async fn expire_proposal(req: HttpRequest, exp_info: web::Json<schemas::fishuman
             Ok(
                 HttpResponse::Ok().json(
                     response_body
-                ).into_body() //-- call this method in order not to get failed to fetch in client side
+                ).into_body()
             )
         }, 
         None => { //-- means we didn't find any document related to this title and we have to tell the user to create a new proposaL
@@ -253,7 +253,7 @@ async fn expire_proposal(req: HttpRequest, exp_info: web::Json<schemas::fishuman
             Ok(
                 HttpResponse::NotFound().json(
                     response_body
-                ).into_body() //-- call this method in order not to get failed to fetch in client side
+                ).into_body()
             )
         },
     }
