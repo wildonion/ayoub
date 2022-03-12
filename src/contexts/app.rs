@@ -20,6 +20,8 @@ use log::{info, error};
 
 
 
+unsafe impl Send for Api{}
+unsafe impl Sync for Api {}
 
 
 #[derive(Debug)]
