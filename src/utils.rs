@@ -9,7 +9,7 @@ use log::info;
 
 
 
-
+// TODO - build a download manager like IDM
 // TODO - macros and attribute like macros
 // TODO - vector of || async move{} of events for an event manager struct 
 // TODO - call new event every 5 seconds from vector of event of closures 
