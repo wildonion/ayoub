@@ -31,7 +31,7 @@ use mongodb::Client;
 // -------------------------------- not found controller
 //
 // -------------------------------------------------------------------------
-pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn not_found(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 

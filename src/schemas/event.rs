@@ -15,6 +15,14 @@ use mongodb::bson::{oid::ObjectId};
 
 
 
+#[derive(Serialize, Deserialize, Clone, Copy)]
+pub struct Simd{
+    pub input: u32,
+}
+
+
+
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Voter{
     pub nft_owner_wallet_address: String,
