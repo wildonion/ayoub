@@ -1,10 +1,10 @@
-## Ayoub Server Supports JWT Based Authentication and Event Managing System 
+# Ayoub Server Supports JWT Based Authentication, Event Managing System and Solana Scrows
 
 ```console
 $ cargo build --bin ayoub --release
 ```
 
-# About the `/proposal/simd-ops` route
+## About the `/proposal/simd-ops` route
 
 [Question](https://quera.org/problemset/113613/)
 
@@ -67,3 +67,39 @@ INFO  simd  > ::::: the result is 3936210 - [it might be different from the inpu
 ### The Beauty of Concurrency!
 
 **NOTE** - Due to the time which takes to send and receive each chunks inside threads through the `mpsc` channel asyncly, the result might be different on each run and it depends on the system, but here at first run both input and the result got into an equality condition.
+
+# Solana Smart Contracts
+
+### Environment Setup
+1. Install Rust from https://rustup.rs/
+2. Install Solana from https://project-serum.github.io/anchor/getting-started/installation.html#install-rust
+```
+$ solana config set --url https://api.devnet.solana.com
+$ mkdir solana-wallet
+$ solana-keygen new --outfile solana-wallet/keypair.json
+$ solana airdrop 1 $(solana-keygen pubkey solana-wallet/keypair.json)
+$ solana config get
+$ solana account $(solana-keygen pubkey solana-wallet/keypair.json)
+```
+
+### Build and test for program compiled natively
+```
+$ cargo build
+$ cargo test
+```
+
+### Build and test the program compiled for BPF
+```
+$ cargo build-bpf
+$ cargo test-bpf
+```
+
+### Deplopy the program
+```
+$ solana deploy -v --keypair solana-wallet/keypair.json target/deploy/smarties.so
+```
+
+### Show program info
+```
+$ solana program show --keypair solana-wallet/keypair.json <PROGRAM_ID>
+```
