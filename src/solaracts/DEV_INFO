@@ -80,6 +80,7 @@ the address of the deployed bpf bytecode of our campaign contract contains a pro
 our campaign contract contains some methods like TransferingWithCommission(), LockWallet() and MakeCampaignEmpty()
 our campaign contract's methods will be called on a specific event or condition and that's what a smart contract does!
 big-endian system stores the most significant byte of a word at the smallest memory address and the least significant byte at the largest (the most right hex will be stored at the bottom of the stack)
-
+use the Solana SDK Crate to write client side applications in Rust to call contracts using JSON RPC 
+use the Solana Program Crate to write on-chain programs in Rust to deploy bpf contracts on solana runtime
 
 
