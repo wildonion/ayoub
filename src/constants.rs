@@ -29,3 +29,4 @@ pub static UPDATED: &str = "Updated Successfully";
 pub static FETCHED: &str = "Fetched Successfully";
 pub static NOT_FOUND_DOCUMENT: &str = "Not Found Document";
 pub static NOT_FOUND_ROUTE: &str = "Not Found Route";
+pub static IGNORE_ROUTES: &[&str] = &["login", "signup"];

@@ -1,4 +1,4 @@
-# Ayoub Server Supports JWT Based Authentication, Event Managing System and Solana Scrows
+# 🤖 Run Ayoub Event and Auth Servers
 
 ```console
 $ cargo build --bin ayoub --release
@@ -68,7 +68,7 @@ INFO  simd  > ::::: the result is 3936210 - [it might be different from the inpu
 
 **NOTE** - Due to the time which takes to send and receive each chunks inside threads through the `mpsc` channel asyncly, the result might be different on each run and it depends on the system, but here at first run both input and the result got into an equality condition.
 
-# Solana Smart Contracts
+# 📑 Solana Smart Contracts
 
 ### Environment Setup
 1. Install Rust from https://rustup.rs/

@@ -11,7 +11,7 @@
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
-use crate::controllers::event::{add_proposal, get_all_proposals, cast_vote_proposal, expire_proposal, not_found, simd_ops};
+use crate::controllers::event::{add_event, get_all_events, cast_vote_event, expire_event, not_found, simd_ops};
 
 
 
@@ -30,12 +30,12 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::POST, "/proposal/add")           => add_proposal(app_storage, app).await,
-        (&Method::GET, "/proposal/get/availables") => get_all_proposals(app_storage, app).await, //-- get all none expired proposals
-        (&Method::POST, "/proposal/cast-vote")     => cast_vote_proposal(app_storage, app).await,
-        (&Method::POST, "/proposal/set-expire")    => expire_proposal(app_storage, app).await,
-        (&Method::POST, "/proposal/simd-ops")      => simd_ops(app).await,
-        _                                          => not_found(app).await
+        (&Method::POST, "/event/add")           => add_event(app_storage, app).await,
+        (&Method::GET, "/event/get/availables") => get_all_events(app_storage, app).await, //-- get all none expired events
+        (&Method::POST, "/event/cast-vote")     => cast_vote_event(app_storage, app).await,
+        (&Method::POST, "/event/set-expire")    => expire_event(app_storage, app).await,
+        (&Method::POST, "/event/simd-ops")      => simd_ops(app).await,
+        _                                       => not_found(app).await
     }
 
 }

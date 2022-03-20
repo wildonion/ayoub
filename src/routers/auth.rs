@@ -30,7 +30,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::GET, "/auth/home")         => home(app).await,
+        (&Method::GET, "/auth/home")         => home(app_storage, app).await,
         (&Method::POST, "/auth/login")       => login(app_storage, app).await,
         (&Method::POST, "/auth/signup")      => signup(app_storage, app).await,
         (&Method::POST, "/auth/check-token") => check_token(app_storage, app).await,
