@@ -4,7 +4,7 @@
 $ cargo build --bin ayoub --release
 ```
 
-## About the `/proposal/simd-ops` route
+## About the `/event/simd-ops` route
 
 [Question](https://quera.org/problemset/113613/)
 
