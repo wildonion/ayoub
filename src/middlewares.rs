@@ -21,7 +21,7 @@ pub mod auth{
     
     
 
-    pub async fn pass(req: hyper::Request<Body>) -> Result<(TokenData<jwt::Claims>, hyper::Request<Body>), jsonwebtoken::errors::Error>{
+    pub async fn pass(req: hyper::Request<Body>) -> Result<(TokenData<jwt::Claims>, hyper::Request<Body>), String>{
         let mut authenticate_pass: bool = false;
         let mut user_data_inside_token: Option<TokenData<jwt::Claims>> = None;
         let mut jwt_error: Option<jsonwebtoken::errors::Error> = None;
@@ -50,14 +50,15 @@ pub mod auth{
                             }
                         }
                     }
+                } else{
+                    return Err(constants::NOT_FOUND_TOKEN.to_string());
                 }
             }
         }
-        
         if authenticate_pass{
-            Ok((user_data_inside_token.unwrap(), req))
+            Ok((user_data_inside_token.unwrap(), req)) //-- returning the request object back to where it's called 
         } else{
-            Err(jwt_error.unwrap())
+            Err(jwt_error.unwrap().to_string())
         }
     }
 
