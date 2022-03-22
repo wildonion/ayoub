@@ -1,4 +1,8 @@
-# 🤖 Run Ayoub Event and Auth Servers
+# 🤖 Run Ayoub Servers
+
+* To run the `event` server just change the `CURRENT_SERVICE` variable to `event` value.
+
+* To run the `auth` server just change the `CURRENT_SERVICE` variable to `auth` value.
 
 ```console
 $ cargo build --bin ayoub --release
