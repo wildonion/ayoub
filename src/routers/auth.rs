@@ -17,7 +17,7 @@ use crate::controllers::auth::{home, check_token, login, signup, not_found};
 
 
 
-pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Api) -> Result<Response<Body>, hyper::Error>{
+pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app::Api) -> Result<Response<Body>, hyper::Error>{ // NOTE - we've defined the app as mutable cause we want to change the name field later
 
 
 
@@ -30,11 +30,25 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::GET, "/auth/home")         => home(app_storage, app).await,
-        (&Method::POST, "/auth/login")       => login(app_storage, app).await,
-        (&Method::POST, "/auth/signup")      => signup(app_storage, app).await,
-        (&Method::POST, "/auth/check-token") => check_token(app_storage, app).await,
-        _                                    => not_found(app).await
+        (&Method::GET, "/auth/home")           => {
+            app.name = "/auth/home".to_string();
+            home(app_storage, app).await
+        },
+        (&Method::POST, "/auth/login") => {
+            app.name = "/auth/login".to_string();
+            login(app_storage, app).await
+        },
+        (&Method::POST, "/auth/signup")     => {
+            app.name = "/auth/signup".to_string();
+            signup(app_storage, app).await
+        },
+        (&Method::POST, "/auth/check-token")    => {
+            app.name = "/auth/check-token".to_string();
+            check_token(app_storage, app).await
+        },
+        _                                       => not_found().await,
     }
+
+
 
 }

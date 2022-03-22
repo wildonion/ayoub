@@ -17,7 +17,7 @@ use crate::controllers::event::{add_event, get_all_events, cast_vote_event, expi
 
 
 
-pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Api) -> Result<Response<Body>, hyper::Error>{
+pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app::Api) -> Result<Response<Body>, hyper::Error>{ // NOTE - we've defined the app as mutable cause we want to change the name field later
 
 
 
@@ -30,12 +30,27 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, app: ctx::app::Ap
 
 
     match (req.method(), req.uri().path()){
-        (&Method::POST, "/event/add")           => add_event(app_storage, app).await,
-        (&Method::GET, "/event/get/availables") => get_all_events(app_storage, app).await, //-- get all none expired events
-        (&Method::POST, "/event/cast-vote")     => cast_vote_event(app_storage, app).await,
-        (&Method::POST, "/event/set-expire")    => expire_event(app_storage, app).await,
-        (&Method::POST, "/event/simd-ops")      => simd_ops(app).await,
-        _                                       => not_found(app).await
+        (&Method::POST, "/event/add")           => {
+            app.name = "/event/add".to_string();
+            add_event(app_storage, app).await
+        },
+        (&Method::GET, "/event/get/availables") => {
+            app.name = "/event/get/availables".to_string();
+            get_all_events(app_storage, app).await
+        },
+        (&Method::POST, "/event/cast-vote")     => {
+            app.name = "/event/cast-vote".to_string();
+            cast_vote_event(app_storage, app).await
+        },
+        (&Method::POST, "/event/set-expire")    => {
+            app.name = "/event/set-expire".to_string();
+            expire_event(app_storage, app).await
+        },
+        (&Method::POST, "/event/simd-ops")      => {
+            app.name = "/event/simd-ops".to_string();
+            simd_ops(app).await
+        },
+        _                                       => not_found().await,
     }
 
 }
