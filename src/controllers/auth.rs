@@ -30,10 +30,8 @@ use mongodb::Client;
 //
 // -------------------------------------------------------------------------
 
-pub async fn not_found(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
-
     let res = Response::builder(); //-- creating a new response cause we didn't find any available route
     let response_body = ctx::app::Response::<ctx::app::Nill>{
         message: NOTFOUND_ROUTE,
@@ -128,7 +126,7 @@ pub async fn home(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -224,7 +222,7 @@ pub async fn check_token(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -307,7 +305,7 @@ pub async fn login(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Res
                                             Err(e) => {
                                                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                                                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                    message: &e.to_string(), //-- take a reference to the string error
+                                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                                     status: 500,
                                                 };
                                                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -324,7 +322,7 @@ pub async fn login(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Res
                                     Err(e) => {
                                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: &e.to_string(), //-- take a reference to the string error
+                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 500,
                                         };
                                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -364,7 +362,7 @@ pub async fn login(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Res
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: &e.to_string(), //-- take a reference to the string error
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -381,7 +379,7 @@ pub async fn login(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Res
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -479,7 +477,7 @@ pub async fn signup(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
                                             Err(e) => {
                                                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                                                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                    message: &e.to_string(), //-- take a reference to the string error
+                                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                                     status: 406,
                                                 };
                                                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -496,7 +494,7 @@ pub async fn signup(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
                                     Err(e) => {
                                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: &e.to_string(), //-- take a reference to the string error
+                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 500,
                                         };
                                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -521,7 +519,7 @@ pub async fn signup(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: &e.to_string(), //-- take a reference to the string error
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -538,7 +536,7 @@ pub async fn signup(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();

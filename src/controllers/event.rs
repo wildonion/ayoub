@@ -104,7 +104,7 @@ pub async fn add_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper:
                                     Err(e) => {
                                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: &e.to_string(), //-- take a reference to the string error
+                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
                                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -127,7 +127,7 @@ pub async fn add_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper:
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: &e.to_string(), //-- take a reference to the string error
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -144,7 +144,7 @@ pub async fn add_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper:
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -210,7 +210,7 @@ pub async fn get_all_events(db: Option<&Client>, api: ctx::app::Api) -> Result<h
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -333,7 +333,7 @@ pub async fn cast_vote_event(db: Option<&Client>, api: ctx::app::Api) -> Result<
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: &e.to_string(), //-- take a reference to the string error
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -350,7 +350,7 @@ pub async fn cast_vote_event(db: Option<&Client>, api: ctx::app::Api) -> Result<
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -438,7 +438,7 @@ pub async fn expire_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: &e.to_string(), //-- take a reference to the string error
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -455,7 +455,7 @@ pub async fn expire_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -481,9 +481,7 @@ pub async fn expire_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
 // -------------------------------- not found controller
 //
 // -------------------------------------------------------------------------
-pub async fn not_found(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
-
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+pub async fn not_found() -> Result<hyper::Response<Body>, hyper::Error>{
 
     let res = Response::builder(); //-- creating a new response cause we didn't find any available route
     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -530,12 +528,12 @@ pub async fn simd_ops(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper
 
 
                         // https://github.com/tokio-rs/tokio/discussions/3858
-                        // NOTE - don't spawn an async task using tokio inside the rust native thread due to threads confliction nature instead do the vice versa!
                         // NOTE - hadnling async task is done using tokio::spawn() method which the task will be solved based on multi threading concept using tokio green threads in the background of the app
                         // NOTE - sharing and mutating clonable data (Arc<Mutex<T>>) between tokio green and rust native threads is done using message passing protocol like mpsc job queue channel
 
 
-                        ////////////////////////////////// multi threading ops
+                        //////////////////////////////////
+                        ////////////////////////////////// multi threading ops - rust native threads inside the tokio async task 
                         let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
                         info!("inside the native thread");
                             let async_task = tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model - 
@@ -545,6 +543,7 @@ pub async fn simd_ops(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper
                                 ////////
                             });
                         });
+                        //////////////////////////////////
                         //////////////////////////////////
                         
                         
@@ -581,7 +580,7 @@ pub async fn simd_ops(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper
                                 info!("::::: error in reading chunk caused by {:?}", e);
                                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                    message: &e.to_string(), //-- take a reference to the string error
+                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 406,
                                 };
                                 let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -603,7 +602,7 @@ pub async fn simd_ops(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: &e.to_string(), //-- take a reference to the string error
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -620,7 +619,7 @@ pub async fn simd_ops(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper
             Err(e) => {
                 let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: &e.to_string(), //-- take a reference to the string error
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
