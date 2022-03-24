@@ -529,7 +529,7 @@ pub async fn simd_ops(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper
 
                         // https://github.com/tokio-rs/tokio/discussions/3858
                         // NOTE - hadnling async task is done using tokio::spawn() method which the task will be solved based on multi threading concept using tokio green threads in the background of the app
-                        // NOTE - sharing and mutating clonable data (Arc<Mutex<T>>) between tokio green and rust native threads is done using message passing protocol like mpsc job queue channel
+                        // NOTE - sharing and mutating clonable data (Arc<Mutex<T>>) between tokio green and rust native threads is done by passing the object through a channel of one of the message passing protocols like mpsc job queue channel
 
 
                         //////////////////////////////////

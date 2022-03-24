@@ -11,6 +11,7 @@ use serde::{Serialize, Deserialize};
 use mongodb::bson::{oid::ObjectId};
 
 
+// NOTE - serializing from struct or json or bson into the utf8 bytes and deserializing from utf8 into json or struct or bson
 // NOTE - a mongodb document is serialized into the BSON format
 
 
