@@ -42,7 +42,7 @@ pub struct CastVoteRequest{
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ProposalAddRequest{
+pub struct EventAddRequest{
     pub title: String,
     pub content: String,
     pub creator_wallet_address: String,
@@ -72,13 +72,13 @@ pub struct EventInfo{
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct AvailableProposals{
+pub struct AvailableEvents{
     pub events: Vec<EventInfo>,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ExpireProposalRequest{
+pub struct ExpireEventRequest{
     pub _id: String, //-- this is the id of the proposal took from the mongodb
 }
 

@@ -47,7 +47,7 @@ pub async fn add_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper:
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::event::ProposalAddRequest>(&json){ //-- the generic type of from_str() method is ProposalAddRequest struct - mapping (deserializing) the json into the ProposalAddRequest struct
+                match serde_json::from_str::<schemas::event::EventAddRequest>(&json){ //-- the generic type of from_str() method is EventAddRequest struct - mapping (deserializing) the json into the EventAddRequest struct
                     Ok(event_info) => { //-- we got the username and password inside the login route
 
 
@@ -71,10 +71,10 @@ pub async fn add_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper:
                                 )
                             }, 
                             None => { //-- means we didn't find any document related to this title and we have to create a new event
-                                let events = db.unwrap().database("ayoub").collection::<schemas::event::ProposalAddRequest>("events");
+                                let events = db.unwrap().database("ayoub").collection::<schemas::event::EventAddRequest>("events");
                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                 let exp_time = now + env::var("PROPOSAL_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
-                                let new_event = schemas::event::ProposalAddRequest{
+                                let new_event = schemas::event::EventAddRequest{
                                     title: event_info.title,
                                     content: event_info.content,
                                     creator_wallet_address: event_info.creator_wallet_address,
@@ -183,7 +183,7 @@ pub async fn get_all_events(db: Option<&Client>, api: ctx::app::Api) -> Result<h
                         
         let filter = doc! { "is_expired": false }; //-- filtering all none expired events
         let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-        let mut available_events = schemas::event::AvailableProposals{
+        let mut available_events = schemas::event::AvailableEvents{
             events: vec![],
         };
 
@@ -193,7 +193,7 @@ pub async fn get_all_events(db: Option<&Client>, api: ctx::app::Api) -> Result<h
                     available_events.events.push(event);
                 }
                 let res = Response::builder(); //-- creating a new response cause we didn't find any available route
-                let response_body = ctx::app::Response::<schemas::event::AvailableProposals>{
+                let response_body = ctx::app::Response::<schemas::event::AvailableEvents>{
                     message: FETCHED,
                     data: Some(available_events), //-- data is an empty &[u8] array
                     status: 200,
@@ -390,7 +390,7 @@ pub async fn expire_event(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::event::ExpireProposalRequest>(&json){ //-- the generic type of from_str() method is ExpireProposalRequest struct - mapping (deserializing) the json into the ExpireProposalRequest struct
+                match serde_json::from_str::<schemas::event::ExpireEventRequest>(&json){ //-- the generic type of from_str() method is ExpireEventRequest struct - mapping (deserializing) the json into the ExpireEventRequest struct
                     Ok(exp_info) => { //-- we got the username and password inside the login route
 
                         
