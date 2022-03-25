@@ -63,7 +63,7 @@ use crate::contexts as ctx;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Error, Send and Sync are traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory  
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Error, Send and Sync are traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory cause they're object safe traits 
     
     
 

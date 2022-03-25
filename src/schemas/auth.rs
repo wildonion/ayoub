@@ -12,9 +12,16 @@ use std::env;
 
 
 
-// NOTE - serializing from struct or json or bson into the utf8 bytes and deserializing from utf8 into json or struct or bson
-// NOTE - a mongodb document is serialized into the BSON format
+
+
+
+// NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
+// NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into the json to send back to the user
 // NOTE - RegisterResponse struct doesn't have the pwd field cause we don't want the user see the password if there was any user already inside the collection
+
+
+
+
 
 
 
@@ -55,6 +62,47 @@ pub struct LoginRequest{
 
 
 /*
+  --------------------------------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize user info bson from the mongodb into this struct to serialize as json back to user
+| --------------------------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LoginResponse{ // NOTE - those Option values can be None tho
+    pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
+    pub access_token: String,
+    pub username: String,
+    pub phone: String,
+    pub access_level: String, // NOTE - dev, admin, user
+    pub status: u8,
+    pub role_id: Option<ObjectId>,
+    pub side_id: Option<ObjectId>,
+    pub created_at: Option<chrono::NaiveDateTime>,
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize user info bson from the mongodb into this struct to serialize as json back to user
+| --------------------------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RegisterResponse{ // NOTE - those Option values can be None tho
+    pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
+    pub username: String,
+    pub phone: String,
+    pub access_level: String, // NOTE - dev, admin, user
+    pub status: u8,
+    pub role_id: Option<ObjectId>,
+    pub side_id: Option<ObjectId>,
+    pub created_at: Option<chrono::NaiveDateTime>,
+}
+
+
+/*
   -------------------------------------------------------------------------------------------
 | this struct will be used to deserialize OTP request info json from client into this struct
 | -------------------------------------------------------------------------------------------
@@ -62,8 +110,43 @@ pub struct LoginRequest{
 |
 */
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct OTPRequest{
+pub struct SendOTPRequest{
     pub phone: String,
+}
+
+
+/*
+  --------------------------------------------------------------------------------------
+| this struct will be used to serialize OTP info into the json to send back to the user
+| --------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SendOTPResponse{
+  pub exp_time: i64,
+  pub phone: String,
+  pub created_at: Option<i64>,
+  pub updated_at: Option<i64>,
+
+}
+
+
+/*
+  ------------------------------------------------------------------------------------
+| this struct will be used to serialize OTP info into the bson to insert into mongodb
+| ------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SaveOTPInfo{
+  pub exp_time: i64,
+  pub code: String,
+  pub phone: String,
+  pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+  pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+
 }
 
 
@@ -112,8 +195,8 @@ pub struct OTPInfo{
     pub exp_time: i64,
     pub code: String,
     pub phone: String,
-    pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
-    pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
 }
 
 
@@ -132,51 +215,10 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
     pub phone: String,
     pub access_level: String, // NOTE - dev, admin, user
     pub status: u8,
-    pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field might be None so we must put it inside the Option 
-    pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field might be None so we must put it inside the Option
+    pub role_id: Option<ObjectId>,
+    pub side_id: Option<ObjectId>,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
-}
-
-
-/*
-  --------------------------------------------------------------------------------------------------------------------------
-| this struct will be used to deserialize user info bson from the mongodb into this struct to serialize as json back to user
-| --------------------------------------------------------------------------------------------------------------------------
-|
-|
-*/
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct LoginResponse{ // NOTE - those Option values can be None tho
-    pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
-    pub access_token: String,
-    pub username: String,
-    pub phone: String,
-    pub access_level: String, // NOTE - dev, admin, user
-    pub status: u8,
-    pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field might be None so we must put it inside the Option
-    pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field might be None so we must put it inside the Option
-    pub created_at: Option<chrono::NaiveDateTime>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
-}
-
-
-/*
-  --------------------------------------------------------------------------------------------------------------------------
-| this struct will be used to deserialize user info bson from the mongodb into this struct to serialize as json back to user
-| --------------------------------------------------------------------------------------------------------------------------
-|
-|
-*/
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct RegisterResponse{ // NOTE - those Option values can be None tho
-    pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
-    pub username: String,
-    pub phone: String,
-    pub access_level: String, // NOTE - dev, admin, user
-    pub status: u8,
-    pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field might be None so we must put it inside the Option
-    pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field might be None so we must put it inside the Option
-    pub created_at: Option<chrono::NaiveDateTime>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
 }
 
 
@@ -207,9 +249,9 @@ pub struct CheckTokenResponse{ // NOTE - those Option values can be None tho
     pub phone: String,
     pub access_level: String, // NOTE - dev, admin, user
     pub status: u8,
-    pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field might be None so we must put it inside the Option
-    pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field might be None so we must put it inside the Option
-    pub created_at: Option<chrono::NaiveDateTime>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub role_id: Option<ObjectId>,
+    pub side_id: Option<ObjectId>,
+    pub created_at: Option<chrono::NaiveDateTime>,
 }
 
 impl RegisterRequest{

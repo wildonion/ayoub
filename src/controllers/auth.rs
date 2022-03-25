@@ -72,24 +72,28 @@ pub async fn opt_request(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::auth::OTPRequest>(&json){ //-- the generic type of from_str() method is OTPRequest struct - mapping (deserializing) the json into the OTPRequest struct
+                match serde_json::from_str::<schemas::auth::SendOTPRequest>(&json){ //-- the generic type of from_str() method is OTPRequest struct - mapping (deserializing) the json into the OTPRequest struct
                     Ok(otp_req) => { //-- we got the phone number of the user
                         
 
-
-                        
-                        
-                        
-                        // TODO - send otp req to the career
-                        // TODO - set a 2 mins time for the current code
-                        // TODO - save time, code and phone in otp_info collection 
-                        // TODO - insert new if there wasn't any phone inside the otp_info collection and it means this is the first time the user is trying to login
                         let phone = otp_req.phone;
 
 
 
 
+                        
+                        // 1) generate random code
+                        // 2) send generated code to the receptor
+                        // 3) on successful status coming from the career upsert the code, phone and 2 mins expiration time into otp_info collection
+                        // 4) use SaveOTPInfo struct to insert otp info bson into the mongodb
+                        // ... 
 
+
+
+
+
+                        ////////////////////////////////// DB Ops
+                        let otps = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info");
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             message: NOT_IMPLEMENTED,
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
@@ -103,6 +107,14 @@ pub async fn opt_request(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
                                 .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
                                 .unwrap()
                         )
+                        ////////////////////////////////// 
+
+
+
+
+
+
+
                     
                     
                     },
