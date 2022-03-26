@@ -12,6 +12,5 @@
 
 // collections:
 //-- board -> deck
-//-- roles -> id, name, rate, desc, ability
-//-- sides -> 
-//-- phases -> [ { day: {users: []}, mid_day: {users: []}, night: {users: []} }, ..., { day: {users: []}, mid_day: {users: []}, night: {users: []} } ]
+//-- roles -> _id, name, rate, desc, abilities
+//-- sides -> _id, name

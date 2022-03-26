@@ -87,8 +87,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     let host = env::var("HOST").expect("⚠️ no host variable set");
     let auth_port = env::var("AYOUB_AUTH_PORT").expect("⚠️ no port variable set for auth service");
     let event_port = env::var("AYOUB_EVENT_PORT").expect("⚠️ no port variable set for event service");
+    let player_port = env::var("AYOUB_PLAYER_PORT").expect("⚠️ no port variable set for player service");
     let auth_server_addr = format!("{}:{}", host, auth_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     let event_server_addr = format!("{}:{}", host, event_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
+    let player_server_addr = format!("{}:{}", host, player_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
 
@@ -149,6 +151,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     // ---------------------------------------------------------------------
     let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
     let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
+    let player_service = services::player::PlayerSvc::new(db.clone(), vec![]).await;
 
 
 
@@ -165,6 +168,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     // -------------------------------------------------------------------------
     let auth_server = Server::bind(&auth_server_addr).serve(auth_serivce);
     let event_server = Server::bind(&event_server_addr).serve(event_service);
+    let player_server = Server::bind(&player_server_addr).serve(player_service);
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel 
     
     
@@ -190,6 +194,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     } else if current_service.as_str() == "event"{
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = event_graceful.await{ //-- awaiting on the server to receive the shutdown signal
+            error!("event server error {} - {}", e, chrono::Local::now().naive_local());
+        }
+        // TODO - if the number of clients reached too many requests shutdown the server
+        sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
+        // sender.send(1); //-- freez feature
+    } else if current_service.as_str() == "player"{
+        let player_graceful = player_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
+        if let Err(e) = player_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("event server error {} - {}", e, chrono::Local::now().naive_local());
         }
         // TODO - if the number of clients reached too many requests shutdown the server

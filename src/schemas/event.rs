@@ -11,6 +11,7 @@ use mongodb::bson::{oid::ObjectId};
 
 
 
+
 // NOTE - serializing from struct or json or bson into the utf8 bytes and deserializing from utf8 into json or struct or bson
 // NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
 // NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into its related struct and then serialize it to json to send back to the user through the socket
@@ -26,6 +27,37 @@ pub struct Simd{
     pub input: u32,
 }
 
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EventInfo{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub upvotes: Option<u16>,
+    pub downvotes: Option<u16>,
+    pub voters: Option<Vec<Voter>>,
+    pub phases: Option<Vec<Phase>>,
+    pub is_expired: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+}
+
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlayerInfo{
+    pub _id: Option<ObjectId>, //-- this is the _id of the user from the users collection
+}
+
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Phase{
+    pub day: Vec<PlayerInfo>,
+    pub mid_day: Vec<PlayerInfo>,
+    pub night: Vec<PlayerInfo>,
+}
 
 
 
@@ -57,21 +89,6 @@ pub struct EventAddRequest{
     pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a proposal reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new proposal object
     pub created_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the created time inside the request body, we'll fill it inside the server
-}
-
-
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EventInfo{
-    pub _id: Option<ObjectId>,
-    pub title: String,
-    pub content: String,
-    pub upvotes: Option<u16>,
-    pub downvotes: Option<u16>,
-    pub voters: Option<Vec<Voter>>,
-    pub is_expired: Option<bool>,
-    pub expire_at: Option<i64>,
-    pub created_at: Option<i64>,
 }
 
 
