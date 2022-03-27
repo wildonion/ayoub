@@ -11,7 +11,15 @@
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
-use crate::controllers::auth::{home, check_token, login, signup, not_found, opt_request, check_otp};
+use crate::controllers::auth::{
+                               home::main as home, 
+                               check_token::main as check_token, 
+                               login::main as login, 
+                               signup::main as signup, 
+                               not_found::main as not_found, 
+                               otp_request::main as otp_request, 
+                               check_otp::main as check_otp
+                            };
 
 
 
@@ -48,7 +56,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         },
         (&Method::POST, "/auth/otp-request")    => {
             app.name = "/auth/otp-request".to_string();
-            opt_request(app_storage, app).await
+            otp_request(app_storage, app).await
         },
         (&Method::POST, "/auth/check-otp")    => {
             app.name = "/auth/check-otp".to_string();

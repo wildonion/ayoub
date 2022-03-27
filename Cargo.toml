@@ -23,6 +23,7 @@ log = "0.4"
 jsonwebtoken = "8"
 mongodb = "2.1.0"
 rust-argon2 = "1.0.0"
+rand = "0.8.5"
 
 
 

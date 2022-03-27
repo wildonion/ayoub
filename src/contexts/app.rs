@@ -35,9 +35,9 @@ pub struct Api{
 impl Api{
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // NOTE - we have to borrow the req and res cause Request and Response structs are not bounded to Copy and Clone traits 
+    // NOTE - we can borrow the req and res cause Request and Response structs are not bounded to Copy and Clone traits 
     //        thus cb closure (callback) arguments must be references to Request and Response objects.
-    // NOTE - we have to use as_ref() method to borrow the self.req and self.res cause as_ref() 
+    // NOTE - we can use as_ref() method to borrow the self.req and self.res cause as_ref() 
     //        converts Option<T> to Option<&T> then we can unwrap them to get the borrowed objects.
     // NOTE - don't put & behind self or borrow Api fields cause sharing Api fields between other threads 
     //        with & or borrowing the ownership is impossible caused by not implemented trait Clone (a super trait of Copy) 
@@ -150,7 +150,7 @@ pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside 
 
 
 pub async fn shutdown_signal(signal: Receiver<u8>){
-    match signal.await{ //-- await on signla to get the message
+    match signal.await{ //-- await on signal to get the message
         Ok(s) => {
             if s == 0{
                 info!("shutting down the server - {}", chrono::Local::now().naive_local());
