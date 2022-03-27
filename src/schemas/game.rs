@@ -13,8 +13,19 @@
 
 
 
-// collections:
-//-- decks -> [ { _id, roles{ _id, name, rate, desc, abilities} }, ..., { _id, roles{ _id, name, rate, desc, abilities} } ]
-//-- sides -> _id, name
-//-- player_role_ability -> _id, user_id, role_id, event_id, current_ability
-//-- player_chain_to -> _id, from_id, to_id 
+pub struct Decks{ // [ { _id, roles{ _id, name, rate, desc, abilities} }, ..., { _id, roles{ _id, name, rate, desc, abilities} } ]
+
+}
+
+pub struct Sides{ // _id, name
+
+}
+
+pub struct PlayerRoleAbility{ // _id, user_id, role_id, event_id, current_ability
+
+}
+
+
+pub struct PlayerChainTo{ // _id, from_id, to_id 
+
+}

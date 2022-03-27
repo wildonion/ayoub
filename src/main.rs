@@ -63,7 +63,7 @@ use crate::contexts as ctx;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Error, Send and Sync are traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory cause they're object safe traits 
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory cause they're object safe traits 
     
     
 
@@ -87,14 +87,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     let host = env::var("HOST").expect("⚠️ no host variable set");
     let auth_port = env::var("AYOUB_AUTH_PORT").expect("⚠️ no port variable set for auth service");
     let event_port = env::var("AYOUB_EVENT_PORT").expect("⚠️ no port variable set for event service");
-    let player_port = env::var("AYOUB_PLAYER_PORT").expect("⚠️ no port variable set for player service");
+    let game_port = env::var("AYOUB_GAME_PORT").expect("⚠️ no port variable set for game service");
     let auth_server_addr = format!("{}:{}", host, auth_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     let event_server_addr = format!("{}:{}", host, event_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    let player_server_addr = format!("{}:{}", host, player_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
+    let game_server_addr = format!("{}:{}", host, game_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
 
 
+
+    
 
     
     
@@ -112,7 +114,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
                 init_db.engine = Some(db_engine);
                 init_db.url = Some(db_addr);
                 info!("getting mongodb instance - {}", chrono::Local::now().naive_local());
-                let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db after calling this method cause self as the first argument will move the instance after calling the related method
+                let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db after calling this method cause self as the first argument will move the instance after calling the related method and we don't have access to init_db.url any more due to moved value error
                 Some( //-- putting the Arc-ed db inside the Option
                     Arc::new( //-- cloning app_storage to move it between threads
                         ctx::app::Storage{ //-- defining db context 
@@ -151,7 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     // ---------------------------------------------------------------------
     let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
     let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
-    let player_service = services::player::PlayerSvc::new(db.clone(), vec![]).await;
+    let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await;
 
 
 
@@ -168,7 +170,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     // -------------------------------------------------------------------------
     let auth_server = Server::bind(&auth_server_addr).serve(auth_serivce);
     let event_server = Server::bind(&event_server_addr).serve(event_service);
-    let player_server = Server::bind(&player_server_addr).serve(player_service);
+    let game_server = Server::bind(&game_server_addr).serve(game_service);
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel 
     
     
@@ -199,10 +201,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
         // TODO - if the number of clients reached too many requests shutdown the server
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
-    } else if current_service.as_str() == "player"{
-        let player_graceful = player_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
-        if let Err(e) = player_graceful.await{ //-- awaiting on the server to receive the shutdown signal
-            error!("event server error {} - {}", e, chrono::Local::now().naive_local());
+    } else if current_service.as_str() == "game"{
+        let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
+        if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
+            error!("game server error {} - {}", e, chrono::Local::now().naive_local());
         }
         // TODO - if the number of clients reached too many requests shutdown the server
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 

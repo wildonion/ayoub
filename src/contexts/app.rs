@@ -110,7 +110,7 @@ impl Db{
         )
     }
     
-    pub async fn GetMongoDbInstance(&self) -> Client{ //-- it'll return an instance of the mongodb client
+    pub async fn GetMongoDbInstance(&self) -> Client{ //-- it'll return an instance of the mongodb client - we set the first argument to &self in order to have the instance of the object later on after calling this method and prevent from moving
         Client::with_uri_str(self.url.as_ref().unwrap()).await.unwrap() //-- building mongodb client instance
     }
 

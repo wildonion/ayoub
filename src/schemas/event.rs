@@ -53,9 +53,9 @@ pub struct PlayerInfo{
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Phase{
-    pub day: Vec<PlayerInfo>,
-    pub mid_day: Vec<PlayerInfo>,
-    pub night: Vec<PlayerInfo>,
+    pub day: Vec<PlayerInfo>, //-- vector of all users at the end of the day that their status has changed
+    pub mid_day: Vec<PlayerInfo>, //-- vector of all users at the end of the mid day that their status has changed
+    pub night: Vec<PlayerInfo>, //-- vector of all users at the end of the night that their status has changed
 }
 
 
