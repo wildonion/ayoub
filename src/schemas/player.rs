@@ -16,5 +16,5 @@
 // collections:
 //-- decks -> [ { _id, roles{ _id, name, rate, desc, abilities} }, ..., { _id, roles{ _id, name, rate, desc, abilities} } ]
 //-- sides -> _id, name
-//-- player_role_ability -> _id, user_id, role_id, current_ability
+//-- player_role_ability -> _id, user_id, role_id, event_id, current_ability
 //-- player_chain_to -> _id, from_id, to_id 
