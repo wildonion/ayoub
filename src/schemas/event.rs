@@ -20,45 +20,10 @@ use mongodb::bson::{oid::ObjectId};
 
 
 
-
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct Simd{
     pub input: u32,
 }
-
-
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EventInfo{
-    pub _id: Option<ObjectId>,
-    pub title: String,
-    pub content: String,
-    pub upvotes: Option<u16>,
-    pub downvotes: Option<u16>,
-    pub voters: Option<Vec<Voter>>,
-    pub phases: Option<Vec<Phase>>,
-    pub is_expired: Option<bool>,
-    pub expire_at: Option<i64>,
-    pub created_at: Option<i64>,
-}
-
-
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PlayerInfo{
-    pub _id: Option<ObjectId>, //-- this is the _id of the user from the users collection
-}
-
-
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Phase{
-    pub day: Vec<PlayerInfo>, //-- vector of all users at the end of the day that their status has changed
-    pub mid_day: Vec<PlayerInfo>, //-- vector of all users at the end of the mid day that their status has changed
-    pub night: Vec<PlayerInfo>, //-- vector of all users at the end of the night that their status has changed
-}
-
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Voter{
@@ -77,11 +42,59 @@ pub struct CastVoteRequest{
 
 
 
+
+
+
+
+/*
+  -----------------------------------------------------------------------------------------
+| this struct will be used to deserialize event info bson from the mongodb into this struct
+| -----------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EventInfo{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub creator_wallet_address: Option<String>, //-- it might be None at initializing stage inside the add api
+    pub upvotes: Option<u16>,
+    pub downvotes: Option<u16>,
+    pub voters: Option<Vec<Voter>>,
+    pub phases: Option<Vec<Phase>>,
+    pub is_expired: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlayerInfo{
+    pub _id: Option<ObjectId>, //-- this is the _id of the user from the users collection
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Phase{
+    pub day: Vec<PlayerInfo>, //-- vector of all users at the end of the day that their status has changed
+    pub mid_day: Vec<PlayerInfo>, //-- vector of all users at the end of the mid day that their status has changed
+    pub night: Vec<PlayerInfo>, //-- vector of all users at the end of the night that their status has changed
+}
+
+
+/*
+  -------------------------------------------------------------------------------------
+| this struct will be used to deserialize event info json from client into this struct
+| -------------------------------------------------------------------------------------
+|
+|
+*/
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventAddRequest{
     pub title: String,
     pub content: String,
-    pub creator_wallet_address: String,
+    pub creator_wallet_address: Option<String>,
     pub upvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the upvotes inside the request body, we'll fill it inside the server
     pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server
     pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on using cast-vote route
@@ -91,17 +104,44 @@ pub struct EventAddRequest{
 }
 
 
-
+/*
+  ------------------------------------------------------------------------------------------------------
+| this struct will be used to put all available events in it and serialize as json to send back to user
+| ------------------------------------------------------------------------------------------------------
+|
+|
+*/
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableEvents{
     pub events: Vec<EventInfo>,
 }
 
 
+/*
+  -------------------------------------------------------------------------------------
+| this struct will be used to deserialize expire info json from client into this struct
+| -------------------------------------------------------------------------------------
+|
+|
+*/
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ExpireEventRequest{
     pub _id: String, //-- this is the id of the proposal took from the mongodb
 }
+
+
+/*
+  -------------------------------------------------------------------------------------
+| this struct will be used to deserialize delete info json from client into this struct
+| -------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DeleteEventRequest{
+    pub _id: String, //-- this is the id of the proposal took from the mongodb
+}
+
 
 
 impl EventInfo{

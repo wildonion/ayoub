@@ -8,8 +8,8 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
-use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
-use bytes::Buf; //-- based on orphan rule it'll be needed to call the reader() method on the whole_body buffer
+use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
+use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body};
 use log::info;
 use mongodb::bson::doc;
@@ -69,7 +69,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                             .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
                                             .unwrap()
                                     )
-                                } else if time <= otp_info_doc.exp_time{
+                                } else if time <= otp_info_doc.exp_time{ //-- no need to clone time cause time is of type i64 and it's saved inside the stack
                                     match users.find_one(doc!{"phone": phone.clone()}, None).await.unwrap(){ //-- we're finding the user based on the incoming phone from the clinet - we've cloned the phone in order to prevent its ownership from moving
                                         Some(user_info) => {
                                                 match otps.find_one_and_update(doc!{"_id": otp_info_doc._id}, doc!{"$set": {"updated_at": Some(Utc::now().timestamp())}}, None).await.unwrap(){ //-- updating the updated_at field for the current otp_info doc based on the current otp_info doc id 

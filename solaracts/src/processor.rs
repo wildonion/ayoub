@@ -30,7 +30,7 @@
 
 
 
-use borsh::{BorshDeserialize, BorshSerialize}; //-- based on orphan rule these two traits must be include here in order to use the try_from_slice() method on Contract structure
+use borsh::{BorshDeserialize, BorshSerialize}; //-- these two traits must be include here in order to use the try_from_slice() method on Contract structure
 use crate::utils::Contract;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},

@@ -11,7 +11,14 @@
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
-use crate::controllers::event::{add_event, get_all_events, cast_vote_event, expire_event, not_found, simd_ops};
+use crate::controllers::event::{
+                                add::main as add_event, 
+                                get::all as get_all_events, 
+                                vote::main as cast_vote_event, 
+                                expire::main as expire_event, 
+                                not_found::main as not_found, 
+                                simd::main as simd_ops
+                            };
 
 
 
