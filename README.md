@@ -4,6 +4,8 @@
 
 * To run the `auth` server just change the `CURRENT_SERVICE` variable to `auth` value.
 
+* To run the `game` server just change the `CURRENT_SERVICE` variable to `game` value.
+
 ```console
 $ cargo build --bin ayoub --release
 ```
