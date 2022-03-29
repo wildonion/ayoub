@@ -56,6 +56,8 @@ use crate::contexts as ctx;
 
 
 
+// NOTE - to solve the `future is not `Send` as this value is used across an await` error we have to implement the Send trait for that type, since we don't know the type at compile time (it'll specify at runtime due to the logic of the code) we must put the trait inside the Box with the dyn keyword (object safe traits have unknown size at compile time) inside the return type of the function in second part of the Result 
+// NOTE - Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory
 
 
 
@@ -63,7 +65,7 @@ use crate::contexts as ctx;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory cause they're object safe traits 
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     
     
 
@@ -99,7 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{ //-- Er
     
 
     
-    
+
 
 
 

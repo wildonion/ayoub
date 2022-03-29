@@ -9,32 +9,6 @@ use log::info;
 
 
 
-// TODO - build a download manager like IDM
-// TODO - macros and attribute like macros
-// TODO - vector of || async move{} of events for an event manager struct 
-// TODO - call new event every 5 seconds from vector of event of closures 
-
-pub mod manager{
-
-    use uuid::Uuid;
-
-
-    pub struct Event{
-        id: Uuid,
-        last_call: i64, // last call timestamp  
-    }
-
-
-}
-
-
-
-
-pub trait void{
-    type Input;
-    type Output;
-
-}
 
 
 
@@ -86,7 +60,7 @@ pub mod jwt{
 
 
 
-// ------------------------------ using mpsc job queue channel + tokio + natiev thread
+// ------------------------------ using mpsc channel + tokio + natiev thread
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------

@@ -77,8 +77,6 @@ impl Api{
 }
 
 
-#[derive(Clone, Debug)]
-pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
 
 
 

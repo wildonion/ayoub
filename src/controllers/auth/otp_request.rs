@@ -7,12 +7,13 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use std::env;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
-use hyper::{header, StatusCode, Body};
+use hyper::{body::HttpBody, Client, header, StatusCode, Body};
 use log::info;
 use mongodb::bson::doc;
-use mongodb::Client;
+use mongodb::Client as MC;
 use rand::prelude::*;
 use chrono::Utc;
 use std::time::Instant;
@@ -29,7 +30,7 @@ use std::time::Instant;
 //
 // -------------------------------------------------------------------------
 
-pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
@@ -46,25 +47,38 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                     Ok(otp_req) => { //-- we got the phone number of the user
                         
 
+                        let sms_api_token = env::var("SMS_API_TOKEN").expect("⚠️ no sms api token variable set");
+                        let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms api token variable set");
                         let phone = otp_req.phone;
                         let mut rng = thread_rng();
                         let code: String = (0..4).map(|_|{
-                            let idx = rng.gen_range(0..CHARSET.len());
+                            let idx = rng.gen_range(0..CHARSET.len()); //-- idx is one byte cause it's of type u8
                             CHARSET[idx] as char
                         }).collect();
 
-                        
+
+
+                        let uri = format!("https://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).parse::<hyper::Uri>().unwrap(); //-- parsing it to hyper based uri
+                        let client = Client::new();
+                        let mut sms_response_streamer = client.get(uri).await.unwrap();
+
 
                         
-   
-                        // 2) send generated code to the receptor
+                        while let Some(chunk) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously but it’s easy to await for each chunk as it comes in using a while let Some()
+                            // do something with &chunk?
+                            // ...
+                        }
+                        
+
+
+
+
                         // 3) on successful status coming from the career upsert the code, phone and 2 mins expiration time into otp_info collection
                         // 4) use SaveOTPInfo struct to insert otp info bson into the mongodb
                         // ... 
 
 
-
-
+ 
 
 
 
