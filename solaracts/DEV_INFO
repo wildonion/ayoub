@@ -24,56 +24,9 @@ https://learn.figment.io/protocols/solana
 https://solanacookbook.com/
 https://soldev.app/
 https://docs.metaplex.com/
-https://doc.rust-lang.org/nightly/rust-by-example/unsafe/asm.html
-https://blog.cloudflare.com/pin-and-unpin-in-rust/
-https://bparli.medium.com/adventures-in-rust-and-load-balancers-73a0bc61a192
-https://dzone.com/articles/rust-based-load-balancing-proxy-server-with-async
-https://github.com/NicolasLM/nucleon
-https://github.com/bparli/convey
-https://github.com/hyperium/hyper/blob/master/examples/http_proxy.rs
-https://truelayer.com/blog/grpc-load-balancing-in-rust
-https://medium.com/load-balancer-series/writing-a-http-load-balancer-in-python-using-tdd-theoretical-concepts-fb6dab3e879b
-https://doc.rust-lang.org/rust-by-example/macros.html
-https://doc.rust-lang.org/book/ch19-06-macros.html
-https://doc.rust-lang.org/reference/procedural-macros.html
-http://zderadicka.eu/hyper-websocket/
-https://rust-unofficial.github.io/patterns/
-https://rustwasm.github.io/docs/book/introduction.html
-https://danielkeep.github.io/practical-intro-to-macros.html
-https://blog.logrocket.com/macros-in-rust-a-tutorial-with-examples/
-https://blog.logrocket.com/procedural-macros-in-rust/
-https://doc.rust-lang.org/reference/attributes.html
-http://gradebot.org/doc/ipur/trait.html
-https://cheats.rs/#behind-the-scenes
-https://doc.rust-lang.org/beta/unstable-book/language-features/generators.html
-https://stackoverflow.com/questions/28127165/how-to-convert-struct-to-u8
-https://stackoverflow.com/questions/2490912/what-are-pinned-objects
-https://rust-lang.github.io/async-book/01_getting_started/01_chapter.html
-https://github.com/zupzup/warp-websockets-example
-https://github.com/tokio-rs/tokio/tree/master/examples
-https://blog.softwaremill.com/multithreading-in-rust-with-mpsc-multi-producer-single-consumer-channels-db0fc91ae3fa
-https://danielkeep.github.io/tlborm/book/
-https://cetra3.github.io/blog/implementing-a-jobq/
-https://cetra3.github.io/blog/implementing-a-jobq-with-tokio/
-https://docs.rs/tokio/1.12.0/tokio/sync/index.html
-https://tokio.rs/tokio/tutorial/channels
-https://docs.rs/tokio-stream/0.1.7/tokio_stream/
-https://doc.rust-lang.org/std/marker/struct.PhantomData.html
-https://doc.rust-lang.org/std/pin/index.html
-https://doc.rust-lang.org/std/sync/struct.Arc.html
-https://doc.rust-lang.org/std/rc/struct.Rc.html
-https://doc.rust-lang.org/std/sync/struct.Mutex.html
-https://doc.rust-lang.org/std/sync/struct.RwLock.html
-https://doc.rust-lang.org/std/cell/struct.RefMut.html
-https://doc.rust-lang.org/std/cell/struct.RefCell.html
-https://doc.rust-lang.org/std/rc/struct.Weak.html
-https://doc.rust-lang.org/std/keyword.dyn.html
->>>> https://github.com/wildonion/stomegranate/blob/master/helper_board
->>>> https://github.com/wildonion/coiniXerr
->>>> https://github.com/wildonion/ayoub
->>>> https://github.com/wildonion/extrust/blob/master/_trash/_unsafer.rs
->>>> https://rust-lang-nursery.github.io/rust-cookbook/intro.html
->>>> https://doc.rust-lang.org/nomicon/
+
+
+
 
 
 
@@ -87,3 +40,13 @@ our campaign contract's methods will be called on a specific event or condition 
 big-endian system stores the most significant byte of a word at the smallest memory address and the least significant byte at the largest (the most right hex will be stored at the bottom of the stack)
 use the Solana SDK Crate to write client side applications in Rust to call contracts using JSON RPC 
 use the Solana Program Crate to write on-chain programs in Rust to deploy bpf contracts on solana runtime
+
+
+
+
+
+
+
+
+
+
