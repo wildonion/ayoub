@@ -24,6 +24,11 @@ use std::env;
 
 
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SMSResponse{
+    pub messageid: String,
+}
+
 
 
 

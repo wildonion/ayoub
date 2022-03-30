@@ -48,15 +48,15 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
                         
 
                         let sms_api_token = env::var("SMS_API_TOKEN").expect("⚠️ no sms api token variable set");
-                        let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms api token variable set");
+                        let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms template variable set");
                         let phone = otp_req.phone;
-                        let mut rng = thread_rng();
                         let code: String = (0..4).map(|_|{
-                            let idx = rng.gen_range(0..CHARSET.len()); //-- idx is one byte cause it's of type u8
+                            let idx = random::<u8>() as usize; //-- idx is one byte cause it's of type u8
                             CHARSET[idx] as char
                         }).collect();
-
-
+                        
+                    
+                        
 
                         let uri = format!("https://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).parse::<hyper::Uri>().unwrap(); //-- parsing it to hyper based uri
                         let client = Client::new();
@@ -64,10 +64,20 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
 
 
                         
-                        while let Some(chunk) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously but it’s easy to await for each chunk as it comes in using a while let Some()
-                            // do something with &chunk?
+                        while let Some(chunk) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
+                            //-- deserializng from utf8 bytes into the SMSResponse struct to send back as json to user
                             // ...
                         }
+
+
+
+                        
+                            // benchmark issue
+                            // unpacking pointer struct
+                            // https://www.reddit.com/r/rust/comments/2s9qzh/how_i_can_generate_random_string_in_rust/ 
+                            // https://kavenegar.com/rest.html#sms-Lookup
+                            // chiliz
+                            // top drive game
                         
 
 
@@ -83,6 +93,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
 
 
                         ////////////////////////////////// DB Ops
+
                         let otps = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info");
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             message: NOT_IMPLEMENTED,
@@ -97,6 +108,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
                                 .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
                                 .unwrap()
                         )
+                        
                         ////////////////////////////////// 
 
 
