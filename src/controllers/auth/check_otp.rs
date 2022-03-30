@@ -52,8 +52,8 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                         
                         ////////////////////////////////// DB Ops
                         let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users");
-                        let otps = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info");
-                        match otps.find_one(doc!{"phone": phone.clone(), "code": code}, None).await.unwrap(){ // NOTE - we've cloned the phone in order to prevent its ownership from moving
+                        let otp_info = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info");
+                        match otp_info.find_one(doc!{"phone": phone.clone(), "code": code}, None).await.unwrap(){ // NOTE - we've cloned the phone in order to prevent its ownership from moving
                             Some(otp_info_doc) => {
                                 if time > otp_info_doc.exp_time{
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -72,7 +72,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                 } else if time <= otp_info_doc.exp_time{ //-- no need to clone time cause time is of type i64 and it's saved inside the stack
                                     match users.find_one(doc!{"phone": phone.clone()}, None).await.unwrap(){ //-- we're finding the user based on the incoming phone from the clinet - we've cloned the phone in order to prevent its ownership from moving
                                         Some(user_info) => {
-                                                match otps.find_one_and_update(doc!{"_id": otp_info_doc._id}, doc!{"$set": {"updated_at": Some(Utc::now().timestamp())}}, None).await.unwrap(){ //-- updating the updated_at field for the current otp_info doc based on the current otp_info doc id 
+                                                match otp_info.find_one_and_update(doc!{"_id": otp_info_doc._id}, doc!{"$set": {"updated_at": Some(Utc::now().timestamp())}}, None).await.unwrap(){ //-- updating the updated_at field for the current otp_info doc based on the current otp_info doc id 
                                                     Some(updated_otp_info) => {
                                                         let check_otp_response = schemas::auth::CheckOTPResponse{
                                                             user_id: user_info._id, //-- this is of tyoe mongodb bson ObjectId

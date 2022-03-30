@@ -51,5 +51,3 @@ $ solana program show --keypair solana-wallet/keypair.json <PROGRAM_ID>
 * postman collection
 
 * server documentaion
-
-* auth guard on event and game apis

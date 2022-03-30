@@ -11,6 +11,7 @@ use hyper::{header, StatusCode, Body, Response};
 use log::info;
 use mongodb::bson::doc;
 use mongodb::Client;
+use mongodb::bson::oid::ObjectId;
 
 
 
@@ -78,8 +79,8 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                         };
                                         match users.insert_one(user_doc, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
                                             Ok(insert_result) => {
-                                                let response_body = ctx::app::Response::<mongodb::bson::Bson>{ //-- we have to specify a generic type for data field in Response struct which in our case is Bson struct
-                                                    data: Some(insert_result.inserted_id),
+                                                let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                                    data: Some(insert_result.inserted_id.as_object_id().unwrap()),
                                                     message: REGISTERED,
                                                     status: 200,
                                                 };

@@ -24,12 +24,24 @@ use std::env;
 
 
 
+/*
+  -----------------------------------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize the SMS response coming from the career to serialize it as json to send back to user
+| -----------------------------------------------------------------------------------------------------------------------------
+|
+|
+*/
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponse{
     pub messageid: String,
+    pub message: String,
+    pub status: u8,
+    pub statustext: String,
+    pub sender: String,
+    pub receptor: String,
+    pub date: i64,
+    pub cost: u32,
 }
-
-
 
 
 /*
