@@ -33,14 +33,14 @@ use std::env;
 */
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponse{
-    pub messageid: String,
+    pub messageid: f64,
     pub message: String,
     pub status: u8,
     pub statustext: String,
     pub sender: String,
     pub receptor: String,
     pub date: i64,
-    pub cost: u32,
+    pub cost: u16,
 }
 
 
