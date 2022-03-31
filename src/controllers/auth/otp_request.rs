@@ -90,7 +90,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
 
 
 
-                                        if sms_response.status == 10{ //-- means the code has been delivered successfully
+                                        if sms_response.status == 10{ //-- means the code has been delivered successfully and we can go further
                                             
                                             
                                             // --------------------------------------------------------------------
