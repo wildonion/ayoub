@@ -17,3 +17,5 @@ $ cargo build --bin ayoub --release
 * server documentaion
 
 * auth guard on APIs
+
+* server signal handling 

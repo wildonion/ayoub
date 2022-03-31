@@ -72,7 +72,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
                         // --------------------------------------------------------------------
                         //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
                         // --------------------------------------------------------------------
-                        let mut buffer = [0u8; 1024];
+                        let mut buffer = [0u8; IO_BUFFER_SIZE];
                         let mut stream = BufWriter::new(buffer.as_mut());
                         while let Some(next) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
                             let chunk = next?;

@@ -35,6 +35,7 @@ pub static NOT_FOUND_TOKEN: &str = "No Token Found";
 pub static NOT_IMPLEMENTED: &str = "Not Implemented";
 pub static OTP_CODE_HAS_BEEN_SENT: &str = "OTP Code Has Been Sent Successfully";
 pub static EXPIRED_OTP_CODE: &str = "OTP Code Has Been Expored";
+pub const IO_BUFFER_SIZE: usize = 1024;
 pub const CHARSET: &[u8] = b"0123456789";
 pub const DEFAULT_STATUS: &u8 = &0;
 pub const KICK_STATUS: &u8 = &1;
