@@ -63,7 +63,7 @@ impl EventSvc{
 
 impl<T> Service<T> for EventSvc{
 
-    type Response = Svc; //-- the response type is an object of type Svc which handles routing processes
+    type Response = Svc; //-- the response type is an object of type Svc which handles registering routers
     type Error = hyper::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
     
@@ -78,7 +78,7 @@ impl<T> Service<T> for EventSvc{
         let clients = self.clients.clone(); //-- storage here is behind a mutable pointer (&mut self) and we must clone it cause trait Copy is not implemented for &mut self
         Box::pin(
             async move { 
-                Ok(Svc { id, storage, clients })
+                Ok(Self::Response { id, storage, clients }) //-- we can build the response object using Self::Response cause it's a alias for the Svc type
             }
         )
     }

@@ -4,9 +4,10 @@
 
 use std::thread;
 use std::sync::mpsc;
+use futures::future::{BoxFuture, FutureExt};
 use log::info;
-
-
+use crate::constants::*;
+use rand::prelude::*;
 
 
 
@@ -108,4 +109,32 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     let final_res = u32::from_be_bytes(result); //-- will create a u32 number from 4 pack of 8 bits 
     Ok(final_res) //-- the final results might be different from the input due to the time takes to send the each chunks through the channel and receive them from the receiver thus the order of chunks will not be the same as the input
 
+}
+
+
+
+// https://rust-lang.github.io/async-book/07_workarounds/04_recursion.html
+//-- Future trait is an object safe trait thus we have to Box it with dyn keyword kinda a pointer to the heap where the object is allocated in runtime
+//-- usize is how many bytes it takes to reference any location in memory, on a 32 bit target, this is 4 bytes and on a 64 bit target, this is 8 bytes.
+//-- a recursive `async fn` must be rewritten to return a boxed `dyn Future` 
+// pub fn gen_random_idx(idx: usize) -> BoxFuture<'static, usize>{ // NOTE - pub type BoxFuture<'a, T> = Pin<alloc::boxed::Box<dyn Future<Output = T> + Send + 'a>>
+//     async move{
+//         if idx <= CHARSET.len(){
+//             idx
+//         } else if idx > CHARSET.len(){
+//             gen_random_idx(random::<u8>() as usize).await
+//         } else{
+//             todo!()
+//         }
+//     }.boxed() //-- wrap the future in a Box, pinning it
+// }
+
+
+
+pub fn gen_random_idx(idx: usize) -> usize{
+    if idx < CHARSET.len(){
+        idx
+    } else{
+        gen_random_idx(random::<u8>() as usize)
+    }
 }

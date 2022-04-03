@@ -61,7 +61,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                     Ok(updated_result) => {
                                         let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
                                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: UPDATED, //-- collection found in ayoub document (database)
+                                            message: UPDATED, //-- collection found in ayoub database
                                             status: 200,
                                         };
                                         let response_body_json = serde_json::to_string(&response_body).unwrap();

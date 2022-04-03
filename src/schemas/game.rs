@@ -3,6 +3,15 @@
 
 
 
+use serde::{Serialize, Deserialize};
+use mongodb::bson::oid::ObjectId;
+use std::env;
+
+
+
+
+
+
 
 // NOTE - serializing from struct or json or bson into the utf8 bytes and deserializing from utf8 into json or struct or bson
 // NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
@@ -13,19 +22,51 @@
 
 
 
-pub struct Decks{ // [ { _id, roles{ _id, name, rate, desc, abilities} }, ..., { _id, roles{ _id, name, rate, desc, abilities} } ]
-
-}
-
-pub struct Sides{ // _id, name
-
-}
-
-pub struct PlayerRoleAbility{ // _id, user_id, role_id, event_id, current_ability
-
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RoleInfo{
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub name: String, //-- role name
+    pub rate: u8, //-- role rate
+    pub desc: String, //-- role description
+    pub abilities: u8, //-- number of total abilities for a role, the default is 0
 }
 
 
-pub struct PlayerChainTo{ // _id, from_id, to_id 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DeckInfo{
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub roles: RoleInfo,
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AvailableDecks{
+    pub decks: Vec<DeckInfo>, //-- fetch all decks
+}
+
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SidesInfo{ // _id, name
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub name: String,
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PlayerRoleAbilityInfo{
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub user_id: String, //-- string type of ObjectId for user id 
+    pub role_id: String, //-- string type of ObjectId for role id
+    pub event_id: String, //-- string type of ObjectId for event id
+    pub current_ability: u8,
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PlayerChainToInfo{
+    pub _id: Option<ObjectId>,
+    pub from_id: String, //-- string type of ObjectId for from user id 
+    pub to_id: String, //-- string type of ObjectId for to user id 
 
 }

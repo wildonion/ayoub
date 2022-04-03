@@ -54,8 +54,8 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/auth/check-token".to_string();
             check_token(app_storage, app).await
         },
-        (&Method::POST, "/auth/otp-request")    => {
-            app.name = "/auth/otp-request".to_string();
+        (&Method::POST, "/auth/otp-req")    => {
+            app.name = "/auth/otp-req".to_string();
             otp_request(app_storage, app).await
         },
         (&Method::POST, "/auth/check-otp")    => {

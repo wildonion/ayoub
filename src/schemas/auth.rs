@@ -22,6 +22,38 @@ use std::env;
 
 
 
+/*
+  -----------------------------------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize the SMS response return part coming from the career to serialize to into this struct
+| -----------------------------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SMSResponseReturn{
+    pub status: u16,
+    pub message: String,
+}
+
+
+/*
+  ------------------------------------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize the SMS response entries part coming from the career to serialize to into this struct
+| ------------------------------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SMSResponseEntries{
+    pub messageid: f64,
+    pub message: String,
+    pub status: u8,
+    pub statustext: String,
+    pub sender: String,
+    pub receptor: String,
+    pub date: i64,
+    pub cost: u16, 
+}
 
 
 /*
@@ -33,14 +65,8 @@ use std::env;
 */
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponse{
-    pub messageid: f64,
-    pub message: String,
-    pub status: u8,
-    pub statustext: String,
-    pub sender: String,
-    pub receptor: String,
-    pub date: i64,
-    pub cost: u16,
+    pub r#return: SMSResponseReturn, //-- escape reserved keywords to use them as identifiers using r#
+    pub entries: Vec<SMSResponseEntries>,
 }
 
 

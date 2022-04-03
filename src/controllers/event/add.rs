@@ -49,7 +49,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                             Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
                                 let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
                                     data: Some(event_doc), //-- data is an empty &[u8] array
-                                    message: FOUND_DOCUMENT, //-- collection found in ayoub document (database)
+                                    message: FOUND_DOCUMENT, //-- collection found in ayoub database
                                     status: 302,
                                 };
                                 let response_body_json = serde_json::to_string(&response_body).unwrap();

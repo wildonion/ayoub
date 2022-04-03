@@ -51,6 +51,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                         
                         
                         ////////////////////////////////// DB Ops
+
                         let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users");
                         let otp_info = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info");
                         match otp_info.find_one(doc!{"phone": phone.clone(), "code": code}, None).await.unwrap(){ // NOTE - we've cloned the phone in order to prevent its ownership from moving
@@ -148,6 +149,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                 )
                             },
                         }
+
                         //////////////////////////////////
 
 

@@ -7,6 +7,8 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use crate::utils::gen_random_idx;
+use std::str::from_utf8;
 use std::{env, io::{BufWriter, Write}};
 use chrono::Duration;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
@@ -19,6 +21,9 @@ use mongodb::bson::doc;
 use mongodb::Client as MC;
 use rand::prelude::*;
 use chrono::prelude::*;
+use hyper::http::Uri;
+use serde::{Serialize, Deserialize}; //-- to use the deserialize() and serialize() methods on struct we must use these traits
+
 
 
 
@@ -55,33 +60,45 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
                         let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms template variable set");
                         
                         
+
+                        
+
                         
                         // --------------------------------------------------------------------
                         //          GENERATING RANDOM CODE TO SEND IT TO THE RECEPTOR
                         // --------------------------------------------------------------------
                         let code: String = (0..4).map(|_|{
-                            let idx = random::<u8>() as usize; //-- idx is one byte cause it's of type u8
-                            CHARSET[idx] as char
+                            let idx = gen_random_idx(random::<u8>() as usize); //-- idx is one byte cause it's of type u8
+                            CHARSET[idx] as char //-- CHARSET is of type utf8 bytes thus we can slice it 
                         }).collect();
-                        let uri = format!("https://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).parse::<hyper::Uri>().unwrap(); //-- parsing it to hyper based uri
+                        let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
                         let client = Client::new();
                         let mut sms_response_streamer = client.get(uri).await.unwrap();
                         
                         
 
+
+
+
                         // --------------------------------------------------------------------
                         //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
                         // --------------------------------------------------------------------
                         let mut buffer = [0u8; IO_BUFFER_SIZE];
-                        let mut stream = BufWriter::new(buffer.as_mut());
+                        let mut stream = BufWriter::new(buffer.as_mut()); //-- creating a new buffer writer from the defined buffer mutably
                         while let Some(next) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
                             let chunk = next?;
                             write!(stream, "{:#?}", chunk).unwrap(); //-- collecting each incoming chunks to write them into the defined stream buffer to deserialize from utf8 bytes into the SMSResponse struct to send back as json to user
                         }
 
 
+   
+
+
                         
-                        match serde_json::from_reader(stream.buffer().reader()){ //-- buffer() method returns a reference to the internally buffered data then we can read the bytes of the buffer by calling the reader() method
+                        // --------------------------------------------------------------------
+                        //       DESERIALIZING FROM ut8 BYTES INTO THE SMSResponse STRUCT
+                        // --------------------------------------------------------------------
+                        match serde_json::from_reader(stream.buffer().reader()){ //-- buffer() method returns a reference to the internally buffered data (means &[u8]) then we can read the bytes of the buffer by calling the reader() method
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
@@ -90,9 +107,10 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
 
 
 
-                                        if sms_response.status == 10{ //-- means the code has been delivered successfully and we can go further
+                                        if sms_response.r#return.status == 200{ //-- means the code has been sent to telecommunications
                                             
                                             
+
                                             // --------------------------------------------------------------------
                                             //          GENERATING TWO MINS LATER EXPIRATION TIME FROM NOW
                                             // --------------------------------------------------------------------
@@ -181,7 +199,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
                                         } else{
                                             let response_body = ctx::app::Response::<ctx::app::Nill>{
                                                 data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: &sms_response.message, //-- converting String to &str by taking a reference to the String location inside the heap cause String will be coerced into &str at compile time
+                                                message: &sms_response.r#return.message, //-- converting String to &str by taking a reference to the String location inside the heap cause String will be coerced into &str at compile time
                                                 status: 406,
                                             };
                                             let response_body_json = serde_json::to_string(&response_body).unwrap();
