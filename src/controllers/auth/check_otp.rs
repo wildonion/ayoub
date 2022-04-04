@@ -130,7 +130,19 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                         },
                                     }  
                                 } else{
-                                    todo!();
+                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                        message: EXPIRED_OTP_CODE,
+                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                        status: 406,
+                                    };
+                                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                    Ok(
+                                        res
+                                            .status(StatusCode::NOT_ACCEPTABLE) //-- not found route or method not allowed
+                                            .header(header::CONTENT_TYPE, "application/json")
+                                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+                                            .unwrap()
+                                    )
                                 }
                             },
                             None => { //-- means we didn't find any document related to this otp and we have to tell the user do a signup

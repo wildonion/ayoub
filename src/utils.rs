@@ -97,7 +97,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     info!("collecting all chunks received from the receiver at time {:?}", chrono::Local::now().naive_local());
     let bytes: Vec<u8> = receiver.iter().take(threads).collect(); //-- collecting 4 packs of 8 bits to gather all incoming chunks from the channel
     info!("collected bytes -> {:?} at time {:?}", bytes, chrono::Local::now().naive_local());
-    let boxed_slice = bytes.into_boxed_slice(); //-- converting the collected bytes into a Box slice or array of utf8 bytes
+    let boxed_slice = bytes.into_boxed_slice(); //-- converting the collected bytes into a Box slice or array of utf8 bytes - we put it inside the Box cause the size of [u8] is not known at compile time
     let boxed_array: Box<[u8; 4]> = match boxed_slice.try_into() {
         Ok(arr) => arr,
         Err(o) => return Err(format!("vector length must be 4 but it's {}", o.len())),
@@ -109,7 +109,12 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     let final_res = u32::from_be_bytes(result); //-- will create a u32 number from 4 pack of 8 bits 
     Ok(final_res) //-- the final results might be different from the input due to the time takes to send the each chunks through the channel and receive them from the receiver thus the order of chunks will not be the same as the input
 
+
 }
+
+
+
+
 
 // -----------------------------------
 // handling a recursive async function
@@ -122,13 +127,13 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 //     async move{
 //         if idx <= CHARSET.len(){
 //             idx
-//         } else if idx > CHARSET.len(){
-//             gen_random_idx(random::<u8>() as usize).await
 //         } else{
-//             todo!()
+//             gen_random_idx(random::<u8>() as usize).await
 //         }
 //     }.boxed() //-- wrap the future in a Box, pinning it
 // }
+
+
 
 
 

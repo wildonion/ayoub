@@ -115,7 +115,7 @@ impl Service<Request<Body>> for Svc{
 
     fn call(&mut self, req: Request<Body>) -> Self::Future{ //-- Body is the generic type of the Request struct
         let api = ctx::app::Api::new(Some(req), Some(Response::builder()));
-        let res = routers::event::register(self.storage.clone(), api); //-- registering event routers for the event service - register method returns a result of hyper response based on calling one of the available routes
+        let res = routers::game::register(self.storage.clone(), api); //-- registering game routers for the game service - register method returns a result of hyper response based on calling one of the available routes
         Box::pin(async{ //-- returning the future response pinned to memory to solve later using .await - we can't mutate self.* in here cause the lifetime of the self must be static across a .await  
             res.await
         })

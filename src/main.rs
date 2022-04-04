@@ -103,17 +103,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
 
 
-    
+
+
+
+
+
 
     
-
-
-
-
     
     // -------------------------------- app storage setup
     //
     // ---------------------------------------------------------------------
+    let empty_app_storage = Some( //-- putting the Arc-ed db inside the Option
+        Arc::new( //-- cloning app_storage to move it between threads
+            ctx::app::Storage{ //-- defining db context 
+                id: Uuid::new_v4(),
+                db: Some(
+                    ctx::app::Db{
+                        mode: ctx::app::Mode::Off,
+                        instance: None,
+                        engine: None,
+                        url: None,
+                    }
+                ),
+            }
+        )
+    );
     let db = if db_engine.as_str() == "mongodb"{
         info!("switching to mongodb - {}", chrono::Local::now().naive_local());
         match ctx::app::Db::new().await{ //-- passing '_ as the lifetime of engine and url field which are string slices or pointers to a part of the String
@@ -140,11 +155,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
             },
             Err(e) => {
                 error!("init db error {} - {}", e, chrono::Local::now().naive_local());
-                todo!()
+                empty_app_storage
             }
         }
     } else{
-        todo!()
+        empty_app_storage
     };
 
 

@@ -90,8 +90,13 @@ pub struct Db{
 }
 
 impl Default for Db{
-    fn default()-> Db {
-        todo!()
+    fn default() -> Db {
+        Db{
+            mode: self::Mode::Off,
+            engine: None,
+            url: None,
+            instance: None,
+        }
     }
 }
 
@@ -154,7 +159,7 @@ pub async fn shutdown_signal(signal: Receiver<u8>){
                 info!("shutting down the server - {}", chrono::Local::now().naive_local());
                 tokio::signal::ctrl_c().await.expect("failed to plugin CTRL+C signal to the server");
             } else if s == 1 { // TODO - freez the server
-                todo!()
+                // ...
             }
         },
         Err(e) => {
