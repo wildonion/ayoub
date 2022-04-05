@@ -22,7 +22,7 @@ use mongodb::bson::oid::ObjectId;
 
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct RoleInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub name: String, //-- role name
@@ -32,28 +32,28 @@ pub struct RoleInfo{
 }
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct DeckInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub roles: RoleInfo,
 }
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableDecks{
     pub decks: Vec<DeckInfo>, //-- fetch all decks
 }
 
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SidesInfo{ // _id, name
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct SidesInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub name: String,
 }
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct PlayerRoleAbilityInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub user_id: String, //-- string type of ObjectId for user id 
@@ -63,7 +63,7 @@ pub struct PlayerRoleAbilityInfo{
 }
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct PlayerChainToInfo{
     pub _id: Option<ObjectId>,
     pub from_id: String, //-- string type of ObjectId for from user id 

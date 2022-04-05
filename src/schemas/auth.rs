@@ -29,7 +29,7 @@ use std::env;
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponseReturn{
     pub status: u16,
     pub message: String,
@@ -43,7 +43,7 @@ pub struct SMSResponseReturn{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponseEntries{
     pub messageid: f64,
     pub message: String,
@@ -63,7 +63,7 @@ pub struct SMSResponseEntries{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponse{
     pub r#return: SMSResponseReturn, //-- escape reserved keywords to use them as identifiers using r#
     pub entries: Vec<SMSResponseEntries>,
@@ -77,7 +77,7 @@ pub struct SMSResponse{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct RegisterRequest{ // NOTE - those Option values can be None tho
     pub username: String,
     pub phone: String,
@@ -97,7 +97,7 @@ pub struct RegisterRequest{ // NOTE - those Option values can be None tho
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct LoginRequest{
     pub username: String,
     pub pwd: String,
@@ -111,7 +111,7 @@ pub struct LoginRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct LoginResponse{ // NOTE - those Option values can be None tho
     pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub access_token: String,
@@ -132,7 +132,7 @@ pub struct LoginResponse{ // NOTE - those Option values can be None tho
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct RegisterResponse{ // NOTE - those Option values can be None tho
     pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub username: String,
@@ -152,7 +152,7 @@ pub struct RegisterResponse{ // NOTE - those Option values can be None tho
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SendOTPRequest{
     pub phone: String,
 }
@@ -165,7 +165,7 @@ pub struct SendOTPRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SendOTPResponse{
   pub exp_time: i64,
   pub phone: String,
@@ -182,7 +182,7 @@ pub struct SendOTPResponse{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SaveOTPInfo{
   pub exp_time: i64,
   pub code: String,
@@ -200,7 +200,7 @@ pub struct SaveOTPInfo{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CheckOTPRequest{
     pub code: String,
     pub phone: String,
@@ -215,7 +215,7 @@ pub struct CheckOTPRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CheckOTPResponse{
     pub user_id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub otp_info_id: Option<ObjectId>, //-- this is the otp info id inside the otp_info collection
@@ -232,7 +232,7 @@ pub struct CheckOTPResponse{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct OTPInfo{
     pub _id: Option<ObjectId>, //-- this is the otp info id inside the otp_info collection
     pub exp_time: i64,
@@ -250,7 +250,7 @@ pub struct OTPInfo{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct UserInfo{ // NOTE - those Option values can be None tho
     pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub username: String,
@@ -272,7 +272,7 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CheckTokenRequest{
     pub access_token: String,
 }
@@ -285,7 +285,7 @@ pub struct CheckTokenRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CheckTokenResponse{ // NOTE - those Option values can be None tho
     pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub username: String,

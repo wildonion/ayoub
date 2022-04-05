@@ -29,7 +29,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
 
 
     match (req.method(), req.uri().path()){
-        (&Method::POST, "/game/role/add")           => {
+        (&Method::POST, "/game/role/add") => {
             app.name = "/game/role/add".to_string();
             add_role(app_storage, app).await
         },
@@ -37,11 +37,12 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/side/add".to_string();
             add_side(app_storage, app).await
         },
-        (&Method::POST, "/game/deck/add")     => {
+        (&Method::POST, "/game/deck/add") => {
             app.name = "/game/deck/add".to_string();
             add_deck(app_storage, app).await
         },
-        _                                      => not_found().await,
+        _                                 => not_found().await,
     }
+
 
 }

@@ -25,7 +25,7 @@ pub struct Simd{
     pub input: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct Voter{
     pub nft_owner_wallet_address: String,
     pub is_upvote: bool,
@@ -34,7 +34,7 @@ pub struct Voter{
 
 
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct CastVoteRequest{
     pub _id: String, //-- this is the id of the proposal took from the mongodb
     pub voter: Voter,
@@ -56,7 +56,7 @@ pub struct CastVoteRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct EventInfo{
     pub _id: Option<ObjectId>,
     pub title: String,
@@ -93,7 +93,7 @@ pub struct Phase{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct EventAddRequest{
     pub title: String,
     pub content: String,
@@ -114,7 +114,7 @@ pub struct EventAddRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableEvents{
     pub events: Vec<EventInfo>,
 }
@@ -127,7 +127,7 @@ pub struct AvailableEvents{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct ExpireEventRequest{
     pub _id: String, //-- this is the id of the proposal took from the mongodb
 }
@@ -140,7 +140,7 @@ pub struct ExpireEventRequest{
 |
 |
 */
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct DeleteEventRequest{
     pub _id: String, //-- this is the id of the proposal took from the mongodb
 }
