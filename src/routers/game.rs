@@ -8,7 +8,8 @@ use std::sync::Arc;
 use crate::controllers::game::{
                                 role::add as add_role, 
                                 side::add as add_side, 
-                                deck::add as add_deck, 
+                                deck::add as add_deck,
+                                player::{update_role_ability, chain_to_another_player}, 
                                 not_found::main as not_found, 
                             };
 
@@ -40,6 +41,14 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/game/deck/add") => {
             app.name = "/game/deck/add".to_string();
             add_deck(app_storage, app).await
+        },
+        (&Method::POST, "/game/player/update/role-ability") => {
+            app.name = "/game/player/update/role-ability".to_string();
+            update_role_ability(app_storage, app).await
+        },
+        (&Method::POST, "/game/player/chain") => {
+            app.name = "/game/player/chain".to_string();
+            chain_to_another_player(app_storage, app).await
         },
         _                                 => not_found().await,
     }
