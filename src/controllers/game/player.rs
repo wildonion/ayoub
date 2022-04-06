@@ -16,7 +16,7 @@ use mongodb::Client;
 
 
 
-
+// TODO - update phase APIs
 // TODO - must update the role_id, side_id inside the users collection
 // TODO - role reservation by God and the server
 // TODO - update reserves collection also

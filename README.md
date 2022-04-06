@@ -20,9 +20,7 @@ $ cargo build --bin ayoub --release
 
 * player APIs
 
-* update phase APIs
-
-* send OTP API issue with serde parser 
+* send OTP response API from career issue with serde parser 
 
 * **postman collection**
 
