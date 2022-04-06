@@ -50,7 +50,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
                 let res = Response::builder(); //-- creating a new response cause we didn't find any available route
                 let response_body = ctx::app::Response::<schemas::event::AvailableEvents>{
                     message: FETCHED,
-                    data: Some(available_events), //-- data is an empty &[u8] array
+                    data: Some(available_events),
                     status: 200,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();

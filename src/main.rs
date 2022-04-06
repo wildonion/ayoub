@@ -100,6 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     let game_server_addr = format!("{}:{}", host, game_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
+    let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel
 
 
 
@@ -171,44 +172,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
 
 
-    // -------------------------------- building services
+     
+    
+    
+    
+
+    // -------------------------------- building services, signal channel handling and server setup
     //
-    // ---------------------------------------------------------------------
-    let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
-    let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
-    let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await;
-
-
-
-
-
-
-
-
-
-
-
-    // -------------------------------- server and signal channel setup
-    //
-    // -------------------------------------------------------------------------
-    let auth_server = Server::bind(&auth_server_addr).serve(auth_serivce);
-    let event_server = Server::bind(&event_server_addr).serve(event_service);
-    let game_server = Server::bind(&game_server_addr).serve(game_service);
-    let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel 
-    
-    
-    
-
-
-    
-    
-    
-    
-
-    // -------------------------------- signal handling for built servers
-    //
-    // -------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------
     if current_service.as_str() == "auth"{
+        let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
+        let auth_server = Server::bind(&auth_server_addr).serve(auth_serivce);
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = auth_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
@@ -216,7 +190,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         // TODO - if the number of clients reached too many requests shutdown the server
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
+        Ok(())
     } else if current_service.as_str() == "event"{
+        let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
+        let event_server = Server::bind(&event_server_addr).serve(event_service);
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = event_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("event server error {} - {}", e, chrono::Local::now().naive_local());
@@ -224,7 +201,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         // TODO - if the number of clients reached too many requests shutdown the server
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
+        Ok(())
     } else if current_service.as_str() == "game"{
+        let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await;
+        let game_server = Server::bind(&game_server_addr).serve(game_service);
         let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("game server error {} - {}", e, chrono::Local::now().naive_local());
@@ -232,6 +212,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         // TODO - if the number of clients reached too many requests shutdown the server
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
+        Ok(())
+    } else {
+        Ok(())
     }
     
     
@@ -241,12 +224,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
 
 
-
-
-
-    
-
-    Ok(())
 
 
 }

@@ -107,7 +107,7 @@ pub async fn main(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Er
     api.post("/event/simd-ops", |req, res| async move{
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
-        match serde_json::from_reader(whole_body_bytes.reader()){
+        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string

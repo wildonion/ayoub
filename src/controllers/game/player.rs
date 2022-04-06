@@ -17,6 +17,72 @@ use mongodb::Client;
 
 
 
+// TODO - must update the role_id, side_id inside the users collection
+// TODO - role reservation by God and the server
+// TODO - update reserves collection also
+// ...
+
+
+
+
+
+// -------------------------------- update player role controller
+//
+// -------------------------------------------------------------------------
+
+pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+    
+    let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+    let response_body = ctx::app::Response::<ctx::app::Nill>{
+        message: NOTFOUND_ROUTE,
+        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+        status: 404,
+    };
+    let response_body_json = serde_json::to_string(&response_body).unwrap();
+    Ok(
+        res
+            .status(StatusCode::NOT_FOUND) //-- not found route or method not allowed
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+            .unwrap()
+    )
+    
+}
+
+
+
+
+
+
+
+
+
+
+// -------------------------------- update player side controller
+//
+// -------------------------------------------------------------------------
+
+pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+
+    let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+    let response_body = ctx::app::Response::<ctx::app::Nill>{
+        message: NOTFOUND_ROUTE,
+        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+        status: 404,
+    };
+    let response_body_json = serde_json::to_string(&response_body).unwrap();
+    Ok(
+        res
+            .status(StatusCode::NOT_FOUND) //-- not found route or method not allowed
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+            .unwrap()
+    )
+    
+}
+
+
+
 
 
 

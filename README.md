@@ -12,18 +12,22 @@ $ cargo build --bin ayoub --release
 
 # 📌 TODOs
 
-* Zarinpal API token
+* **Zarinpal API token**
 
-* OTP API token
+* **OTP API token**
 
-* portal APIs
+* reserve APIs
 
-* game APIs
+* player APIs
 
-* postman collection
+* update phase APIs
 
-* server documentaion
+* send OTP API issue with serde parser 
+
+* **postman collection**
 
 * auth guard on APIs
 
 * server signal handling 
+
+* add client algorithm

@@ -13,5 +13,5 @@ pub mod check_token;
 pub mod home;
 pub mod login;
 pub mod signup;
-pub mod not_found;
+pub mod _404;
 pub mod otp_request;

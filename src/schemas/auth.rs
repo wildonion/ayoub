@@ -86,7 +86,7 @@ pub struct RegisterRequest{ // NOTE - those Option values can be None tho
     pub status: u8,
     pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field is None initially
     pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field is None initially
-    pub created_at: Option<chrono::NaiveDateTime>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
 }
 
 
@@ -121,7 +121,7 @@ pub struct LoginResponse{ // NOTE - those Option values can be None tho
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
-    pub created_at: Option<chrono::NaiveDateTime>,
+    pub created_at: Option<i64>,
 }
 
 
@@ -141,7 +141,7 @@ pub struct RegisterResponse{ // NOTE - those Option values can be None tho
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
-    pub created_at: Option<chrono::NaiveDateTime>,
+    pub created_at: Option<i64>,
 }
 
 
@@ -260,8 +260,8 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
-    pub created_at: Option<chrono::NaiveDateTime>,
-    pub updated_at: Option<chrono::NaiveDateTime>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
 }
 
 
@@ -294,7 +294,7 @@ pub struct CheckTokenResponse{ // NOTE - those Option values can be None tho
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
-    pub created_at: Option<chrono::NaiveDateTime>,
+    pub created_at: Option<i64>,
 }
 
 impl RegisterRequest{

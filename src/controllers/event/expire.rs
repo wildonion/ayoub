@@ -28,12 +28,12 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
     api.post("/event/set-expire", |req, res| async move{
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
-        match serde_json::from_reader(whole_body_bytes.reader()){
+        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
                 match serde_json::from_str::<schemas::event::ExpireEventRequest>(&json){ //-- the generic type of from_str() method is ExpireEventRequest struct - mapping (deserializing) the json into the ExpireEventRequest struct
-                    Ok(exp_info) => { //-- we got the username and password inside the login route
+                    Ok(exp_info) => {
 
                         
                         ////////////////////////////////// DB Ops
@@ -43,7 +43,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                         match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"is_expired": true}}, None).await.unwrap(){ //-- finding event based on event id
                             Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
                                 let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
-                                    data: Some(event_doc), //-- data is an empty &[u8] array
+                                    data: Some(event_doc),
                                     message: UPDATED, //-- collection found in ayoub database
                                     status: 200,
                                 };

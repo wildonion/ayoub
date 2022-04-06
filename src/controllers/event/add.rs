@@ -34,11 +34,11 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
     api.post("/event/add", |req, res| async move{
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
-        match serde_json::from_reader(whole_body_bytes.reader()){
+        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::event::EventAddRequest>(&json){ //-- the generic type of from_str() method is EventAddRequest struct - mapping (deserializing) the json into the EventAddRequest struct
+                match serde_json::from_str::<schemas::event::AddEventRequest>(&json){ //-- the generic type of from_str() method is AddEventRequest struct - mapping (deserializing) the json into the AddEventRequest struct
                     Ok(event_info) => { //-- we got the username and password inside the login route
 
 
@@ -62,12 +62,13 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                 )
                             }, 
                             None => { //-- means we didn't find any document related to this title and we have to create a new event
-                                let events = db.unwrap().database("ayoub").collection::<schemas::event::EventAddRequest>("events");
+                                let events = db.unwrap().database("ayoub").collection::<schemas::event::AddEventRequest>("events");
                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                 let exp_time = now + env::var("PROPOSAL_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
-                                let new_event = schemas::event::EventAddRequest{
+                                let new_event = schemas::event::AddEventRequest{
                                     title: event_info.title,
                                     content: event_info.content,
+                                    deck_id: event_info.deck_id, //-- it's ObjectId of the selected deck but string-ed!
                                     creator_wallet_address: Some("0x0000000000000000000000000000000000000000".to_string()),
                                     upvotes: Some(0),
                                     downvotes: Some(0),

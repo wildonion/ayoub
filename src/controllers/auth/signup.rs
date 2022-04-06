@@ -5,6 +5,7 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body, Response};
@@ -33,7 +34,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
         
         
         let whole_body_bytes = hyper::body::aggregate(req.into_body()).await.unwrap(); //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all futures stream or chunks which is utf8 bytes - since we don't know the end yet, we can't simply stream the chunks as they arrive (cause all futures stream or chunks which are called chunks are arrived asynchronously), so here we do `.await` on the future, waiting on concatenating the full body after all chunks arrived then afterwards the content can be reversed
-        match serde_json::from_reader(whole_body_bytes.reader()){
+        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
@@ -64,6 +65,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                 )        
                             }, 
                             None => { //-- no document found with this username thus we must insert a new one into the databse
+                                let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                 let users = db.unwrap().database("ayoub").collection::<schemas::auth::RegisterRequest>("users");
                                 match schemas::auth::RegisterRequest::hash_pwd(user_info.pwd).await{
                                     Ok(hash) => {
@@ -75,7 +77,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                             status: user_info.status,
                                             role_id: None,
                                             side_id: None,
-                                            created_at: Some(chrono::Local::now().naive_local()),
+                                            created_at: Some(now),
                                         };
                                         match users.insert_one(user_doc, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
                                             Ok(insert_result) => {

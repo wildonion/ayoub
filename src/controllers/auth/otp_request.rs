@@ -8,7 +8,6 @@ use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
 use crate::utils::gen_random_idx;
-use std::str::from_utf8;
 use std::{env, io::{BufWriter, Write}};
 use chrono::Duration;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
@@ -46,7 +45,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
 
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
-        match serde_json::from_reader(whole_body_bytes.reader()){
+        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
@@ -98,7 +97,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
                         // --------------------------------------------------------------------
                         //       DESERIALIZING FROM ut8 BYTES INTO THE SMSResponse STRUCT
                         // --------------------------------------------------------------------
-                        match serde_json::from_reader(stream.buffer().reader()){ //-- buffer() method returns a reference to the internally buffered data (means &[u8]) then we can read the bytes of the buffer by calling the reader() method
+                        match serde_json::from_reader(stream.buffer().reader()){ //-- buffer() method returns a reference to the internally buffered data (means &[u8]) then we can read the bytes of the buffer by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
