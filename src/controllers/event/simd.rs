@@ -121,11 +121,13 @@ pub async fn main(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Er
                         // https://github.com/tokio-rs/tokio/discussions/3858
                         // NOTE - hadnling async task is done using tokio::spawn() method which the task will be solved based on multi threading concept using tokio green threads in the background of the app
                         // NOTE - sharing and mutating clonable data (Arc<Mutex<T>>) between tokio green and rust native threads is done by passing the object through a channel of one of the message passing protocols like mpsc channel
+                        // NOTE - to use tokio::spawn(async move{}) and thread::spawn(|| async move{}) we must be inside an async function to await on what's has been spawned
+
 
 
                         //////////////////////////////////
-                        ////////////////////////////////// multi threading ops - rust native threads inside the tokio async task 
-                        let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
+                        ////////////////////////////////// multi threading ops - tokio async task inside the rust native threads 
+                        let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) with type either () or a especific type
                         info!("inside the native thread");
                             let async_task = tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model - 
                                 info!("inside tokio green thread");

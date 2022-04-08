@@ -61,7 +61,7 @@ pub mod jwt{
 
 
 
-// ------------------------------ using mpsc channel + tokio + natiev thread
+// ------------------------------ using mpsc channel + tokio + native thread
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
         let cloned_sender = sender.clone();
         let cloned_ops = ops.clone();
         tokio::spawn(async move{
-            thread::spawn(move || {
+            thread::spawn(|| async move{
                 let new_chunk = cloned_ops(big_end_bytes[index]);
                 info!("\tsender-channel---(chunk {:?})---receiver-channel at time {:?} ", index, chrono::Local::now().naive_local());
                 cloned_sender.send(new_chunk).unwrap();
@@ -98,7 +98,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     let bytes: Vec<u8> = receiver.iter().take(threads).collect(); //-- collecting 4 packs of 8 bits to gather all incoming chunks from the channel
     info!("collected bytes -> {:?} at time {:?}", bytes, chrono::Local::now().naive_local());
     let boxed_slice = bytes.into_boxed_slice(); //-- converting the collected bytes into a Box slice or array of utf8 bytes - we put it inside the Box cause the size of [u8] is not known at compile time
-    let boxed_array: Box<[u8; 4]> = match boxed_slice.try_into() {
+    let boxed_array: Box<[u8; 4]> = match boxed_slice.try_into() { //-- Boxing u8 with size 4 cause our input number is 32 bits which is 4 pack of 8 bits 
         Ok(arr) => arr,
         Err(o) => return Err(format!("vector length must be 4 but it's {}", o.len())),
     };
