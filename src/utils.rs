@@ -82,7 +82,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
         let cloned_sender = sender.clone();
         let cloned_ops = ops.clone();
         tokio::spawn(async move{
-            thread::spawn(|| async move{
+            thread::spawn(move || async move{ //-- the return body of the closure is async and for solving it we have to be in an async function - in order to capture the variables before spawning scope we have to use move keyword before ||
                 let new_chunk = cloned_ops(big_end_bytes[index]);
                 info!("\tsender-channel---(chunk {:?})---receiver-channel at time {:?} ", index, chrono::Local::now().naive_local());
                 cloned_sender.send(new_chunk).unwrap();

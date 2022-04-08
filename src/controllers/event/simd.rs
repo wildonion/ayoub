@@ -127,7 +127,7 @@ pub async fn main(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Er
 
                         //////////////////////////////////
                         ////////////////////////////////// multi threading ops - tokio async task inside the rust native threads 
-                        let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) with type either () or a especific type
+                        let thread = thread::spawn(move || async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) with type either () or a especific type
                         info!("inside the native thread");
                             let async_task = tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model - 
                                 info!("inside tokio green thread");
