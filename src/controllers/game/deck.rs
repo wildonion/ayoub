@@ -10,10 +10,9 @@ use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body, Response};
-use mongodb::bson::doc;
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use mongodb::Client;
 use log::info;
-use mongodb::bson::oid::ObjectId;
 
 
 
@@ -32,7 +31,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
-    api.post("/game/deck/add", |req, res| async move{
+    api.post("/game/deck/add", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
@@ -150,7 +149,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
-    api.post("/game/deck/get/availables", |req, res| async move{    
+    api.post("/game/deck/get/availables", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
 
 
         ////////////////////////////////// DB Ops
@@ -217,7 +216,7 @@ pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::R
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
-    api.post("/game/deck/diable", |req, res| async move{
+    api.post("/game/deck/diable", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait

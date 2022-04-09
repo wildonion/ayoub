@@ -14,9 +14,7 @@ use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body_bytes and stream buffer
 use hyper::{body::HttpBody, Client, header, StatusCode, Body};
 use log::info;
-use mongodb::bson::oid::ObjectId;
-use mongodb::bson;
-use mongodb::bson::doc;
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use mongodb::Client as MC;
 use rand::prelude::*;
 use chrono::prelude::*;
@@ -41,7 +39,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
 
-    api.post("/auth/otp-req", |req, res| async move{
+    api.post("/auth/otp-req", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes

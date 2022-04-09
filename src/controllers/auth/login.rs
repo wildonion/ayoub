@@ -7,6 +7,7 @@ use crate::contexts as ctx;
 use crate::schemas;
 use crate::utils;
 use crate::constants::*;
+use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body, Response};
@@ -29,7 +30,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
-    api.post("/auth/login", |req, res| async move{
+    api.post("/auth/login", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
@@ -54,6 +55,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                         let jwt_payload = utils::jwt::Claims{_id: user_doc.clone()._id, username: user_doc.clone().username, iat: now, exp};
                                         match utils::jwt::construct(jwt_payload).await{
                                             Ok(token) => {
+                                                let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                                 let user_response = schemas::auth::LoginResponse{
                                                     _id: user_doc._id,
                                                     access_token: token,
@@ -64,9 +66,11 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                                     role_id: user_doc.role_id,
                                                     side_id: user_doc.side_id,
                                                     created_at: user_doc.created_at,
+                                                    updated_at: user_doc.updated_at,
+                                                    last_login_time: Some(now),
                                                 };
                                                 let response_body = ctx::app::Response::<schemas::auth::LoginResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is LoginResponse struct
-                                                    data: Some(user_response), //-- deserialize_from_json_into_struct is of type UserInfo struct 
+                                                    data: Some(user_response),
                                                     message: ACCESS_GRANTED,
                                                     status: 200,
                                                 };

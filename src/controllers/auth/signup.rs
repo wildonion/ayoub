@@ -10,9 +10,8 @@ use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body, Response};
 use log::info;
-use mongodb::bson::doc;
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use mongodb::Client;
-use mongodb::bson::oid::ObjectId;
 
 
 
@@ -30,7 +29,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
-    api.post("/auth/signup", |req, res| async move{    
+    api.post("/auth/signup", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
         
         
         let whole_body_bytes = hyper::body::aggregate(req.into_body()).await.unwrap(); //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all futures stream or chunks which is utf8 bytes - since we don't know the end yet, we can't simply stream the chunks as they arrive (cause all futures stream or chunks which are called chunks are arrived asynchronously), so here we do `.await` on the future, waiting on concatenating the full body after all chunks arrived then afterwards the content can be reversed
@@ -74,10 +73,12 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                             phone: user_info.phone,
                                             pwd: hash,
                                             access_level: user_info.access_level,
-                                            status: user_info.status,
+                                            status: DEFAULT_STATUS, //-- setting the user (player) status to default which is 0
                                             role_id: None,
                                             side_id: None,
                                             created_at: Some(now),
+                                            updated_at: Some(now),
+                                            last_login_time: Some(now),
                                         };
                                         match users.insert_one(user_doc, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
                                             Ok(insert_result) => {

@@ -27,7 +27,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
-    api.get("/auth/home", |req, res| async move{
+    api.get("/auth/home", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -51,9 +51,11 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                             role_id: user_doc.role_id,
                             side_id: user_doc.side_id,
                             created_at: user_doc.created_at,
+                            updated_at: user_doc.updated_at,
+                            last_login_time: user_doc.last_login_time,
                         };
                         let response_body = ctx::app::Response::<schemas::auth::CheckTokenResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is CheckTokenResponse struct
-                            data: Some(user_response), //-- deserialize_from_json_into_struct is of type UserInfo struct 
+                            data: Some(user_response), 
                             message: ACCESS_GRANTED,
                             status: 200,
                         };

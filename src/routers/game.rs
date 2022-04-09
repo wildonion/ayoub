@@ -66,10 +66,6 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/side/diable".to_string();
             diable_side(app_storage, app).await
         },
-        (&Method::POST, "/game/player/update/role-ability") => {
-            app.name = "/game/player/update/role-ability".to_string();
-            update_role_ability(app_storage, app).await
-        },
         (&Method::POST, "/game/player/update/role") => {
             app.name = "/game/player/update/role".to_string();
             update_role(app_storage, app).await
@@ -81,6 +77,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/game/player/update/status") => {
             app.name = "/game/player/update/status".to_string();
             update_status(app_storage, app).await
+        },
+        (&Method::POST, "/game/player/update/role-ability") => {
+            app.name = "/game/player/update/role-ability".to_string();
+            update_role_ability(app_storage, app).await
         },
         (&Method::POST, "/game/player/chain") => {
             app.name = "/game/player/chain".to_string();

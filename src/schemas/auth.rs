@@ -4,7 +4,7 @@
 
 
 use serde::{Serialize, Deserialize};
-use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use argon2::{self, Config};
 use std::env;
 
@@ -20,6 +20,72 @@ use std::env;
 // NOTE - RegisterResponse struct doesn't have the pwd field cause we don't want the user see the password if there was any user already inside the collection
 
 
+
+
+
+
+
+/*
+  ------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize user role update info json from client into this struct
+| ------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UserRoleUpdateRequest{
+    pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub role_id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
+  ------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize user side update info json from client into this struct
+| ------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UserSideUpdateRequest{
+    pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub side_id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize user status update info json from client into this struct
+| --------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UserStatusUpdateRequest{
+    pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub status: u8, //-- one of the constant value defined in constants.rs
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------------------------
+| this struct will be used to serialize user info after update any field into the json to send back to the user
+| --------------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UserUpdateResponse{
+  pub username: String,
+  pub phone: String,
+  pub access_level: String,
+  pub status: u8,
+  pub role_id: Option<ObjectId>,
+  pub side_id: Option<ObjectId>,
+  pub created_at: Option<i64>,
+  pub updated_at: Option<i64>,
+  pub last_login_time: Option<i64>,
+}
 
 
 /*
@@ -87,6 +153,8 @@ pub struct RegisterRequest{ // NOTE - those Option values can be None tho
     pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field is None initially
     pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field is None initially
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub last_login_time: Option<i64>, //-- we set this field to Option cause we don't want to pass the last login time inside the request body thus it should be None initially, we'll fill it inside the server
 }
 
 
@@ -122,6 +190,9 @@ pub struct LoginResponse{ // NOTE - those Option values can be None tho
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
     pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+    pub last_login_time: Option<i64>,
+    
 }
 
 
@@ -142,6 +213,8 @@ pub struct RegisterResponse{ // NOTE - those Option values can be None tho
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
     pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+    pub last_login_time: Option<i64>
 }
 
 
@@ -262,6 +335,7 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
     pub side_id: Option<ObjectId>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
+    pub last_login_time: Option<i64>,
 }
 
 
@@ -295,6 +369,8 @@ pub struct CheckTokenResponse{ // NOTE - those Option values can be None tho
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
     pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+    pub last_login_time: Option<i64>,
 }
 
 impl RegisterRequest{

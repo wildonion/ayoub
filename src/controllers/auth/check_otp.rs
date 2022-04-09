@@ -31,7 +31,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
-    api.post("/auth/check-otp", |req, res| async move{
+    api.post("/auth/check-otp", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
 
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes

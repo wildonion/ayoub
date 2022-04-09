@@ -13,10 +13,11 @@ use hyper::{Method, Body, Response};
 use std::sync::Arc;
 use crate::controllers::event::{
                                 add::main as add_event, 
-                                get::all as get_all_events, 
+                                get::{all as get_all_events, single as get_single_events}, 
                                 vote::main as cast_vote_event, 
                                 expire::main as expire_event, 
                                 _404::main as not_found, 
+                                phase::insert as insert_phase,
                                 simd::main as simd_ops
                             };
 
@@ -45,6 +46,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/get/availables".to_string();
             get_all_events(app_storage, app).await
         },
+        (&Method::GET, "/event/get/single") => {
+            app.name = "/event/get/single".to_string();
+            get_single_events(app_storage, app).await
+        },
         (&Method::POST, "/event/cast-vote")     => {
             app.name = "/event/cast-vote".to_string();
             cast_vote_event(app_storage, app).await
@@ -57,6 +62,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/simd-ops".to_string();
             simd_ops(app).await
         },
+        (&Method::POST, "/event/update/phases/add") => {
+            app.name = "/event/update/phases/add".to_string();
+            insert_phase(app_storage, app).await
+        }
         _                                       => not_found().await,
     }
 

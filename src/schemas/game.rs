@@ -4,7 +4,7 @@
 
 
 use serde::{Serialize, Deserialize};
-use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 
 
 
@@ -207,8 +207,39 @@ pub struct DisableSideRequest{
 
 /*
   -----------------------------------------------------------------------------------------------------
-| this struct will be used to deserialize player abilities info bson from the mongodb into this struct
+| this struct will be used to deserialize player role abilities info json from client into this struct
 | -----------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UpdatePlayerRoleAbilityRequest{
+    pub user_id: String, 
+    pub role_id: String,
+    pub event_id: String,
+    pub current_ability: u8,
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player chain info json from client into this struct
+| --------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct InsertPlayerChainToRequest{
+    pub from_id: String,
+    pub to_id: String,
+    pub chained_at: Option<i64>, //-- this must be filled inside the server
+}
+
+
+/*
+  ----------------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player role abilities info bson from the mongodb into this struct
+| ----------------------------------------------------------------------------------------------------------
 |
 |
 */
@@ -218,7 +249,8 @@ pub struct PlayerRoleAbilityInfo{
     pub user_id: String, //-- string type of ObjectId for user id 
     pub role_id: String, //-- string type of ObjectId for role id
     pub event_id: String, //-- string type of ObjectId for event id
-    pub current_ability: u8,
+    pub current_ability: u8, //-- number of current abilities for this player
+    pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
 }
 
 
@@ -234,5 +266,5 @@ pub struct PlayerChainToInfo{
     pub _id: Option<ObjectId>,
     pub from_id: String, //-- string type of ObjectId for from user id 
     pub to_id: String, //-- string type of ObjectId for to user id 
-
+    pub chained_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the chained time inside the request body thus it should be None initially, we'll fill it inside the server
 }

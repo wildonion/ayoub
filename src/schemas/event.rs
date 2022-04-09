@@ -5,8 +5,8 @@
 
 
 use serde::{Serialize, Deserialize};
-use mongodb::bson::{oid::ObjectId};
-
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
+use uuid::Uuid;
 
 
 
@@ -49,7 +49,7 @@ pub struct PlayerInfo{
 
 
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct Phase{
     pub day: Vec<PlayerInfo>, //-- vector of all users at the end of the day that their status has changed
     pub mid_day: Vec<PlayerInfo>, //-- vector of all users at the end of the mid day that their status has changed
@@ -57,8 +57,39 @@ pub struct Phase{
 }
 
 
+/*
+  ---------------------------------------------------------------------------------------
+| this struct will be used to deserialize payment info json from client into this struct
+| ---------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)] //-- the Default trait must be implemented for all types of each field 
+pub struct InsertPhaseRequest{
+    pub event_id: String, //-- this is the id of the event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub phase: Phase, //-- this is the new phase that the god is trying to insert into the current phases; means we passed a complete day in our game
+}
 
 
+/*
+  -----------------------------------------------------------------------------------------------
+| this struct will be used to put an event info in it and serialize as json to send back to user
+| -----------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct InsertPhaseResponse{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub deck_id: String,
+    pub phases: Option<Vec<Phase>>,
+    pub is_expired: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
 
 
 /*
@@ -74,6 +105,7 @@ pub struct AddPaymentRequest{
     pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub event_id: String, //-- this is the id of the event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub authority: String,
+    pub successful_payment_id: Uuid, //-- this is the successful payment id 
     pub verification_code: Option<String>, //-- it might be None by canceling the payment process
     pub ref_id: Option<String>, //-- it might be None by canceling the payment process
     pub card_pan: Option<String>, //-- it might be None by canceling the payment process
@@ -102,6 +134,7 @@ pub struct PaymentInfo{
     pub user_id: String,
     pub event_id: String,
     pub authority: String,
+    pub successful_payment_id: Uuid,
     pub verification_code: Option<String>,
     pub ref_id: Option<String>,
     pub card_pan: Option<String>,
@@ -134,6 +167,7 @@ pub struct EventInfo{
     pub is_expired: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
 }
 
 
@@ -152,10 +186,12 @@ pub struct AddEventRequest{
     pub creator_wallet_address: Option<String>, //-- it might be None at initializing stage inside the add api
     pub upvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the upvotes inside the request body, we'll fill it inside the server
     pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server
-    pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on using cast-vote route
+    pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on
+    pub phases: Option<Vec<Phase>>, // NOTE - we set this field to Option cause we don't want to pass the phases inside the request body, we'll update it later on
     pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object
     pub created_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the created time inside the request body, we'll fill it inside the server
+    pub updated_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the updated time inside the request body, we'll fill it inside the server
 }
 
 
@@ -209,4 +245,15 @@ impl EventInfo{
         }
         voters
     }
+}
+
+
+impl EventInfo{ //-- we have to define the following method for the EventInfo struct cause we want to call this method on a document of fetched from the events collection which is an instance of the EventInfo struct 
+
+    pub async fn add_phase(self, new_phase: Phase) -> Vec<Phase>{ //-- new phase is of type Phase struct which contains list of all user_id in which their status has changed during the game for day, mid-day and night
+        let mut current_phases = self.phases.unwrap();
+        current_phases.push(new_phase);
+        current_phases
+    } 
+
 }
