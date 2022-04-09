@@ -12,7 +12,7 @@ use crate::constants::*;
 use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
-use hyper::{header, StatusCode, Body, Response};
+use hyper::{header, StatusCode, Body};
 use log::info;
 use mongodb::Client;
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file

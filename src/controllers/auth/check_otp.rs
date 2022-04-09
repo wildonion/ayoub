@@ -65,7 +65,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                     let response_body_json = serde_json::to_string(&response_body).unwrap();
                                     Ok(
                                         res
-                                            .status(StatusCode::NOT_ACCEPTABLE) //-- not found route or method not allowed
+                                            .status(StatusCode::NOT_ACCEPTABLE)
                                             .header(header::CONTENT_TYPE, "application/json")
                                             .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
                                             .unwrap()
@@ -138,7 +138,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                     let response_body_json = serde_json::to_string(&response_body).unwrap();
                                     Ok(
                                         res
-                                            .status(StatusCode::NOT_ACCEPTABLE) //-- not found route or method not allowed
+                                            .status(StatusCode::NOT_ACCEPTABLE)
                                             .header(header::CONTENT_TYPE, "application/json")
                                             .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
                                             .unwrap()
