@@ -74,6 +74,15 @@ impl Api{
         let cb_res = cb(req, res).await.unwrap(); //-- this would be of type either hyper::Response<Body> or hyper::Error
         Ok(cb_res)
     }
+
+    pub async fn set_name(mut self, endpoint: &str){ //-- we must define self as mutable cause we want to change the name field
+        let endpoint_name = endpoint.to_string();
+        self.name = endpoint_name;
+    }
+
+    pub async fn get_name(self) -> String{
+        self.name.to_string()
+    }
 }
 
 

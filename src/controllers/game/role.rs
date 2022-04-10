@@ -52,55 +52,73 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
 
                         ////////////////////////////////// DB Ops
                         
-                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                        let roles = db.unwrap().database("ayoub").collection::<schemas::game::AddRoleRequest>("roles"); //-- using AddRoleRequest struct to insert a role info into roles collection 
-                        let role_doc = schemas::game::AddRoleRequest{
-                            name,
-                            rate,
-                            desc,
-                            abilities,
-                            is_disabled: Some(false),
-                            created_at: Some(now),
-                            updated_at: Some(now),
-                        };
-                        match roles.insert_one(role_doc, None).await{
-                            Ok(insert_result) => {
-                                let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
-                                    data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                    message: REGISTERED,
-                                    status: 200,
+                        let roles = db.unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("sides");
+                        match roles.find_one(doc!{"name": role_info.clone().name}, None).await.unwrap(){
+                            Some(role_doc) => { 
+                                let response_body = ctx::app::Response::<schemas::game::RoleInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is RoleInfo struct
+                                    data: Some(role_doc),
+                                    message: FOUND_DOCUMENT,
+                                    status: 302,
                                 };
                                 let response_body_json = serde_json::to_string(&response_body).unwrap();
                                 Ok(
                                     res
-                                        .status(StatusCode::OK)
+                                        .status(StatusCode::FOUND)
                                         .header(header::CONTENT_TYPE, "application/json")
                                         .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
                                         .unwrap() 
-                                )
-                            },
-                            Err(e) => {
-                                let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                    status: 406,
+                                )        
+                            }, 
+                            None => { //-- no document found with this name thus we must insert a new one into the databse
+                                let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                let roles = db.unwrap().database("ayoub").collection::<schemas::game::AddRoleRequest>("roles"); //-- using AddRoleRequest struct to insert a role info into roles collection 
+                                let role_doc = schemas::game::AddRoleRequest{
+                                    name,
+                                    rate,
+                                    desc,
+                                    abilities,
+                                    is_disabled: Some(false),
+                                    created_at: Some(now),
+                                    updated_at: Some(now),
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
-                                Ok(
-                                    res
-                                        .status(StatusCode::NOT_ACCEPTABLE)
-                                        .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
-                                        .unwrap() 
-                                )
-                            },
-                        }
+                                match roles.insert_one(role_doc, None).await{
+                                    Ok(insert_result) => {
+                                        let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                            data: Some(insert_result.inserted_id.as_object_id().unwrap()),
+                                            message: REGISTERED,
+                                            status: 200,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        Ok(
+                                            res
+                                                .status(StatusCode::OK)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .unwrap() 
+                                        )
+                                    },
+                                    Err(e) => {
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                            status: 406,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        Ok(
+                                            res
+                                                .status(StatusCode::NOT_ACCEPTABLE)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .unwrap() 
+                                        )
+                                    },
+                                }
+                            },                            
+                        },
 
                         //////////////////////////////////
-
-
-
-                    },
+                    
+                    
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array

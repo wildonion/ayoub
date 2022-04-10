@@ -31,63 +31,63 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
 
     match (req.method(), req.uri().path()){
         (&Method::POST, "/game/role/add") => {
-            app.name = "/game/role/add".to_string();
+            app.set_name("/game/role/add").await;
             add_role(app_storage, app).await
         },
         (&Method::POST, "/game/role/get/availables") => {
-            app.name = "/game/role/get/availables".to_string();
+            app.set_name("/game/role/get/availables").await;
             get_roles(app_storage, app).await
         },
         (&Method::POST, "/game/role/diable") => {
-            app.name = "/game/role/diable".to_string();
+            app.set_name("/game/role/diable").await;
             diable_role(app_storage, app).await
         },
         (&Method::POST, "/game/deck/add") => {
-            app.name = "/game/deck/add".to_string();
+            app.set_name("/game/deck/add").await;
             add_deck(app_storage, app).await
         },
         (&Method::POST, "/game/deck/get/availables") => {
-            app.name = "/game/deck/get/availables".to_string();
+            app.set_name("/game/deck/get/availables").await;
             get_decks(app_storage, app).await
         },
         (&Method::POST, "/game/deck/diable") => {
-            app.name = "/game/deck/diable".to_string();
+            app.set_name("/game/deck/diable").await;
             diable_deck(app_storage, app).await
         },
         (&Method::GET, "/game/side/add") => {
-            app.name = "/game/side/add".to_string();
+            app.set_name("/game/side/add").await;
             add_side(app_storage, app).await
         },
         (&Method::GET, "/game/side/get/availables") => {
-            app.name = "/game/side/get/availables".to_string();
+            app.set_name("/game/side/get/availables").await;
             get_sides(app_storage, app).await
         },
         (&Method::POST, "/game/side/diable") => {
-            app.name = "/game/side/diable".to_string();
+            app.set_name("/game/side/diable").await;
             diable_side(app_storage, app).await
         },
         (&Method::POST, "/game/player/update/role") => {
-            app.name = "/game/player/update/role".to_string();
+            app.set_name("/game/player/update/role").await;
             update_role(app_storage, app).await
         },
         (&Method::POST, "/game/player/update/side") => {
-            app.name = "/game/player/update/side".to_string();
+            app.set_name("/game/player/update/side").await;
             update_side(app_storage, app).await
         },
         (&Method::POST, "/game/player/update/status") => {
-            app.name = "/game/player/update/status".to_string();
+            app.set_name("/game/player/update/status").await;
             update_status(app_storage, app).await
         },
         (&Method::POST, "/game/player/update/role-ability") => {
-            app.name = "/game/player/update/role-ability".to_string();
+            app.set_name("/game/player/update/role-ability").await;
             update_role_ability(app_storage, app).await
         },
         (&Method::POST, "/game/player/chain") => {
-            app.name = "/game/player/chain".to_string();
+            app.set_name("/game/player/chain").await;
             chain_to_another_player(app_storage, app).await
         },
         (&Method::POST, "/game/player/get/single") => {
-            app.name = "/game/player/get/single".to_string();
+            app.set_name("/game/player/get/single").await;
             get_single(app_storage, app).await
         },
         _                                 => not_found().await,
