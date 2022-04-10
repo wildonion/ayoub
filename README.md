@@ -36,8 +36,6 @@ $ cargo build --bin ayoub --release
 
 * reserve APIs
 
-* phase APIs
-
 * send OTP response API from career issue with serde parser 
 
 * **postman collection (status constants + unix timestamps)** 
