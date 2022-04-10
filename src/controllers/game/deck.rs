@@ -44,14 +44,14 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
 
 
 
-                        let deck_name = deck_info.deck_name;
-                        let roles = deck_info.roles; //-- roles of this deck
+                        let deck_name = deck_info.clone().deck_name; //-- cloning to prevent from moving
+                        let roles = deck_info.clone().roles; //-- roles of this deck - cloning to prevent from moving
 
 
 
                         ////////////////////////////////// DB Ops
 
-                        let decks = db.unwrap().database("ayoub").collection::<schemas::game::SideInfo>("sides");
+                        let decks = db.unwrap().database("ayoub").collection::<schemas::game::DeckInfo>("sides");
                         match decks.find_one(doc!{"deck_name": deck_info.clone().deck_name}, None).await.unwrap(){
                             Some(deck_doc) => { 
                                 let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
@@ -111,13 +111,12 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
                                     },
                                 }
                             },
-
-                        },
+                        }
 
                         //////////////////////////////////
-
-
-
+                    
+                    
+                    },
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array

@@ -43,9 +43,9 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
                     Ok(role_info) => {
 
 
-                        let name = role_info.name;
+                        let name = role_info.clone().name; //-- cloning to prevent from moving
                         let rate = role_info.rate;
-                        let desc = role_info.desc;
+                        let desc = role_info.clone().desc; //-- cloning to prevent from moving
                         let abilities = role_info.abilities;
 
 
@@ -114,11 +114,10 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
                                     },
                                 }
                             },                            
-                        },
-
+                        }
+                        
                         //////////////////////////////////
-                    
-                    
+                    },
                     Err(e) => {
                         let response_body = ctx::app::Response::<ctx::app::Nill>{
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array

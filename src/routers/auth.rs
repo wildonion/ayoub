@@ -40,31 +40,31 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
 
     match (req.method(), req.uri().path()){
         (&Method::GET, "/auth/home")           => {
-            app.set_name("/auth/home").await;
+            app.name = "/auth/home".to_string();
             home(app_storage, app).await
         },
         (&Method::POST, "/auth/login") => {
-            app.set_name("/auth/login").await;
+            app.name = "/auth/login".to_string();
             login(app_storage, app).await
         },
         (&Method::POST, "/auth/signup")     => {
-            app.set_name("/auth/signup").await;
+            app.name = "/auth/signup".to_string();
             signup(app_storage, app).await
         },
         (&Method::POST, "/auth/check-token")    => {
-            app.set_name("/auth/check-token").await;
+            app.name = "/auth/check-token".to_string();
             check_token(app_storage, app).await
         },
         (&Method::POST, "/auth/otp-req")    => {
-            app.set_name("/auth/otp-req").await;
+            app.name = "/auth/otp-req".to_string();
             otp_request(app_storage, app).await
         },
         (&Method::POST, "/auth/check-otp")    => {
-            app.set_name("/auth/check-otp").await;
+            app.name = "/auth/check-otp".to_string();
             check_otp(app_storage, app).await
         },
         (&Method::POST, "/auth/user/get/all")    => {
-            app.set_name("/auth/user/get/all").await;
+            app.name = "/auth/user/get/all".to_string();
             get_all(app_storage, app).await
         },
         _                                       => not_found().await,

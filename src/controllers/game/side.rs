@@ -42,7 +42,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
                     Ok(side_info) => {
 
 
-                        let name = side_info.name;
+                        let name = side_info.clone().name; //-- cloning to prevent from moving
 
 
 
@@ -106,10 +106,10 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
                                         )
                                     },
                                 }
-                            }
-
+                            },      
+                        }
+                        
                         //////////////////////////////////
-
 
 
                     },

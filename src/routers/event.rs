@@ -39,31 +39,31 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
 
     match (req.method(), req.uri().path()){
         (&Method::POST, "/event/add")           => {
-            app.set_name("/event/add").await;
+            app.name = "/event/add".to_string();
             add_event(app_storage, app).await
         },
         (&Method::GET, "/event/get/availables") => {
-            app.set_name("/event/get/availables").await;
+            app.name = "/event/get/availables".to_string();
             get_all_events(app_storage, app).await
         },
         (&Method::GET, "/event/get/single") => {
-            app.set_name("/event/get/single").await;
+            app.name = "/event/get/single".to_string();
             get_single_events(app_storage, app).await
         },
         (&Method::POST, "/event/cast-vote")     => {
-            app.set_name("/event/cast-vote").await;
+            app.name = "/event/cast-vote".to_string();
             cast_vote_event(app_storage, app).await
         },
         (&Method::POST, "/event/set-expire")    => {
-            app.set_name("/event/set-expire").await;
+            app.name = "/event/set-expire".to_string();
             expire_event(app_storage, app).await
         },
         (&Method::POST, "/event/simd-ops")      => {
-            app.set_name("/event/simd-ops").await;
+            app.name = "/event/simd-ops".to_string();
             simd_ops(app).await
         },
         (&Method::POST, "/event/update/phases/add") => {
-            app.set_name("/event/update/phases/add").await;
+            app.name = "/event/update/phases/add".to_string();
             insert_phase(app_storage, app).await
         }
         _                                       => not_found().await,
