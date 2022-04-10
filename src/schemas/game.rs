@@ -268,3 +268,20 @@ pub struct PlayerChainToInfo{
     pub to_id: String, //-- string type of ObjectId for to user id 
     pub chained_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the chained time inside the request body thus it should be None initially, we'll fill it inside the server
 }
+
+
+/*
+  ---------------------------------------------------------------------------------------
+| this struct will be used to serialize user info into the json to send back to the user
+| ---------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct PlayerInfo{
+  pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+  pub username: String,
+  pub status: u8,
+  pub role_id: Option<ObjectId>,
+  pub side_id: Option<ObjectId>,
+}

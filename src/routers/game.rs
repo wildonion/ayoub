@@ -9,7 +9,7 @@ use crate::controllers::game::{
                                 role::{add as add_role, all as get_roles, disable as diable_role}, 
                                 deck::{add as add_deck, all as get_decks, disable as diable_deck},
                                 side::{add as add_side, all as get_sides, disable as diable_side}, 
-                                player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status}, 
+                                player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single}, 
                                 _404::main as not_found, 
                             };
 
@@ -85,6 +85,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/game/player/chain") => {
             app.name = "/game/player/chain".to_string();
             chain_to_another_player(app_storage, app).await
+        },
+        (&Method::POST, "/game/player/get/single") => {
+            app.name = "/game/player/get/single".to_string();
+            get_single(app_storage, app).await
         },
         _                                 => not_found().await,
     }

@@ -61,6 +61,8 @@ pub mod jwt{
 
 
 
+
+
 // ------------------------------ using mpsc channel + tokio + native thread
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -143,4 +145,10 @@ pub fn gen_random_idx(idx: usize) -> usize{
     } else{
         gen_random_idx(random::<u8>() as usize)
     }
+}
+
+
+
+pub fn string_to_static_str(s: String) -> &'static str {
+    Box::leak(s.into_boxed_str())
 }

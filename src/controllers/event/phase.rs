@@ -161,12 +161,3 @@ pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
 
 }
 
-
-
-
-
-
-
-// -------------------------------- get user info inside the event phases controller
-//
-// ------------------------------------------------------------------------------------

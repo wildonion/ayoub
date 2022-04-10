@@ -18,7 +18,8 @@ use crate::controllers::auth::{
                                signup::main as signup, 
                                _404::main as not_found, 
                                otp_request::main as otp_request, 
-                               check_otp::main as check_otp
+                               check_otp::main as check_otp,
+                               user::get_all
                             };
 
 
@@ -61,6 +62,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/auth/check-otp")    => {
             app.name = "/auth/check-otp".to_string();
             check_otp(app_storage, app).await
+        },
+        (&Method::POST, "/auth/user/get/all")    => {
+            app.name = "/auth/user/get/all".to_string();
+            get_all(app_storage, app).await
         },
         _                                       => not_found().await,
     }

@@ -106,6 +106,13 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
     api.post("/event/get/single", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
 
 
+
+        
+        
+
+        
+
+
         ////////////////////////////////// DB Ops
                         
         let filter = doc! { "is_expired": false }; //-- filtering all none expired events

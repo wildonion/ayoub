@@ -16,7 +16,7 @@ use hyper::{header, StatusCode, Body, Response};
 use log::info;
 use mongodb::Client;
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
-
+use hyper::http::Uri;
 
 
 
@@ -624,6 +624,84 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                 )
             },
         }
+
+    }).await
+    
+}
+
+
+
+
+
+
+
+
+// -------------------------------- get a single player info controller
+//
+// ----------------------------------------------------------------------------------
+
+pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+
+    api.post("/game/player/get/single/id?=", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+       
+
+        // TODO - need admin (God) access level
+        // ...
+
+
+        let uri = &req.uri().to_string().parse::<Uri>().unwrap();
+        let params = uri.query().unwrap();
+        
+
+        
+        
+        ////////////////////////////////// DB Ops
+
+        let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
+        match users.find_one(doc! { "_id": false }, None).await.unwrap(){
+            Some(user_doc) => {
+                let player_info = schemas::game::PlayerInfo{
+                    _id: user_doc._id,
+                    username: user_doc.username,
+                    status: user_doc.status,
+                    role_id: user_doc.role_id,
+                    side_id: user_doc.side_id,
+                };
+                let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+                let response_body = ctx::app::Response::<schemas::game::PlayerInfo>{
+                    message: FETCHED,
+                    data: Some(player_info),
+                    status: 200,
+                };
+                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                Ok(
+                    res
+                        .status(StatusCode::OK)
+                        .header(header::CONTENT_TYPE, "application/json")
+                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+                        .unwrap()
+                )
+            },
+            None => { //-- means we didn't find any document related to this user_id and we have to tell the user do a signup
+                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                    message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
+                    status: 404,
+                };
+                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                Ok(
+                    res
+                        .status(StatusCode::NOT_FOUND)
+                        .header(header::CONTENT_TYPE, "application/json")
+                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .unwrap() 
+                )
+            },
+        }
+
+        //////////////////////////////////
 
     }).await
     
