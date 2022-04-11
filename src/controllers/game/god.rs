@@ -23,6 +23,11 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 // NOTE - the following api is only for God 
 
 
+// TODO - create groups schema
+//          - _id
+//          - name
+//          - owner (God / user_id)
+
 
 
 
