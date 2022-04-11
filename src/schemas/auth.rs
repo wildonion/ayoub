@@ -340,6 +340,18 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
 
 
 /*
+  ----------------------------------------------------------------------------------------------------
+| this struct will be used to put all available users in it and serialize as json to send back to user
+| ----------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct AvailableUsers{
+    pub users: Vec<UserInfo>,
+}
+
+/*
   ------------------------------------------------------------------------------------
 | this struct will be used to deserialize token info json from client into this struct
 | ------------------------------------------------------------------------------------

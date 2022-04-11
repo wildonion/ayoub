@@ -7,7 +7,6 @@
 use crate::schemas;
 use crate::contexts as ctx;
 use crate::constants::*;
-use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body, Response};
@@ -45,22 +44,21 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::R
 
         
         ////////////////////////////////// DB Ops
-                        
-        let filter = doc! { "is_expired": false }; //-- filtering all none expired events
-        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-        let mut available_events = schemas::event::AvailableEvents{
-            events: vec![],
+
+        let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all event infos or documents from BSON into the UserInfo struct
+        let mut available_users = schemas::auth::AvailableUsers{
+            users: vec![],
         };
 
-        match events.find(filter, None).await{
+        match users.find(None, None).await{
             Ok(mut cursor) => {
-                while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
-                    available_events.events.push(event);
+                while let Some(event) = cursor.try_next().await.unwrap(){ //-- a mongodb Cursor implements Stream from the futures crate so we can iterate over its future objects by calling try_next() method on cursor which require the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
+                    available_users.users.push(event);
                 }
                 let res = Response::builder(); //-- creating a new response cause we didn't find any available route
-                let response_body = ctx::app::Response::<schemas::event::AvailableEvents>{
+                let response_body = ctx::app::Response::<schemas::auth::AvailableUsers>{
                     message: FETCHED,
-                    data: Some(available_events),
+                    data: Some(available_users),
                     status: 200,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
