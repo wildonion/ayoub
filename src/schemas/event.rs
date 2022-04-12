@@ -237,7 +237,7 @@ pub struct DeleteEventRequest{
 
 impl EventInfo{
 
-    pub async fn add_voter(self, voter: Voter) -> Vec<Voter>{ //-- we don't take a reference to self cause we can't dereference a shared reference and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
+    pub async fn add_voter(self, voter: Voter) -> Vec<Voter>{ //-- we don't take a reference to self cause we can't dereference a shared reference (&T) and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
         let mut voters = self.voters.unwrap();
         let index = voters.iter().position(|v| v.nft_owner_wallet_address == voter.nft_owner_wallet_address); //-- this owner has alreay voted to this event
         if index == None{
