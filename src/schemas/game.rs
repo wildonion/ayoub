@@ -12,10 +12,10 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 
-
+// NOTE - each collection has some documents which can be deserailzed into a struct inside the rust
 // NOTE - serializing from struct or json or bson into the utf8 bytes and deserializing from utf8 into json or struct or bson
 // NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
-// NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into its related struct and then serialize it to json to send back to the user through the socket
+// NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into the struct then serialize to json to serialize to utf8 to send back to the user which is a bson object back to the user we must first deserialize the bson into its related struct and then serialize it to json to send back to the user through the socket
 
 
 
@@ -93,6 +93,66 @@ pub struct DeckInfo{
     pub is_disabled: Option<bool>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
+}
+
+
+/*
+  ------------------------------------------------------------------------------------
+| this struct will be used to deserialize group info json from client into this struct
+| ------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct AddGroupRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub name: String,
+    pub owner: String,
+    pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------
+| this struct will be used to deserialize group info bson from the mongodb into this struct
+| -----------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GroupInfo{
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub name: String,
+    pub owner: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
+  -------------------------------------------------------------------------------------
+| this struct will be used to deserialize group info json from client into this struct
+| -------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UpdateGroupRequest{
+    pub _id: String,
+    pub name: String,
+}
+
+
+/*
+  ------------------------------------------------------------------------------------------------------
+| this struct will be used to put all available groups in it and serialize as json to send back to user
+| ------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct AvailableGroups{
+    pub groups: Vec<GroupInfo>, //-- fetch all groups
 }
 
 

@@ -11,7 +11,8 @@ use crate::controllers::game::{
                                 side::{add as add_side, all as get_sides, disable as diable_side}, 
                                 player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single}, 
                                 _404::main as not_found,
-                                god::create_group,
+                                god::{create_group, update_group},
+                                get::all_groups,
                             };
 
 
@@ -94,6 +95,14 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/game/god/create/group") => {
             app.name = "/game/god/create/group".to_string();
             create_group(app_storage, app).await
+        },
+        (&Method::POST, "/game/get/group/all") => {
+            app.name = "/game/get/group/all".to_string();
+            all_groups(app_storage, app).await
+        },
+        (&Method::POST, "/game/update/group/") => {
+            app.name = "/game/update/group/".to_string();
+            update_group(app_storage, app).await
         },
         _                                 => not_found().await,
     }

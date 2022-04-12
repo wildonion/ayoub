@@ -14,9 +14,9 @@ use std::env;
 
 
 
-
+// NOTE - each collection has some documents which can be deserailzed into a struct inside the rust
 // NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
-// NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into the json to send back to the user
+// NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into the struct then serialize to json to serialize to utf8 to send back to the user which is a bson object back to the user we must first deserialize the bson into the json to send back to the user
 // NOTE - RegisterResponse struct doesn't have the pwd field cause we don't want the user see the password if there was any user already inside the collection
 
 

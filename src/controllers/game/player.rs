@@ -653,7 +653,8 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper
 
         let uri = &req.uri().to_string().parse::<Uri>().unwrap();
         let params = uri.query().unwrap();
-        
+        let param_dicts = params.split("=");
+                
 
         
         
