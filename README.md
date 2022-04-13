@@ -39,7 +39,7 @@ $ cargo build --bin ayoub --release
 
 * send OTP response API from career issue with serde parser 
 
-* reserve APIs
+* reserve and image group APIs 
 
 * auth guard and access level (inside the token) on APIs
 

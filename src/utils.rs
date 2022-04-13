@@ -152,3 +152,8 @@ pub fn gen_random_idx(idx: usize) -> usize{
 pub fn string_to_static_str(s: String) -> &'static str {
     Box::leak(s.into_boxed_str())
 }
+
+
+
+// TODO - build custom inner and outter macro attributes and derive like; on fields, modules and functions like #[derive(Clone)] and #[near_bindgen] style 
+// ...

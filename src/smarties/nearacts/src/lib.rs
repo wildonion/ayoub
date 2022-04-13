@@ -3,6 +3,10 @@
 
 
 
+
+// NOTE - #[..] applies an attribute to the thing after it and #![..] applies an attribute to the containing thing
+
+
 #![macro_use] //-- apply the macro_use attribute to the root cause it's an inner attribute and will be effect on all things inside this crate 
 mod utils; //-- or crate::utils
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
