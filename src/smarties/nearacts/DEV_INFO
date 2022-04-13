@@ -1,0 +1,41 @@
+
+
+
+
+
+account name: wildonion.testnet
+private key: praise purse gather only inmate wire impulse isolate inch vendor labor fringe
+https://wallet.near.org/
+https://wallet.testnet.near.org/
+https://docs.near.org/docs/develop/contracts/rust/intro
+https://www.near-sdk.io/
+https://near.org/papers/the-official-near-white-paper/
+https://github.com/near-examples/rust-counter/blob/master/contract/src/lib.rs
+http://ftp.cvut.cz/kernel/people/geoff/cell/ps3-linux-docs/CellProgrammingTutorial/BasicsOfSIMDProgramming.html#:~:text=SIMD%20is%20short%20for%20Single,data%20is%20called%20scalar%20operations.
+
+
+
+
+
+calling between contracts
+serde_json issue
+Box methods
+use Box instead of & in struct fields
+whole near docs
+lifetime, borrowing the ownership, moving no need garbage collctor
+ 
+
+
+
+
+this contract (a family tree contract) is our campaign in which will catch a commission from incoming lamports and transfer the rest to the family tree owner account
+funder will send a transaction also contains some instruction data to transfer lamports from his/her address to our campaign address (escrow)
+&self mean we're borrowing all the fields of the struct in other words if we create an instance from our struct and call on of the method which has the &self then we can access other methods and fields after that call cause the instance won't be moved due to &self in first parameter of that method
+contracts can't interact with their outside worlds since can't compile socket in lib (wasm and bpf) mode thus we can't have whether tokio or any web framework 
+we need lib.rs and crate type of cdylib for .wasm, .so, .dylib and .dll
+wasm and bpf are bytecodes (on ram instruction) to be executed by VMs (execute shell and byte codes inside the ram)
+bytecodes like .wasm and .so are compiled codes from other langs and must be loaded into a buffer to execute them on ram using VMs 
+compile contracts to wasm and bfp to run inside each node on different lang
+make trust between two accounts by calling the address of the deployed contract on a specific event
+our campaign contract contains some methods like TransferingWithCommission(), LockWallet() and MakeCampaignEmpty()
+our campaign contract's methods will be called on a specific event or condition and that's what a smart contract does!
