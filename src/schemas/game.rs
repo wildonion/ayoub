@@ -22,6 +22,20 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 
+
+/*
+  ------------------------------------------------------------------------------------------
+| this struct will be used to deserialize get player info json from client into this struct
+| ------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GetPlayerRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub _id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
 /*
   ------------------------------------------------------------------------------------
 | this struct will be used to deserialize role info json from client into this struct
@@ -138,7 +152,7 @@ pub struct GroupInfo{
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct UpdateGroupRequest{
-    pub _id: String,
+    pub _id: String, //-- this is the id of the group took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub name: String,
 }
 

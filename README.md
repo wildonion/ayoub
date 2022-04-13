@@ -34,18 +34,18 @@ $ cargo build --bin ayoub --release
 
 * **OTP API token**
 
-<<<<<<< HEAD
-=======
-* reserve APIs
-
->>>>>>> 686ca2ab2c779ce4b752028933bbf2274a3aaca0
-* send OTP response API from career issue with serde parser 
 
 * **postman collection (status constants + unix timestamps)** 
+
+* send OTP response API from career issue with serde parser 
+
+* reserve APIs
 
 * auth guard and access level on APIs
 
 * server signal handling 
 
 * add client algorithm
+
+* test whole APIs
 

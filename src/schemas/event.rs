@@ -58,6 +58,19 @@ pub struct Phase{
 
 
 /*
+  ------------------------------------------------------------------------------------
+| this struct will be used to deserialize even info json from client into this struct
+| ------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GetEventRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub _id: String, //-- this is the id of the event took from the mongodb events collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
   ---------------------------------------------------------------------------------------
 | this struct will be used to deserialize payment info json from client into this struct
 | ---------------------------------------------------------------------------------------

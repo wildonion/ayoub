@@ -644,66 +644,112 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
-    api.post("/game/player/get/single/id?=", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/get/single", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
        
+
+
 
         // TODO - need admin (God) access level
         // ...
 
 
+        
         let uri = &req.uri().to_string().parse::<Uri>().unwrap();
-        let params = uri.query().unwrap();
-        let param_dicts = params.split("=");
-                
+        let params = uri.query().unwrap(); //-- extracting all parameters inside the url
+
 
         
-        
-        ////////////////////////////////// DB Ops
 
-        let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
-        match users.find_one(doc! { "_id": false }, None).await.unwrap(){
-            Some(user_doc) => {
-                let player_info = schemas::game::PlayerInfo{
-                    _id: user_doc._id,
-                    username: user_doc.username,
-                    status: user_doc.status,
-                    role_id: user_doc.role_id,
-                    side_id: user_doc.side_id,
-                };
-                let res = Response::builder(); //-- creating a new response cause we didn't find any available route
-                let response_body = ctx::app::Response::<schemas::game::PlayerInfo>{
-                    message: FETCHED,
-                    data: Some(player_info),
-                    status: 200,
-                };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
-                Ok(
-                    res
-                        .status(StatusCode::OK)
-                        .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
-                        .unwrap()
-                )
+        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
+            Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
+                let data: serde_json::Value = value;
+                let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
+                match serde_json::from_str::<schemas::game::GetPlayerRequest>(&json){ //-- the generic type of from_str() method is GetPlayerRequest struct - mapping (deserializing) the json into the GetPlayerRequest struct
+                    Ok(player_info) => { //-- we got the username and password inside the login route
+
+
+                        ////////////////////////////////// DB Ops
+
+                        let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                        let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
+                        match users.find_one(doc! { "_id": player_id }, None).await.unwrap(){
+                            Some(user_doc) => {
+                                let player_info = schemas::game::PlayerInfo{
+                                    _id: user_doc._id,
+                                    username: user_doc.username,
+                                    status: user_doc.status,
+                                    role_id: user_doc.role_id,
+                                    side_id: user_doc.side_id,
+                                };
+                                let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+                                let response_body = ctx::app::Response::<schemas::game::PlayerInfo>{
+                                    message: FETCHED,
+                                    data: Some(player_info),
+                                    status: 200,
+                                };
+                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                Ok(
+                                    res
+                                        .status(StatusCode::OK)
+                                        .header(header::CONTENT_TYPE, "application/json")
+                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+                                        .unwrap()
+                                )
+                            },
+                            None => { //-- means we didn't find any document related to this user_id and we have to tell the user do a signup
+                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                    message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
+                                    status: 404,
+                                };
+                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                Ok(
+                                    res
+                                        .status(StatusCode::NOT_FOUND)
+                                        .header(header::CONTENT_TYPE, "application/json")
+                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .unwrap() 
+                                )
+                            },
+                        }
+
+                        //////////////////////////////////
+
+                    },
+                    Err(e) => {
+                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                            status: 406,
+                        };
+                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        Ok(
+                            res
+                                .status(StatusCode::NOT_ACCEPTABLE)
+                                .header(header::CONTENT_TYPE, "application/json")
+                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .unwrap() 
+                        )
+                    },
+                }
             },
-            None => { //-- means we didn't find any document related to this user_id and we have to tell the user do a signup
-                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+            Err(e) => {
+                let response_body = ctx::app::Response::<ctx::app::Nill>{
                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                    message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
-                    status: 404,
+                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                    status: 400,
                 };
                 let response_body_json = serde_json::to_string(&response_body).unwrap();
                 Ok(
                     res
-                        .status(StatusCode::NOT_FOUND)
+                        .status(StatusCode::BAD_REQUEST)
                         .header(header::CONTENT_TYPE, "application/json")
                         .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
                         .unwrap() 
                 )
             },
         }
-
-        //////////////////////////////////
-
     }).await
     
 }
