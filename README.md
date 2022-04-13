@@ -41,7 +41,7 @@ $ cargo build --bin ayoub --release
 
 * reserve APIs
 
-* auth guard and access level on APIs
+* auth guard and access level (inside the token) on APIs
 
 * server signal handling 
 
