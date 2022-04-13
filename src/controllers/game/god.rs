@@ -43,8 +43,9 @@ pub async fn create_group(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
     api.post("/game/god/create/group", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
 
-
         // TODO - need admin (God) access level
+        // TODO - upload image for group prof
+        // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the client ram on corruption condition to gather those bytes to form the whole file
         // ...
 
         
