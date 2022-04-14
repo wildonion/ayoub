@@ -17,20 +17,17 @@ http://ftp.cvut.cz/kernel/people/geoff/cell/ps3-linux-docs/CellProgrammingTutori
 
 
 
+
+
 calling between contracts
 serde_json issue
 Box methods
 use Box instead of & in struct fields
+always use & to borrow the ownership instead of cloning to prevent from moving
+&self mean we're borrowing all the fields of the struct in other words if we create an instance from our struct and call on of the method which has the &self then we can access other methods and fields after that call cause the instance won't be moved due to &self in first parameter of that method
 whole near docs
-lifetime, borrowing the ownership, moving no need garbage collctor
- 
-
-
-
-
 this contract (a family tree contract) is our campaign in which will catch a commission from incoming lamports and transfer the rest to the family tree owner account
 funder will send a transaction also contains some instruction data to transfer lamports from his/her address to our campaign address (escrow)
-&self mean we're borrowing all the fields of the struct in other words if we create an instance from our struct and call on of the method which has the &self then we can access other methods and fields after that call cause the instance won't be moved due to &self in first parameter of that method
 contracts can't interact with their outside worlds since can't compile socket in lib (wasm and bpf) mode thus we can't have whether tokio or any web framework 
 we need lib.rs and crate type of cdylib for .wasm, .so, .dylib and .dll
 wasm and bpf are bytecodes (on ram instruction) to be executed by VMs (execute shell and byte codes inside the ram)
