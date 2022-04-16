@@ -5,7 +5,7 @@
 
 
 
-use std::{sync::mpsc, thread, time::Instant};
+use std::{sync::mpsc, thread, time::Instant}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T
 use near_sdk::env;
 
 
@@ -33,7 +33,7 @@ pub fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8) -> u8
         env::log(log_message.as_bytes());
         let cloned_sender = sender.clone();
         let cloned_ops = ops.clone();
-        thread::spawn(move ||{ //-- spawning a native thread - can't have async body here cause we are not inside an async function to solve the future inside the body of closure of the thread by joining on the spawned thread
+        thread::spawn(move ||{ //-- spawning a native thread - can't have async body here (like spawning an async task inside the tokio green threads) to get the result out from the thread asyncly cause we are not inside an async function to solve the future inside the body of closure of the thread (or the async task of the tokio) by joining on the spawned thread 
             let new_chunk = cloned_ops(big_end_bytes[index]);
             let new_chunk_log_message = format!("\tsender-channel---(chunk {:?})---receiver-channel at time {:?} ", index, chrono::Local::now().naive_local());
             env::log(new_chunk_log_message.as_bytes());

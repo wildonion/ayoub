@@ -5,6 +5,8 @@
 
 
 
+
+
 #![macro_use] //-- apply the macro_use attribute to the root cause it's an inner attribute and will be effect on all things inside this crate 
 mod utils; //-- or crate::utils
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
@@ -16,12 +18,31 @@ near_sdk::setup_alloc!();
 
 
 
+// NOTE - for calling private method current_account_id must be equal to predecessor_account_id (account of the contract)
+// NOTE - Box<T> is one of the smart pointers in the Rust standard library, it provides a way to allocate enough memory on the heap to store a value of the corresponding type, and then it serves as a handle, a pointer to that memory
+// NOTE - Box<T> owns the data it points to; when it is dropped, the corresponding piece of memory on the heap is deallocated and we can use dereference operator to reach their contents
+// NOTE - every method call is a transaction in smart contract concepts
+// NOTE - contracts can't interact with their outside worlds since can't compile socket in lib (wasm and bpf) mode thus we can't have whether tokio or any web framework
+// NOTE - bytecodes like .wasm and .so are compiled codes (on RAM instructions) from other langs must be loaded into a buffer to execute them on RAM using VMs
+// NOTE - this contract (a family tree contract) is our campaign in which will catch a commission from incoming lamports and transfer the rest to the family tree owner account
+// NOTE - funder will send a transaction also contains some instruction data to transfer lamports from his/her address to our campaign address (escrow)
+// NOTE - our campaign contract contains some methods like TransferingWithCommission(), LockWallet() and MakeCampaignEmpty()
+// NOTE - our campaign contract's methods will be called on a specific event or condition and that's what a smart contract does!
 
+
+
+
+
+
+
+pub struct Savage{
+    pub signer: Box<str>, // TODO - use Box methods on signer field
+}
 
 
 
 #[near_bindgen] //-- implementing the near_bindgen attribute on Counter struct to compile to wasm
-#[derive(Default, BorshDeserialize, BorshSerialize)] //-- need for serde and codec ops - deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
+#[derive(Default, BorshDeserialize, BorshSerialize)] //-- the struct needs to implement Default trait which NEAR will use to create the initial state of the contract upon its first usage - need for serde and codec ops - deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
 pub struct Counter{
     val: i8,
 }

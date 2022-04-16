@@ -18,6 +18,7 @@ serde = {version = "1", features = ["derive"] }
 
 
 [lib]
+# we need lib.rs and crate type of cdylib for .wasm, .so, .dylib and .dll files
 crate-type = ["cdylib", "rlib"]
 
 

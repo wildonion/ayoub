@@ -8,7 +8,7 @@ use crate::schemas;
 use crate::contexts as ctx;
 use crate::constants::*;
 use chrono::Utc;
-use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
+use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body, Response};
 use log::info;
@@ -44,7 +44,8 @@ pub async fn create_group(db: Option<&Client>, api: ctx::app::Api) -> Result<hyp
         
 
         // TODO - need admin (God) access level
-        // TODO - upload image for group prof
+        // TODO - upload image for group prof like tus resumable upload file
+        // TODO - first allocate a space on ram in server for file then on every incoming chunk save the file and seek the cursor to that saved chunk on reconnecting to the server
         // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the client ram on corruption condition to gather those bytes to form the whole file
         // ...
 

@@ -11,10 +11,15 @@ use uuid::Uuid;
 
 
 
+
+
 // NOTE - each collection has some documents which can be deserailzed into a struct inside the rust
 // NOTE - serializing from struct or json or bson into the utf8 bytes and deserializing from utf8 into json or struct or bson
 // NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
 // NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into the struct then serialize to json to serialize to utf8 to send back to the user which is a bson object back to the user we must first deserialize the bson into its related struct and then serialize it to json to send back to the user through the socket
+
+
+
 
 
 

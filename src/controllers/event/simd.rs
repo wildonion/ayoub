@@ -11,7 +11,7 @@ use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
 use crate::utils;
-use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream
+use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer
 use hyper::{header, StatusCode, Body};
 use log::info;
@@ -119,9 +119,10 @@ pub async fn main(api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Er
 
 
                         // https://github.com/tokio-rs/tokio/discussions/3858
+                        // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T 
                         // NOTE - hadnling async task is done using tokio::spawn() method which the task will be solved based on multi threading concept using tokio green threads in the background of the app
                         // NOTE - sharing and mutating clonable data (Arc<Mutex<T>>) between tokio green and rust native threads is done by passing the object through a channel of one of the message passing protocols like mpsc channel
-                        // NOTE - to use tokio::spawn(async move{}) and thread::spawn(|| async move{}) we must be inside an async function to await on what's has been spawned
+                        // NOTE - to use tokio::spawn(async move{}) and thread::spawn(|| async move{}) we must be inside an async function to await on what's has been spawned on the background
 
 
 

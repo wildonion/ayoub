@@ -3,10 +3,6 @@
 
 
 
-
-
-
-
 use futures::Future;
 use mongodb::Client;
 use uuid::Uuid;
@@ -16,6 +12,12 @@ use hyper::Body;
 use log::{info, error};
 
 
+
+
+
+// NOTE - always use &self or &mut self inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
+// NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
+// NOTE - &self or &mut self will be converted automatically to self on compile time
 
 
 
@@ -75,13 +77,13 @@ impl Api{
         Ok(cb_res)
     }
 
-    pub async fn set_name(mut self, endpoint: &str){ //-- we must define self as mutable cause we want to change the name field
+    pub async fn set_name(&mut self, endpoint: &str){ //-- we must define self as mutable cause we want to change the name field
         let endpoint_name = endpoint.to_string();
         self.name = endpoint_name;
     }
 
-    pub async fn get_name(self) -> String{
-        self.name.to_string()
+    pub async fn get_name(&self) -> String{
+        self.name.to_string() //-- self.name is the dereferenced value of the &self.name and will be done automatically by the compiler 
     }
 }
 
@@ -162,7 +164,7 @@ pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside 
 
 
 pub async fn shutdown_signal(signal: Receiver<u8>){
-    match signal.await{ //-- await on signal to get the message
+    match signal.await{ //-- await on signal to get the message in down side of the channel
         Ok(s) => {
             if s == 0{
                 info!("shutting down the server - {}", chrono::Local::now().naive_local());
