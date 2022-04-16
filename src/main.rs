@@ -41,10 +41,9 @@ mod services;
 
 
 
-use std::{net::SocketAddr, sync::Arc};
+use std::{net::SocketAddr, sync::Arc, env};
 use dotenv::dotenv;
 use uuid::Uuid;
-use std::env;
 use log::{info, error};
 use tokio::sync::oneshot;
 use hyper::server::Server;
@@ -58,14 +57,14 @@ use self::contexts as ctx;
 
 // NOTE - to solve the `future is not `Send` as this value is used across an await` error we have to implement the Send trait for that type, since we don't know the type at compile time (it'll specify at runtime due to the logic of the code) we must put the trait inside the Box with the dyn keyword (object safe traits have unknown size at compile time) inside the return type of the function in second part of the Result 
 // NOTE - Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory
-
+// NOTE - ? on wrapped type (Option or Result) will work only inside a method that will return Result or Option
 
 
 
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime
     
     
 
@@ -110,7 +109,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
 
 
+
+
+
+
+
+
+    // -------------------------------- cli args setup
+    //
+    // ---------------------------------------------------------------------
+    let args: Vec<String> = env::args().collect();
+    let service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args it to service_name we lose the ownership of args (cause its ownership will be belonged to service_name) and args will be dropped from the ram 
+    let service_port = &args[2];
+
+
     
+
+
+
+
+
+
+
     
 
     
@@ -175,6 +195,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
 
      
+    
     
     
     

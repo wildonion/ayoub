@@ -14,9 +14,10 @@ https://docs.near.org/docs/develop/contracts/rust/near-sdk-rs#
 
 
 
+reading file asyncly
+ayoub todos (cli args as struct fields) and test its apis
 
 async function in contracts
-ayoub todos (cli args) and test its apis
 near white paper, docs, tuts and sdk
 gas fee for every function call based on cpu usage
 user feedback based reward in rl for pos
