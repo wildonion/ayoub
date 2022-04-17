@@ -72,7 +72,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                             username: user_info.username,
                                             phone: user_info.phone,
                                             pwd: hash,
-                                            access_level: user_info.access_level,
+                                            access_level: Some(USER_ACCESS), //-- default access is the user access
                                             status: DEFAULT_STATUS, //-- setting the user (player) status to default which is 0
                                             role_id: None,
                                             side_id: None,

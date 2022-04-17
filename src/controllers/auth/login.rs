@@ -52,7 +52,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Resp
                                 match schemas::auth::LoginRequest::verify_pwd(user_doc.clone().pwd, user_info.clone().pwd).await{
                                     Ok(_) => { // if we're here means hash and raw are match together and we have the successful login
                                         let (now, exp) = utils::jwt::gen_times().await;
-                                        let jwt_payload = utils::jwt::Claims{_id: user_doc.clone()._id, username: user_doc.clone().username, iat: now, exp};
+                                        let jwt_payload = utils::jwt::Claims{_id: user_doc.clone()._id, username: user_doc.clone().username, access_level: user_doc.access_level, iat: now, exp}; //-- building jwt if passwords are matched
                                         match utils::jwt::construct(jwt_payload).await{
                                             Ok(token) => {
                                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec

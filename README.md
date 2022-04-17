@@ -1,16 +1,14 @@
 # ☣️ Build Ayoub Servers
 
-* ☢️ To run the `event` server just change the `CURRENT_SERVICE` variable to `event` value.
-
-* ☢️ To run the `auth` server just change the `CURRENT_SERVICE` variable to `auth` value.
-
-* ☢️ To run the `game` server just change the `CURRENT_SERVICE` variable to `game` value.
-
-> Behalf of the user the server will assign the role_id and side_id for the user
-
 ```console
 $ cargo build --bin ayoub --release
 ```
+
+* ☢️ To run the `event` server: `./ayoub auth 7436`
+
+* ☢️ To run the `auth` server: `./ayoub event 7435`
+
+* ☢️ To run the `game` server: `./ayoub event 7437`
 
 # 🧿 God Access
 
@@ -28,6 +26,8 @@ $ cargo build --bin ayoub --release
 
 * Reserve and pay for the event and his/her role
 
+> Behalf of the user the server will assign the role_id and side_id for the user
+
 # 📌 TODOs
 
 * **Zarinpal API token**
@@ -35,17 +35,11 @@ $ cargo build --bin ayoub --release
 * **OTP API token**
 
 
-* **postman collection (status constants + unix timestamps)** 
+* **postman collection (status and access level constants + unix timestamps)**
 
-* send OTP response API from career issue with serde parser 
+* **fandogh.cloud for devops**
 
-* reserve and image group APIs 
-
-* auth guard and access level (inside the token) on APIs
-
-* server signal handling 
-
-* add client algorithm
+* complete all todos
 
 * test whole APIs
 

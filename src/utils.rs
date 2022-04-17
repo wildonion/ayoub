@@ -29,6 +29,7 @@ pub mod jwt{
     pub struct Claims{
         pub _id: Option<ObjectId>, //-- mongodb object id
         pub username: String,
+        pub access_level: u8,
         pub exp: i64, //-- expiration timestamp
         pub iat: i64, //-- issued timestamp
     }
@@ -55,6 +56,34 @@ pub mod jwt{
 
 }
 
+
+
+
+
+
+
+pub mod user{
+
+    use crate::schemas;
+    use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
+
+
+    pub async fn exists(storage: Option<&Client>, user_id: Option<ObjectId>, username: String, access_level: u8) -> bool{
+
+        ////////////////////////////////// DB Ops
+
+        let serialized_access_level = bson::to_bson(&access_level).unwrap(); //-- we have to serialize the access_level to BSON Document object in order to find a user with this info cause mongodb can't do serde ops on raw u8
+        let users = storage.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
+        match users.find_one(doc!{"_id": user_id, "username": username, "access_level": serialized_access_level}, None).await.unwrap(){ //-- finding user based on username
+            Some(user_doc) => true, 
+            None => false,
+        }
+
+        //////////////////////////////////
+ 
+    }
+
+}
 
 
 

@@ -149,6 +149,21 @@ pub enum Mode{
 
 
 
+#[derive(Copy, Clone, Debug)]
+pub enum AppError{ //-- enum like union shares a common memory location between all its fields that means the space an enum needs is as much as the largest variant but unlike union uses some extra memory to keep track of the enum variant
+    OnCrash, //-- caused by too much loading and requests
+    OnStorage, //-- caused by storage services errors  
+}
+
+
+#[derive(Clone, Debug)]
+pub struct Cli{
+    pub service_name: String, // TODO - service_name argument
+    pub port: u16, // TODO - port argument
+}
+
+
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response<'m, T>{
     pub data: Option<T>,

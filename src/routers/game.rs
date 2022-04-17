@@ -10,9 +10,8 @@ use crate::controllers::game::{
                                 deck::{add as add_deck, all as get_decks, disable as diable_deck},
                                 side::{add as add_side, all as get_sides, disable as diable_side}, 
                                 player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single}, 
+                                group::{create as create_group, update as update_group, all as get_groups},
                                 _404::main as not_found,
-                                god::{create_group, update_group},
-                                get::all_groups,
                             };
 
 
@@ -98,7 +97,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         },
         (&Method::POST, "/game/get/group/all") => {
             app.name = "/game/get/group/all".to_string();
-            all_groups(app_storage, app).await
+            get_groups(app_storage, app).await
         },
         (&Method::POST, "/game/update/group/") => {
             app.name = "/game/update/group/".to_string();

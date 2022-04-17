@@ -78,7 +78,7 @@ pub struct UserStatusUpdateRequest{
 pub struct UserUpdateResponse{
   pub username: String,
   pub phone: String,
-  pub access_level: String,
+  pub access_level: u8, // NOTE - 0 means dev, 1 means admin, 2 means user
   pub status: u8,
   pub role_id: Option<ObjectId>,
   pub side_id: Option<ObjectId>,
@@ -148,8 +148,8 @@ pub struct RegisterRequest{ // NOTE - those Option values can be None tho
     pub username: String,
     pub phone: String,
     pub pwd: String, //-- hashed password
-    pub access_level: String, // NOTE - dev, admin, user
     pub status: u8,
+    pub access_level: Option<u8>, // NOTE - 0 means dev, 1 means admin, 2 means user - we set this field to Option cause we don't want to pass the access_level inside the request body thus it should be None initially, we'll fill it inside the server
     pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field is None initially
     pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field is None initially
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
@@ -185,7 +185,7 @@ pub struct LoginResponse{ // NOTE - those Option values can be None tho
     pub access_token: String,
     pub username: String,
     pub phone: String,
-    pub access_level: String, // NOTE - dev, admin, user
+    pub access_level: u8, // NOTE - 0 means dev, 1 means admin, 2 means user
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
@@ -208,7 +208,7 @@ pub struct RegisterResponse{ // NOTE - those Option values can be None tho
     pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub username: String,
     pub phone: String,
-    pub access_level: String, // NOTE - dev, admin, user
+    pub access_level: u8, // NOTE - 0 means dev, 1 means admin, 2 means user
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
@@ -329,7 +329,7 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
     pub username: String,
     pub pwd: String,
     pub phone: String,
-    pub access_level: String, // NOTE - dev, admin, user
+    pub access_level: u8, // NOTE - 0 means dev, 1 means admin, 2 means user
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,
@@ -376,7 +376,7 @@ pub struct CheckTokenResponse{ // NOTE - those Option values can be None tho
     pub _id: Option<ObjectId>, //-- this is the user id inside the users collection
     pub username: String,
     pub phone: String,
-    pub access_level: String, // NOTE - dev, admin, user
+    pub access_level: u8, // NOTE - 0 means dev, 1 means admin, 2 means user
     pub status: u8,
     pub role_id: Option<ObjectId>,
     pub side_id: Option<ObjectId>,

@@ -177,6 +177,7 @@ pub struct EventInfo{
     pub title: String,
     pub content: String,
     pub deck_id: String,
+    pub entry_price: String,
     pub creator_wallet_address: Option<String>,
     pub upvotes: Option<u16>,
     pub downvotes: Option<u16>,
@@ -201,6 +202,7 @@ pub struct AddEventRequest{
     pub title: String,
     pub content: String,
     pub deck_id: String, //-- this is the id of the selected deck for this event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub entry_price: String,
     pub creator_wallet_address: Option<String>, //-- it might be None at initializing stage inside the add api
     pub upvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the upvotes inside the request body, we'll fill it inside the server
     pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server

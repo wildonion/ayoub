@@ -68,8 +68,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     
     
 
-
-
+    // run auth server  => ./ayoub auth 7436
+    // run event server => ./ayoub event 7435
+    // run game server  => ./ayoub game 7437
+    
 
 
 
@@ -121,6 +123,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let args: Vec<String> = env::args().collect();
     let service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args it to service_name we lose the ownership of args (cause its ownership will be belonged to service_name) and args will be dropped from the ram 
     let service_port = &args[2];
+    let server_addr = format!("{}:{}", host, service_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
 
 
     
@@ -203,9 +206,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     // -------------------------------- building services, signal channel handling and server setup
     //
     // --------------------------------------------------------------------------------------------------------
-    if current_service.as_str() == "auth"{
+    if service_name.as_str() == "auth"{
         let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
-        let auth_server = Server::bind(&auth_server_addr).serve(auth_serivce);
+        let auth_server = Server::bind(&server_addr).serve(auth_serivce);
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = auth_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
@@ -214,9 +217,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
         Ok(())
-    } else if current_service.as_str() == "event"{
+    } else if service_name.as_str() == "event"{
         let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
-        let event_server = Server::bind(&event_server_addr).serve(event_service);
+        let event_server = Server::bind(&server_addr).serve(event_service);
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = event_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("event server error {} - {}", e, chrono::Local::now().naive_local());
@@ -225,9 +228,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
         Ok(())
-    } else if current_service.as_str() == "game"{
+    } else if service_name.as_str() == "game"{
         let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await;
-        let game_server = Server::bind(&game_server_addr).serve(game_service);
+        let game_server = Server::bind(&server_addr).serve(game_service);
         let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("game server error {} - {}", e, chrono::Local::now().naive_local());
