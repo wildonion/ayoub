@@ -41,6 +41,8 @@ pub struct Savage{
 
 
 
+
+
 #[near_bindgen] //-- implementing the near_bindgen attribute on Counter struct to compile to wasm
 #[derive(Default, BorshDeserialize, BorshSerialize)] //-- the struct needs to implement Default trait which NEAR will use to create the initial state of the contract upon its first usage - need for serde and codec ops - deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
 pub struct Counter{
@@ -100,6 +102,10 @@ impl Counter{
     }
 
 }
+
+
+
+
 
 
 
