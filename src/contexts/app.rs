@@ -151,8 +151,8 @@ pub enum Mode{
 
 #[derive(Copy, Clone, Debug)]
 pub enum AppError{ //-- enum like union shares a common memory location between all its fields that means the space an enum needs is as much as the largest variant but unlike union uses some extra memory to keep track of the enum variant
-    OnCrash, //-- caused by too much loading and requests
-    OnStorage, //-- caused by storage services errors  
+    OnRuntime, //-- caused by too much loading and requests
+    OnStorage, //-- caused by storage services errors 
 }
 
 
