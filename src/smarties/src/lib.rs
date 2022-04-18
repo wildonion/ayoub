@@ -19,7 +19,7 @@
     NOTE - our campaign contract contains some methods like TransferingWithCommission(), LockWallet() and MakeCampaignEmpty()
     NOTE - our campaign contract's methods will be called on a specific event or condition and that's what a smart contract does!
     NOTE - near uses actor based model to call smart contract methods and pass data between them asyncly using their address (Addr object) which means we can have multi threading in wasm file
-    NOTE - sharded blockchain means that every block is an actor or a shard and will communicate with each other using addr object like passing data by calling a contract method inside block a to another contract method inside the block b asyncly
+    NOTE - sharded blockchain means that every shard is an actor which contains multiple blocks and each will communicates with each other using addr object like passing data by calling a contract method inside block a to another contract method inside the block b asyncly
 
 */
 
