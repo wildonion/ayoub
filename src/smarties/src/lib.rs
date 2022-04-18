@@ -30,6 +30,7 @@ near_sdk::setup_alloc!();
 // NOTE - funder will send a transaction also contains some instruction data to transfer lamports from his/her address to our campaign address (escrow)
 // NOTE - our campaign contract contains some methods like TransferingWithCommission(), LockWallet() and MakeCampaignEmpty()
 // NOTE - our campaign contract's methods will be called on a specific event or condition and that's what a smart contract does!
+// NOTE - near uses actor based model to call smart contract methods and pass data between them asyncly using their address (Addr object) which means we can have multi threading in wasm file
 
 
 
@@ -43,7 +44,6 @@ near_sdk::setup_alloc!();
 #[derive(Default, BorshDeserialize, BorshSerialize)] //-- the struct needs to implement Default trait which NEAR will use to create the initial state of the contract upon its first usage - need for serde and codec ops - deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
 pub struct Counter{
     val: i8,
-    signer: Box<str>, // TODO - use Box methods on signer field
 }
 
 

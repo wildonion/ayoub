@@ -179,6 +179,8 @@ pub fn gen_random_idx(idx: usize) -> usize{
 
 
 pub fn string_to_static_str(s: String) -> &'static str {
+    // TODO - use other Box methods
+    // ...
     Box::leak(s.into_boxed_str())
 }
 
