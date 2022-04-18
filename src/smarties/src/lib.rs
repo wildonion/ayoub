@@ -11,9 +11,11 @@
 mod utils; //-- or crate::utils
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen};
-
-
 near_sdk::setup_alloc!();
+
+
+
+
 
 
 
@@ -35,18 +37,13 @@ near_sdk::setup_alloc!();
 
 
 
-pub struct Savage{
-    pub signer: Box<str>, // TODO - use Box methods on signer field
-}
-
-
-
 
 
 #[near_bindgen] //-- implementing the near_bindgen attribute on Counter struct to compile to wasm
 #[derive(Default, BorshDeserialize, BorshSerialize)] //-- the struct needs to implement Default trait which NEAR will use to create the initial state of the contract upon its first usage - need for serde and codec ops - deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
 pub struct Counter{
     val: i8,
+    signer: Box<str>, // TODO - use Box methods on signer field
 }
 
 
@@ -102,6 +99,9 @@ impl Counter{
     }
 
 }
+
+
+
 
 
 

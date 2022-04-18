@@ -3,6 +3,17 @@
 
 
 
+/*
+    --------------------------------------------------------------------------
+   |                      REGISTER HANDLER FOR EVENT ROUTER
+   |--------------------------------------------------------------------------
+   |
+   |    job    : the following registers a router requested by the client
+   |    return : a Result of type either successful or error response
+   |
+   |
+
+*/
 
 
 

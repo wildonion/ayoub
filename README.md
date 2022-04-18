@@ -34,7 +34,6 @@ $ cargo build --bin ayoub --release
 
 * **OTP API token**
 
-
 * **postman collection (status and access level constants + unix timestamps)**
 
 * **fandogh.cloud for devops**

@@ -2,6 +2,21 @@
 
 
 
+/*
+    --------------------------------------------------------------------------
+   |                      REGISTER HANDLER FOR GAME ROUTER
+   |--------------------------------------------------------------------------
+   |
+   |    job    : the following registers a router requested by the client
+   |    return : a Result of type either successful or error response
+   |
+   |
+
+*/
+
+
+
+
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
