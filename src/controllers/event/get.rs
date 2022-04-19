@@ -28,7 +28,7 @@ use hyper::http::Uri;
 // -------------------------------- get all events controller
 //
 // -------------------------------------------------------------------------
-pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
@@ -100,7 +100,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
 // -------------------------------- get a single event controller
 //
 // -------------------------------------------------------------------------
-pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     

@@ -33,7 +33,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 //
 // -------------------------------------------------------------------------
 
-pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -229,7 +229,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
 // -------------------------------- get all sides controller
 //
 // -------------------------------------------------------------------------
-pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
@@ -298,7 +298,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Respo
 // -------------------------------- disable side controller
 //
 // -------------------------------------------------------------------------
-pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     

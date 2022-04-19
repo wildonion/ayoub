@@ -34,7 +34,7 @@ use serde::{Serialize, Deserialize}; //-- to use the deserialize() and serialize
 //
 // -------------------------------------------------------------------------
 
-pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     

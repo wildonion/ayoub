@@ -22,8 +22,6 @@ https://docs.near.org/docs/tutorials/contracts/nfts/marketplace
 
 
 
-http://ftp.cvut.cz/kernel/people/geoff/cell/ps3-linux-docs/CellProgrammingTutorial/BasicsOfSIMDProgramming.html#:~:text=SIMD%20is%20short%20for%20Single,data%20is%20called%20scalar%20operations.
+
 https://fasterthanli.me/articles/peeking-inside-a-rust-enum
-macros and enum for storage keys
-Actor: multithreading + async message passing
-Service: async function from a request to a reponse used for writing middlewares and resuable network modules 
+https://fasterthanli.me/articles/pin-and-suffering

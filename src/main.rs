@@ -29,15 +29,9 @@ Coded by
 
 
 
-mod middlewares;
-mod utils;
-mod constants;
-mod contexts;
-mod schemas;
-mod controllers;
-mod routers;
-mod services;
 
+// #![allow(unused)] //-- will let the unused vars be there
+#![macro_use] //-- apply the macro_use attribute to the root cause it's an inner attribute and will be effect on all things inside this crate 
 
 
 
@@ -49,6 +43,19 @@ use tokio::sync::oneshot;
 use hyper::server::Server;
 // use crate::contexts as ctx;
 use self::contexts as ctx;
+
+
+
+
+mod middlewares;
+mod utils;
+mod constants;
+mod contexts;
+mod schemas;
+mod controllers;
+mod routers;
+mod services;
+
 
 
 

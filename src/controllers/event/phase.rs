@@ -32,7 +32,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 //
 // -------------------------------------------------------------------------------------
 
-pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{ //-- inserting a new passed event for the current event
+pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- inserting a new passed event for the current event
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 

@@ -34,7 +34,7 @@ use hyper::http::Uri;
 //
 // -------------------------------------------------------------------------
 
-pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -215,7 +215,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
 //
 // -------------------------------------------------------------------------
 
-pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -391,7 +391,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> Result<hype
 //
 // -------------------------------------------------------------------------
 
-pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -569,7 +569,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> Result<hy
 //
 // -------------------------------------------------------------------------
 
-pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -739,7 +739,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Res
 //
 // ----------------------------------------------------------------------------------
 
-pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -908,7 +908,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
 //
 // ----------------------------------------------------------------------------------
 
-pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 

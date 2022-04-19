@@ -2,7 +2,7 @@
 
 
 
-
+use crate::constants::*;
 use futures::Future;
 use mongodb::Client;
 use uuid::Uuid;
@@ -54,9 +54,9 @@ impl Api{
         }
     }
     
-    pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> Result<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
+    pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C, //-- capturing by mut T
-                        C: Future<Output=Result<hyper::Response<Body>, hyper::Error>> + Send, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
+                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
     {
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();
@@ -66,9 +66,9 @@ impl Api{
     }
 
 
-    pub async fn get<F, C>(mut self, endpoint: &str, mut cb: F) -> Result<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
+    pub async fn get<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C, //-- capturing by mut T
-                        C: Future<Output=Result<hyper::Response<Body>, hyper::Error>> + Send, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
+                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
     {
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();

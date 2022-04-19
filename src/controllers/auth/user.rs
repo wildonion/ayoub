@@ -31,7 +31,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 //
 // -------------------------------------------------------------------------
 
-pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 

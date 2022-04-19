@@ -18,7 +18,7 @@ use hyper::{header, StatusCode, Body, Response};
 //
 // -------------------------------------------------------------------------
 
-pub async fn main() -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn main() -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
     let res = Response::builder(); //-- creating a new response cause we didn't find any available route
     let response_body = ctx::app::Response::<ctx::app::Nill>{

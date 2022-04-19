@@ -31,7 +31,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 //
 // -------------------------------------------------------------------------
 
-pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -241,7 +241,7 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
 //
 // -------------------------------------------------------------------------
 
-pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
 
@@ -418,7 +418,7 @@ pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Re
 // -------------------------------- get all groups controller
 //
 // -------------------------------------------------------------------------
-pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     

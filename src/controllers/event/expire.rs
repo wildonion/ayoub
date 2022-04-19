@@ -24,7 +24,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 // -------------------------------- expire event controller
 //
 // -------------------------------------------------------------------------
-pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     

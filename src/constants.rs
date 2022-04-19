@@ -5,7 +5,7 @@
 
 
 pub type GenericError = Box<dyn std::error::Error + Send + Sync>;
-// pub type Result<T> = std::result::Result<T, GenericError>;
+pub type GenericResult<T, E> = std::result::Result<T, E>;
 pub static INTERNAL_SERVER_ERROR: &str = "Interal Server Error";
 pub static WRONG_CREDENTIALS: &str = "Wrong Credentials";
 pub static WELCOME: &str = "Welcome Home";

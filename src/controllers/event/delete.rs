@@ -27,7 +27,7 @@ use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to th
 // -------------------------------- delete event controller
 //
 // -------------------------------------------------------------------------
-pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> Result<hyper::Response<Body>, hyper::Error>{
+pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
