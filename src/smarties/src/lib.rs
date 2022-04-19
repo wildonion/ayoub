@@ -53,7 +53,7 @@ pub struct Contract{
 
 
 #[derive(BorshSerialize)]
-pub enum Storagekey{ //-- the size of this enum is the largest size of the variant - helper enum for keys of the persistent collections - storage keys are simply the prefixes used for the collections and helps avoid data collision
+pub enum Storagekey{ //-- the size of this enum is equal to a variant with largest size - helper enum for keys of the persistent collections - storage keys are simply the prefixes used for the collections and helps avoid data collision
     TokensPerOwner,
     TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- a structure with a field of type CryptoHash which is a raw type for 32 bytes of the hash
     TokensById,
