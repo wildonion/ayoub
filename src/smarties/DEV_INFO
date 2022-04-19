@@ -8,7 +8,6 @@
 
 account name: wildonion.testnet
 private key: praise purse gather only inmate wire impulse isolate inch vendor labor fringe
-http://ftp.cvut.cz/kernel/people/geoff/cell/ps3-linux-docs/CellProgrammingTutorial/BasicsOfSIMDProgramming.html#:~:text=SIMD%20is%20short%20for%20Single,data%20is%20called%20scalar%20operations.
 https://developers.facebook.com/blog/post/2020/09/30/build-discord-bot-with-rust-and-serenity/
 https://betterprogramming.pub/writing-a-discord-bot-in-rust-2d0e50869f64
 https://github.com/near/near-sdk-rs
@@ -19,15 +18,12 @@ https://docs.near.org/docs/develop/contracts/rust/near-sdk-rs#
 https://docs.near.org/docs/tutorials/contracts/xcc-receipts
 https://docs.near.org/docs/tutorials/contracts/xcc-rust-cheatsheet
 https://docs.near.org/docs/tutorials/contracts/xcc-rust
-https://docs.near.org/docs/tutorials/contracts/nfts/minting-nfts
-https://docs.near.org/docs/tutorials/contracts/nfts/skeleton
-https://docs.near.org/docs/tutorials/contracts/nfts/minting
 https://docs.near.org/docs/tutorials/contracts/nfts/marketplace
 
 
 
-nft minting api on near using compile smarties code 
-nft and nft mkplc code structure
-paas cli & nazin pay
-send OTP response API from career issue with serde parser 
-tuts for bitdad & skynight nfts on bitzio nft mkplace & youtube streaming on git repos + discord
+http://ftp.cvut.cz/kernel/people/geoff/cell/ps3-linux-docs/CellProgrammingTutorial/BasicsOfSIMDProgramming.html#:~:text=SIMD%20is%20short%20for%20Single,data%20is%20called%20scalar%20operations.
+https://fasterthanli.me/articles/peeking-inside-a-rust-enum
+macros and enum for storage keys
+Actor: multithreading + async message passing
+Service: async function from a request to a reponse used for writing middlewares and resuable network modules 

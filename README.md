@@ -1,44 +1,20 @@
-# ☣️ Build Ayoub Servers
+# ☢️ Usage
 
 ```console
-$ cargo build --bin ayoub --release
+$ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 ```
 
-* ☢️ To run the `event` server: `./ayoub auth 7436`
+## 📌 TODOs
 
-* ☢️ To run the `auth` server: `./ayoub event 7435`
+* OTP response serde parser issue + API token
 
-* ☢️ To run the `game` server: `./ayoub event 7437`
+* reserve APIs + API token
 
-# 🧿 God Access
+* smarties family tree nft contract + nft ayoub APIs
 
-* Create the deck
-
-* Create the event
-
-* Attach the deck id for the created event
-
-* Can update the role, side, ability for a player and phases for the event
-
-* Can chain two players together
-
-# 🎎 Player Access
-
-* Reserve and pay for the event and his/her role
-
-> Behalf of the user the server will assign the role_id and side_id for the user
-
-# 📌 TODOs
-
-* **Zarinpal API token**
-
-* **OTP API token**
-
-* **postman collection (status and access level constants + unix timestamps)**
-
-* **fandogh.cloud for devops**
+* make a PaaS cli for ayoub a framework 
 
 * complete all todos
 
-* test whole APIs
+* postman collection (status and access level constants + unix timestamps doc)
 

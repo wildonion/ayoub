@@ -114,8 +114,8 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/get/group/all".to_string();
             get_groups(app_storage, app).await
         },
-        (&Method::POST, "/game/update/group/") => {
-            app.name = "/game/update/group/".to_string();
+        (&Method::POST, "/game/god/update/group/") => {
+            app.name = "/game/god/update/group/".to_string();
             update_group(app_storage, app).await
         },
         _                                 => not_found().await,
