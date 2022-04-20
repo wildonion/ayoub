@@ -41,8 +41,8 @@ impl Contract{ //-- we've defined the internal_add_token_to_owner() method of th
     pub fn internal_add_token_to_owner(&mut self, account_id: &AccountId, token_id: &TokenId){ //-- we've defined the self to be mutable and borrowed cause we want to add the account_id and minted token to tokens_per_owner field - add the minted token to the set of token an owner has
 
         let mut tokens_set = self.tokens_per_owner.get(account_id).unwrap_or_else(|| { //-- getting the set of token_id(s) for the given account out of the LookupMap or create a new set for the given account inside the closure
-            UnorderedSet::new( //-- if the account (minter) doesn't have any tokens related to the token_id, we create a new unordered set to save the minted token_id for the current account_id as his/her first NFT
-            Storagekey::TokenPerOwnerInner{ //-- getting a new unique prefix or key from the enum for the storage of the current collection which is the TokenPerOwnerInner variant struct 
+            UnorderedSet::new( //-- if the account (minter) doesn't have any tokens related to the token_id, we create a new unordered set to save the minted token_id for the current account_id as his/her first NFT 
+            Storagekey::TokenPerOwnerInner{ //-- choosing a new unique prefix or key from the enum for the storage of the current collection which is the TokenPerOwnerInner variant struct 
                         account_id_hash: hash_account_id(&account_id), //-- getting the hash of the current account_id
                 } //-- our current storage (also current variant) is the TokenPerOwnerInner struct
                 .try_to_vec() //-- converting the selected storage key into a vector of u8
