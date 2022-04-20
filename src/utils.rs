@@ -188,9 +188,9 @@ pub fn string_to_static_str(s: String) -> &'static str {
 macro_rules! test {
     () => {
         
+        // TODO - build custom inner and outter macro attributes and derive like; on fields, modules and functions like #[near_bindgen] and #[derive(Clone)] style 
+        // NOTE - #[..] applies an attribute to the thing after it and #![..] applies an attribute to the containing thing
+        // ...
+        
     };
 }
-
-// TODO - build custom inner and outter macro attributes and derive like; on fields, modules and functions like #[near_bindgen] and #[derive(Clone)] style 
-// NOTE - #[..] applies an attribute to the thing after it and #![..] applies an attribute to the containing thing
-// ...

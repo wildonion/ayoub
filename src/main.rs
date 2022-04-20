@@ -30,7 +30,7 @@ Coded by
 
 
 
-// #![allow(unused)] //-- will let the unused vars be there
+// #![allow(unused)] //-- will let the unused vars be there - we have to put this on top of everything to affect the whole crate
 #![macro_use] //-- apply the macro_use attribute to the root cause it's an inner attribute and will be effect on all things inside this crate 
 
 
@@ -41,8 +41,7 @@ use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;
 use hyper::server::Server;
-// use crate::contexts as ctx;
-use self::contexts as ctx;
+use self::contexts as ctx; // use crate::contexts as ctx;
 
 
 

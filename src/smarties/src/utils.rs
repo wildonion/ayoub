@@ -6,12 +6,12 @@
 
 
 use std::{sync::mpsc, thread, time::Instant}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T
-use near_sdk::env;
+use crate::*;  // load all defined crates, structs and functions from the root crate which is lib.rs in our case
 
 
 
 
-// NOTE - since can't compile socket in lib (wasm and bpf) mode, contracts can't interact with their outside worlds thus we can't have whether tokio or any web framework to handle async functions
+
 
 
 
@@ -24,12 +24,14 @@ use near_sdk::env;
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
+// NOTE - since can't compile socket in lib (wasm and bpf) mode, contracts can't interact with their outside worlds thus we can't have whether tokio or any web framework to handle async functions
 pub fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8) -> u8 + std::marker::Send + 'static + Clone{ //-- in order to move the F between threads it must be bounded to Send trait
         
         
     let threads = 4; //-- the total number of all packs or chunks containing 8 bits which in this case is 4 cause our number is of type u32
     let (sender, receiver) = mpsc::channel::<u8>();
     let big_end_bytes = number.to_be_bytes(); //-- network bytes - since there are 4 chunks of 8 bits in the context of u32 bits there will be 4 chunks of 8 bits each chunk between 0 up to 255 
+    let vector_of_big_end_bytes = Vec::<u8>::from(big_end_bytes); //-- converting [u8] bytes to Vec<u8> using from() methods of the From trait implemented for the Vec type
     let mut index = 0;
     
 
@@ -120,4 +122,21 @@ pub fn simd_ops(){ //-- this function can't be invoked directly on the blockchai
         },
     }
 
+}
+
+
+
+
+
+
+#[derive(BorshSerialize)]
+pub enum Storagekey{ //-- each variant is the key as the current storage; the size of this enum is equal to a variant with largest size - helper enum for keys of the persistent collections - storage keys are simply the prefixes used for the collections and helps avoid data collision
+    TokensPerOwner,
+    TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex
+    TokensById,
+    TokenMetadataById,
+    NFTContractMetadata,
+    TokensPerType,
+    TokensPerTypeInner{token_type_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex
+    TokenTypesLocked,
 }
