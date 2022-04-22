@@ -10,7 +10,7 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * reserve APIs + API token
 
-* smarties family tree nft contract + nft ayoub APIs
+* ayoub nft APIs for deployed bluerangene contract's methods
 
 * make a PaaS cli for ayoub a framework 
 

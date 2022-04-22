@@ -1,7 +1,75 @@
 
 
 
+/*
 
+
+    ## About the `simd` function
+
+    [Question](https://quera.org/problemset/113613/)
+
+
+    ### Inputs
+
+    * An operation function
+    * u32 bits number
+
+    ### Output
+
+    * u32 bits number
+
+
+    ### Sample Input
+
+    * _heavy_func_
+    * _3985935_
+
+    ### Sample Output on Equal Condition
+
+    ```console
+    INFO  utils > chunk 0 in utf8 format -> [0] at time 2022-03-16T18:19:47.883156
+    INFO  utils > chunk 1 in utf8 format -> [60] at time 2022-03-16T18:19:47.885159800
+    INFO  utils > chunk 2 in utf8 format -> [210] at time 2022-03-16T18:19:47.885159800
+    INFO  simd  >  --------Doing some heavy operation on chunk [0]
+    INFO  utils > chunk 3 in utf8 format -> [15] at time 2022-03-16T18:19:47.885159800
+    INFO  simd  >  --------Doing some heavy operation on chunk [60]
+    INFO  utils >  sender-channel---(chunk 0)---receiver-channel at time 2022-03-16T18:19:47.885159800
+    INFO  simd  >  --------Doing some heavy operation on chunk [210]
+    INFO  utils > collecting all chunks received from the receiver at time 2022-03-16T18:19:47.886155
+    INFO  utils >  sender-channel---(chunk 1)---receiver-channel at time 2022-03-16T18:19:47.886155
+    INFO  simd  >  --------Doing some heavy operation on chunk [15]
+    INFO  utils >  sender-channel---(chunk 2)---receiver-channel at time 2022-03-16T18:19:47.886155
+    INFO  utils >  sender-channel---(chunk 3)---receiver-channel at time 2022-03-16T18:19:47.887157100
+    INFO  utils > collected bytes -> [0, 60, 210, 15] at time 2022-03-16T18:19:47.887157100
+    INFO  simd  > ::::: the result is 3985935 - [it might be different from the input] - | cost : 4.0779
+    ```
+
+    ### Sample Output on Unequal Condition
+
+    ```console
+    INFO  utils > chunk 0 in utf8 format -> [0] at time 2022-03-16T18:20:57.775299
+    INFO  utils > chunk 1 in utf8 format -> [60] at time 2022-03-16T18:20:57.776326200
+    INFO  simd  >  --------Doing some heavy operation on chunk [0]
+    INFO  utils > chunk 2 in utf8 format -> [210] at time 2022-03-16T18:20:57.779358200
+    INFO  utils > chunk 3 in utf8 format -> [15] at time 2022-03-16T18:20:57.780341
+    INFO  utils >  sender-channel---(chunk 0)---receiver-channel at time 2022-03-16T18:20:57.780341
+    INFO  simd  >  --------Doing some heavy operation on chunk [60]
+    INFO  utils >  sender-channel---(chunk 1)---receiver-channel at time 2022-03-16T18:20:57.783330100
+    INFO  utils > collecting all chunks received from the receiver at time 2022-03-16T18:20:57.782328700
+    INFO  simd  >  --------Doing some heavy operation on chunk [15]
+    INFO  simd  >  --------Doing some heavy operation on chunk [210]
+    INFO  utils >  sender-channel---(chunk 3)---receiver-channel at time 2022-03-16T18:20:57.787324900
+    INFO  utils >  sender-channel---(chunk 2)---receiver-channel at time 2022-03-16T18:20:57.788324300
+    INFO  utils > collected bytes -> [0, 60, 15, 210] at time 2022-03-16T18:20:57.790324800
+    INFO  simd  > ::::: the result is 3936210 - [it might be different from the input] - | cost : 15.9839
+    ```
+
+    ### The Beauty of Concurrency!
+
+    **NOTE** - Due to the time which takes to send and receive each chunks inside threads through the `mpsc` channel asyncly, the result might be different on each run and it depends on the system, but here at first run both input and the result got into an equality condition.
+
+
+*/
 
 
 
@@ -129,9 +197,33 @@ pub fn simd_ops(){ //-- this function can't be invoked directly on the blockchai
 
 
 
-#[derive(BorshSerialize)]
-pub enum Storagekey{ //-- each variant is the key as the current storage; the size of this enum is equal to a variant with largest size - helper enum for keys of the persistent collections - storage keys are simply the prefixes used for the collections and helps avoid data collision
-    TokensPerOwner,
+/*
+    ---------------------------------
+
+        NOTE - none struct variant in Storagekey enum allocates zero byte for the current persistent storage once the tag point to its address 
+        NOTE - tag is a 64 bits or 8 bytes pointer and is big enough to store the current vairant address
+        NOTE - an enum is the size of the maximum of its variants plus a discriminant value to know which variant it is, rounded up to be efficiently aligned, the alignment depends on the platform
+        NOTE - an enum and its tag size with one variant is equals to the size of that variant
+        NOTE - an enum size wit more than one variant is equals to a variant with largest size + 8 bytes tag cause 
+        NOTE - enum size with a single f64 type variant would be 8 bytes and with four f64 variants would be 16 bytes cause one 8 bytes wouldn't be enough because there would be no room for the tag.
+        NOTE - enum has an extra size like 8 bytes for its tag which tells use which variant we have right now, but rust uses null pointer optimization instead of allocating 8 bytes tag 
+        NOTE - null pointer optimization means a reference can never be null such as Option<&T> which is a pinter with 8 bytes length thus rust uses that reference or pointer as the tag with 8 bytes length for the current variant  
+        NOTE - the size of the following enum is 28 (is equals to its largest variant size which belongs to the Text variant) + 8 (the tag size) bytes 
+
+        pub enum UserID {
+            Number(u64),
+            Text(String),
+        }
+
+    ---------------------------------
+*/
+#[derive(BorshSerialize)] // NOTE - since UnorderedMap, LookupMap and UnorderedSet each one takes a vector of u8 as their key_prefix argument we have to bound the Storagekey enum to BorshSerialize trait to convert each variant into a vector of u8 using try_to_vec() method of the BorshSerialize trait 
+// -> we've used an enum based storage key for better memory efficiency and avoiding data collision to keeps track of the persistent storage taken by the current collection (one of the following variant). 
+// -> data collision could happen by UnorderedMap, LookupMap or UnorderedSet cause these hashmap based structure generate a hash from their keys. 
+// -> in order not to have a duplicate key entry inside hashmap based structures we can use enum to avoid having some hash collision with two distinct keys.
+// -> with enum we can be sure that there will be only one collection (one of the following variant) at a time inside the storage that has been pointed by the enum tag.
+pub enum Storagekey{ 
+    TokensPerOwner, 
     TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex
     TokensById,
     TokenMetadataById,

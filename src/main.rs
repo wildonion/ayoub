@@ -70,13 +70,12 @@ mod services;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic type can also be bounded to lifetime and traits - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime
     
     
 
-    // run auth server  => ./ayoub auth 7436
-    // run event server => ./ayoub event 7435
-    // run game server  => ./ayoub game 7437
+
+
     
 
 

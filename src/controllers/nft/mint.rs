@@ -18,7 +18,7 @@ use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to th
 
 
 
-// TODO - mint nft using deployed smarties contracts
+
 
 
 
@@ -32,6 +32,16 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
     api.post("/event/add", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+        
+        
+        
+        
+        // calling mint method of the deployed bluerangene contract 
+        // ...
+        // near call $NFT_CONTRACT_ID nft_mint '{"token_id": "token-1", "metadata": {"title": "My Non Fungible Team Token", "description": "The Team Most Certainly Goes :)", "media": "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif"}, "receiver_id": "'$NFT_CONTRACT_ID'"}' --accountId $NFT_CONTRACT_ID --amount 0.1
+        
+
+
         let res = Response::builder(); //-- creating a new response cause we didn't find any available route
         let response_body = ctx::app::Response::<ctx::app::Nill>{
             message: NOTFOUND_ROUTE,

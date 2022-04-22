@@ -2,9 +2,6 @@
 
 
 
-// token info (metadata, json and etc...) structures
-// ...
-
 
 
 use crate::*; // load all defined crates, structs and functions from the root crate which is lib.rs in our case
@@ -71,13 +68,13 @@ pub struct JsonToken{ //-- the token json info which will be returned from view 
 }
 
 
-pub trait NoneFungibleTokenMetadata{ //-- defining an object safe trait for NFT queries, we'll implement this for any contract that wants to interact with NFT queries - object safe trait won't return Self or have generic params in its methods 
-    fn nft_metadata(&self) -> NFTContractMetadata; //-- the return type is of type NFTContractMetadata struct 
+pub trait NoneFungibleTokenMetadata{ //-- defining an object safe trait for NFT metadata queries, we'll implement this for any contract that wants to interact with NFT metadata queries - object safe traits are not bounded to trait Sized thus they won't return Self or have generic params in its methods if so then some space shoul have been allocated inside the memory for Self or that generic param and it wasn't no longer an abstract type  
+    fn nft_metadata(&self) -> NFTContractMetadata; //-- the return type is of type NFTContractMetadata struct - we should borrow the self (&self) as far as we can
 }
 
 
-#[near_bindgen] //-- implementing the near_bindgen attribute on the trait implementation for Contract struct to also have a compiled trait for this struct 
-impl NoneFungibleTokenMetadata for Contract{ //-- implementing the NoneFungibleTokenMetadata trait for our main Contract struct; bounding the mentioned trait to the Contract struct to query NFT infos
+#[near_bindgen] //-- implementing the near_bindgen attribute on the trait implementation for the Contract struct in order to have a compiled trait for this struct 
+impl NoneFungibleTokenMetadata for Contract{ //-- implementing the NoneFungibleTokenMetadata trait for our main Contract struct; bounding the mentioned trait to the Contract struct to query NFT metadata infos
     fn nft_metadata(&self) -> NFTContractMetadata{ //-- overriding the nft_metadata() method
         self.metadata.get().unwrap() //-- since metadata field is inside the LazyOption we must get the actual data itself using get() method which will return the type (NFTContractMetadata in our case) inside an Option
     }
