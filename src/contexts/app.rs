@@ -142,15 +142,15 @@ pub struct Storage{
 
 
 #[derive(Copy, Clone, Debug)]
-pub enum Mode{
-    On,
-    Off,
+pub enum Mode{ //-- enum uses 8 bytes tag which is a pointer pointing to the current variant - the total size of this enum is 8 bytes tag + the largest variant size = 8 + 0 = 8 bytes
+    On, //-- zero byte size
+    Off, //-- zero byte size
 }
 
 
 
 #[derive(Copy, Clone, Debug)]
-pub enum AppError{ //-- enum like union shares a common memory location between all its fields that means the space an enum needs is as much as the largest variant but unlike union uses some extra memory to keep track of the enum variant
+pub enum AppError{ //-- enum like union shares a common memory location between all its fields that means the space an enum needs is as much as the largest variant but unlike union uses some extra memory to keep track of the enum variant which is called tag and is a pointer with 8 bytes length 
     OnRuntime, //-- caused by too much loading and requests
     OnStorage, //-- caused by storage services errors 
 }

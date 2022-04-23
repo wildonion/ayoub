@@ -8,11 +8,14 @@ use crate::*; // load all defined crates, structs and functions from the root cr
 
 
 
+// NOTE - methods and function in here don't need to be compiled to wasm cause they're internal functions
+// NOTE - can't use #[payable] and #[private] attributes on a none #[near_bindgen] attribute on the Contract implementation 
 
 
-pub fn hash_account_id(account_id: &AccountId) -> CryptoHash{ //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex
-    let mut hash = CryptoHash::default(); //-- getting the default hash which will be 32 bytes of utf8 bytes (8 bits long)
-    hash.copy_from_slice(&env::sha256(account_id.as_bytes())); //-- getting the hash of the account_id from its utf8 bytes
+
+pub fn hash_account_id(account_id: &AccountId) -> CryptoHash{ //-- we'll pass the account_id as a borrowed type to this function - account_id in CryptoHash format is a 32 bytes or 256 bits which will be 64 chars in hex
+    let mut hash = CryptoHash::default(); //-- getting the default hash which will be 32 bytes of utf8 bytes (8 bits long for each)
+    hash.copy_from_slice(&env::sha256(account_id.as_bytes())); //-- extending the defined hash with the borrowed type of the bytes of the hash of the account_id by converting its String into utf8 bytes first
     hash
 }
 
@@ -22,14 +25,13 @@ pub fn refund_deposit(storage_used: u64){ //-- refunding the initial deposit bas
     let attached_deposit = env::attached_deposit(); //-- getting the attached deposit - attached_deposit() method will get the balance that was attached to the call that will be immediately deposited before the contract execution starts; this is the minimum balance required to call the nft_mint() method 0.1 $NEAR is attached and the caller will get refunded any excess that is unused at the end 
     assert!(required_cost <= attached_deposit, "Need {} yocto$NEAR to mint", required_cost); //-- 1 yocto is 10^-24
     let refund = attached_deposit - required_cost; //-- refunding the owner account by subtracting the required_cost from his/her attached_deposit in yocto$NEAR
-    if refund > 1{ //-- if the refund was greater than 1 yocto$NEAR, means we have to get pay back the remaining deposit as a refund to the predecessor account
-        Promise::new(env::predecessor_account_id()).transfer(refund); //-- transfer the refund to the predecessor account which is the one who is minting this NFT - we've used Promise object here cause we're transfering some $NEARs asyncly 
+    if refund > 1{ //-- if the refund was greater than 1 yocto$NEAR, means we have to get pay back the remaining deposit as a refund to the predecessor account or the signer of this contract - refund is of type u128 or 16 bytes
+        Promise::new(env::predecessor_account_id()).transfer(refund); //-- transfer the refund to the predecessor account or the signer which is the one who is minting this NFT - we've created a Promise object here with the predecessor account to transfer some $NEARs asyncly 
     }
-
 }
 
 
-impl Contract{ //-- we've defined the internal_add_token_to_owner() method of the Contract struct in this crate cause this crate is related to all internal calculation functions and methods - we don't need to add #[near_bindgen] attribute on this impl cause we've already put inside the lib.rs on the frist implementation
+impl Contract{ //-- we've defined the internal_add_token_to_owner() method of the Contract struct in this crate cause this crate is related to all internal calculation functions and methods - we don't need to add #[near_bindgen] attribute on this impl cause this is a none exporting methods and won't compile to wasm
 
     pub fn internal_add_token_to_owner(&mut self, account_id: &AccountId, token_id: &TokenId){ //-- we've defined the self to be mutable and borrowed cause we want to add the account_id and minted token info to tokens_per_owner field and have the isntance with a valid lifetime after calling this method on it - add the minted token to the set of token an owner has first
         let mut tokens_set = self.tokens_per_owner.get(account_id).unwrap_or_else(|| { //-- getting the set of token_id(s) for the given account out of the LookupMap or create a new set for the given account inside the closure

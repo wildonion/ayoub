@@ -73,7 +73,7 @@ pub trait NoneFungibleTokenMetadata{ //-- defining an object safe trait for NFT 
 }
 
 
-#[near_bindgen] //-- implementing the near_bindgen attribute on the trait implementation for the Contract struct in order to have a compiled trait for this struct 
+#[near_bindgen] //-- implementing the #[near_bindgen] attribute on the trait implementation for the Contract struct in order to have a compiled wasm trait for this struct 
 impl NoneFungibleTokenMetadata for Contract{ //-- implementing the NoneFungibleTokenMetadata trait for our main Contract struct; bounding the mentioned trait to the Contract struct to query NFT metadata infos
     fn nft_metadata(&self) -> NFTContractMetadata{ //-- overriding the nft_metadata() method
         self.metadata.get().unwrap() //-- since metadata field is inside the LazyOption we must get the actual data itself using get() method which will return the type (NFTContractMetadata in our case) inside an Option

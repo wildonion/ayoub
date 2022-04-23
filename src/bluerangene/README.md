@@ -5,7 +5,6 @@
 1. Install Rust from https://rustup.rs/
 2. Install WSL and ```sudo apt update && sudo apt install build-essential```
 3. Install near cli using ```npm install -g near-cli``` command
-4. Run ```rustup target add wasm32-unknown-unknown```
 5. Create near [testnet](https://wallet.testnet.near.org/) or [mainnet](https://wallet.near.org/) account
 
 > To deploy on _mainnet_ you should have an account on mainnet like _wildonion.near_.

@@ -200,14 +200,12 @@ pub fn simd_ops(){ //-- this function can't be invoked directly on the blockchai
 /*
     ---------------------------------
 
-        NOTE - none struct variant in Storagekey enum allocates zero byte for the current persistent storage once the tag point to its address 
-        NOTE - tag is a 64 bits or 8 bytes pointer and is big enough to store the current vairant address
-        NOTE - an enum is the size of the maximum of its variants plus a discriminant value to know which variant it is, rounded up to be efficiently aligned, the alignment depends on the platform
-        NOTE - an enum and its tag size with one variant is equals to the size of that variant
-        NOTE - an enum size wit more than one variant is equals to a variant with largest size + 8 bytes tag cause 
-        NOTE - enum size with a single f64 type variant would be 8 bytes and with four f64 variants would be 16 bytes cause one 8 bytes wouldn't be enough because there would be no room for the tag.
-        NOTE - enum has an extra size like 8 bytes for its tag which tells use which variant we have right now, but rust uses null pointer optimization instead of allocating 8 bytes tag 
+        NOTE - enum has an extra size like 8 bytes, a 64 bits pointer which is big enough to store the current vairant address for its tag which tells use which variant we have right now, but rust uses null pointer optimization instead of allocating 8 bytes tag  
         NOTE - null pointer optimization means a reference can never be null such as Option<&T> which is a pinter with 8 bytes length thus rust uses that reference or pointer as the tag with 8 bytes length for the current variant  
+        NOTE - none struct variants in Storagekey enum allocates zero byte for the current persistent storage once the tag point to their address at a time 
+        NOTE - an enum is the size of the maximum of its variants plus a discriminant value to know which variant it is, rounded up to be efficiently aligned, the alignment depends on the platform
+        NOTE - an enum size is equals to a variant with largest size + 8 bytes tag
+        NOTE - enum size with a single f64 type variant would be 8 bytes and with four f64 variants would be 16 bytes cause one 8 bytes (the tag) wouldn't be enough because there would be no room for the tag
         NOTE - the size of the following enum is 28 (is equals to its largest variant size which belongs to the Text variant) + 8 (the tag size) bytes 
 
         pub enum UserID {
@@ -224,11 +222,11 @@ pub fn simd_ops(){ //-- this function can't be invoked directly on the blockchai
 // -> with enum we can be sure that there will be only one collection (one of the following variant) at a time inside the storage that has been pointed by the enum tag.
 pub enum Storagekey{ 
     TokensPerOwner, 
-    TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex
+    TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex which is the account_id length
     TokensById,
     TokenMetadataById,
     NFTContractMetadata,
     TokensPerType,
-    TokensPerTypeInner{token_type_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex
+    TokensPerTypeInner{token_type_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex which is the account_id length
     TokenTypesLocked,
 }

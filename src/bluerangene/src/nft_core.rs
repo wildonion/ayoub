@@ -24,7 +24,7 @@ pub trait NoneFungibleTokenCore{ //-- defining a trait for NFT core queries, we'
 
 
 
-#[near_bindgen] //-- implementing the near_bindgen attribute on the trait implementation for the Contract struct in order to have a compiled trait for this struct 
+#[near_bindgen] //-- implementing the #[near_bindgen] attribute on the trait implementation for the Contract struct in order to have a compiled trait for this struct 
 impl NoneFungibleTokenCore for Contract{ //-- implementing the NoneFungibleTokenMetadata trait for our main Contract struct; bounding the mentioned trait to the Contract struct to query NFT metadata infos
 
     #[payable] //-- means the following would be a payable method and the caller must pay for that 
