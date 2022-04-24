@@ -157,7 +157,7 @@ pub enum AppError{ //-- enum like union shares a common memory location between 
 
 
 #[derive(Clone, Debug)]
-pub struct Cli{
+pub struct Cli{ // https://rust-cli.github.io/book/index.html
     pub service_name: String, // TODO - service_name argument
     pub port: u16, // TODO - port argument
 }
@@ -168,13 +168,18 @@ pub struct Cli{
 pub struct Response<'m, T>{
     pub data: Option<T>,
     pub message: &'m str,
-    pub status: u32,
+    pub status: u16,
 }
 
 
 
 #[derive(Serialize, Deserialize)]
 pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside the data field of the Response struct - 'n is the lifetime of the &[u8] type cause every pointer needs a lifetime in order not to point to an empty location inside the memory
+
+
+
+#[derive(Serialize, Deserialize)]
+pub struct LinkToRuntime(pub u64) //-- TODO - save a pointer with length of u64 bits or 8 bytes (big enough to store in memory) of the current runtime location address inside the memory 
 
 
 

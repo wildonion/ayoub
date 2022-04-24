@@ -3,36 +3,25 @@
 
 
 
-TASK2
 
 account name: wildonion.testnet
 private key: praise purse gather only inmate wire impulse isolate inch vendor labor fringe
 https://developers.facebook.com/blog/post/2020/09/30/build-discord-bot-with-rust-and-serenity/
 https://betterprogramming.pub/writing-a-discord-bot-in-rust-2d0e50869f64
 https://near.org/downloads/Nightshade.pdf
-https://nomicon.io/
-https://github.com/near/near-sdk-rs
 https://github.com/near/near-sdk-rs/tree/master/examples/cross-contract-calls/high-level
 https://github.com/near-examples/NFT
 https://github.com/near-examples/nft-tutorial
 https://docs.near.org/docs/tutorials/contracts/nfts/marketplace
-
-
-
-
-TASK1
-
-https://nomicon.io/NetworkSpec/RoutingTableExchangeAlgorithm
-https://docs.near.org/docs/tutorials/contracts/xcc-rust-cheatsheet
-https://docs.near.org/docs/tutorials/contracts/xcc-rust
 https://docs.near.org/docs/tutorials/contracts/xcc-receipts
-https://docs.near.org/docs/tutorials/contracts/nfts/minting
-https://nomicon.io/NetworkSpec/Messages
-https://github.com/near-examples/nft-tutorial/blob/2.minting/nft-contract/src/nft_core.rs
+https://docs.near.org/docs/tutorials/contracts/xcc-rust-cheatsheet
+https://learn.figment.io/protocols/near
+https://www.near-sdk.io/
 
-promise or future object can be scheduled to run some action or pass message between contracts asyncly
-deploy and run the contract
+
+
+https://www.openwebcollective.com/post/650k-accelerator-investment-deal
+https://docs.near.org/docs/tutorials/contracts/nfts/upgrade-contract#upgrading-contracts => deploy and test the contract
+impl Service, Actor for Server
 PhantomData
-
-
-
+arvan VoD

@@ -4,66 +4,97 @@
 
 
 
-                                                             *** NEAR CONTRACTS IS BASED ON ACTOR DESIGN PATTERN ***
+                                                                                                            *** NEAR CONTRACTS IS BASED ON ACTOR DESIGN PATTERN ***
+
+
+                                                            ***********************************************************************************************************************************************
+                                                            *********** NEAR RUNTIME WILL CREATE ACTIONS RECEIPT FROM THE TRANSACTION EITHER FROM CONTRACT METHODS OR ONE OF THE FOLLOWING TYPE ***********
+                                                            ***********************************************************************************************************************************************
+                                                             pub enum Action { 
+                                                                CreateAccount(CreateAccountAction),
+                                                                DeployContract(DeployContractAction),
+                                                                FunctionCall(FunctionCallAction),
+                                                                Transfer(TransferAction),
+                                                                Stake(StakeAction),
+                                                                AddKey(AddKeyAction),
+                                                                DeleteKey(DeleteKeyAction),
+                                                                DeleteAccount(DeleteAccountAction),
+                                                            }
 
 
 
-                     Actor                                                                                                                      Actor
-              --------------------                                                                                                        --------------------                                                                                                  
-            |                     |                                                                                                     |                     |
-            |        Shard        |                                                                                                     |        Shard        |
-            |   ---------------   |                                                                                                     |   ---------------   | 
-            |  |               |  |                               [Message Passing Between Contract Actors]                             |  |               |  |
-            |  | Alice Account |  |         <---------- promise or future object contains data like funding balance ---------->         |  |  Bob Account  |  |
-            |  |   ----------  |  |                                                                                                     |  |   ----------  |  |
-            |  |  |contract A| |  |                                                                                                     |  |  |contract B| |  |
-            |  | / ----------  |  |                                                                                                     |  | / ----------  |  |
-            |  / ---------------  |                                                                                                     |  / ---------------  |
-             / -------------------                                                                                                       / -------------------
-           /                                                                                                                           /
-         /                                                                                                                           /
-    contract-A.wasm                                                                                                             contract-B.wasm
 
 
+
+                     Actor                                                                                                                          Actor
+              --------------------                                                                                                           --------------------                                                                                                  
+            |                     |                                                                                                        |                     |
+            |        Shard        |                                                                                                        |        Shard        |
+            |   ---------------   |                                                                                                        |   ---------------   | 
+            |  |               |  |  [Promise Message Passing (futures or receipts) Between Contract Actors Based on Pre-defined Actions]  |  |               |  |
+            |  | Alice Account |  |         <---------- promise or future object contains data like funding balance ---------->            |  |  Bob Account  |  |
+            |  |   ----------  |  |                                                                                                        |  |   ----------  |  |
+            |  |  |contract A| |  |                       ---------------- [MPSC CHANNEL] ----------------                                 |  |  |contract B| |  |
+            |  | / ----------  |  |                                                                                                        |  | / ----------  |  |
+            |  / ---------------  |                                                                                                        |  / ---------------  |
+             / -------------------                                                                                                         / -------------------
+           /                                                                                                                             /
+         /                                                                                                                             /
+    contract-A.wasm                                                                                                               contract-B.wasm
+
+
+
+0) receipts (or event inside the actor world!) are an async message which are in form of promise or future objects and will be created by runtime 
+   from every incoming transaction which contains either one of the above enum variant actions or a contract method to apply to a receiver (another contract actor)
+   and can be scheduled to be ran later by passing them between actors (blocks or shards or contracts) asyncly through mpsc channel 
+   using the address of the second contract actor. (https://docs.near.org/docs/tutorials/contracts/xcc-rust)
+   
+   
 
 1) each contract belongs to a specific account and each account belongs to a specific shard which means 
    we can pass message between contracts or shards using actor design pattern (through the address of each actor) 
    and is more like every contract is an actor and every method of a contract is a transaction of different type 
    like payable ones and none payable ones which contains the sender and receiver account id and runtime 
-   will create action actors from these transactions (they can also mutate the state inside the contract). 
+   will create action receipt or message from these transactions (they can also mutate the state inside the contract). 
 
 
-2) every contract can be wait for data coming from another contract which has been schduled before using a promise or future object
+
+2) promises are future objects which contains some async message or receipt (data receipt) and can be scheduled to run and act on a given account_id based 
+   on some action receipt (which will be created by runtime from a transaction or contract method like transfering fund to other contract or account) to run them inside 
+   other contract actors (threads) by passing them asyncly through the mpsc channel using the address object of each contract actor to solve them (join or await on them) 
+   inside other threads (contract actors) and get the result (awaited or joined response from the future or promise) of the promise after they get solved by passing the 
+   callback method from the first contract actor into the .then() of the promise object and the callback contract has the data receipt of the first contract actor.
 
 
-3) promise is like a future object contains scheduled message which can be passed between other contracts 
-   or passed through action actors (built from transaction by runtime) using a message passing pattern like mpsc channel asyncly; 
-   like transfering fund between predecessor and the receiver account or funding a contract account.
+   
+3) promise objects will be scheduled to sovle later inside other actors by passing them through mpsc channel asyncly 
+   to other actors like creating a promise of refund action receipt to refund an account or other contract actors later.
+    
 
 
-4) callback is a response from the promise that executed the async code or the future object like when we're awaiting on a future.
+4) we can await on multiple promises or future objects simultaneously in near contracts using promise_and; is more like joining on each of future object simultaneously.
 
 
-5) we can await on multiple promises or future objects simultaneously in near contracts using promise_and; is more like joining on each of future object simultaneously.
 
-
-6) since we can't have future objects in our contracts due to the fact that smart contract can't communicate with their outside 
+5) since we can't have future objects in our contracts due to the fact that smart contract can't communicate with their outside 
    world and in order to solve the future we need tokio which is a socket based framework.
 
 
 
-7) data actor contains some data for the action actor and action actor data is an Option and if it was Some means we have awaited on that action and have some data.
+6) data receipt contains some data for the action receipt and data inside the action receipt is an Option 
+   and if it was Some means we have awaited on that action and have some data.
 
 
-8) action actor contains vector of input data with their id for executing them with based on the specified action and output data 
+
+7) action receipt contains vector of input data with their id for executing them based on the specified action and output data 
    vector which indicates data id and the receiver id or the other contract actor account.
    
+
    
-9) for every incoming action actor created by runtime from each transaction; runtime checks whether we have all the data actors (data id inside the action actor) 
-   required for the execution if all the required data actors are already in the storage, runtime can apply this action actor 
-   immediately otherwise we save this actor as a postponed action actor and also we save pending data actors count and a 
-   link from pending data actors to the actor address of postponed action actor; now runtime will wait for all the 
-   missing data actors to apply the postponed action actor.
+8) for every incoming action receipt created by runtime from each transaction; runtime checks whether we have all the data receipt (data id inside the action receipt) 
+   required for the execution if all the required data receipts are already in the storage, runtime can apply this action actor immediately otherwise we save this 
+   receipt as a postponed action receipt and also we save pending data receipts count and a link from pending data receipts to the address of postponed action receipt; 
+   now runtime will wait for all the missing data receipts to apply the postponed action receipt.
 
 
 
@@ -79,7 +110,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize}; //-- self referes
 use near_sdk::collections::{LazyOption, LookupMap, UnorderedMap, UnorderedSet}; //-- LookupMap and UnorderedMap are non-iterable implementations of a map that stores their contents directly on the trie - LazyOption stores a value in the storage lazily! 
 use near_sdk::json_types::{Base64VecU8, U128}; //-- Base64VecU8 is used to serialize/deserialize Vec<u8> to base64 string
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{Gas, ext_contract, log, PromiseResult, env, near_bindgen, AccountId, Balance, CryptoHash, PanicOnDefault, Promise, PromiseOrValue}; //-- Promise struct is needed to handle async cross contract calls or message passing between contract actors - Default trait is used when we don't have init methods otherwise we have to use PanicOnDefault macro which is a helpful macro and must be used in case that the contract is required to be initialized with init methods which will be paniced on implemnted Default trait for the contract
+use near_sdk::{Gas, ext_contract, log, PromiseResult, env, near_bindgen, AccountId, Balance, CryptoHash, PanicOnDefault, Promise, PromiseOrValue}; //-- Promise struct is needed to handle async cross contract calls or message passing between contract actors - PanicOnDefault macro must be used in case that the contract is required to be initialized with init methods which will be paniced on implemnted Default trait for the contract
 use crate::utils::*;
 use crate::approval::*;
 use crate::enumeration::*;
@@ -116,7 +147,7 @@ pub mod internal;
 
 
 #[near_bindgen] //-- implementing the near_bindgen attribute on Counter struct to compile to wasm
-#[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)] //-- the struct needs to implement Default trait which NEAR will use to create the initial state of the contract upon its first usage - need for serde and codec ops - deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
+#[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)] //-- borsh is need for serde and codec ops; deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
 pub struct Contract{ //-- can't implement Default trait for this contract cause Default is not implemented for LazyOption, LookupMap and UnorderedMap structs - our contract keeps track of some mapping between owner_id, token_id and the token_metadata inside some collections
     pub owner_id: AccountId, //-- contract owner
     pub metadata: LazyOption<NFTContractMetadata>, //-- keeps track of the metadata for the contract
@@ -130,7 +161,7 @@ pub struct Contract{ //-- can't implement Default trait for this contract cause 
 #[near_bindgen]
 impl Contract{ //-- we'll add bytes to the contract by creating entries in the data structures - we've defined the init methods of the Contract struct in here cause the lib.rs is our main crate
 
-    #[init] //-- means the following would be a contract initialization method
+    #[init] //-- means the following would be a contract initialization method and verifies that the contract state doesn't exist which can only be called once and will be paniced on second call
     pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self{ //-- initialization function can only be called once when we first deploy the contract to runtime shards - this initializes the contract with metadata that was passed in and the owner_id
         Self{ //-- the return type is of type Self or the contract itself with initialized fields - this function will default all the collections to be empty
             owner_id,
@@ -141,7 +172,7 @@ impl Contract{ //-- we'll add bytes to the contract by creating entries in the d
         }
     }
 
-    #[init] //-- means the following would be a contract initialization method
+    #[init] //-- means the following would be a contract initialization method and verifies that the contract state doesn't exist which can only be called once and will be paniced on second call
     pub fn new_default_meta(owner_id: AccountId) -> Self{ //-- initialization function can only be called once when we first deploy the contract to runtime shards - this initializes the contract with default metadata so the user don't have to manually type metadata
         Self::new( //-- calling new() method with some default metadata params and the owner_id passed in
             owner_id,

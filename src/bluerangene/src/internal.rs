@@ -10,6 +10,11 @@ use crate::*; // load all defined crates, structs and functions from the root cr
 
 // NOTE - methods and function in here don't need to be compiled to wasm cause they're internal functions
 // NOTE - can't use #[payable] and #[private] attributes on a none #[near_bindgen] attribute on the Contract implementation 
+// NOTE - CryptoHash are objects with 256 bits of information which is 32 bytes of data or 64 chars in hex
+//        pub struct Digest(pub [u8; 32]);
+//        pub struct CryptoHash(pub Digest);
+
+
 
 
 
@@ -26,7 +31,7 @@ pub fn refund_deposit(storage_used: u64){ //-- refunding the initial deposit bas
     assert!(required_cost <= attached_deposit, "Need {} yocto$NEAR to mint", required_cost); //-- 1 yocto is 10^-24
     let refund = attached_deposit - required_cost; //-- refunding the owner account by subtracting the required_cost from his/her attached_deposit in yocto$NEAR
     if refund > 1{ //-- if the refund was greater than 1 yocto$NEAR, means we have to get pay back the remaining deposit as a refund to the predecessor account or the signer of this contract - refund is of type u128 or 16 bytes
-        Promise::new(env::predecessor_account_id()).transfer(refund); //-- transfer the refund to the predecessor account or the signer which is the one who is minting this NFT - we've created a Promise object here with the predecessor account to transfer some $NEARs asyncly 
+        Promise::new(env::predecessor_account_id()).transfer(refund); //-- transfer the refund to the predecessor account or the signer which is the one who is minting this NFT - we've created a Promise object here to transfer some $NEARs asyncly from the current account_id to the predecessor account as the receiver account_id
     }
 }
 
