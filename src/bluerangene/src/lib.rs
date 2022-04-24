@@ -46,7 +46,7 @@
 
 0) receipts (or event inside the actor world!) are async messages which are in form of promise or future objects and will be created by runtime 
    from every incoming transaction which contains either one of the above enum variant actions or a contract method to apply to a receiver (another contract actor)
-   and can be scheduled to be ran later by passing them between actors (blocks or shards or contracts) asyncly through mpsc channel 
+   and can be scheduled to be ran later by passing them between actors (blocks or shards or contracts) asyncly (using the defined promise) through mpsc channel
    using the address of the second contract actor. (https://docs.near.org/docs/tutorials/contracts/xcc-rust)
    
    
