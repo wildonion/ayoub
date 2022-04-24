@@ -31,7 +31,7 @@ pub fn refund_deposit(storage_used: u64){ //-- refunding the initial deposit bas
 }
 
 
-impl Contract{ //-- we've defined the internal_add_token_to_owner() method of the Contract struct in this crate cause this crate is related to all internal calculation functions and methods - we don't need to add #[near_bindgen] attribute on this impl cause this is a none exporting methods and won't compile to wasm
+impl Contract{ //-- we've defined the internal_add_token_to_owner() method of the Contract struct in this crate cause this crate is related to all internal calculation functions and methods - we don't need to add #[near_bindgen] attribute on this impl cause this is a none exporting method and won't compile to wasm to call it 
 
     pub fn internal_add_token_to_owner(&mut self, account_id: &AccountId, token_id: &TokenId){ //-- we've defined the self to be mutable and borrowed cause we want to add the account_id and minted token info to tokens_per_owner field and have the isntance with a valid lifetime after calling this method on it - add the minted token to the set of token an owner has first
         let mut tokens_set = self.tokens_per_owner.get(account_id).unwrap_or_else(|| { //-- getting the set of token_id(s) for the given account out of the LookupMap or create a new set for the given account inside the closure
