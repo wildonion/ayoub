@@ -106,7 +106,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let game_server_addr = format!("{}:{}", host, game_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the mpsc channel
+    let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the oneshot channel
 
 
 
@@ -167,7 +167,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             Ok(mut init_db) => {
                 init_db.engine = Some(db_engine);
                 init_db.url = Some(db_addr);
-                info!("getting mongodb instance - {}", chrono::Local::now().naive_local());
                 let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
                 Some( //-- putting the Arc-ed db inside the Option
                     Arc::new( //-- cloning app_storage to move it between threads
@@ -212,6 +211,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //
     // --------------------------------------------------------------------------------------------------------
     if service_name.as_str() == "auth"{
+        info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
         let auth_server = Server::bind(&server_addr).serve(auth_serivce);
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
@@ -223,6 +223,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // sender.send(1); //-- freez feature
         Ok(())
     } else if service_name.as_str() == "event"{
+        info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
         let event_server = Server::bind(&server_addr).serve(event_service);
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
@@ -234,6 +235,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // sender.send(1); //-- freez feature
         Ok(())
     } else if service_name.as_str() == "game"{
+        info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await;
         let game_server = Server::bind(&server_addr).serve(game_service);
         let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));

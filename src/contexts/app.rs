@@ -179,7 +179,7 @@ pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside 
 
 
 #[derive(Serialize, Deserialize)]
-pub struct LinkToRuntime(pub u64) //-- TODO - save a pointer with length of u64 bits or 8 bytes (big enough to store in memory) of the current runtime location address inside the memory 
+pub struct LinkToRuntime(pub u64); //-- TODO - save a pointer with length of u64 bits or 8 bytes (big enough to store in memory) of the current runtime location address inside the memory 
 
 
 

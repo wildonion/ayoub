@@ -16,6 +16,15 @@
 
 # cargo build --bin ayoub --release
 
+# ☢️ To run the `event` server: `cargo run auth 7436`
+
+# ☢️ To run the `auth` server: `cargo run event 7435`
+
+# ☢️ To run the `game` server: `cargo run event 7437`
+
+# ☢️ To run the `nft` server: `cargo run nft 7438`
+
+# -----------------------------------------------------------
 
 # ☢️ To run the `event` server: `./ayoub auth 7436`
 

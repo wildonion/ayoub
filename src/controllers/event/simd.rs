@@ -119,7 +119,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
 
 
                         // https://github.com/tokio-rs/tokio/discussions/3858
-                        // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T 
+                        // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T; multiple reader but single writer
                         // NOTE - hadnling async task is done using tokio::spawn() method which the task will be solved based on multi threading concept using tokio green threads in the background of the app
                         // NOTE - sharing and mutating clonable data (Arc<Mutex<T>>) between tokio green and rust native threads is done by passing the object through a channel of one of the message passing protocols like mpsc channel
                         // NOTE - to use tokio::spawn(async move{}) and thread::spawn(|| async move{}) we must be inside an async function to await on what's has been spawned on the background
