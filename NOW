@@ -8,7 +8,7 @@ account name: wildonion.testnet
 private key: praise purse gather only inmate wire impulse isolate inch vendor labor fringe
 https://developers.facebook.com/blog/post/2020/09/30/build-discord-bot-with-rust-and-serenity/
 https://betterprogramming.pub/writing-a-discord-bot-in-rust-2d0e50869f64
-https://near.org/downloads/Nightshade.pdf
+https://near.org/downloads/Nightshade.pdf => near actor and sharding design pattern 
 https://github.com/near/near-sdk-rs/tree/master/examples/cross-contract-calls/high-level
 https://github.com/near-examples/NFT
 https://github.com/near-examples/nft-tutorial
@@ -22,11 +22,17 @@ https://docs.near.org/docs/tutorials/contracts/nfts/marketplace
 
 
 
+binary encoded 
+ascii encoded 
+base64 encoded
+256 bits hash
+near doc generator 
+bindgen attribute like wowasm to write smart contract with wo syntax and run on near
 
 
-https://docs.near.org/docs/tutorials/contracts/nfts/enumeration
+
+
+https://docs.near.org/docs/tutorials/contracts/nfts/enumeration => ./deploy.sh && ./test.sh
 arvan VoD
 serde parser issue with otp request
 OWC submit + bitdad discord
-near doc generator 
-bindgen attribute like wowasm to write smart contract with wo syntax

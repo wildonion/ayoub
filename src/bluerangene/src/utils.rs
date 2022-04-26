@@ -108,7 +108,7 @@ use crate::*;  // load all defined crates, structs and functions from the root c
 // -> data collision could happen by UnorderedMap, LookupMap or UnorderedSet cause these hashmap based structure generate a hash from their keys. 
 // -> in order not to have a duplicate key entry inside hashmap based structures we can use enum to avoid having some hash collision with two distinct keys.
 // -> with enum we can be sure that there will be only one collection (one of the following variant) at a time inside the storage that has been pointed by the enum tag.
-// -> hash of the account_id inside the TokensPer* structs is the unique key to use it as the prefix for creating the UnorderedSet to avoid data collision cause every account_id has a unique hash of 256 bits long
+// -> hash of the account_id inside the TokensPer* structs is the unique key to use it as the prefix for creating the UnorderedSet to avoid data collision cause every account_id has a unique hash with 256 bits long
 pub enum Storagekey{ 
     TokensPerOwner, 
     TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits of the hash which will be 64 chars in hex which is the account_id length
@@ -269,7 +269,11 @@ pub fn simd_ops(){ //-- this function can't be invoked directly on the blockchai
                                         Actor Definition : Actor is an object created from a struct that can sends 
                                                            future objects of messages or events or receipts to other 
                                                            actors asyncly their address through some message passing 
-                                                           protocol like mpsc. 
+                                                           protocol like mpsc.
+                                        Actors in near   : are shards which contains blocks
+                                                           which there are lots of transactions made from contracts'
+                                                           methods so every shards can communicate with each other
+                                                           thus every block can thus every contract account also can. 
                                         -----------------------------------------------------------------------------
                                         \   near uses promise for async execution of receipts pass between actors   /
                                          ---------------------------------------------------------------------------
@@ -320,7 +324,7 @@ pub fn simd_ops(){ //-- this function can't be invoked directly on the blockchai
 
 0) receipts (or event inside the actor world!) are async messages which are in form of promise or future objects and will be created by runtime 
    from every transaction (action receipt) which contains either one of the above enum variant actions or a contract method to apply to a receiver (another contract actor)
-   and can be scheduled to be run later by passing them between actors (blocks or shards or contracts) asyncly (using the defined promise) through mpsc channel
+   and can be scheduled to be run later by passing them between actors or shards (contains blocks which contains transaction made from contracts' methods) asyncly (using the defined promise) through mpsc channel
    using the address of the second contract actor.
    
    
