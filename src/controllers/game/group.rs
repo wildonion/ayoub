@@ -40,11 +40,34 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
 
         // TODO - upload image for group prof like tus resumable upload file
-        // TODO - first allocate a space on ram in server for file then on every incoming chunk save that chunk into the file and seek the cursor to the saved position of the file to resume on reconnecting to the server
-        // TODO - reading file asyncly to send the file chunks back to client 
-        // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the client ram on corruption condition to gather those bytes to form the whole file
+        // TODO - first allocate some bytes on server ram for the incoming file from the client then on every incoming chunk of the file coming from the client save that chunk into the created file on server from the allocated buffer and seek the cursor to the saved position of the file to resume on reconnecting to the server
+        // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the server ram on corruption condition to gather those bytes to form the whole file
         // ...
+        /*
+            --------------------------------------------------------------------------------------------------------------------------------------------    
 
+            fs::create_dir_all(constants::UPLOAD_PATH)?;
+            let mut filename = "".to_string();
+            while let Ok(Some(mut field)) = prof_img.try_next().await{
+                let content_type = field.content_disposition().unwrap();
+                filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), content_type.get_filename().unwrap());
+                let filepath = format!("{}/{}", constants::UPLOAD_PATH, sanitize_filename::sanitize(&filename));
+                let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
+                while let Some(chunk) = field.next().await{
+                    let data = chunk.unwrap();
+                    f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+                }
+            }
+            let res = UploadFile{
+                name: filename,
+                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+            };
+            let user = QueryableUser::update_prof_img(id.into_inner(), res).await?;
+            Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
+
+            --------------------------------------------------------------------------------------------------------------------------------------------
+
+        */
 
 
         match middlewares::auth::pass(req).await{

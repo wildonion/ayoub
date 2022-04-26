@@ -40,14 +40,14 @@ impl Contract{ //-- we've defined the internal_add_token_to_owner() method of th
 
     pub fn internal_add_token_to_owner(&mut self, account_id: &AccountId, token_id: &TokenId){ //-- we've defined the self to be mutable and borrowed cause we want to add the account_id and minted token info to tokens_per_owner field and have the isntance with a valid lifetime after calling this method on it - add the minted token to the set of token an owner has first
         let mut tokens_set = self.tokens_per_owner.get(account_id).unwrap_or_else(|| { //-- getting the set of token_id(s) for the given account out of the LookupMap or create a new set for the given account inside the closure
-            UnorderedSet::new( //-- if the account (minter) doesn't have any tokens related to the token_id, we create a new unordered set to save the minted token_id for the current account_id as his/her first NFT 
-            Storagekey::TokenPerOwnerInner{ //-- choosing a new unique prefix or key from the enum for the storage of the current collection which is the TokenPerOwnerInner variant struct - UnorderedSet will create a new set based on the selected storage key which is an enum variant in our case and takes the size of the TokenPerOwnerInner struct
+            UnorderedSet::new( //-- if the account (minter) doesn't have any tokens, we create a new unordered set to save the minted token_id for the current account_id as his/her first NFT 
+            Storagekey::TokenPerOwnerInner{ //-- choosing a new unique prefix or key from the enum for the storage of the current collection which is the TokenPerOwnerInner variant struct - UnorderedSet will create a new set based on the selected storage key which is an enum variant in our case and takes the size of the TokenPerOwnerInner struct in memory in order to avoid data collision with hash map based data structures' keys
                         account_id_hash: hash_account_id(&account_id), //-- getting the hash of the current account_id
-                } //-- our current storage (also current variant) is the TokenPerOwnerInner struct
-                .try_to_vec() //-- converting the selected storage key into a vector of u8
+                } //-- our current storage key in memory (also current variant) is the TokenPerOwnerInner struct which contains the hash of the account_id we can be sure that there is one account_id which has this token_id in other words there are no two different account_id(s) that has the same token_id at the same time 
+                .try_to_vec() //-- converting the selected storage key into a vector of u8 to build the UnorderedSet hash key based on this vector
                 .unwrap(),
-            )
-        }); //-- the type of the tokens_set must be UnorderedSet<String>
+            ) //-- to create a new UnorderedSet we have to pass a prefix which is a unique key to avoid data collision and in our case this unique key is the hash of the account_id since there is one account_id which has this token_id in other words there are no two different account_id(s) that have the same token_id at the same time 
+        }); //-- the type of the tokens_set must be UnorderedSet<String> cause TokenId is of type String
         tokens_set.insert(token_id); //-- inserting the token_id into the created set for the current account_id
         self.tokens_per_owner.insert(account_id, &tokens_set); //-- inserting the created set for the given account_id
     }
