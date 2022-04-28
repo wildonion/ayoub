@@ -17,4 +17,3 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 * complete all todos
 
 * postman collection (status and access level constants + unix timestamps doc)
-

@@ -98,14 +98,14 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                         // --------------------------------------------------------------------
                         //       DESERIALIZING FROM ut8 BYTES INTO THE SMSResponse STRUCT
                         // --------------------------------------------------------------------
-                        match serde_json::from_slice::<schemas::auth::SMSResponse>(stream.buffer()){ //-- we can also use from_slice() method which is faster than from_reader() method and deserialize the bytes of json text directly into the SMSResponse struct - the generic type of from_slice() method is SMSResponse struct - mapping (deserializing) the bytes of json text into the SMSResponse struct
+                        match serde_json::from_slice::<schemas::auth::SMSResponse>(stream.buffer()){ //-- we can also use from_reader() method which is slower than from_slice() method and deserialize the bytes of json text directly into the SMSResponse struct - the generic type of from_slice() method is SMSResponse struct - mapping (deserializing) the bytes of json text into the SMSResponse struct
                             Ok(sms_response) => {
                                 
 
 
                                 // NOTE - from_raw_parts() forms a slice or &[u8] from the pointer and the length
                                 // NOTE - into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
-                                let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into a utf8 bytes
+                                let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes
                                 
                                 
 
@@ -133,9 +133,12 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                         Some(otp_info) => { //-- once we get here means that the user is already exists in the collection and we have to save the generated new otp code along with a new expiration time for him/her
 
 
+
+                                            // Do what so ever with otp_info object :) 
                                             // ---
                                             // ...
 
+                                            
 
                                             let response_body = ctx::app::Response::<ctx::app::Nill>{
                                                 message: OTP_CODE_HAS_BEEN_SENT,
