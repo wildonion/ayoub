@@ -2,14 +2,17 @@
 
 
 
+use std::net::SocketAddr;
+
 use crate::constants::*;
 use futures::Future;
 use mongodb::Client;
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use tokio::sync::oneshot::Receiver;
-use hyper::Body;
+use hyper::{Body, Server, server::conn::AddrIncoming};
 use log::{info, error};
+use actix::*;
 
 
 
@@ -149,7 +152,7 @@ pub enum Mode{ //-- enum uses 8 bytes tag which is a pointer pointing to the cur
 
 
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 pub enum AppError{ //-- enum like union shares a common memory location between all its fields that means the space an enum needs is as much as the largest variant but unlike union uses some extra memory to keep track of the enum variant which is called tag and is a pointer with 8 bytes length 
     OnRuntime, //-- caused by too much loading and requests
     OnStorage, //-- caused by storage services errors 
@@ -179,7 +182,35 @@ pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside 
 
 
 #[derive(Serialize, Deserialize)]
-pub struct LinkToRuntime(pub u64); //-- TODO - save a pointer with length of u64 bits or 8 bytes (big enough to store in memory) of the current runtime location address inside the memory 
+pub struct LinkToService(pub u64); //-- TODO - save a pointer with length of u64 bits or 8 bytes (big enough to store in memory) of the current service location address inside the memory 
+
+
+
+#[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
+pub struct Runtime{
+    pub server: LinkToService,
+    pub error: AppError,
+    pub node_addr: SocketAddr,
+}
+
+
+
+impl Runtime{ // TODO - add wasm bindgen to compile this to wasm
+    
+    // Runtime methods 
+    // ...
+}
+
+
+
+impl Actor for Runtime{ // TODO - add wasm bindgen to compile this to wasm
+    type Context = Context<Self>;
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        
+    }
+
+}
 
 
 

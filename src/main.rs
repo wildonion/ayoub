@@ -219,6 +219,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
         }
         // TODO - if the number of clients reached too many requests shutdown the server
+        // TODO - call add_client() method to add an address into the clients vector
+        // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
         Ok(())
@@ -231,6 +233,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             error!("event server error {} - {}", e, chrono::Local::now().naive_local());
         }
         // TODO - if the number of clients reached too many requests shutdown the server
+        // TODO - call add_client() method to add an address into the clients vector
+        // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
         Ok(())
@@ -243,6 +247,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             error!("game server error {} - {}", e, chrono::Local::now().naive_local());
         }
         // TODO - if the number of clients reached too many requests shutdown the server
+        // TODO - call add_client() method to add an address into the clients vector
+        // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
         Ok(())
