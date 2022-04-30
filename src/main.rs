@@ -63,7 +63,7 @@ mod services;
 
 // NOTE - to solve the `future is not `Send` as this value is used across an await` error we have to implement the Send trait for that type, since we don't know the type at compile time (it'll specify at runtime due to the logic of the code) we must put the trait inside the Box with the dyn keyword (object safe traits have unknown size at compile time) inside the return type of the function in second part of the Result 
 // NOTE - Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory
-// NOTE - ? on wrapped type (Option or Result) will work only inside a method that will return Result or Option
+// NOTE - unwrapping a wrapped Option or Result type using ? will only work inside a method that will return Result or Option
 
 
 
