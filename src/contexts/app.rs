@@ -197,7 +197,7 @@ pub struct Runtime{
 
 impl Runtime{ // TODO - add wasm bindgen attribute to compile this to wasm
     
-    // Runtime methods 
+    // Runtime serverless methods 
     // ...
 }
 
