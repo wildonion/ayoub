@@ -188,14 +188,14 @@ pub struct LinkToService(pub u64); //-- TODO - save a pointer with length of u64
 
 #[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
 pub struct Runtime{
-    pub server: LinkToService,
+    pub server: LinkToService, //-- due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer to the location address of the service inside the memory 
     pub error: AppError,
     pub node_addr: SocketAddr,
 }
 
 
 
-impl Runtime{ // TODO - add wasm bindgen to compile this to wasm
+impl Runtime{ // TODO - add wasm bindgen attribute to compile this to wasm
     
     // Runtime methods 
     // ...
@@ -203,7 +203,7 @@ impl Runtime{ // TODO - add wasm bindgen to compile this to wasm
 
 
 
-impl Actor for Runtime{ // TODO - add wasm bindgen to compile this to wasm
+impl Actor for Runtime{ // TODO - add wasm bindgen attribute to compile this to wasm
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
