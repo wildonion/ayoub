@@ -91,7 +91,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -106,7 +106,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -127,7 +127,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                 .unwrap() 
                                         )
                                     },
@@ -144,7 +144,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                     res
                                         .status(StatusCode::BAD_REQUEST)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -162,7 +162,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                             res
                                 .status(StatusCode::BAD_REQUEST)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -177,7 +177,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                         res
                             .status(StatusCode::NOT_FOUND)
                             .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                             .unwrap() 
                     )
                 }
@@ -193,7 +193,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },
@@ -271,7 +271,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -286,7 +286,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -306,7 +306,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                 .unwrap() 
                                         )
                                     },
@@ -323,7 +323,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                     res
                                         .status(StatusCode::BAD_REQUEST)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -341,7 +341,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                             res
                                 .status(StatusCode::BAD_REQUEST)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -356,7 +356,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                         res
                             .status(StatusCode::NOT_FOUND)
                             .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                             .unwrap() 
                     )
                 }
@@ -372,7 +372,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },
@@ -447,7 +447,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -462,7 +462,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -482,7 +482,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                 .unwrap() 
                                         )
                                     },
@@ -499,7 +499,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                     res
                                         .status(StatusCode::BAD_REQUEST)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -517,7 +517,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                             res
                                 .status(StatusCode::BAD_REQUEST)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -532,7 +532,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                         res
                             .status(StatusCode::NOT_FOUND)
                             .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                             .unwrap() 
                     )
                 }
@@ -548,7 +548,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },
@@ -616,7 +616,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -631,7 +631,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -651,7 +651,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                 .unwrap() 
                                         )
                                     },
@@ -668,7 +668,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                     res
                                         .status(StatusCode::BAD_REQUEST)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -685,7 +685,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                             res
                                 .status(StatusCode::BAD_REQUEST)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -700,7 +700,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                         res
                             .status(StatusCode::NOT_FOUND)
                             .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                             .unwrap() 
                     )
                 }
@@ -716,7 +716,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },
@@ -787,7 +787,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -802,7 +802,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                                     res
                                                         .status(StatusCode::NOT_ACCEPTABLE)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             }
@@ -822,7 +822,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                 .unwrap() 
                                         )
                                     },
@@ -839,7 +839,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                     res
                                         .status(StatusCode::BAD_REQUEST)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -857,7 +857,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                             res
                                 .status(StatusCode::BAD_REQUEST)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -872,7 +872,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                         res
                             .status(StatusCode::NOT_FOUND)
                             .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                             .unwrap() 
                     )
                 }
@@ -888,7 +888,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },
@@ -962,7 +962,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
                                                         .unwrap()
                                                 )
                                             },
@@ -977,7 +977,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )
                                             },
@@ -997,7 +997,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                 .unwrap() 
                                         )
                                     },
@@ -1014,7 +1014,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                     res
                                         .status(StatusCode::BAD_REQUEST)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -1030,7 +1030,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                             res
                                 .status(StatusCode::BAD_REQUEST)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -1045,7 +1045,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                         res
                             .status(StatusCode::NOT_FOUND)
                             .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                             .unwrap() 
                     )
                 }
@@ -1061,7 +1061,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },

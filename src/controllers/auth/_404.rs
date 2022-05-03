@@ -31,7 +31,7 @@ pub async fn main() -> GenericResult<hyper::Response<Body>, hyper::Error>{
         res
             .status(StatusCode::NOT_FOUND) //-- not found route or method not allowed
             .header(header::CONTENT_TYPE, "application/json")
-            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
             .unwrap()
     )
     

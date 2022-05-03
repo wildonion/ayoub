@@ -12,7 +12,7 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * ayoub nft APIs for deployed bluerangene contract's methods
 
-* make a PaaS cli for ayoub a framework 
+* make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`)
 
 * complete all todos
 

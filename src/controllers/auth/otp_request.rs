@@ -150,7 +150,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                                 res
                                                     .status(StatusCode::OK) //-- not found route or method not allowed
                                                     .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
                                                     .unwrap()
                                             )
                                         },
@@ -176,7 +176,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                                         res
                                                             .status(StatusCode::CREATED)
                                                             .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                             .unwrap() 
                                                     )
                                                 },
@@ -191,7 +191,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                                         res
                                                             .status(StatusCode::NOT_ACCEPTABLE)
                                                             .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                             .unwrap() 
                                                     )
                                                 },
@@ -214,7 +214,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                         res
                                             .status(StatusCode::NOT_ACCEPTABLE)
                                             .header(header::CONTENT_TYPE, "application/json")
-                                            .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                             .unwrap() 
                                     )
                                 }
@@ -231,7 +231,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                     res
                                         .status(StatusCode::NOT_ACCEPTABLE)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -248,7 +248,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                             res
                                 .status(StatusCode::NOT_ACCEPTABLE)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     },
@@ -265,7 +265,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                     res
                         .status(StatusCode::BAD_REQUEST)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },

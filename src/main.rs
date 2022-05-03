@@ -230,7 +230,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         
         info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
-        let mut auth_server = Server::bind(&server_addr).serve(auth_serivce);
+        let mut auth_server = Server::bind(&server_addr).serve(auth_serivce); //-- we have to define the auth_server as mutable cause we want to take a mutable raw pointer ot it
+        // ------------------------------------------------
+        //     BUILDING RUNTIME OBJECT FROM AUTH SERVICE
+        // ------------------------------------------------
         let mut server_as_raw_pinter = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
         let runtime = ctx::app::Runtime{
             server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
@@ -241,8 +244,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             first_init: Some(Local::now().timestamp()),
             
         };
-        
-
+        // ------------------------------------------------
+        // ------------------------------------------------
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = auth_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
@@ -256,7 +259,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     } else if service_name.as_str() == "event"{
         info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let event_service = services::event::EventSvc::new(db.clone(), vec![]).await;
-        let event_server = Server::bind(&server_addr).serve(event_service);
+        let mut event_server = Server::bind(&server_addr).serve(event_service); //-- we have to define the event_server as mutable cause we want to take a mutable raw pointer ot it
+        // ------------------------------------------------
+        //    BUILDING RUNTIME OBJECT FROM EVENT SERVICE
+        // ------------------------------------------------
+        let mut server_as_raw_pinter = &mut event_server as *mut Server<AddrIncoming, services::event::EventSvc>; //-- taking a mutable raw pointer to the event_server to cast it to usize later
+        let runtime = ctx::app::Runtime{
+            server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+            id: Uuid::new_v4(),
+            error: None,
+            node_addr: event_server.local_addr(), //-- local address of this server which has been bound to
+            last_crash: None,
+            first_init: Some(Local::now().timestamp()),
+            
+        };
+        // ------------------------------------------------
+        // ------------------------------------------------
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = event_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("event server error {} - {}", e, chrono::Local::now().naive_local());
@@ -270,7 +288,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     } else if service_name.as_str() == "game"{
         info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await;
-        let game_server = Server::bind(&server_addr).serve(game_service);
+        let mut game_server = Server::bind(&server_addr).serve(game_service); //-- we have to define the game_server as mutable cause we want to take a mutable raw pointer ot it
+        // ------------------------------------------------
+        //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
+        // ------------------------------------------------
+        let mut server_as_raw_pinter = &mut game_server as *mut Server<AddrIncoming, services::game::PlayerSvc>; //-- taking a mutable raw pointer to the game_server to cast it to usize later
+        let runtime = ctx::app::Runtime{
+            server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+            id: Uuid::new_v4(),
+            error: None,
+            node_addr: game_server.local_addr(), //-- local address of this server which has been bound to
+            last_crash: None,
+            first_init: Some(Local::now().timestamp()),
+            
+        };
+        // ------------------------------------------------
+        // ------------------------------------------------
         let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("game server error {} - {}", e, chrono::Local::now().naive_local());

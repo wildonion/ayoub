@@ -166,7 +166,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                                     res
                                         .status(StatusCode::OK)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
                                         .unwrap()
                                 )
                             },
@@ -182,7 +182,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                                     res
                                         .status(StatusCode::NOT_ACCEPTABLE)
                                         .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                         .unwrap() 
                                 )
                             },
@@ -204,7 +204,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                             res
                                 .status(StatusCode::NOT_ACCEPTABLE)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     },
@@ -221,7 +221,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                     res
                         .status(StatusCode::BAD_REQUEST)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },

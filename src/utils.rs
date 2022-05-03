@@ -202,16 +202,13 @@ fn return_box_trait() -> Box<dyn Interface> { // NOTE - returning Box<dyn Trait>
 
 
 #[macro_export]
-macro_rules! res {
+macro_rules! query {
     
-    ( $message:expr, $status:expr, $data:expr ) => { //-- passing multiple object syntax
-        use hyper::{header, StatusCode, Body};
+    ( $value_0:expr, $value_1:expr, $value_2:expr ) => { //-- passing multiple object syntax
         // ...
-    
     };
 
     ( $($name:expr => $value:expr),* ) => { //-- passing multiple key => value syntax 
-        use hyper::{header, StatusCode, Body};
         // ...
 
     };

@@ -67,7 +67,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                             res
                                 .status(StatusCode::OK)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }, 
@@ -82,7 +82,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                             res
                                 .status(StatusCode::NOT_FOUND)
                                 .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
                     }
@@ -104,7 +104,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(response_body_json)) //-- the body of the response must serialized into the utf8 bytes here is serialized from the json
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                         .unwrap() 
                 )
             },
