@@ -36,11 +36,12 @@ Coded by
 
 
 use std::{net::SocketAddr, sync::Arc, env};
+use chrono::Local;
 use dotenv::dotenv;
 use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;
-use hyper::server::Server;
+use hyper::server::{Server, conn::AddrIncoming};
 use self::contexts as ctx; // use crate::contexts as ctx;
 
 
@@ -60,10 +61,25 @@ mod services;
 
 
 
-
+// NOTE - Box is a none dangling pointer with a usize size and will allocate T size (Box<T>) on the heap to store what's inside of it and allocate nothing on the heap if T is unsized  
 // NOTE - to solve the `future is not `Send` as this value is used across an await` error we have to implement the Send trait for that type, since we don't know the type at compile time (it'll specify at runtime due to the logic of the code) we must put the trait inside the Box with the dyn keyword (object safe traits have unknown size at compile time) inside the return type of the function in second part of the Result 
 // NOTE - Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory
+// NOTE - we can't return a trait inside the function cause the compiler needs to know how much space every function's return type requires and this can't be specified at compile time cause different implementations of a trait need different amount of memory
+// NOTE - to return a trait inside the function we have to put it inside a Box with a dyn keyword (due to the dynamic size of the trait) cause a Box is just a reference to some memory in the heap and a reference has a statically known size thus compiler can guarantee it points to a heap allocated the trait that is not a dangling pointer
 // NOTE - unwrapping a wrapped Option or Result type using ? will only work inside a method that will return Result or Option
+// NOTE - always use &self or &mut self inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
+// NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
+// NOTE - &self or &mut self will be converted automatically to self on compile time
+// NOTE - a pointer takes usize size (64 bits target takes 64 bits or 8 bytes; 32 bits targets takes 32 bits or 4 bytes) to reference any location in memory 
+// NOTE - the size of a boxed value or size_of_val(&Box::new(10)) is equals to the size of the Box which is just a pointer and a pointer takes usize (8 bytes or 4 bytes) to reference any location inside the memory 
+// NOTE - size of the value inside any smart pointer is equals to the size of the smart pointer itself which is usize  
+// NOTE - usize is how many bytes it takes to reference any location in memory, on a 32 bit target, this is 4 bytes and on a 64 bit target, this is 8 bytes
+
+
+
+
+
+
 
 
 
@@ -211,9 +227,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //
     // --------------------------------------------------------------------------------------------------------
     if service_name.as_str() == "auth"{
+        
         info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await;
-        let auth_server = Server::bind(&server_addr).serve(auth_serivce);
+        let mut auth_server = Server::bind(&server_addr).serve(auth_serivce);
+        let mut server_as_raw_pinter = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
+        let runtime = ctx::app::Runtime{
+            server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+            id: Uuid::new_v4(),
+            error: None,
+            node_addr: auth_server.local_addr(), //-- local address of this server which has been bound to
+            last_crash: None,
+            first_init: Some(Local::now().timestamp()),
+            
+        };
+        
+
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = auth_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
@@ -222,7 +251,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // TODO - call add_client() method to add an address into the clients vector
         // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
-        // sender.send(1); //-- freez feature
+        // sender.send(1); //-- freez feature 
         Ok(())
     } else if service_name.as_str() == "event"{
         info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
@@ -257,6 +286,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     }
     
     
+
 
 
 

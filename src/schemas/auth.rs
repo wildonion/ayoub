@@ -131,7 +131,7 @@ pub struct SMSResponseEntries{
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct SMSResponse{
-    pub r#return: SMSResponseReturn, //-- escape reserved keywords to use them as identifiers using r#
+    pub r#return: SMSResponseReturn, //-- use r# to escape reserved keywords to use them as identifiers 
     pub entries: Vec<SMSResponseEntries>,
 }
 

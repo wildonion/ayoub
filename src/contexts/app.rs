@@ -3,7 +3,6 @@
 
 
 use std::net::SocketAddr;
-
 use crate::constants::*;
 use futures::Future;
 use mongodb::Client;
@@ -18,9 +17,10 @@ use actix::*;
 
 
 
-// NOTE - always use &self or &mut self inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
-// NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
-// NOTE - &self or &mut self will be converted automatically to self on compile time
+
+
+
+
 
 
 
@@ -182,15 +182,18 @@ pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside 
 
 
 #[derive(Serialize, Deserialize)]
-pub struct LinkToService(pub u64); //-- TODO - save a pointer with length of u64 bits or 8 bytes (big enough to store in memory) of the current service location address inside the memory 
+pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer to the current service address located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
 
 
 
 #[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
 pub struct Runtime{
-    pub server: LinkToService, //-- due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer to the location address of the service inside the memory 
-    pub error: AppError,
-    pub node_addr: SocketAddr,
+    pub id: Uuid,
+    pub server: LinkToService, //-- due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
+    pub error: Option<AppError>, //-- any runtime error
+    pub node_addr: SocketAddr, //-- socket address of this node
+    pub last_crash: Option<i64>, //-- last crash timestamp
+    pub first_init: Option<i64>, //-- first initialization timestamp 
 }
 
 

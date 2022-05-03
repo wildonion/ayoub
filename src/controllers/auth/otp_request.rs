@@ -12,7 +12,7 @@ use std::{mem, slice, env, io::{BufWriter, Write}};
 use chrono::Duration;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body_bytes and stream buffer
-use hyper::{body::HttpBody, Client, header, StatusCode, Body};
+use hyper::{body::HttpBody, Client, header, StatusCode, Body}; //-- HttpBody trait is required to call the data() method on a hyper response body to get the next future IO stream of coming data from the server
 use log::info;
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use mongodb::Client as MC;
@@ -68,7 +68,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                         // --------------------------------------------------------------------
                         let code: String = (0..4).map(|_|{
                             let idx = gen_random_idx(random::<u8>() as usize); //-- idx is one byte cause it's of type u8
-                            CHARSET[idx] as char //-- CHARSET is of type utf8 bytes thus we can slice it 
+                            CHARSET[idx] as char //-- CHARSET is of type utf8 bytes thus we can index it 
                         }).collect();
                         let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
                         let client = Client::new();
@@ -84,7 +84,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                         //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
                         // --------------------------------------------------------------------
                         let mut buffer = [0u8; IO_BUFFER_SIZE];
-                        let mut stream = BufWriter::new(buffer.as_mut()); //-- creating a new buffer writer from the defined buffer mutably
+                        let mut stream = BufWriter::new(buffer.as_mut()); //-- creating a new mutable buffer writer from the defined buffer mutably for streaming over sms response
                         while let Some(next) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
                             let chunk = next?;
                             write!(stream, "{:#?}", chunk).unwrap(); //-- collecting each incoming chunks to write them into the defined stream buffer to deserialize from utf8 bytes into the SMSResponse struct to send back as json to user
@@ -107,7 +107,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                 // NOTE - into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
                                 let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes
                                 
-                                
+
 
                                 
                                 if sms_response.r#return.status == 200{ //-- means the code has been sent to telecommunications
