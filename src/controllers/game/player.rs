@@ -36,7 +36,7 @@ use hyper::http::Uri;
 
 pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/player/update/role", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
@@ -53,7 +53,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                 
                 if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
@@ -217,7 +217,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
 
 pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/player/update/side", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
        
@@ -234,7 +234,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                 
                 if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
@@ -393,7 +393,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
 
 pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/player/update/status", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
@@ -410,7 +410,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                 
                 if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
@@ -571,7 +571,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
 
 pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/player/update/role-ability", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
@@ -588,7 +588,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                 
                 if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
@@ -741,7 +741,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
 
 pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/player/chain", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
@@ -758,7 +758,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                 
                 if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
@@ -910,7 +910,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
 
 pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/player/get/single", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
        
@@ -929,7 +929,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                 
                 if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp io stream of future chunk bytes or chunks which is utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;

@@ -86,7 +86,8 @@ impl Api{
     }
 
     pub async fn get_name(&self) -> String{
-        self.name.to_string() //-- self.name is the dereferenced value of the &self.name and will be done automatically by the compiler 
+        let endpoint_name = self.name.to_string(); //-- self.name is the dereferenced value of the &self.name and will be done automatically by the compiler 
+        endpoint_name 
     }
 }
 

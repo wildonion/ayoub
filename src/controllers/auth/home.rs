@@ -25,7 +25,7 @@ use mongodb::Client;
 // -------------------------------------------------------------------------
 pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.get("/auth/home", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         

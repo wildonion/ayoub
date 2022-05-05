@@ -33,7 +33,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
+    info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/auth/user/get/all", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
