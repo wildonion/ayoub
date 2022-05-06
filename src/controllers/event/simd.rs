@@ -25,7 +25,7 @@ use std::time::Instant;
 /*
 
 
-        ## About the `/event/simd-ops` route
+        ## About the `/event/simd` route
 
         [Question](https://quera.org/problemset/113613/)
 
@@ -104,21 +104,26 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/event/simd-ops", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/event/simd", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
 
         
         // let chunk_stream = req.into_body().map_ok(|chunk| {
         //     chunk
         //         .iter()
-        //         .map(|byte| byte.to_ascii_uppercase())
-        //         .collect::<Vec<u8>>()
+        //         .map(|byte| {
+        //             // ...
+        //             byte.to_ascii_uppercase()
+        //             // ...
+        //         }
+        //     )
+        //     .collect::<Vec<u8>>()
         // });
 
 
         
         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
-        // let reversed_body = whole_body.iter().rev().cloned().collect::<Vec<u8>>();
+        // let reversed_body_bytes = whole_body_bytes.iter().rev().cloned().collect::<Vec<u8>>();
         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;

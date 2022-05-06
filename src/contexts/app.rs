@@ -23,18 +23,22 @@ use actix::*;
 
 
 
-
+type Callback = Box<dyn FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T
+type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads
 
 unsafe impl Send for Api{}
 unsafe impl Sync for Api {}
 
 
-#[derive(Debug)]
+
 pub struct Api{
     pub name: String,
     pub req: Option<hyper::Request<Body>>,
     pub res: Option<hyper::http::response::Builder>,
+    pub callback: Option<Callback>, //-- the generic of the callback field is the Callback type which is FnMut and a Future object for its return inside the Box
+    pub access_level: Option<u8>, //-- it might be None and the api doesn't require an access level
 }
+
 
 
 impl Api{
@@ -54,6 +58,8 @@ impl Api{
             name: String::from(""),
             req: request,
             res: response,
+            callback: None,
+            access_level: None,
         }
     }
     
@@ -64,6 +70,7 @@ impl Api{
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();
         let res = self.res.unwrap();
+        self.callback = Some(Box::new(cb(req, res)));
         let cb_res = cb(req, res).await.unwrap(); //-- this would be of type either hyper::Response<Body> or hyper::Error
         Ok(cb_res)
     }

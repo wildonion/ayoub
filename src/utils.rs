@@ -90,6 +90,23 @@ pub mod user{
 
 
 
+// ------------------------------ into box method
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+pub async fn into_box_slice(bytes: &Vec<u8>) -> Result<Box<[u8; 4]>, String>{ //-- the return type of this function is either a Box of [u8] slice with 4 bytes (32 bits) or a String of the error
+    let to_owned_vec = bytes.to_owned(); //-- creating owned vector from borrowed vector by cloning to call into_boxed_slice() method on the vector
+    let boxed_slice = to_owned_vec.into_boxed_slice(); //-- converting the collected bytes into a Box slice or array of utf8 bytes - we put it inside the Box cause the size of [u8] is not known at compile time
+    let boxed_array: Box<[u8; 4]> = match boxed_slice.try_into() { //-- Boxing u8 with size 4 cause our input number is 32 bits which is 4 packs of 8 bits
+        Ok(arr) => return Ok(arr), //-- returning a Box of 4 u8 slice or 4 packs of 8 bits
+        Err(o) => return Err(format!("vector length must be 4 but it's {}", o.len())),
+    };
+}
+
+
+
+
+
 
 // ------------------------------ using mpsc channel + tokio + native thread
 // -----------------------------------------------------------------------------------------
@@ -127,17 +144,16 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     info!("collecting all chunks received from the receiver at time {:?}", chrono::Local::now().naive_local());
     let bytes: Vec<u8> = receiver.iter().take(threads).collect(); //-- collecting 4 packs of 8 bits to gather all incoming chunks from the channel
     info!("collected bytes -> {:?} at time {:?}", bytes, chrono::Local::now().naive_local());
-    let boxed_slice = bytes.into_boxed_slice(); //-- converting the collected bytes into a Box slice or array of utf8 bytes - we put it inside the Box cause the size of [u8] is not known at compile time
-    let boxed_array: Box<[u8; 4]> = match boxed_slice.try_into() { //-- Boxing u8 with size 4 cause our input number is 32 bits which is 4 pack of 8 bits 
-        Ok(arr) => arr,
-        Err(o) => return Err(format!("vector length must be 4 but it's {}", o.len())),
-    };
     
     
+
     
+    let boxed_array = self::into_box_slice(&bytes).await.unwrap();
     let result = *boxed_array; //-- dereferencing the box pointer to get the value inside of it 
     let final_res = u32::from_be_bytes(result); //-- will create a u32 number from 4 pack of 8 bits 
     Ok(final_res) //-- the final results might be different from the input due to the time takes to send the each chunks through the channel and receive them from the receiver thus the order of chunks will not be the same as the input
+
+
 
 
 }
@@ -179,6 +195,8 @@ pub fn gen_random_idx(idx: usize) -> usize{
 pub fn string_to_static_str(s: String) -> &'static str {
     // TODO - use other Box methods
     // ...
+    let bytes = vec![0, 1];
+    let into_box_slice = bytes.into_boxed_slice();
     Box::leak(s.into_boxed_str())
 }
 

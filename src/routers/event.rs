@@ -69,8 +69,8 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/set-expire".to_string();
             expire_event(app_storage, app).await
         },
-        (&Method::POST, "/event/simd-ops")      => {
-            app.name = "/event/simd-ops".to_string();
+        (&Method::POST, "/event/simd")      => {
+            app.name = "/event/simd".to_string();
             simd_ops(app).await
         },
         (&Method::POST, "/event/update/phases/add") => {
