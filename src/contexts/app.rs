@@ -51,6 +51,8 @@ impl Api{
     // NOTE - don't put & behind self or borrow Api fields cause sharing Api fields between other threads 
     //        with & or borrowing the ownership is impossible caused by not implemented trait Clone (a super trait of Copy) 
     //        for hyper Request and Response structs error.
+    // NOTE - the body of the `cb` in post and get methods is an async move{} means it'll return a future object
+    //        which we can solve it using .await later.
     // ---------------------------------------------------------------------------------------------------------------------
 
     pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>) -> Self{
