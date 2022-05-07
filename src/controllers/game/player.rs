@@ -51,7 +51,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
         
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -232,7 +232,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
         
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -408,7 +408,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
         
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -586,7 +586,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
         
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -756,7 +756,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
         
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -927,7 +927,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
         
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait

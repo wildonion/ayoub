@@ -60,7 +60,7 @@ mod services;
 
 
 
-
+// NOTE - in order to define a generic type from traits they must be inside the Box with dyn keyword behind them
 // NOTE - None takes up exactly as much memory as if it were Some<T>. This is because Rust needs to know the Size of the Data you want to store and how much space it needs to allocate and for enums, which an option is, that means the space they need is as much as the largest variant And although you know that None will not change in this case, you could also swap it out with Some<T> any time later and then that new value needs to fit into that space
 // NOTE - bodies in hyper are always streamed asynchronously and we have to collect them all together inside a buffer to deserialize from utf8 bytes to a pre defined struct
 // NOTE - Box is a none dangling pointer with a usize size and will allocate T size (Box<T>) on the heap to store what's inside of it and allocate nothing on the heap if T is unsized  
@@ -78,7 +78,7 @@ mod services;
 // NOTE - usize is how many bytes it takes to reference any location in memory, on a 32 bit target, this is 4 bytes and on a 64 bit target, this is 8 bytes
 // NOTE - generic type is needed for function returns and types and for those types that haven't fixed size in compile time we have to put them inside the Box or take a reference to them to borrow them using & and the size of the Box is usize and the size of the Box inside heap is the size of the Box value which T inside the Box and the Box will have a default valid lifetime for any type inside of it
 // NOTE - if the size of the u8 is not specified we have to either use & with lifetime or put it inside a Box in which the lifetime will be handled automatically by the Box itself
-
+// NOTE - since unsized types like traits, closures, Strings and [u8]s won't have fixed size at compile time either they must be used as a borrowed type using & with a valid lifetime or be stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box we have to dereference the Box
 
 
 

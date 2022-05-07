@@ -60,10 +60,10 @@ impl Api{
             name: String::from(""),
             req: request,
             res: response,
-            callback: None,
+            callback: None, // TODO 
             access_level: None,
         }
-    }
+    } 
     
     pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C, //-- capturing by mut T
@@ -72,7 +72,6 @@ impl Api{
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();
         let res = self.res.unwrap();
-        self.callback = Some(Box::new(cb(req, res)));
         let cb_res = cb(req, res).await.unwrap(); //-- this would be of type either hyper::Response<Body> or hyper::Error
         Ok(cb_res)
     }

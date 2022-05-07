@@ -45,7 +45,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
 
                 
                 
-                if utils::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
