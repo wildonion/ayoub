@@ -4,7 +4,7 @@
 
 
 
-
+// https://github.com/hyperium/hyper/blob/master/examples/params.rs
 // get all (un)successful payments for an event with admin or God access
 // get all (un)successful payments for a user with user access
 // TODO - after reservation (successful payment):

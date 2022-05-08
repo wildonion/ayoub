@@ -9,7 +9,7 @@ use crate::schemas;
 use crate::contexts as ctx;
 use crate::constants::*;
 use chrono::Utc;
-use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
+use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer and is used for manipulating coming network bytes from the socket
 use hyper::{header, StatusCode, Body, Response};
 use log::info;
@@ -38,7 +38,7 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
     api.post("/game/god/create/group", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
         
 
-
+        // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
         // TODO - upload image for group prof like tus resumable upload file
         // TODO - first allocate some bytes on server ram for the incoming file from the client then on every incoming chunk of the file coming from the client save that chunk into the created file on server from the allocated buffer and seek the cursor to the saved position of the file to resume on reconnecting to the server
         // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the server ram on corruption condition to gather those bytes to form the whole file
@@ -83,7 +83,7 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                 
                 if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
@@ -283,7 +283,7 @@ pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                 
                 if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                     if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
-                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;

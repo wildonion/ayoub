@@ -24,6 +24,14 @@ Coded by
 
 
 
+
+Server Design Pattern Idea:
+    https://github.com/hyperium/hyper/tree/master/examples
+
+
+
+
+
 */
 
 
@@ -79,6 +87,7 @@ mod services;
 // NOTE - generic type is needed for function returns and types and for those types that haven't fixed size in compile time we have to put them inside the Box or take a reference to them to borrow them using & and the size of the Box is usize and the size of the Box inside heap is the size of the Box value which T inside the Box and the Box will have a default valid lifetime for any type inside of it
 // NOTE - if the size of the u8 is not specified we have to either use & with lifetime or put it inside a Box in which the lifetime will be handled automatically by the Box itself
 // NOTE - since unsized types like traits, closures, Strings and [u8]s won't have fixed size at compile time either they must be used as a borrowed type using & with a valid lifetime or be stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box we have to dereference the Box
+// NOTE - unsized borrowing for abstract types will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
 
 
 

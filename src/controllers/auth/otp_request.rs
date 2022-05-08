@@ -10,7 +10,7 @@ use crate::constants::*;
 use crate::utils::gen_random_idx;
 use std::{mem, slice, env, io::{BufWriter, Write}};
 use chrono::Duration;
-use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
+use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body_bytes and stream buffer
 use hyper::{body::HttpBody, Client, header, StatusCode, Body}; //-- HttpBody trait is required to call the data() method on a hyper response body to get the next future IO stream of coming data from the server
 use log::info;
@@ -44,7 +44,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
     api.post("/auth/otp-req", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
 
 
-        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes
+        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;

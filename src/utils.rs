@@ -105,8 +105,8 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
         info!("chunk {:?} in utf8 format -> [{:?}] at time {:?}", index, big_end_bytes[index], chrono::Local::now().naive_local());
         let cloned_sender = sender.clone();
         let cloned_ops = ops.clone();
-        tokio::spawn(async move{
-            thread::spawn(move || async move{ //-- the return body of the closure is async and for solving it we have to be in an async function - in order to capture the variables before spawning scope we have to use move keyword before ||
+        tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model
+            thread::spawn(move || async move{ //-- the return body of the closure is async block means it'll return a future object (trait Future has implemented for that) with type either () or a especific type and for solving it we have to be inside an async function - in order to capture the variables before spawning scope we have to use move keyword before ||
                 let new_chunk = cloned_ops(big_end_bytes[index]);
                 info!("\tsender-channel---(chunk {:?})---receiver-channel at time {:?} ", index, chrono::Local::now().naive_local());
                 cloned_sender.send(new_chunk).unwrap();
@@ -134,6 +134,8 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 }
+
+
 
 
 
@@ -194,24 +196,4 @@ fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from f
 
 fn return_box_trait() -> Box<dyn Interface> { // NOTE - returning Box<dyn Trait> from function means we're returning a struct inside the Box which the trait has implemented for
     Box::new(Struct {})
-}
-
-
-
-
-
-
-
-#[macro_export]
-macro_rules! query {
-    
-    ( $value_0:expr, $value_1:expr, $value_2:expr ) => { //-- passing multiple object syntax
-        // ...
-    };
-
-    ( $($name:expr => $value:expr),* ) => { //-- passing multiple key => value syntax 
-        // ...
-
-    };
-
 }
