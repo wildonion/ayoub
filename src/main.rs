@@ -68,6 +68,8 @@ mod services;
 
 
 
+
+// NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
 // NOTE - in order to define a generic type from traits they must be inside the Box with dyn keyword behind them
 // NOTE - None takes up exactly as much memory as if it were Some<T>. This is because Rust needs to know the Size of the Data you want to store and how much space it needs to allocate and for enums, which an option is, that means the space they need is as much as the largest variant And although you know that None will not change in this case, you could also swap it out with Some<T> any time later and then that new value needs to fit into that space
 // NOTE - bodies in hyper are always streamed asynchronously and we have to collect them all together inside a buffer to deserialize from utf8 bytes to a pre defined struct

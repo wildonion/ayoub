@@ -109,6 +109,9 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
 
 
         let heavy_func = |chunk: u8| {
+            let mut name = "wildonion".to_string();
+            let mut mutable_pointer_to_name = &mut name;
+            mutable_pointer_to_name = &mut "changed_wildonion".to_string();
             let byte_name = Ok::<&[u8], String>(b"wildonion");
             info!("\t--------Doing some heavy operation on chunk [{:?}]", chunk);
             chunk
