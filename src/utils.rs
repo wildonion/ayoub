@@ -67,7 +67,7 @@ pub mod jwt{
 
 
 
-// ------------------------------ into box method
+// ------------------------------ into box slice method
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -79,6 +79,9 @@ pub async fn into_box_slice(bytes: &Vec<u8>) -> Result<Box<[u8; 4]>, String>{ //
         Err(o) => return Err(format!("vector length must be 4 but it's {}", o.len())),
     };
 }
+
+
+
 
 
 
@@ -125,7 +128,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     
 
     
-    let boxed_array = self::into_box_slice(&bytes).await.unwrap();
+    let boxed_array = self::into_box_slice(&bytes).await.unwrap(); //-- converting &Vec<u8> to [u8] with a fixed size
     let result = *boxed_array; //-- dereferencing the box pointer to get the value inside of it 
     let final_res = u32::from_be_bytes(result); //-- will create a u32 number from 4 pack of 8 bits - from_be_bytes() method creates a native endian integer value from its representation as a byte array in big endian
     Ok(final_res) //-- the final results might be different from the input due to the time takes to send the each chunks through the channel and receive them from the receiver thus the order of chunks will not be the same as the input
@@ -178,8 +181,6 @@ pub fn string_to_static_str(s: String) -> &'static str {
     // ...
     Box::leak(s.into_boxed_str())
 }
-
-
 
 
 
