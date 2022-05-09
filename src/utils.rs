@@ -95,7 +95,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
         
     let threads = 4; //-- the total number of all packs or chunks containing 8 bits which in this case is 4 cause our number is of type u32
     let (sender, receiver) = mpsc::channel::<u8>();
-    let big_end_bytes = number.to_be_bytes(); //-- network bytes - since there are 4 chunks of 8 bits in the context of u32 bits there will be 4 chunks of 8 bits each chunk between 0 up to 255 
+    let big_end_bytes = number.to_be_bytes(); //-- network bytes which is in form utf8 or big endian bytes - since there are 4 chunks of 8 bits in the context of u32 bits there will be 4 chunks of 8 bits each chunk between 0 up to 255 
     let mut index = 0;
     
 
@@ -127,7 +127,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
     
     let boxed_array = self::into_box_slice(&bytes).await.unwrap();
     let result = *boxed_array; //-- dereferencing the box pointer to get the value inside of it 
-    let final_res = u32::from_be_bytes(result); //-- will create a u32 number from 4 pack of 8 bits 
+    let final_res = u32::from_be_bytes(result); //-- will create a u32 number from 4 pack of 8 bits - from_be_bytes() method creates a native endian integer value from its representation as a byte array in big endian
     Ok(final_res) //-- the final results might be different from the input due to the time takes to send the each chunks through the channel and receive them from the receiver thus the order of chunks will not be the same as the input
 
 
