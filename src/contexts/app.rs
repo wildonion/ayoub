@@ -305,3 +305,12 @@ pub trait void{
     type Output;
 
 }
+
+
+
+pub mod env{ 
+
+    // TODO - env functions to mutate the state of the runtime object
+    // ...
+
+}
