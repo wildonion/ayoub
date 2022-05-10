@@ -7,6 +7,7 @@
 # -------------------------------
 
 
+# ./ayoub.sh create --name <PROJECT_NAME> -> create the boilerplate code for a new project including auth and event service
 # ./ayoub.sh build --service <SERVICE_NAME> -> build and compile the selected service (game, auth, event or nft)
 # ./ayoub.sh make --service <SERVICE_NAME> -> make a service with controller, schemas, routers and service files
 # ./ayoub.sh run --service <SERVICE_NAME> --port-number <PORT> -> run a built service on desired port (game, auth, event or nft)
