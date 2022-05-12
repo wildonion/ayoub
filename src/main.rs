@@ -80,8 +80,9 @@ mod services;
 // NOTE - to return a trait inside the function we have to put it inside a Box with a dyn keyword (due to the dynamic size of the trait) cause a Box is just a reference to some memory in the heap and a reference has a statically known size thus compiler can guarantee it points to a heap allocated the trait that is not a dangling pointer
 // NOTE - unwrapping a wrapped Option or Result type using ? will only work inside a method that will return Result or Option
 // NOTE - always use &self or &mut self inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
-// NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
+// NOTE - since mutable pointer to a type can change the value of the type thus if we want to mutate the struct field in its methods without losing its ownership we have to use &mut self as the first param of methods 
 // NOTE - &self or &mut self will be converted automatically to self on compile time
+// NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
 // NOTE - a pointer takes usize size (64 bits target takes 64 bits or 8 bytes; 32 bits targets takes 32 bits or 4 bytes) to reference any location in memory 
 // NOTE - the size of a boxed value or size_of_val(&Box::new(10)) is equals to the size of the Box which is just a pointer and a pointer takes usize (8 bytes or 4 bytes) to reference any location inside the memory 
 // NOTE - size of the value inside any smart pointer is equals to the size of the smart pointer itself which is usize  
