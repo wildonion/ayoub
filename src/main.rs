@@ -30,6 +30,28 @@ Server Design Pattern Idea:
 
 
 
+    NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
+    NOTE - in order to define a generic type from traits they must be inside the Box with dyn keyword behind them
+    NOTE - None takes up exactly as much memory as if it were Some<T>. This is because Rust needs to know the Size of the Data you want to store and how much space it needs to allocate and for enums, which an option is, that means the space they need is as much as the largest variant And although you know that None will not change in this case, you could also swap it out with Some<T> any time later and then that new value needs to fit into that space
+    NOTE - bodies in hyper are always streamed asynchronously and we have to collect them all together inside a buffer to deserialize from utf8 bytes to a pre defined struct
+    NOTE - Box is a none dangling pointer with a usize size and will allocate T size (Box<T>) on the heap to store what's inside of it and allocate nothing on the heap if T is unsized  
+    NOTE - to solve the `future is not `Send` as this value is used across an await` error we have to implement the Send trait for that type, since we don't know the type at compile time (it'll specify at runtime due to the logic of the code) we must put the trait inside the Box with the dyn keyword (object safe traits have unknown size at compile time) inside the return type of the function in second part of the Result 
+    NOTE - Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory
+    NOTE - we can't return a trait inside the function cause the compiler needs to know how much space every function's return type requires and this can't be specified at compile time cause different implementations of a trait need different amount of memory
+    NOTE - to return a trait inside the function we have to put it inside a Box with a dyn keyword (due to the dynamic size of the trait) cause a Box is just a reference to some memory in the heap and a reference has a statically known size thus compiler can guarantee it points to a heap allocated the trait that is not a dangling pointer
+    NOTE - unwrapping a wrapped Option or Result type using ? will only work inside a method that will return Result or Option
+    NOTE - always use &self (immutable pointer) or &mut self (mutable pointer) inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
+    NOTE - since mutable pointer to a type can change the value of the type thus if we want to mutate the struct field in its methods without losing its ownership we have to use &mut self as the first param of methods 
+    NOTE - &self or &mut self will be converted automatically to self on compile time
+    NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
+    NOTE - a pointer takes usize size (64 bits target takes 64 bits or 8 bytes; 32 bits targets takes 32 bits or 4 bytes) to reference any location in memory 
+    NOTE - the size of a boxed value or size_of_val(&Box::new(10)) is equals to the size of the Box which is just a pointer and a pointer takes usize (8 bytes or 4 bytes) to reference any location inside the memory 
+    NOTE - size of the value inside any smart pointer is equals to the size of the smart pointer itself which is usize  
+    NOTE - usize is how many bytes it takes to reference any location in memory, on a 32 bit target, this is 4 bytes and on a 64 bit target, this is 8 bytes
+    NOTE - generic type is needed for function returns and types and for those types that haven't fixed size in compile time we have to put them inside the Box or take a reference to them to borrow them using & and the size of the Box is usize and the size of the Box inside heap is the size of the Box value which T inside the Box and the Box will have a default valid lifetime for any type inside of it
+    NOTE - if the size of the u8 is not specified we have to either use & with lifetime or put it inside a Box in which the lifetime will be handled automatically by the Box itself
+    NOTE - since unsized types like traits, closures, Strings and [u8]s won't have fixed size at compile time either they must be used as a borrowed type using & with a valid lifetime or be stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box we have to dereference the Box
+    NOTE - unsized borrowing for abstract types will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
 
 
 */
@@ -69,28 +91,6 @@ mod services;
 
 
 
-// NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
-// NOTE - in order to define a generic type from traits they must be inside the Box with dyn keyword behind them
-// NOTE - None takes up exactly as much memory as if it were Some<T>. This is because Rust needs to know the Size of the Data you want to store and how much space it needs to allocate and for enums, which an option is, that means the space they need is as much as the largest variant And although you know that None will not change in this case, you could also swap it out with Some<T> any time later and then that new value needs to fit into that space
-// NOTE - bodies in hyper are always streamed asynchronously and we have to collect them all together inside a buffer to deserialize from utf8 bytes to a pre defined struct
-// NOTE - Box is a none dangling pointer with a usize size and will allocate T size (Box<T>) on the heap to store what's inside of it and allocate nothing on the heap if T is unsized  
-// NOTE - to solve the `future is not `Send` as this value is used across an await` error we have to implement the Send trait for that type, since we don't know the type at compile time (it'll specify at runtime due to the logic of the code) we must put the trait inside the Box with the dyn keyword (object safe traits have unknown size at compile time) inside the return type of the function in second part of the Result 
-// NOTE - Error, Send and Sync are object safe traits which must be bounded to a type, since we don't know the type in compile time (will be specified at runtime) we must put these trait inside a Box with the dyn keword behind them cause we don't know how much size they will take inside the memory
-// NOTE - we can't return a trait inside the function cause the compiler needs to know how much space every function's return type requires and this can't be specified at compile time cause different implementations of a trait need different amount of memory
-// NOTE - to return a trait inside the function we have to put it inside a Box with a dyn keyword (due to the dynamic size of the trait) cause a Box is just a reference to some memory in the heap and a reference has a statically known size thus compiler can guarantee it points to a heap allocated the trait that is not a dangling pointer
-// NOTE - unwrapping a wrapped Option or Result type using ? will only work inside a method that will return Result or Option
-// NOTE - always use &self (immutable pointer) or &mut self (mutable pointer) inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
-// NOTE - since mutable pointer to a type can change the value of the type thus if we want to mutate the struct field in its methods without losing its ownership we have to use &mut self as the first param of methods 
-// NOTE - &self or &mut self will be converted automatically to self on compile time
-// NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
-// NOTE - a pointer takes usize size (64 bits target takes 64 bits or 8 bytes; 32 bits targets takes 32 bits or 4 bytes) to reference any location in memory 
-// NOTE - the size of a boxed value or size_of_val(&Box::new(10)) is equals to the size of the Box which is just a pointer and a pointer takes usize (8 bytes or 4 bytes) to reference any location inside the memory 
-// NOTE - size of the value inside any smart pointer is equals to the size of the smart pointer itself which is usize  
-// NOTE - usize is how many bytes it takes to reference any location in memory, on a 32 bit target, this is 4 bytes and on a 64 bit target, this is 8 bytes
-// NOTE - generic type is needed for function returns and types and for those types that haven't fixed size in compile time we have to put them inside the Box or take a reference to them to borrow them using & and the size of the Box is usize and the size of the Box inside heap is the size of the Box value which T inside the Box and the Box will have a default valid lifetime for any type inside of it
-// NOTE - if the size of the u8 is not specified we have to either use & with lifetime or put it inside a Box in which the lifetime will be handled automatically by the Box itself
-// NOTE - since unsized types like traits, closures, Strings and [u8]s won't have fixed size at compile time either they must be used as a borrowed type using & with a valid lifetime or be stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box we have to dereference the Box
-// NOTE - unsized borrowing for abstract types will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
 
 
 
