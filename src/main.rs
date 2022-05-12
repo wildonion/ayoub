@@ -79,7 +79,7 @@ mod services;
 // NOTE - we can't return a trait inside the function cause the compiler needs to know how much space every function's return type requires and this can't be specified at compile time cause different implementations of a trait need different amount of memory
 // NOTE - to return a trait inside the function we have to put it inside a Box with a dyn keyword (due to the dynamic size of the trait) cause a Box is just a reference to some memory in the heap and a reference has a statically known size thus compiler can guarantee it points to a heap allocated the trait that is not a dangling pointer
 // NOTE - unwrapping a wrapped Option or Result type using ? will only work inside a method that will return Result or Option
-// NOTE - always use &self or &mut self inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
+// NOTE - always use &self (immutable pointer) or &mut self (mutable pointer) inside the struct methods' parameters to borrow the ownership of struct fields instead of moving
 // NOTE - since mutable pointer to a type can change the value of the type thus if we want to mutate the struct field in its methods without losing its ownership we have to use &mut self as the first param of methods 
 // NOTE - &self or &mut self will be converted automatically to self on compile time
 // NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
