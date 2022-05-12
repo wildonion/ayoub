@@ -242,3 +242,75 @@ pub async fn shutdown_signal(signal: Receiver<u8>){
         }
     }
 }
+
+
+#[derive(Clone, Debug)]
+pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
+
+
+
+pub mod manager{
+    
+    use uuid::Uuid;
+
+    // TODO - vector of || async move{} of events for an event manager struct 
+    // TODO - call new event every 5 seconds from vector of event of closures 
+    
+    pub struct Event{
+        id: Uuid,
+        last_call: i64, // last call timestamp  
+    }
+
+
+}
+
+
+pub mod messanger{
+    
+    
+    use uuid::Uuid;
+
+    
+    // TODO - use actix actors for each server
+    // ....
+    
+    pub struct Server{
+        pub id: Uuid,
+        pub name: String,
+        pub channels: Vec<Channel>,
+        pub members: Vec<ServerMember>,
+    }
+    
+    pub struct Thread{
+        pub id: Uuid,
+        pub name: String,
+    }
+    
+    pub struct Channel{
+        pub name: String,
+        pub members: Vec<ChannelMember>,
+        pub threads: Vec<Thread>,
+    }
+    
+    pub struct ServerMember;
+    pub struct ChannelMember;
+        
+
+
+}
+
+
+pub trait void{
+    type Input;
+    type Output;
+
+}
+
+
+
+pub mod env{ 
+
+    // TODO - env functions to mutate the state of the runtime object
+    // ...
+
+}
