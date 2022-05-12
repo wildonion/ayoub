@@ -53,6 +53,8 @@ Server Design Pattern Idea:
     NOTE - since unsized types like traits, closures, Strings and [u8]s won't have fixed size at compile time either they must be used as a borrowed type using & with a valid lifetime or be stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box we have to dereference the Box
     NOTE - unsized borrowing for abstract types will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
     NOTE - can't return &[u8] or [u8] in function signature due to unknown size of slice and lifetime constraints we could return either Vec<u8> or Box<[u8]> since since Vec<u8> will be coerced to &'a [u8] with a valid lifetime (like 'a) at compile time
+    NOTE - & is used for borrowing and taking a referencing to the location inside the memory of an unknown sized type like [u8] slices
+
 
 */
 
