@@ -7,6 +7,8 @@ use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use argon2::{self, Config};
 use std::env;
+use borsh::{BorshDeserialize, BorshSerialize};
+
 
 
 
@@ -95,7 +97,7 @@ pub struct UserUpdateResponse{
 |
 |
 */
-#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct SMSResponseReturn{
     pub status: u16,
     pub message: String,
@@ -109,7 +111,7 @@ pub struct SMSResponseReturn{
 |
 |
 */
-#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct SMSResponseEntries{
     pub messageid: f64,
     pub message: String,
@@ -129,7 +131,7 @@ pub struct SMSResponseEntries{
 |
 |
 */
-#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
 pub struct SMSResponse{
     pub r#return: SMSResponseReturn, //-- use r# to escape reserved keywords to use them as identifiers 
     pub entries: Vec<SMSResponseEntries>,

@@ -7,8 +7,11 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use crate::utils::into_box_slice;
 use crate::utils::gen_random_idx;
 use std::{mem, slice, env, io::{BufWriter, Write}};
+use borsh::BorshDeserialize;
+use borsh::BorshSerialize;
 use chrono::Duration;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body_bytes and stream buffer
@@ -103,15 +106,27 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                 
 
 
-                                // NOTE - from_raw_parts() forms a slice or &[u8] from the pointer and the length
-                                // NOTE - into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
-                                let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes
-                                
+                                // --------------------------------------------------------------------
+                                //                   CODEC OPS USING serde & borsh
+                                // --------------------------------------------------------------------
+                                let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
+                                let mut sms_response_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&sms_response).unwrap(); //-- converting teh sms_response object into vector of utf8 bytes using serde
+                                let mut sms_response_serialized_into_vec_bytes_using_borsh = sms_response.try_to_vec().unwrap(); //-- converting teh sms_response object into vector of utf8 bytes using borsh
+                                let deserialize_to_utf8_using_serde_from_slice = serde_json::from_slice::<schemas::auth::SMSResponse>(&sms_response_serialized_into_vec_bytes_using_serede).unwrap(); //-- passing the vector of utf8 bytes into the from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> into the from_slice() method 
+                                let deserialize_to_utf8_using_borsh_from_slice = schemas::auth::SMSResponse::try_from_slice(&sms_response_serialized_into_vec_bytes_using_borsh).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> into the try_from_slice() method
+                                // --------------------------------------------------------------------
+                                //                      CONVERTING Vec<u8> -> &[u8]
+                                // --------------------------------------------------------------------
+                                let mut utf8_bytes_using_as_mut_slice = sms_response_serialized_into_vec_bytes_using_serede.as_mut_slice(); //-- converting Vec<u8> to mutable slice of &[u8] using as_mut_slice() method - remeber that sms_response_serialized_into_vec_bytes_using_serede must be defined as mutable
+                                let utf8_bytes_using_casting: &[u8] = &sms_response_serialized_into_vec_bytes_using_serede; //-- since the Vec<u8> will be coerced to &'a [u8] with a valid lifetime at compile time we can borrow the ownership of sms_response_serialized_into_vec_bytes_using_serede using & which will be coerced to &'a [u8] since we've specified the type of sms_response_serialized_into_utf8_bytes_using_serede which is &[u8]
+                                let boxed_utf8_bytes_using_box_slcie = sms_response_serialized_into_vec_bytes_using_serede.into_boxed_slice(); //-- converting the Vec<u8> to Box<u8> using into_boxed_slice() method 
+                                let utf_bytes_dereference_from_box = &*boxed_utf8_bytes_using_box_slcie; //-- borrow the ownership of the dereferenced boxed_utf8_bytes_using_box_slcie using & to convert it to &[u8] with a valid lifetime since the dereferenced boxed_utf8_bytes_using_box_slcie has unknown size at compile time since working with u8 slice needs to borrow them due to implemented ?Sized for [u8] 
 
 
                                 
+                                
+
                                 if sms_response.r#return.status == 200{ //-- means the code has been sent to telecommunications
-                                            
                                             
 
 
