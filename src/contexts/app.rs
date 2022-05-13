@@ -271,7 +271,7 @@ pub mod messanger{
     use uuid::Uuid;
 
     
-    // TODO - simd using actor based cross sharding
+    // TODO - simd using borsh and serde codec and actor based cross sharding
     // TODO - use actix actors for each server
     // ....
     
@@ -311,7 +311,16 @@ pub trait void{
 
 pub mod env{ 
 
+    const APP_NAME: &str = "Ayoub";
+
     // TODO - env functions to mutate the state of the runtime object
+    // TODO - try different IO streaming and future traits on a defined buffer from the following crates 
     // ...
+
+    use std::sync::mpsc as std_mpsc;
+    use futures::channel::mpsc as future_mpsc;
+    use tokio::sync::mpsc as tokio_mpsc;
+
+
 
 }
