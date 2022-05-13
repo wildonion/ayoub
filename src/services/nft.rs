@@ -118,7 +118,7 @@ impl Service<Request<Body>> for Svc{
     fn call(&mut self, req: Request<Body>) -> Self::Future{ //-- Body is the generic type of the Request struct
         let api = ctx::app::Api::new(Some(req), Some(Response::builder()));
         let res = routers::nft::register(self.storage.clone(), api); //-- registering nft routers for the nft service - register method returns a result of hyper response based on calling one of the available routes
-        Box::pin(async{ //-- returning the future response pinned to memory to solve later using .await - we can't mutate self.* in here cause the lifetime of the self must be static across a .await  
+        Box::pin(async{ //-- returning the future response pinned to memory to solve later using .await - we can't mutate self.* in here cause the lifetime of the self must be static across a .await cause .await might be solved later thus the type that is used before and after it must have a valid lifetime which must be static 
             res.await
         })
     }
