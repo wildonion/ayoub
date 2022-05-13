@@ -154,7 +154,7 @@ pub struct Storage{
 
 
 #[derive(Copy, Clone, Debug)]
-pub enum Mode{ //-- enum uses 8 bytes tag which is a pointer pointing to the current variant - the total size of this enum is 8 bytes tag + the largest variant size = 8 + 0 = 8 bytes
+pub enum Mode{ //-- enum uses 8 bytes (usize which is 64 bits on 64 bits arch) tag which is a pointer pointing to the current variant - the total size of this enum is 8 bytes tag + the largest variant size = 8 + 0 = 8 bytes
     On, //-- zero byte size
     Off, //-- zero byte size
 }
