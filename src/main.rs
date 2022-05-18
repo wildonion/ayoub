@@ -258,9 +258,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // ------------------------------------------------
         //     BUILDING RUNTIME OBJECT FROM AUTH SERVICE
         // ------------------------------------------------
-        let mut server_as_raw_pinter = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
+        let mut raw_pointer_to_server = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
         let runtime = ctx::app::Runtime{
-            server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+            server: ctx::app::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
             id: Uuid::new_v4(),
             error: None,
             node_addr: auth_server.local_addr(), //-- local address of this server which has been bound to
@@ -287,9 +287,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // ------------------------------------------------
         //    BUILDING RUNTIME OBJECT FROM EVENT SERVICE
         // ------------------------------------------------
-        let mut server_as_raw_pinter = &mut event_server as *mut Server<AddrIncoming, services::event::EventSvc>; //-- taking a mutable raw pointer to the event_server to cast it to usize later
+        let mut raw_pointer_to_server = &mut event_server as *mut Server<AddrIncoming, services::event::EventSvc>; //-- taking a mutable raw pointer to the event_server to cast it to usize later
         let runtime = ctx::app::Runtime{
-            server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+            server: ctx::app::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
             id: Uuid::new_v4(),
             error: None,
             node_addr: event_server.local_addr(), //-- local address of this server which has been bound to
@@ -316,9 +316,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // ------------------------------------------------
         //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
         // ------------------------------------------------
-        let mut server_as_raw_pinter = &mut game_server as *mut Server<AddrIncoming, services::game::PlayerSvc>; //-- taking a mutable raw pointer to the game_server to cast it to usize later
+        let mut raw_pointer_to_server = &mut game_server as *mut Server<AddrIncoming, services::game::PlayerSvc>; //-- taking a mutable raw pointer to the game_server to cast it to usize later
         let runtime = ctx::app::Runtime{
-            server: ctx::app::LinkToService(server_as_raw_pinter as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+            server: ctx::app::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
             id: Uuid::new_v4(),
             error: None,
             node_addr: game_server.local_addr(), //-- local address of this server which has been bound to

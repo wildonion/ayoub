@@ -4,6 +4,37 @@
 
 
 
+
+/* 
+                                                    ---------------------------------------------
+                                                    THE IDEA BEHIND THE Api STRUCT DESIGN PATTERN
+                                                    ---------------------------------------------
+
+    based on the borrowing and ownership rules instead of garbage collection rule, the variable lifetime will be dropped after first usage 
+    and to get this rule over we must either clone (Clone trait must be implemented for that type) the variable or borrow its ownership using 
+    & in order to have it in later scopes therefore based on the desing pattern of the Api struct we can't bound it to Clone trait thus we can't clone 
+    the api object or have api.clone() in multiple scopes inside a single crate like the nodejs express app object therefore the best design pattern 
+    would be to return only one response object with a valid lifetime per request (cause the old one will be dropped after we're done with being inside the api methods) 
+    in the whole app runtime based on matching the request on one of the available routes; since there is only one initialized api object which contains 
+    the current request and a new response object inside the whole runtime in memory, there are no multiple of them at runtime 
+    cause we're using match expression to detect the current route. 
+    
+    
+    we've handled every incoming request using one the api object methods (post & get) in a 
+    specific controller inside a single crate to implement the above idea!
+
+
+
+*/
+
+
+
+
+
+
+
+
+
 use crate::routers;
 use crate::contexts as ctx;
 use std::future::Future;
@@ -116,7 +147,7 @@ impl Service<Request<Body>> for Svc{
 
 
     fn call(&mut self, req: Request<Body>) -> Self::Future{ //-- Body is the generic type of the Request struct
-        let api = ctx::app::Api::new(Some(req), Some(Response::builder()));
+        let api = ctx::app::Api::new(Some(req), Some(Response::builder())); //-- creating a new api object with a valid lifetime contains the incoming request and a new response
         let res = routers::nft::register(self.storage.clone(), api); //-- registering nft routers for the nft service - register method returns a result of hyper response based on calling one of the available routes
         Box::pin(async{ //-- returning the future response pinned to memory to solve later using .await - we can't mutate self.* in here cause the lifetime of the self must be static across a .await cause .await might be solved later thus the type that is used before and after it must have a valid lifetime which must be static 
             res.await
