@@ -24,10 +24,7 @@ Coded by
 
 
 
-
-Server Design Pattern Idea:
-    https://github.com/hyperium/hyper/tree/master/examples
-
+    Server Design Pattern Idea: https://github.com/hyperium/hyper/tree/master/examples
 
 
     NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
@@ -59,6 +56,7 @@ Server Design Pattern Idea:
     NOTE - the size of a String allocated in memeory is 24 bytes; 64 bits or 8 bytes or usize (usize which is big enough to hold any pointer or offset) for each of pointer, len and capacity on 64 bits system
     NOTE - the size of the &str allocated in memeory (heap or binary or stack) is the total length of the that str itself cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes for example the size of a none emoji word like "wildonion" is 9 bytes 1 byte for each but the size of "wildn🥲oion" is 13 bytes which is 4 bytes more than the "wildonion" which is because of 🥲 emoji 
     NOTE - the size of the &str allocated in memeory (heap or binary or stack) is less than String and equals to the size of that str in bytes: size_of_val("wildonion") == size_of_val("wildonion".as_bytes()) 
+    NOTE - shared reference for a type means that we have multiple owner across the whole app runtime and other threads and we can count them by putting the type inside a Rc smart pointer
 
 
     
