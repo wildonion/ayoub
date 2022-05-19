@@ -275,8 +275,9 @@ pub mod messanger{
     // TODO - use actix actors for each server
     // ....
     
-    pub struct Server{
-        pub id: Uuid,
+    pub struct Server<'a>{ //-- 'a is the lifetime of &[u8]
+        pub cluster_id: Uuid, //-- the id of the cluster which this server is inside
+        pub api_token: &'a [u8], //-- is an array of a borrowed type of utf8 bytes with a valid lifetime 
         pub name: String,
         pub channels: Vec<Channel>,
         pub members: Vec<ServerMember>,
