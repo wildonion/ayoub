@@ -24,6 +24,9 @@
     we've handled every incoming request using one the api object methods (post & get) in a 
     specific controller inside a single crate to implement the above idea!
 
+    we can't borrow the api object cause it'll be a shared reference and can't dereference it 
+    a shared reference across other threads.
+
 
 
 */
