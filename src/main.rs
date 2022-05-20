@@ -52,17 +52,21 @@ Coded by
     NOTE - unsized borrowing for abstract types will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
     NOTE - can't return &[u8] or [u8] in function signature due to unknown size of slice and lifetime constraints we could return either Vec<u8> or Box<[u8]> since Vec<u8> will be coerced to &'a [u8] with a valid lifetime (like 'a) at compile time
     NOTE - string (list) in rust can be either String (Vector) which will be stored on heap or str ([u8]) since beacuse of unknown size of the str ([u8]) we should take a pointer using & to the location of it which is either inside the binary, heap or the stack to pass them by reference between functions or store them inside a variable and they primarily uses are to create slices from String and Vec.
-    NOTE - since str and [u8] must be in their borrowed form in the whole app runtime (their size would be 2 machine (usize) words wide; one for the pointer and the other for the length which both of them will be inside the stack) thus in order to return them inside a function we must put them inside the Box like Vec, String, traits and closures which must be inside the Box to return them in their borrowed form
+    NOTE - since str and [u8] must be in their borrowed form in the whole app runtime (their size would be 2 machine (usize) words wide; one for the pointer and the other for the length which both of them will be inside the stack) thus in order to return them inside a function we must put them inside the Box like &String, &Vec, &dyn Trait and &move || {} which must be inside the Box to return them in their borrowed form
     NOTE - & is used for borrowing and taking a referencing to the location inside the memory of an unknown sized type like [u8] slices
     NOTE - since every type has its own lifetime which which will be destryoed whe it goes to out of its scope it'll prevent us to have a grabage collector system 
     NOTE - we have to pass by reference using & in function param to borrow the ownership of the type like passing Vec and String by & to borrow a slice of them and coerce them to &[u8] and &str
     NOTE - the size of a String allocated in memeory is 24 bytes; 64 bits or 8 bytes or usize (usize which is big enough to hold any pointer or offset) for each of pointer, len and capacity on 64 bits system
     NOTE - the size of the &str allocated in memeory (heap or binary or stack) is the total length of the that str itself cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes for example the size of a none emoji word like "wildonion" is 9 bytes 1 byte for each but the size of "wildn🥲oion" is 13 bytes which is 4 bytes more than the "wildonion" which is because of 🥲 emoji 
     NOTE - the size of the &str allocated in memeory (heap or binary or stack) is less than String and equals to the size of that str in bytes: size_of_val("wildonion") == size_of_val("wildonion".as_bytes()) 
-    NOTE - shared reference for a type means that we have multiple owner across the whole app runtime and other threads and we can count them by putting the type inside a Rc smart pointer
-
-
+    NOTE - shared reference for a type means that we have multiple owner across the whole app runtime and other threads and we can count them by putting the type inside a Rc smart pointer.
+    NOTE - Vec and String are stored on the heap and their pointer, length and capacity (for resizing) will be stored on the stack; str and [u8] are stored on either heap, binary or the stack at runtime and since they are a slice of String or Vec they must be in their borrowed form using &.
+    NOTE - we can't return pointer from the function body due to the borrowing and ownership (instead of garbage collection rule) rule which says that the lifetime of a type will be dropped once it goes out of its scope and due to this fact we can't return pointer from the function body cause it will be a dangled pointer after function scope which is pointing to an empty location with invalid lifetime; therefore we can use Box to put the borrowed type inside of it in order to return it from the function body.
+    NOTE - to use unknown sized types like str, [u8], traits and closures at runtime they must have size at compile time and in order to fix this we have to either take a reference to them using & or put them inside the Box if we want to return them from function body.
     
+
+
+
 */
 
 
