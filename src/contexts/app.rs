@@ -271,7 +271,7 @@ pub mod messanger{
     use uuid::Uuid;
 
     
-    // TODO - simd using borsh and serde codec and actor based cross sharding
+    // TODO - simd using borsh and serde codec and actix actor based cross sharding
     // TODO - use actix actors for each server
     // ....
     
