@@ -35,7 +35,7 @@ pub struct Api{
     pub name: String,
     pub req: Option<hyper::Request<Body>>,
     pub res: Option<hyper::http::response::Builder>,
-    pub callback: Option<Callback>, //-- the generic of the callback field is the Callback type which is FnMut and a Future object for its return inside the Box
+    pub callback: Option<Callback>, //-- the generic type of the callback field is the Callback type which is FnMut and a Future object for its return type inside the Box
     pub access_level: Option<u8>, //-- it might be None and the api doesn't require an access level
 }
 
@@ -60,8 +60,8 @@ impl Api{
             name: String::from(""),
             req: request,
             res: response,
-            callback: None, // TODO 
-            access_level: None,
+            callback: None, // TODO - caching using closures
+            access_level: None, // TODO
         }
     } 
     
@@ -198,7 +198,7 @@ pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer 
 #[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
 pub struct Runtime{
     pub id: Uuid,
-    pub server: LinkToService, //-- due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
+    pub server: LinkToService, //-- TODO - convert usize to pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
     pub error: Option<AppError>, //-- any runtime error
     pub node_addr: SocketAddr, //-- socket address of this node
     pub last_crash: Option<i64>, //-- last crash timestamp
