@@ -23,8 +23,8 @@ use actix::*;
 
 
 
-type Callback = Box<dyn FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T
-type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads
+type Callback = Box<dyn 'static + FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T - the closure inside the Box is valid as long as the Callback is valid due to the 'static lifetime and will never become invalid until the variable that has the Callback type drop
+type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
 
 unsafe impl Send for Api{}
 unsafe impl Sync for Api {}
@@ -198,7 +198,7 @@ pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer 
 #[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
 pub struct Runtime{
     pub id: Uuid,
-    pub server: LinkToService, //-- TODO - convert usize to pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
+    pub server: LinkToService, //-- TODO - build the server type from usize of its pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
     pub error: Option<AppError>, //-- any runtime error
     pub node_addr: SocketAddr, //-- socket address of this node
     pub last_crash: Option<i64>, //-- last crash timestamp

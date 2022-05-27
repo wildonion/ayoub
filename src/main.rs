@@ -27,8 +27,9 @@ Coded by
     Server Design Pattern Idea: https://github.com/hyperium/hyper/tree/master/examples
 
 
+    NOTE - 'static trait bound means the type does not contain any non-static references, the receiver (function or the struct field) can hold on to the type for as long as they want and it will never become invalid until they drop it also any owned data always passes a 'static lifetime bound, but a reference to that owned data generally does not
     NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
-    NOTE - in order to define a generic type from traits or closures they must be inside the Box with dyn keyword behind them cause object safe traits are no bounded to Sized traits and each closure generates a unique anonymous type for the closure's value  
+    NOTE - it's ok to bound the generic type inside the function to traits and a valid lifetime (trait bound lifetime like 'static) without the Box but in order to define a generic type from traits or closures (closures are marked as traits) they must be inside the Box with dyn keyword behind them plus a valid lifetime ('static or 'other) cause object safe traits are no bounded to Sized traits and each closure generates a unique anonymous type for the closure's value  
     NOTE - None takes up exactly as much memory as if it were Some<T>. This is because Rust needs to know the Size of the Data you want to store and how much space it needs to allocate and for enums, which an option is, that means the space they need is as much as the largest variant And although you know that None will not change in this case, you could also swap it out with Some<T> any time later and then that new value needs to fit into that space
     NOTE - bodies in hyper are always streamed asynchronously and we have to collect them all together inside a buffer to deserialize from utf8 bytes to a pre defined struct
     NOTE - Box is a none dangling pointer with a usize size and will allocate T size (Box<T>) on the heap to store what's inside of it and allocate nothing on the heap if T is unsized  
@@ -49,7 +50,7 @@ Coded by
     NOTE - if the size of the u8 is not specified we have to either use & with lifetime or put it inside a Box in which the lifetime will be handled automatically by the Box itself
     NOTE - since unsized types like traits, closures, str and [u8]s won't have fixed size at compile time they must be either used as a borrowed type using & with a valid lifetime or stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box which is owned by the Box itself we have to dereference the Box
     NOTE - heap allocated types like String, Vec, traits and closures has 3 machine (usize) words wide which are pointer, length and capacity (for efficient resizing) inside the stack also they can be in their borrowed mode like &String, &Vec, &dyn Trait and &move || {}.
-    NOTE - unsized borrowing for abstract types like object safe traits will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
+    NOTE - unsized borrowing for abstract types like object safe traits will be done using &dyn Trait/Closure + 'a or Box<dyn Trait/Closure + 'a> with a valid lifetime added at the end and for concrete type is done by using &Type or Box<Type>
     NOTE - can't return &[u8] or [u8] in function signature due to unknown size of slice and lifetime constraints we could return either Vec<u8> or Box<[u8]> since Vec<u8> will be coerced to &'a [u8] with a valid lifetime (like 'a) at compile time
     NOTE - string (list) in rust can be either String (Vec) which will be stored on heap or str ([u8]) since beacuse of unknown size of the str ([u8]) we should take a pointer using & to the location of it which is either inside the binary, heap or the stack to pass them by reference between functions or store them inside a variable and they primarily uses are to create slices from String and Vec.
     NOTE - since str and [u8] must be in their borrowed form in the whole app runtime (their size would be 2 machine (usize) words wide; one for the pointer and the other for the length which both of them will be inside the stack) thus in order to return them inside a function we must put them inside the Box like &String, &Vec, &dyn Trait and &move || {} which must be inside the Box to return them in their borrowed form cause we can return them easily in their unborrowed form!
@@ -115,7 +116,7 @@ mod services;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
     
     
 
