@@ -24,14 +24,12 @@ Coded by
 
 
 
-
-Server Design Pattern Idea:
-    https://github.com/hyperium/hyper/tree/master/examples
+    Server Design Pattern Idea: https://github.com/hyperium/hyper/tree/master/examples
 
 
-
+    NOTE - 'static trait bound means the type does not contain any non-static references, the receiver (function or the struct field) can hold on to the type for as long as they want and it will never become invalid until they drop it also any owned data always passes a 'static lifetime bound, but a reference to that owned data generally does not
     NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
-    NOTE - in order to define a generic type from traits they must be inside the Box with dyn keyword behind them
+    NOTE - it's ok to bound the generic type inside the function to traits and a valid lifetime (trait bound lifetime like 'static) without the Box but in order to define a generic type from traits or closures (closures are marked as traits) they must be inside the Box with dyn keyword behind them plus a valid lifetime ('static or 'other) cause object safe traits are no bounded to Sized traits and each closure generates a unique anonymous type for the closure's value  
     NOTE - None takes up exactly as much memory as if it were Some<T>. This is because Rust needs to know the Size of the Data you want to store and how much space it needs to allocate and for enums, which an option is, that means the space they need is as much as the largest variant And although you know that None will not change in this case, you could also swap it out with Some<T> any time later and then that new value needs to fit into that space
     NOTE - bodies in hyper are always streamed asynchronously and we have to collect them all together inside a buffer to deserialize from utf8 bytes to a pre defined struct
     NOTE - Box is a none dangling pointer with a usize size and will allocate T size (Box<T>) on the heap to store what's inside of it and allocate nothing on the heap if T is unsized  
@@ -45,23 +43,31 @@ Server Design Pattern Idea:
     NOTE - &self or &mut self will be converted automatically to self on compile time
     NOTE - the trait Clone must be implemented for that struct in order to use & cause Clone is a super trait of Copy otherwise we can't borrow the ownership and take a reference to its field (see Api struct comments!)
     NOTE - a pointer takes usize size (64 bits target takes 64 bits or 8 bytes; 32 bits targets takes 32 bits or 4 bytes) to reference any location in memory 
-    NOTE - the size of a boxed value or size_of_val(&Box::new(10)) is equals to the size of the Box which is just a pointer and a pointer takes usize (8 bytes or 4 bytes) to reference any location inside the memory 
+    NOTE - the size of a boxed value or size_of_val(&Box::new(10)) is equals to the size of the Box which is just a pointer and a pointer takes usize (8 bytes or 4 bytes) to reference any location inside the memory
     NOTE - size of the value inside any smart pointer is equals to the size of the smart pointer itself which is usize  
     NOTE - usize is how many bytes it takes to reference any location in memory, on a 32 bit target, this is 4 bytes and on a 64 bit target, this is 8 bytes
-    NOTE - generic type is needed for function returns and types and for those types that haven't fixed size in compile time we have to put them inside the Box or take a reference to them to borrow them using & and the size of the Box is usize and the size of the Box inside heap is the size of the Box value which T inside the Box and the Box will have a default valid lifetime for any type inside of it
+    NOTE - generic type is needed for function returns and types and for those types that haven't fixed size in compile time we have to put them inside the Box or take a reference to them to borrow them using & and the size of the Box is usize and the size of the Box inside heap is the size of the T (on the heap) inside the Box and the Box will have a default valid lifetime for any type inside of it
     NOTE - if the size of the u8 is not specified we have to either use & with lifetime or put it inside a Box in which the lifetime will be handled automatically by the Box itself
-    NOTE - since unsized types like traits, closures, Strings and [u8]s won't have fixed size at compile time either they must be used as a borrowed type using & with a valid lifetime or be stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box we have to dereference the Box
-    NOTE - unsized borrowing for abstract types will be done using &dyn Trait/Closure or Box<dyn Trait/Closure> and for concrete type is done by using &Type or Box<Type>
-    NOTE - can't return &[u8] or [u8] in function signature due to unknown size of slice and lifetime constraints we could return either Vec<u8> or Box<[u8]> since since Vec<u8> will be coerced to &'a [u8] with a valid lifetime (like 'a) at compile time
+    NOTE - since unsized types like traits, closures, str and [u8]s won't have fixed size at compile time they must be either used as a borrowed type using & with a valid lifetime or stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box which is owned by the Box itself we have to dereference the Box
+    NOTE - heap allocated types like String, Vec, traits and closures has 3 machine (usize) words wide which are pointer, length and capacity (for efficient resizing) inside the stack also they can be in their borrowed mode like &String, &Vec, &dyn Trait and &move || {}.
+    NOTE - unsized borrowing for abstract types like object safe traits will be done using &dyn Trait/Closure + 'a or Box<dyn Trait/Closure + 'a> with a valid lifetime added at the end and for concrete type is done by using &Type or Box<Type>
+    NOTE - can't return &[u8] or [u8] in function signature due to unknown size of slice and lifetime constraints we could return either Vec<u8> or Box<[u8]> since Vec<u8> will be coerced to &'a [u8] with a valid lifetime (like 'a) at compile time
+    NOTE - string (list) in rust can be either String (Vec) which will be stored on heap or str ([u8]) since beacuse of unknown size of the str ([u8]) we should take a pointer using & to the location of it which is either inside the binary, heap or the stack to pass them by reference between functions or store them inside a variable and they primarily uses are to create slices from String and Vec.
+    NOTE - since str and [u8] must be in their borrowed form in the whole app runtime (their size would be 2 machine (usize) words wide; one for the pointer and the other for the length which both of them will be inside the stack) thus in order to return them inside a function we must put them inside the Box like &String, &Vec, &dyn Trait and &move || {} which must be inside the Box to return them in their borrowed form cause we can return them easily in their unborrowed form!
     NOTE - & is used for borrowing and taking a referencing to the location inside the memory of an unknown sized type like [u8] slices
     NOTE - since every type has its own lifetime which which will be destryoed whe it goes to out of its scope it'll prevent us to have a grabage collector system 
     NOTE - we have to pass by reference using & in function param to borrow the ownership of the type like passing Vec and String by & to borrow a slice of them and coerce them to &[u8] and &str
     NOTE - the size of a String allocated in memeory is 24 bytes; 64 bits or 8 bytes or usize (usize which is big enough to hold any pointer or offset) for each of pointer, len and capacity on 64 bits system
     NOTE - the size of the &str allocated in memeory (heap or binary or stack) is the total length of the that str itself cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes for example the size of a none emoji word like "wildonion" is 9 bytes 1 byte for each but the size of "wildn🥲oion" is 13 bytes which is 4 bytes more than the "wildonion" which is because of 🥲 emoji 
     NOTE - the size of the &str allocated in memeory (heap or binary or stack) is less than String and equals to the size of that str in bytes: size_of_val("wildonion") == size_of_val("wildonion".as_bytes()) 
-
-
+    NOTE - shared reference for a type means that we have multiple owner across the whole app runtime and other threads and we can count them by putting the type inside a Rc smart pointer.
+    NOTE - Vec and String are stored on the heap and their pointer, length and capacity (for resizing) will be stored on the stack; str and [u8] are stored on either heap, binary or the stack at runtime and since they are a slice of String or Vec they must be in their borrowed form using &.
+    NOTE - we can't return pointer from the function body due to the borrowing and ownership (instead of garbage collection rule) rule which says that the lifetime of a type will be dropped once it goes out of its scope and due to this fact we can't return pointer from the function body cause it will be a dangled pointer after function scope which is pointing to an empty location with invalid lifetime; therefore we can use Box to put the borrowed type inside of it in order to return it from the function body.
+    NOTE - to use unknown sized types like str, [u8], traits and closures at runtime they must have size at compile time and in order to fix this we have to either take a reference to them using & or put them inside the Box if we want to return them from function body.
     
+
+
+
 */
 
 
@@ -110,7 +116,7 @@ mod services;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic type can also be bounded to lifetime and traits - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
     
     
 

@@ -40,7 +40,7 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
         // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
         // TODO - upload image for group prof like tus resumable upload file
-        // TODO - first allocate some bytes on server ram for the incoming file from the client then on every incoming chunk of the file coming from the client save that chunk into the created file on server from the allocated buffer and seek the cursor to the saved position of the file to resume on reconnecting to the server
+        // TODO - first allocate some bytes inside the server ram buffer for the incoming file from the client then on every incoming io streaming of chunks of the file from the client save that chunk into the created file on server from the allocated buffer and seek the cursor to the saved position of the file to resume on reconnecting to the server
         // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the server ram on corruption condition to gather those bytes to form the whole file
         // ...
         /*

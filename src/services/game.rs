@@ -20,9 +20,11 @@
     the current request and a new response object inside the whole runtime in memory, there are no multiple of them at runtime 
     cause we're using match expression to detect the current route. 
     
-    
     we've handled every incoming request using one the api object methods (post & get) in a 
     specific controller inside a single crate to implement the above idea!
+
+    we can't borrow the api object cause it'll be a shared reference and can't dereference it 
+    a shared reference across other threads.
 
 
 

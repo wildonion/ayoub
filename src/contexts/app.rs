@@ -23,8 +23,8 @@ use actix::*;
 
 
 
-type Callback = Box<dyn FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T
-type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads
+type Callback = Box<dyn 'static + FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T - the closure inside the Box is valid as long as the Callback is valid due to the 'static lifetime and will never become invalid until the variable that has the Callback type drop
+type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
 
 unsafe impl Send for Api{}
 unsafe impl Sync for Api {}
@@ -35,7 +35,7 @@ pub struct Api{
     pub name: String,
     pub req: Option<hyper::Request<Body>>,
     pub res: Option<hyper::http::response::Builder>,
-    pub callback: Option<Callback>, //-- the generic of the callback field is the Callback type which is FnMut and a Future object for its return inside the Box
+    pub callback: Option<Callback>, //-- the generic type of the callback field is the Callback type which is FnMut and a Future object for its return type inside the Box
     pub access_level: Option<u8>, //-- it might be None and the api doesn't require an access level
 }
 
@@ -60,8 +60,8 @@ impl Api{
             name: String::from(""),
             req: request,
             res: response,
-            callback: None, // TODO 
-            access_level: None,
+            callback: None, // TODO - caching using closures
+            access_level: None, // TODO
         }
     } 
     
@@ -198,7 +198,7 @@ pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer 
 #[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
 pub struct Runtime{
     pub id: Uuid,
-    pub server: LinkToService, //-- due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
+    pub server: LinkToService, //-- TODO - build the server type from usize of its pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
     pub error: Option<AppError>, //-- any runtime error
     pub node_addr: SocketAddr, //-- socket address of this node
     pub last_crash: Option<i64>, //-- last crash timestamp
@@ -293,8 +293,9 @@ pub mod messanger{
     
     */
     
-    pub struct Server{
-        pub id: Uuid,
+    pub struct Server<'a>{ //-- 'a is the lifetime of &[u8] which is the borrowed type of [u8] due to its unknown size at compile time  
+        pub cluster_id: Uuid, //-- the id of the cluster which this server is inside
+        pub api_token: &'a [u8], //-- is an array of a borrowed type of utf8 bytes with a valid lifetime 
         pub name: String,
         pub channels: Vec<Channel>,
         pub members: Vec<ServerMember>,
