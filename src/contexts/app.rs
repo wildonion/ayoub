@@ -209,7 +209,7 @@ pub struct Runtime{
 
 impl Runtime{ // TODO - add wasm bindgen attribute to compile this to wasm
     
-    // Runtime serverless methods 
+    // Runtime serverless methods here
     // ...
 
 }
@@ -222,6 +222,9 @@ impl Actor for Runtime{ // TODO - add wasm bindgen attribute to compile this to 
     fn started(&mut self, ctx: &mut Self::Context) {
         
     }
+
+    // TODO - send borsh encoded async message between different runtimes using actor mpsc channel
+    // ...
 
 }
 
@@ -270,10 +273,25 @@ pub mod messanger{
     
     use uuid::Uuid;
 
+    /*
+
+        user
+            --- channel
+                --- subscribers
+                    --- tv
+                    --- mobile
+                    --- web
+                    --- desktop
+                    --- watch
+
+
+        >> broadcast `play` event on the user channel with the message which indicates the sub type
     
-    // TODO - simd using borsh and serde codec and actor based cross sharding
-    // TODO - use actix actors for each server
-    // ....
+        TODO - simd using borsh and serde codec and actor based cross sharding
+        TODO - use actix actors for each server
+        ....
+    
+    */
     
     pub struct Server{
         pub id: Uuid,
