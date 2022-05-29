@@ -3,7 +3,7 @@
 
 
 
-
+pub type MainResult<T, E> = std::result::Result<T, E>;
 pub type GenericError = Box<dyn std::error::Error + Send + Sync>;
 pub type GenericResult<T, E> = std::result::Result<T, E>;
 pub static INTERNAL_SERVER_ERROR: &str = "Interal Server Error";
