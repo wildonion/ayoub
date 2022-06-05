@@ -27,6 +27,7 @@ Coded by
     Server Design Pattern Idea: https://github.com/hyperium/hyper/tree/master/examples
 
 
+    NOTE - it's ok to setup app storage and api object inside each controller instead of setting them up in main.rs to have single instance of them in the whole lifetime of the app since rust doesn't have garbage collector thus based on borrowing and ownership rules each app storage and api object inside each controller function lifetime will be valid till the end of function scope or body   
     NOTE - 'static trait bound means the type does not contain any non-static references, the receiver (function or the struct field) can hold on to the type for as long as they want and it will never become invalid until they drop it also any owned data always passes a 'static lifetime bound, but a reference to that owned data generally does not
     NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
     NOTE - it's ok to bound the generic type inside the function to traits and a valid lifetime (trait bound lifetime like 'static) without the Box but in order to define a generic type from traits or closures (closures are marked as traits) they must be inside the Box with dyn keyword behind them plus a valid lifetime ('static or 'other) cause object safe traits are no bounded to Sized traits and each closure generates a unique anonymous type for the closure's value  
@@ -51,6 +52,7 @@ Coded by
     NOTE - since unsized types like traits, closures, str and [u8]s won't have fixed size at compile time they must be either used as a borrowed type using & with a valid lifetime or stored inside the Box which will be stored on the heap and a reference to that location will be returned from the Box thus in order to get the value inside the Box which is owned by the Box itself we have to dereference the Box using *
     NOTE - heap allocated types like String, Vec, traits and closures has 3 machine (usize) words wide which are pointer, length and capacity (for efficient resizing) inside the stack also they can be in their borrowed mode like &String, &Vec, &dyn Trait and &move || {}.
     NOTE - unsized borrowing for abstract types like object safe traits will be done using &dyn Trait/Closure + 'a or Box<dyn Trait/Closure + 'a> with a valid lifetime added at the end and for concrete type is done by using &Type or Box<Type>
+    NOTE - we have to put the unknown size at compile time types like object safe traits and closures (which are of type traits) inside the Box due to the face that they don't bound to Sized traits and don't have fixed size at compile time
     NOTE - can't return &[u8] or [u8] in function signature due to unknown size of slice and lifetime constraints we could return either Vec<u8> or Box<[u8]> since Vec<u8> will be coerced to &'a [u8] with a valid lifetime (like 'a) at compile time
     NOTE - string (list) in rust can be either String (Vec) which will be stored on heap or str ([u8]) since beacuse of unknown size of the str ([u8]) we should take a pointer using & to the location of it which is either inside the binary, heap or the stack to pass them by reference between functions or store them inside a variable and they primarily uses are to create slices from String and Vec.
     NOTE - since str and [u8] must be in their borrowed form in the whole app runtime (their size would be 2 machine (usize) words wide; one for the pointer and the other for the length which both of them will be inside the stack) thus in order to return them inside a function we must put them inside the Box like &String, &Vec, &dyn Trait and &move || {} which must be inside the Box to return them in their borrowed form cause we can return them easily in their unborrowed form!
@@ -89,9 +91,13 @@ use log::{info, error};
 use tokio::sync::oneshot;
 use hyper::server::{Server, conn::AddrIncoming};
 use self::contexts as ctx; // use crate::contexts as ctx;
+<<<<<<< HEAD
 use actix::prelude::*;
 use ctx::rafael::env::Serverless; // NOTE - based on orphan rule Serverless trait is required to use the run() method on the runtime instance
 
+=======
+use constants::MainResult;
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
 
 
 
@@ -120,7 +126,7 @@ mod services;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
+async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
     
     
 
@@ -181,6 +187,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
     
+
+
 
 
 
@@ -260,8 +268,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //
     // --------------------------------------------------------------------------------------------------------
     if service_name.as_str() == "auth"{
-        
         info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
+<<<<<<< HEAD
         let auth_serivce = services::auth::AuthSvc::new(db.clone()).await; //-- making a new auth server by passing the generated storage
         let mut auth_server = Server::bind(&server_addr).serve(auth_serivce.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the auth_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
@@ -272,15 +280,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             ctx::rafael::env::Runtime::<services::auth::AuthSvc>{ //-- building runtime instance for the auth server 
                 current_service: auth_serivce, //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
                 link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+=======
+        let auth_serivce = services::auth::AuthSvc::new(db.clone(), vec![]).await; //-- passing app storage to the new() method of the AuthSvc struct to pass it between its api routes and threads
+        let mut auth_server = Server::bind(&server_addr).serve(auth_serivce); //-- we have to define the auth_server as mutable cause we want to take a mutable raw pointer ot it
+            // ------------------------------------------------
+            //     BUILDING RUNTIME OBJECT FROM AUTH SERVICE
+            // ------------------------------------------------
+            let mut raw_pointer_to_server = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
+            let runtime = ctx::app::Runtime{
+                server: ctx::app::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
                 id: Uuid::new_v4(),
                 error: None,
                 node_addr: auth_server.local_addr(), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
+<<<<<<< HEAD
             }
         );
         // ------------------------------------------------
         // ------------------------------------------------
+=======
+            };
+            // ------------------------------------------------
+            // ------------------------------------------------
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = auth_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
@@ -304,6 +328,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     } else if service_name.as_str() == "event"{
         info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
+<<<<<<< HEAD
         let event_service = services::event::EventSvc::new(db.clone()).await;
         let mut event_server = Server::bind(&server_addr).serve(event_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the event_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
@@ -314,15 +339,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             ctx::rafael::env::Runtime::<services::event::EventSvc>{ //-- building runtime instance for the event server
                 current_service: event_service, //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
                 link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+=======
+        let event_service = services::event::EventSvc::new(db.clone(), vec![]).await; //-- passing app storage to the new() method of the EventSvc struct to pass it between its api routes and threads
+        let mut event_server = Server::bind(&server_addr).serve(event_service); //-- we have to define the event_server as mutable cause we want to take a mutable raw pointer ot it
+            // ------------------------------------------------
+            //    BUILDING RUNTIME OBJECT FROM EVENT SERVICE
+            // ------------------------------------------------
+            let mut raw_pointer_to_server = &mut event_server as *mut Server<AddrIncoming, services::event::EventSvc>; //-- taking a mutable raw pointer to the event_server to cast it to usize later
+            let runtime = ctx::app::Runtime{
+                server: ctx::app::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
                 id: Uuid::new_v4(),
                 error: None,
                 node_addr: event_server.local_addr(), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
+<<<<<<< HEAD
             }
         );
         // ------------------------------------------------
         // ------------------------------------------------
+=======
+            };
+            // ------------------------------------------------
+            // ------------------------------------------------
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = event_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("event server error {} - {}", e, chrono::Local::now().naive_local());
@@ -345,6 +386,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         Ok(())
     } else if service_name.as_str() == "game"{
         info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
+<<<<<<< HEAD
         let game_service = services::game::PlayerSvc::new(db.clone()).await;
         let mut game_server = Server::bind(&server_addr).serve(game_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the game_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
@@ -355,15 +397,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             ctx::rafael::env::Runtime::<services::game::PlayerSvc>{ //-- building runtime instance for the game server
                 current_service: game_service, //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
                 link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+=======
+        let game_service = services::game::PlayerSvc::new(db.clone(), vec![]).await; //-- passing app storage to the new() method of the PlayerSvc struct to pass it between its api routes and threads
+        let mut game_server = Server::bind(&server_addr).serve(game_service); //-- we have to define the game_server as mutable cause we want to take a mutable raw pointer ot it
+            // ------------------------------------------------
+            //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
+            // ------------------------------------------------
+            let mut raw_pointer_to_server = &mut game_server as *mut Server<AddrIncoming, services::game::PlayerSvc>; //-- taking a mutable raw pointer to the game_server to cast it to usize later
+            let runtime = ctx::app::Runtime{
+                server: ctx::app::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
                 id: Uuid::new_v4(),
                 error: None,
                 node_addr: game_server.local_addr(), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
+<<<<<<< HEAD
             }
         );
         // ------------------------------------------------
         // ------------------------------------------------
+=======
+            };
+            // ------------------------------------------------
+            // ------------------------------------------------
+>>>>>>> 2b36f29c5213a875c1e3094819b98a13f93409bb
         let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
         if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
             error!("game server error {} - {}", e, chrono::Local::now().naive_local());
