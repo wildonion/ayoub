@@ -2,8 +2,8 @@
 
 
 
-use std::net::SocketAddr;
-use crate::constants::*;
+
+use crate::{constants::*, schemas};
 use futures::Future;
 use mongodb::Client;
 use uuid::Uuid;
@@ -11,7 +11,7 @@ use serde::{Serialize, Deserialize};
 use tokio::sync::oneshot::Receiver;
 use hyper::{Body, Server, server::conn::AddrIncoming};
 use log::{info, error};
-use actix::*;
+
 
 
 
@@ -43,17 +43,17 @@ pub struct Api{
 
 impl Api{
 
-    // ---------------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------------------
     // NOTE - we can borrow the req and res cause Request and Response structs are not bounded to Copy and Clone traits 
     //        thus cb closure (callback) arguments must be references to Request and Response objects.
     // NOTE - we can use as_ref() method to borrow the self.req and self.res cause as_ref() 
     //        converts Option<T> to Option<&T> then we can unwrap them to get the borrowed objects.
-    // NOTE - don't put & behind self or borrow Api fields cause sharing Api fields between other threads 
-    //        with & or borrowing the ownership is impossible caused by not implemented trait Clone (a super trait of Copy) 
+    // NOTE - don't put & behind self or borrow Api fields cause sharing Api fields between other threads using a shared reference
+    //        with & or borrowing the ownership is impossible cause by not implemented trait Clone (a super trait of Copy) 
     //        for hyper Request and Response structs error.
     // NOTE - the body of the `cb` in post and get methods is an async move{} means it'll return a future object
     //        which we can solve it using .await later.
-    // ---------------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------------------
 
     pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>) -> Self{
         Api{
@@ -65,7 +65,7 @@ impl Api{
         }
     } 
     
-    pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
+    pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api; since we didn't borrow the self (the instance itself) using & we can't call this method for the second call cause the ownership of the instance will be moved in first call  
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C, //-- capturing by mut T
                         C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
     {
@@ -77,7 +77,7 @@ impl Api{
     }
 
 
-    pub async fn get<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api
+    pub async fn get<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api; since we didn't borrow the self (the instance itself) using & we can't call this method for the second call cause the ownership of the instance will be moved in first call  
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C, //-- capturing by mut T
                         C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
     {
@@ -145,6 +145,8 @@ impl Db{
 
 
 
+
+
 #[derive(Clone, Debug)]
 pub struct Storage{
     pub id: Uuid,
@@ -159,13 +161,6 @@ pub enum Mode{ //-- enum uses 8 bytes (usize which is 64 bits on 64 bits arch) t
     Off, //-- zero byte size
 }
 
-
-
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-pub enum AppError{ //-- enum like union shares a common memory location between all its fields that means the space an enum needs is as much as the largest variant but unlike union uses some extra memory to keep track of the enum variant which is called tag and is a pointer with 8 bytes length 
-    OnRuntime, //-- caused by too much loading and requests
-    OnStorage, //-- caused by storage services errors 
-}
 
 
 #[derive(Clone, Debug)]
@@ -189,44 +184,6 @@ pub struct Response<'m, T>{
 pub struct Nill<'n>(pub &'n [u8]); //-- this will be used for empty data inside the data field of the Response struct - 'n is the lifetime of the &[u8] type cause every pointer needs a lifetime in order not to point to an empty location inside the memory
 
 
-
-#[derive(Serialize, Deserialize)]
-pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer to the current service address located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
-
-
-
-#[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
-pub struct Runtime{
-    pub id: Uuid,
-    pub server: LinkToService, //-- TODO - build the server type from usize of its pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
-    pub error: Option<AppError>, //-- any runtime error
-    pub node_addr: SocketAddr, //-- socket address of this node
-    pub last_crash: Option<i64>, //-- last crash timestamp
-    pub first_init: Option<i64>, //-- first initialization timestamp 
-}
-
-
-
-impl Runtime{ // TODO - add wasm bindgen attribute to compile this to wasm
-    
-    // Runtime serverless methods 
-    // ...
-
-}
-
-
-
-impl Actor for Runtime{ // TODO - add wasm bindgen attribute to compile this to wasm
-    type Context = Context<Self>;
-
-    fn started(&mut self, ctx: &mut Self::Context) {
-        
-    }
-
-}
-
-
-
 pub async fn shutdown_signal(signal: Receiver<u8>){
     match signal.await{ //-- await on signal to get the message in down side of the channel
         Ok(s) => {
@@ -241,87 +198,4 @@ pub async fn shutdown_signal(signal: Receiver<u8>){
             error!("receiving error: [{}] cause sender is not available - {}", e, chrono::Local::now().naive_local())
         }
     }
-}
-
-
-#[derive(Clone, Debug)]
-pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
-
-
-
-pub mod manager{
-    
-    use uuid::Uuid;
-
-    // TODO - vector of || async move{} of events for an event manager struct 
-    // TODO - call new event every 5 seconds from vector of event of closures 
-    
-    pub struct Event{
-        id: Uuid,
-        last_call: i64, // last call timestamp  
-    }
-
-
-}
-
-
-pub mod messanger{
-    
-    
-    use uuid::Uuid;
-
-    
-    // TODO - simd using borsh and serde codec and actix actor based cross sharding
-    // TODO - use actix actors for each server
-    // ....
-    
-    pub struct Server<'a>{ //-- 'a is the lifetime of &[u8] which is the borrowed type of [u8] due to its unknown size at compile time  
-        pub cluster_id: Uuid, //-- the id of the cluster which this server is inside
-        pub api_token: &'a [u8], //-- is an array of a borrowed type of utf8 bytes with a valid lifetime 
-        pub name: String,
-        pub channels: Vec<Channel>,
-        pub members: Vec<ServerMember>,
-    }
-    
-    pub struct Thread{
-        pub id: Uuid,
-        pub name: String,
-    }
-    
-    pub struct Channel{
-        pub name: String,
-        pub members: Vec<ChannelMember>,
-        pub threads: Vec<Thread>,
-    }
-    
-    pub struct ServerMember;
-    pub struct ChannelMember;
-        
-
-
-}
-
-
-pub trait void{
-    type Input;
-    type Output;
-
-}
-
-
-
-pub mod env{ 
-
-    const APP_NAME: &str = "Ayoub";
-
-    // TODO - env functions to mutate the state of the runtime object
-    // TODO - try different IO streaming and future traits on a defined buffer from the following crates 
-    // ...
-
-    use std::sync::mpsc as std_mpsc;
-    use futures::channel::mpsc as future_mpsc;
-    use tokio::sync::mpsc as tokio_mpsc;
-
-
-
 }

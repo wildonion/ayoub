@@ -40,11 +40,12 @@ use crate::contexts as ctx;
 use std::future::Future;
 use hyper::{Body, Request, Response};
 use hyper::service::Service; //-- an asynchronous function from a Request to a Response and is used to write middlewares and reusable network modules
-use std::{pin::Pin, task::{Context, Poll}};
+use std::{pin::Pin, task::{Context as TaskContext, Poll}};
 use uuid::Uuid;
 use std::sync::Arc;
 use std::marker::Send;
 use std::net::SocketAddr;
+use actix::prelude::*;
 
 
 
@@ -57,6 +58,25 @@ use std::net::SocketAddr;
 
 
 
+
+
+/*
+    
+    ------------------------
+    |      NFT SERVICE 
+    ------------------------
+    |   Fields:
+    |       id      -> Uuid
+    |       clients -> Vector
+    |       storage -> Storage option
+    |
+    |   Interfaces:
+    |       Service
+    |       Actor
+    |
+    |
+
+*/
 #[derive(Clone, Debug)]
 pub struct NftSvc{ 
     pub id: Uuid,
@@ -66,10 +86,10 @@ pub struct NftSvc{
 
 impl NftSvc{ 
     
-    pub async fn new(storage: Option<Arc<ctx::app::Storage>>, clients: Vec<SocketAddr>) -> NftSvc{
+    pub async fn new(storage: Option<Arc<ctx::app::Storage>>) -> NftSvc{
         NftSvc{
             id: Uuid::new_v4(),
-            clients,
+            clients: vec![],
             storage,        
         }
     }
@@ -101,7 +121,7 @@ impl<T> Service<T> for NftSvc{
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
     
 
-    fn poll_ready(&mut self, _: &mut Context) -> Poll<Result<(), Self::Error>> {
+    fn poll_ready(&mut self, _: &mut TaskContext) -> Poll<Result<(), Self::Error>> {
         Poll::Ready(Ok(()))
     }
 
@@ -141,7 +161,7 @@ impl Service<Request<Body>> for Svc{
     type Future = Pin<Box<dyn Future<Output=Result<Self::Response, Self::Error>> + Send>>; //-- this is a is a wrapper around a kind of pointer which makes that pointer pin its value in place(stack or heap), preventing the value referenced by that pointer from being moved - we pinned the pointer of the Future object into memory cause we want to await on it later thus it shouldn't move from the memory by replacing with and pointing to a new value of a new variable
     
     
-    fn poll_ready(&mut self, _: &mut Context) -> Poll<Result<(), Self::Error>>{ //-- Poll indicates whether a value is available or if the current task has been scheduled to receive a wakeup instead (Ready or Pending fields of the Poll enum)
+    fn poll_ready(&mut self, _: &mut TaskContext) -> Poll<Result<(), Self::Error>>{ //-- Poll indicates whether a value is available or if the current task has been scheduled to receive a wakeup instead (Ready or Pending fields of the Poll enum)
         Poll::Ready(Ok(())) //-- calling Ready field of Poll enum means this future is ready for calling 
     }
 
@@ -153,4 +173,30 @@ impl Service<Request<Body>> for Svc{
             res.await
         })
     }
+}
+
+
+
+
+
+
+
+
+
+
+impl Actor for NftSvc{
+
+    type Context = Context<Self>; //-- building the Context object from the the Self which refers to the type that this actor is implementing for - Context object is a tool to control the lifecycle of an actor and is available only during the actor execution
+
+    fn started(&mut self, ctx: &mut Self::Context) { 
+        println!("Actor is alive");
+    }
+
+    fn stopped(&mut self, ctx: &mut Self::Context) {
+        println!("Actor is stopped");
+     }
+ 
+    // TODO - send borsh encoded async message between runtimes' server using actor mpsc channel and rpc for tenet idea
+    // ...
+
 }
