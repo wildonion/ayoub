@@ -49,7 +49,7 @@ pub mod env{
 
 
 
-    impl<S> Runtime<S>{ // TODO - add wasm bindgen attribute to compile this to wasm to call the wasm compiled methods using ayoub cli
+    impl<S> Runtime<S>{ // TODO - add wasm bindgen attribute to compile this to wasm to call the wasm compiled methods using ayoub cli and inside js
         
         // Runtime serverless methods 
         // ...
