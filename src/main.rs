@@ -114,6 +114,7 @@ Coded by
 use std::{net::SocketAddr, sync::Arc, env};
 use chrono::Local;
 use dotenv::dotenv;
+use utils::Struct;
 use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;

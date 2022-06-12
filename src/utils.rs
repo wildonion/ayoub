@@ -186,7 +186,7 @@ pub fn string_to_static_str(s: String) -> &'static str {
 
 
 
-struct Struct;
+pub struct Struct;
 trait Interface{}
 
 impl Interface for Struct{} //-- is required for return_box_trait() function
@@ -197,4 +197,28 @@ fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from f
 
 fn return_box_trait() -> Box<dyn Interface> { // NOTE - returning Box<dyn Trait> from function means we're returning a struct inside the Box which the trait has implemented for
     Box::new(Struct {})
+}
+
+impl Struct{ ////// RETURN BY POINTER EXAMPLE //////
+
+
+    // NOTE - argument can also be &mut u8
+    pub fn cons(status: &u8) -> &str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
+        let name = "wildonion";
+        name //-- name has a lifetime as valid as the passed in status argument lifetime from the caller scope 
+    }
+
+    // NOTE - first param can also be &mut self; a mutable reference to the instance and its fields
+    pub fn none_cons(&self) -> &str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the first param which is &self which is a borrowed type of the instance and its fields and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
+        let name = "wildonion";
+        name //-- name has a lifetime as valid as the first param lifetime which is a borrowed type of the instance itself and its fields and will borrow the instance when we want to call the instance methods
+    }
+
+    // NOTE - 'a lifetime has generated from the caller scope by the compiler
+    pub fn cons_valid_lifetime<'a>() -> &'a str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we've defined a valid lifetime for the pointer of the return type to return the pointer from the function which &'a str
+        let name = "wildonion";
+        name //-- name has a lifetime as valid as the generated lifetime from the caller scope by the compiler
+    }
+
+
 }
