@@ -26,6 +26,8 @@ Coded by
 
     Server Design Pattern Idea: https://github.com/hyperium/hyper/tree/master/examples
     Return Pointer from Functions Explanation: https://stackoverflow.com/a/57894943/12132470
+    Rust Rules Gathered by wildonion: https://github.com/wildonion/extrust/blob/master/_docs/rust.rules
+
 
 
 
