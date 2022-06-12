@@ -32,26 +32,25 @@ Coded by
 
 
 
-    [?] due to avoiding use of dangling pointer in rust in order to return in function we could do:
+    [?] due to avoiding use of dangling pointer in rust in order to return pointer in function body we could:
         1) return by value like returning T instead of &T
-        2) return by reference with a defined lifetime for the return type to extend the lifetime cause we can not return a reference pointing to a local variable
-        3) return by reference using the same lifetime of one of the passed in arguments which is a (mutable) reference to the argument to copy the value that we want to create into the caller's memory space
+        2) return by reference with a defined lifetime for the return type to extend its lifetime outside of the function cause we can not return a reference pointing to a local variable inside the function
+        3) return by reference using the same lifetime of one of the passed in arguments which is a (mutable) reference (&T or &mut T and T can be any type) to the argument to copy the value that we want to create into the caller's memory space
         4) return a Box which contains the T inside of it which has the address to the location of the T inside the heap
 
 
 
-    [?] in order to return a value (indeed, any value) from a function, it has to be either copied to a memory location that the function's caller has access to, or placed in a special memory location called "the heap," 
-        which is one particular place that each of your functions has access to and isn't destroyed the same way that a function stack is
-        we have two possible solutions:
-            1) pass a mutable reference as an argument to your function and use that to copy the value you want to create into the caller's memory space.
-            2) store the data you created on the heap, so that you can return a reference to that location instead.
+    [?] in order to return a value (indeed, any value) from a function, it has to be either copied to a memory location that the function's caller has access to, 
+        or placed in a special memory location called "the heap," which is one particular place that each of your functions has access to and isn't destroyed 
+        the same way that a function stack is
 
 
 
     [?] the reason you can't do this is because bindings (variables) that you define in a function only live for as long as the function is executing,
         this isn't specifically a Rust semantic but really a more general semantic of how (most or all?) modern computers work. When a function is called, 
         a block of memory is created for that function to store temporary data in, called "a function stack." When that function finishes, this function stack is, 
-        for all intents and purposes, "destroyed" by the operating system, invalidating whatever was contained within it so that the memory can be reused by other functions in the future.
+        for all intents and purposes, "destroyed" by the operating system, invalidating whatever was contained within it so that 
+        the memory can be reused by other functions in the future.
 
 
 
