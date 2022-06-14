@@ -39,10 +39,10 @@ pub mod env{
     #[derive(Serialize, Deserialize)] // TODO - add wasm bindgen to compile this to wasm
     pub struct Runtime<S>{
         pub id: Uuid,
-        pub current_service: S,
-        pub link_to_server: LinkToService, //-- TODO - build the server type from usize of its pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
+        pub current_service: Option<S>,
+        pub link_to_server: Option<LinkToService>, //-- TODO - build the server type from usize of its pointer - due to the expensive cost of the String or str we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
         pub error: Option<AppError>, //-- any runtime error cause either by the runtime itself or the storage crash
-        pub node_addr: SocketAddr, //-- socket address of this node
+        pub node_addr: Option<SocketAddr>, //-- socket address of this node
         pub last_crash: Option<i64>, //-- last crash timestamp
         pub first_init: Option<i64>, //-- first initialization timestamp 
     }
@@ -58,12 +58,13 @@ pub mod env{
 
 
 
-    pub trait Serverless{
+    pub trait Serverless{ /////// a functional Serverless trait for Runtimes
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
+        type Cost; //-- the total cost of the serverless trait method calls during an especific period of time 
 
-        fn run(&mut self); // NOTE - the type that this trait which must be implemented for must be defined as mutable
+        fn run(&mut self) -> Self; // NOTE - the type that this trait which must be implemented for must be defined as mutable - the return type is the type that this trait will be implemented for
 
     }
 
@@ -73,9 +74,18 @@ pub mod env{
 
         type Service = S;
         type App     = self::Api; 
+        type Cost    = u128; 
 
-        fn run(&mut self){ //-- the first param is a shared mutable pointer to the instance of the runtime 
-
+        fn run(&mut self) -> Self{ //-- the first param is a shared mutable pointer to the instance of the runtime 
+            Self{
+                id: Uuid::new_v4(),
+                current_service: None,
+                link_to_server: None,
+                error: None,
+                node_addr: None,
+                last_crash: None,
+                first_init: Some(chrono::Local::now().timestamp()),
+            }
         }
 
 

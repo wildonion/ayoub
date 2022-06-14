@@ -304,11 +304,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         let mut raw_pointer_to_server = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
         let runtime = Some(
             ctx::rafael::env::Runtime::<services::auth::AuthSvc>{ //-- building runtime instance for the auth server 
-                current_service: auth_serivce, //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
-                link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+                current_service: Some(auth_serivce), //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
+                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
                 id: Uuid::new_v4(),
                 error: None,
-                node_addr: auth_server.local_addr(), //-- local address of this server which has been bound to
+                node_addr: Some(auth_server.local_addr()), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
             }
@@ -346,11 +346,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         let mut raw_pointer_to_server = &mut event_server as *mut Server<AddrIncoming, services::event::EventSvc>; //-- taking a mutable raw pointer to the event_server to cast it to usize later
         let runtime = Some( //-- since the first param of the run() method of the Serverless trait defined as mutable the runtime object must be defined as mutable also
             ctx::rafael::env::Runtime::<services::event::EventSvc>{ //-- building runtime instance for the event server
-                current_service: event_service, //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
-                link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+                current_service: Some(event_service), //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
+                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
                 id: Uuid::new_v4(),
                 error: None,
-                node_addr: event_server.local_addr(), //-- local address of this server which has been bound to
+                node_addr: Some(event_server.local_addr()), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
             }
@@ -387,11 +387,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         let mut raw_pointer_to_server = &mut game_server as *mut Server<AddrIncoming, services::game::PlayerSvc>; //-- taking a mutable raw pointer to the game_server to cast it to usize later
         let runtime = Some( //-- since the first param of the run() method of the Serverless trait defined as mutable the runtime object must be defined as mutable also
             ctx::rafael::env::Runtime::<services::game::PlayerSvc>{ //-- building runtime instance for the game server
-                current_service: game_service, //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
-                link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+                current_service: Some(game_service), //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
+                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
                 id: Uuid::new_v4(),
                 error: None,
-                node_addr: game_server.local_addr(), //-- local address of this server which has been bound to
+                node_addr: Some(game_server.local_addr()), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
             }
@@ -428,11 +428,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         let mut raw_pointer_to_server = &mut nft_server as *mut Server<AddrIncoming, services::nft::NftSvc>; //-- taking a mutable raw pointer to the nft_server to cast it to usize later
         let runtime = Some( //-- since the first param of the run() method of the Serverless trait defined as mutable the runtime object must be defined as mutable also
             ctx::rafael::env::Runtime::<services::nft::NftSvc>{ //-- building runtime instance for the nft server
-                current_service: nft_service, //-- building runtime instance for the nft server
-                link_to_server: ctx::rafael::env::LinkToService(raw_pointer_to_server as usize), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
+                current_service: Some(nft_service), //-- building runtime instance for the nft server
+                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
                 id: Uuid::new_v4(),
                 error: None,
-                node_addr: nft_server.local_addr(), //-- local address of this server which has been bound to
+                node_addr: Some(nft_server.local_addr()), //-- local address of this server which has been bound to
                 last_crash: None,
                 first_init: Some(Local::now().timestamp()),
             }
