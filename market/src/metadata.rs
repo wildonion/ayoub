@@ -43,7 +43,7 @@ pub type TokenId = String;
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate="near_sdk::serde")] //-- loading serde crate instance from near_sdk crate
-pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much 
+pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much per each sell of a specific NFT
     pub payout: HashMap<AccountId, U128>, // NOTE - HashMap has loaded inside the lib.rs before and we imported using use crete::* syntax 
 }
 
@@ -79,11 +79,11 @@ pub struct TokenMetadata{ //-- token metadata info at token level itself
 
 
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct Token{ //-- contains the owner_id and approved accounts info for selling the token on behalf of the owner
+pub struct Token{ //-- contains the owner_id, approved accounts info for selling the token on behalf of the owner and the royalty hashmap for royalty payout
     pub owner_id: AccountId, //-- owner of the token
     pub approved_account_ids: HashMap<AccountId, u64>, //-- a map between all approved account_ids and their approval id to transfer the token on behalf and their unique approval id - we've used hashmap instead of near collection cause we must have only one key or account_id per approval_id
     pub next_approval_id: u64, //-- the next approval id to transfer the token on behalf
-    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners must get paid per each sell or transfer, also the main owner or minter must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
+    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
 }
 
 
@@ -94,7 +94,7 @@ pub struct JsonToken{ //-- the token json info which will be returned from view 
     pub token_id: TokenId, //-- the id of the token which is of type String
     pub metadata: TokenMetadata, //-- the metadata of the token - metadata instance of the TokenMetadata struct will be serialized into the utf8 bytes using the serde Serializer 
     pub approved_account_ids: HashMap<AccountId, u64>, //-- a map between all approved account_ids to transfer the token on behalf and their unique approval id - we've used hashmap instead of near collection cause we must have only one key or account_id per approval_id  
-    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners must get paid per each sell or transfer, also the main owner or minter must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
+    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
 }
 
 

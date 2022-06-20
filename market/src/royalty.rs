@@ -94,11 +94,11 @@ pub trait NoneFungibleTokenCore{ //-- defining an object safe trait for NFT core
 #[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on Market struct to compile all its methods to wasm so we can call them in near cli
 impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCore trait for our main Market contract struct to extend its interface; bounding the mentioned trait to the Market contract struct to query NFT core (nft_* methods standards) infos
 
-    fn nft_payout(&self, token_id: TokenId, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT - this method doesn't transfer the NFT but only calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners must get paid per each sell or transfer, also the main owner or minter must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
+    fn nft_payout(&self, token_id: TokenId, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT - this method doesn't transfer the NFT but only calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
         
         match self.tokens_by_id.get(&token_id){ //-- getting the token object related to the token_id (passed by reference to borrow it) if there is some token object from the self.tokens_by_id LookupMap
             Some(token) => { //-- if there was some token found with this token_id
-                let token_main_owner = token.owner_id; //-- getting the token main owner_id
+                let token_current_owner = token.owner_id; //-- getting the token current owner_id
                 let mut total_perpetual = 0; //-- keeping track of the total perpetual royalties
                 let balacnce_u128 = u128::from(balance); //-- getting the u128 type of the balance or the token amount
                 let mut payout_object = Payout{ //-- creating the payout object
@@ -110,15 +110,15 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
                 }
                 for (owner_id, royalty_percentage_value) in royalty.iter(){
                     let royalty_object_owner_id = owner_id.clone(); //-- we're cloning the owner_id each time since it'll move in each iteration by passing it through the insert() method of payout object
-                    if royalty_object_owner_id != token_main_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the main owner or the minter at the end
+                    if royalty_object_owner_id != token_current_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the current owner or the minter or creator at the end
                         let calculated_payout_from_royalty_value_and_nft_amount = royalty_to_payout(*royalty_percentage_value, balacnce_u128); //-- calculating the payout for an owner_id based on his/her royalty percentage value and the amount of the NFT
                         payout_object.payout.insert(royalty_object_owner_id, calculated_payout_from_royalty_value_and_nft_amount); //-- inserting the calculated payout related to an owner_id into the payout hashmap object - first param of this method is &mut self since we want to mutate the hashmap and have a valid lifetime of the payout object also after calling this method so we can call other method of the payout hashmap; actually by doing this we're borrowing the instance and its fields to have it in later scopes if we want to call other methods of the instance 
                         total_perpetual += *royalty_percentage_value; //-- we have to dereference the royalty_percentage_value cause is of type &u32
                     }
                 }
-                let token_main_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties 
-                let token_main_owner_payout = royalty_to_payout(token_main_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the main owner of the token or the minter 
-                payout_object.payout.insert(token_main_owner, token_main_owner_payout); //-- inserting the payout of the token_main_owner into the payout hashmap object
+                let token_current_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties 
+                let token_current_owner_payout = royalty_to_payout(token_current_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the current owner of the token or the minter 
+                payout_object.payout.insert(token_current_owner, token_current_owner_payout); //-- inserting the payout of the token_current_owner into the payout hashmap object
                 payout_object
             },
             None => { //-- means we found no token with the passed in token_id
@@ -128,15 +128,15 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
     
     }
     
-    fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: Option<String>, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller get paid for his/her NFT - this method transfers the NFT exactly like nft_transfer() method but calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners must get paid per each sell or transfer, also the main owner or minter must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
+    fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: Option<String>, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller get paid for his/her NFT - this method transfers the NFT exactly like nft_transfer() method but calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
         
         // -------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------
         // NOTE - we've cloned the owner_id of the transferred_token in refund_approve_account_ids() 
-        //        method to prevent it from moving cause we'll use it to get the main owner for payout ops
+        //        method to prevent it from moving cause we'll use it to get the old owner for payout ops
         // NOTE - we have to first transfer the token and refund the owner for releasing 
         //        the storage for approval account_ids then calculate the payout for all 
-        //        NFT owners as the pervious method
+        //        NFT owners or charity account_ids as the pervious method
         // utils::panic_not_self(); //-- the caller of this method must be the owner of the contract means that only the owner of the contract can transfer NFT
         utils::panic_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the user to sign the transaction with his/her full access key; we'll refund any excess storage later after calculating the required storage cost
         let sender_id = env::predecessor_account_id(); //-- getting the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method
@@ -146,7 +146,7 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
         // -------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------
 
-        let token_main_owner = transferred_token.owner_id; //-- getting the transferred token main owner_id
+        let token_old_owner = transferred_token.owner_id; //-- getting the transferred token old owner_id
         let mut total_perpetual = 0; //-- keeping track of the total perpetual royalties
         let balacnce_u128 = u128::from(balance); //-- getting the u128 type of the balance or the transferred token amount
         let mut payout_object = Payout{ //-- creating the payout object
@@ -158,15 +158,15 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
         }
         for (owner_id, royalty_percentage_value) in royalty.iter(){ // NOTE - if we use iter() method then we must dereference the key and the value to get their value cause iter() method element are borrowed type of keys and values or pointers to the key and value location (&'a key, &'a value) with a valid lifetime 
             let royalty_object_owner_id = owner_id.clone(); //-- we're cloning the owner_id each time since it'll move in each iteration by passing it through the insert() method of payout object since the insert() method get the type itself and the type will be moved by passing it into this method
-            if royalty_object_owner_id != token_main_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the main owner or the minter at the end
+            if royalty_object_owner_id != token_old_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the old owner or the minter or creator at the end
                 let calculated_payout_from_royalty_value_and_nft_amount = royalty_to_payout(*royalty_percentage_value, balacnce_u128); //-- calculating the payout for an owner_id based on his/her royalty percentage value and the amount of the transferred NFT
                 payout_object.payout.insert(royalty_object_owner_id, calculated_payout_from_royalty_value_and_nft_amount); //-- inserting the calculated payout related to an owner_id into the payout hashmap object - first param of this method is &mut self since we want to mutate the hashmap and have a valid lifetime of the payout object also after calling this method so we can call other method of the payout hashmap; actually by doing this we're borrowing the instance and its fields to have it in later scopes if we want to call other methods of the instance 
                 total_perpetual += *royalty_percentage_value; //-- we have to dereference the royalty_percentage_value cause is of type &u32
             }
         }
-        let token_main_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties 
-        let token_main_owner_payout = royalty_to_payout(token_main_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the main owner of the transferred token or the minter 
-        payout_object.payout.insert(token_main_owner, token_main_owner_payout); //-- inserting the payout of the token_main_owner into the payout hashmap object
+        let token_old_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties 
+        let token_old_owner_payout = royalty_to_payout(token_old_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the old owner of the transferred token or the minter 
+        payout_object.payout.insert(token_old_owner, token_old_owner_payout); //-- inserting the payout of the token_old_owner into the payout hashmap object
         payout_object
 
     }

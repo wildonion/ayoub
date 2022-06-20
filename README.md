@@ -15,13 +15,13 @@ Family Tree Smart Contracts on NEAR
 
 * Minting a Collection Contains Many NFTs in a single Transaction Gas Fee using `batch` functions 
 
-* Multiple NFTs AirDrop Feature in a single Transaction Gas Fee using `batch` functions
+* Multiple NFT AirDrop Feature in a single Transaction Gas Fee using `batch` functions
+
+* Multiple Offer Feature for Biddings, Auctions and Buying NFTs like `gem.xyz` in a single Transaction Gas Fee using
+
+* Escrow System for NFT Merch in `shop` Section for Paying out Owners
 
 * Proposal Voting Collaboration
-
-* Multiple Offer based biddings and auctions
-
-* Escrow System
 
 * Write 2 Earn
 

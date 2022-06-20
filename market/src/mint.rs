@@ -83,7 +83,7 @@ impl Market{ //-- following methods will be compiled to wasm using #[near_bindge
 
         let initial_storage_usage = env::storage_usage(); //-- storage_usage() method calculate current total storage usage as u64 bits or 8 bytes maximum (usize on 64 bits arch system) of this smart contract that this account would be paying for - measuring the initial storage being uses on the contract 
         let mut royalty = HashMap::new(); //-- creating an empty royalty hashmap to keep track of the royalty percentage value for each owner_id that is passed in into the nft_mint() method, the perpetual_royalties param
-        match perpetual_royalties{ // NOTE - perpetual_royalties hashmap contains accounts that will get perpetual royalties whenever the token is sold
+        match perpetual_royalties{ // NOTE - perpetual_royalties hashmap contains accounts that will get perpetual royalties whenever the token is sold, of course it has the owner or the minter or creator of the collection or the NFT in addition to some charity or collaborator account_ids to get paid them
             Some(royalties) => {
                 for (owner_id, royalty_percentage_value) in royalties{ //-- NOTE - no need to call iter() method on royalties hashmap since we only want to insert the key and the value of perpetual_royalties hashmap into the royalty hashmap thus we don't the borrowed type of key and value
                     royalty.insert(owner_id, royalty_percentage_value); //-- filling the royalty hashmap with the incoming perpetual royalties from the call
@@ -98,7 +98,7 @@ impl Market{ //-- following methods will be compiled to wasm using #[near_bindge
             owner_id: receiver_id, //-- the receiver_id is the one that this NFT will be belonged to him/her which can be either some random account_id or the contract owner (signer) account_id if that is a marketplace contract actor account since in marketplace we must mint all NFTs inside the marketplace contract actor account 
             approved_account_ids: Default::default(), //-- creating an empty hashmap or {} for all approved account ids 
             next_approval_id: 0, //-- next approval id must be started from 0 when we're minting the token
-            royalty, //-- a mapping between owner_ids and their royalty percentage value to calculate the payout later for each owner based on the NFT amount - the main owner or the minter will get 100 % - total perpetual royalties 
+            royalty, //-- a mapping between owner_ids and their royalty percentage value to calculate the payout later for each owner based on the NFT amount - the main owner or the minter or creator will get 100 % - total perpetual royalties 
         };
 
         // utils::panic_not_self(); //-- the minter or the caller of this method must be the owner of the contract means the bluerangene itself can mint a new NFT which is the marketplace itself but for now anyone can mint a new NFT and let it be as it is :)
