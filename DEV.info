@@ -1,0 +1,142 @@
+
+
+
+
+
+
+
+https://learnnear.club/near-live-contract-review-part-1-voting-contracts/
+https://learnnear.club/near-live-contract-review-part-2-staking-pool-contract/
+https://learnnear.club/near-live-contract-review-part-3-whitelist-and-staking-pool-factory/#
+https://learnnear.club/near-live-contract-review-part-4-berry-farm/
+https://github.com/near/core-contracts
+https://github.com/near/near-sdk-rs
+https://learn.figment.io/protocols/near
+https://www.near-sdk.io/contract-structure/collections
+
+
+
+
+https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
+https://stackoverflow.com/questions/27831944/how-do-i-store-a-closure-in-a-struct-in-rust
+https://rust-hosted-langs.github.io/book/introduction.html
+https://fasterthanli.me/articles/peeking-inside-a-rust-enum
+https://dhghomon.github.io/easy_rust/Chapter_1.html
+https://github.com/actix/examples/blob/master/websockets/chat-tcp/src/codec.rs
+https://www.youtube.com/watch?v=mwuCMDSZdiQ&ab_channel=ErikDotDev
+https://bparli.medium.com/adventures-in-rust-and-load-balancers-73a0bc61a192
+https://dzone.com/articles/rust-based-load-balancing-proxy-server-with-async
+https://truelayer.com/blog/grpc-load-balancing-in-rust
+https://medium.com/load-balancer-series/writing-a-http-load-balancer-in-python-using-tdd-theoretical-concepts-fb6dab3e879b
+https://doc.rust-lang.org/nightly/rust-by-example/unsafe/asm.html
+https://blog.cloudflare.com/pin-and-unpin-in-rust/
+https://fasterthanli.me/articles/pin-and-suffering
+https://github.com/NicolasLM/nucleon
+https://github.com/bparli/convey
+https://github.com/hyperium/hyper/blob/master/examples/http_proxy.rs
+https://doc.rust-lang.org/rust-by-example/macros.html
+https://doc.rust-lang.org/book/ch19-06-macros.html
+https://doc.rust-lang.org/reference/procedural-macros.html
+http://zderadicka.eu/hyper-websocket/
+https://rust-unofficial.github.io/patterns/
+https://rustwasm.github.io/docs/book/introduction.html
+https://danielkeep.github.io/practical-intro-to-macros.html
+https://blog.logrocket.com/macros-in-rust-a-tutorial-with-examples/
+https://blog.logrocket.com/procedural-macros-in-rust/
+https://doc.rust-lang.org/reference/attributes.html
+http://gradebot.org/doc/ipur/trait.html
+https://cheats.rs/#behind-the-scenes
+https://doc.rust-lang.org/beta/unstable-book/language-features/generators.html
+https://stackoverflow.com/questions/28127165/how-to-convert-struct-to-u8
+https://stackoverflow.com/questions/2490912/what-are-pinned-objects
+https://rust-lang.github.io/async-book/01_getting_started/01_chapter.html
+https://github.com/zupzup/warp-websockets-example
+https://github.com/tokio-rs/tokio/tree/master/examples
+https://blog.softwaremill.com/multithreading-in-rust-with-mpsc-multi-producer-single-consumer-channels-db0fc91ae3fa
+https://danielkeep.github.io/tlborm/book/
+https://cetra3.github.io/blog/implementing-a-jobq/
+https://cetra3.github.io/blog/implementing-a-jobq-with-tokio/
+https://docs.rs/tokio/1.12.0/tokio/sync/index.html
+https://tokio.rs/tokio/tutorial/channels
+https://docs.rs/tokio-stream/0.1.7/tokio_stream/
+https://doc.rust-lang.org/std/marker/struct.PhantomData.html
+https://doc.rust-lang.org/std/pin/index.html
+https://doc.rust-lang.org/std/sync/struct.Arc.html
+https://doc.rust-lang.org/std/rc/struct.Rc.html
+https://doc.rust-lang.org/std/sync/struct.Mutex.html
+https://doc.rust-lang.org/std/sync/struct.RwLock.html
+https://doc.rust-lang.org/std/cell/struct.RefMut.html
+https://doc.rust-lang.org/std/cell/struct.RefCell.html
+https://doc.rust-lang.org/std/rc/struct.Weak.html
+https://doc.rust-lang.org/std/keyword.dyn.html
+https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
+https://github.com/wildonion/stomegranate/blob/master/helper_board
+https://github.com/wildonion/extrust/blob/master/_trash/_unsafer.rs
+https://github.com/wildonion/extrust/
+https://rust-lang-nursery.github.io/rust-cookbook/intro.html
+https://doc.rust-lang.org/nomicon/
+https://stackoverflow.com/questions/56445095/how-does-videojs-determine-when-to-use-hls-vs-mp4-video-when-both-sources-are-av#:~:text=MP4%20and%20HLS%20are%20actually,a%20server%20to%20a%20client.
+https://docs.peer5.com/guides/production-ready-hls-vod/
+https://blog.tempus-ex.com/hello-video-codec/
+https://github.com/alordash/newton-fractal
+https://nnethercote.github.io/perf-book/title-page.html
+https://doc.rust-lang.org/1.30.0/book/2018-edition/ch00-00-introduction.html
+https://blog.jetbrains.com/rust/2022/03/18/procedural-macros-under-the-hood-part-i/
+https://dev.to/dandyvica/rust-procedural-macros-step-by-step-tutorial-36n8
+https://kerkour.com/rust-fearless-concurrency
+https://veykril.github.io/tlborm/
+https://actix.rs/book/actix/sec-2-actor.html
+https://rust-cli.github.io/book/
+https://nomicon.io/RuntimeSpec/ -> use near design pattern cause it's a sharded based blockchain
+https://stackoverflow.com/questions/41823321/how-to-get-pointer-offset-of-an-enum-member-in-bytes
+https://stackoverflow.com/questions/27324821/why-does-an-enum-require-extra-memory-size
+https://docs.tendermint.com/master/
+
+
+
+
+
+
+===========
+TECH NOTES
+===========
+NOTE - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the client ram on corruption condition to gather those bytes to form the whole file
+NOTE - first allocate some bytes on server ram for the incoming file from the client then on every incoming chunk of the file coming from the client save that chunk into the created file on server from the allocated buffer and seek the cursor to the saved position of the file to resume on reconnecting to the server
+NOTE - DRL model to reward validator in PoS pattern based on coiniXerr NFT owners' feedback  
+NOTE - sharded blockchain means that every shard is an actor which contains multiple blocks and each will communicates with each other using addr object like passing data by calling a contract method inside block a to another contract method inside the block b asyncly
+NOTE - near uses actor based model to call smart contract methods and pass data between them asyncly using their address (Addr object) which means we can have multi threading in wasm file
+NOTE - split input (borsh encoded async future object data) data into smaller part or async task (can be a request coming from an opened socket and each opened socket is a client) 
+with divide and conquer algorithm to feed into the actix actors (processor will choose a free thread from the pool in just a single core to mutex and lock the task to avoid deadlock inside the selected thread) and solve them in there separately (run on separate threads in a thread pool of each actor) then send the each result asyncly to other actor if needed by calling betweeen actix actor threads using mpsc channel then combine the results and compile the whole method to wasm like simd and rayon
+NOTE - threadpool app examples: sharding based app like blockchains, actix actors, rayon for simultaneous heavy computations and its wasm bindgen which is handled by the simd design pattern, image processing and 3d design apps
+NOTE - it seems that a thread can handle so many task at a time but it's a false fact; due to avoiding dealock and race condition every single thread can handle a task at a time but it'll done so fast which it seems that it can handle some many tasks at a time
+NOTE - we'll divide the data into tasks using using divide and conquer algo which an async job or a task is a closure with async body which contains heavy computation on some mutable data like querying a db thus every job must get solved in separate thread by joining its scheduled thread containing the job in parallel to the executor and we can communicate between threads of objects using message passing channels like mpsc
+NOTE - we can schedule a task which is a future object, of type closure and Arc<Mutex<T>> to avoid race conditions and deadlock and might contains a calling method of the second actor to be executed inside an specific actor's (specified by their address) free thread choosed from their pool cause one thread can handle one task at a time; finally the result can be awaited by calling .then() on schduled promise to get the result of the executed second contract actor method.
+
+
+
+
+
+
+
+
+
+
+
+===============================================================================================================================================
+TECH BUILDER BASED ON multi threading (job queue), message passing protocols like async mpsc channels and actix actors on top of tokio runtime
+===============================================================================================================================================
+TODO - paas cli like dockerizing, async file handling and ...
+TODO - download/upload manager like IDM/tus.io
+TODO - load balancer for coiniXerr for layer 1 and 2
+TODO - video codec ((de)compression or (de)serializing) like ffmepg or gstreamer
+TODO - add p2p based JSON-RPC over HTTP2 for coiniXerr network inside apis/rpc folder
+TODO - coiniXerr hash for a transaction and transaction signature, block and merkle root and wallet address using Argon2
+TODO - an event streaming platform like VoD protocol like arvancloud based for streaming over video chunks using ffmpeg and gstreamer in rust based on hls which is an adaptive bitrate method 
+        - convert uploaded videos to hls for multi bitrate conversion
+        - create an endpoint api to point where the hls is
+        - call the api to load in html5 video tag
+
+
+
+
+

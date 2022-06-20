@@ -1,10 +1,33 @@
-# ☢️ Usage
 
-```console
-$ sudo chmod +x ayoub.sh && ./ayoub.sh --help
-```
+# 💰 coiniXerr 
 
-## 📌 TODOs
+An Actor and Sharded Based Design Pattern Runtime and Engine for uniXerr Cryptocurrency Coin, CRC20, CRC21 and CRC22 Smart Contract; to Mint NFT and FT for Digital Assests inside uniXerr Protocol on top of coiniXerr Blockchain Network
+
+# 🌀 Ayoub 
+
+Ayoub PaaS Framework
+
+# 🧧 BlueRangene 
+
+Family Tree Smart Contracts on NEAR 
+
+# 📌 TODOs
+
+* Minting a Collection Contains Many NFTs in a single Transaction Gas Fee using `batch` functions 
+
+* Multiple NFTs AirDrop Feature in a single Transaction Gas Fee using `batch` functions
+
+* Proposal Voting Collaboration
+
+* Multiple Offer based biddings and auctions
+
+* Escrow System
+
+* Write 2 Earn
+
+* Ticket based Event 
+
+* Contracts' Methods Doc
 
 * OTP response serde parser issue + API token
 

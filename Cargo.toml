@@ -1,35 +1,11 @@
-[package]
-name = "ayoub"
-version = "0.1.0"
-edition = "2021"
+[workspace]
 
-
-
-
-[dependencies]
-hyper = { version = "0.14", features = ["full"] }
-tokio = { version = "1", features = ["full"] }
-serde = {version = "1", features = ["derive"] }
-uuid = { version = "0.8", features = ["serde", "v4"] }
-chrono = { version = "0.4", features = ["serde"] }
-actix = "0.13.0"
-borsh = "0.9.3"
-serde_json = "1"
-futures = "0.3"
-futures-util = "0.3"
-pretty_env_logger = "0.4"
-bytes = "1"
-hex = "0.4"
-dotenv = "0.15"
-log = "0.4"
-jsonwebtoken = "8"
-mongodb = "2"
-rust-argon2 = "1"
-rand = "0.8"
-
-
-
-
-[[bin]]
-name = "ayoub"
-path = "src/main.rs"
+members = [
+    "escrow",
+    "event",
+    "market",
+    "proposal",
+    "w2e",
+    "PaaS",
+    "coiniXerr",
+]
