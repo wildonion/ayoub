@@ -1,5 +1,5 @@
 
-# 🧧 BlueRangene Family Tree Write 2 Earn Smart Contract on NEAR
+# 🧧 BlueRangene Family Tree NFT Smart Contract on NEAR
 
 ### ☢️ Environment Setup
 

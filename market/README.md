@@ -11,7 +11,7 @@
 
 > For contract method `calls` and `views` see the list of all available APIs using `ayoub` PaaS cli with `./ayoub.sh list --api --controller nft` command.
 
-> The caller must have called the `new_default_meta()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
+> The caller must have called the `new()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
 
 ### Compile Contract
 ```
@@ -35,3 +35,11 @@ $ sudo chmod +x test.sh && ./test.sh
 ## Payable Methods
 
 ## Private Methods
+
+# 📌 TODOs
+
+* Minting a Collection Contains Many NFTs in a single Transaction Gas Fee using `batch` functions 
+
+* Multiple NFT AirDrop Feature in a single Transaction Gas Fee using `batch` functions
+
+* Multiple Offer Feature for Biddings, Auctions and Buying NFTs like `gem.xyz` in a single Transaction Gas Fee using

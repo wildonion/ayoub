@@ -49,7 +49,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
     NOTE - the total storage used by the following method will be calculated after calling the internal_add_token_to_owner() method by subtracting the initial_storage_usage at the beginning of the method from the used or released storage after the call
     NOTE - any execess amount will be paid back to the caller or the owner of the NFT once he/she transferred the NFT to someone else since transferring the NFT will free up the approved_account_ids hashmap and set it to empty hashmap {} thus we have to pay the released storage back the owner or the sender of the NFT who paid for approved account   
-    NOTE - in the following method we add a new entry into Market contract struct collections means we mutate the state of the contract by allocating extra storage on chain to insert a new NFT into all related collections thus we have to pay for it from caller's deposit and refund the caller if there was any execess storage cost 
+    NOTE - in the following method we add a new entry into `Contract` struct collections means we mutate the state of the contract by allocating extra storage on chain to insert a new NFT into all related collections thus we have to pay for it from caller's deposit and refund the caller if there was any execess storage cost 
     NOTE - taking all the available on chain storage in contract needs more $NEARs cause, the contract tracks the change in storage before and after the call
     NOTE - if the storage increases, the contract requires the caller of the contract to attach enough deposit to the function call to cover the storage cost.
     NOTE - if the storage decreases, the contract will issue a refund for the cost of the released storage. the unused tokens from the attached deposit are also refunded, so it's safe to attach more deposit than required.
@@ -75,8 +75,8 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on Market struct to compile all its methods to wasm so we can call them in near cli
-impl Market{ //-- following methods will be compiled to wasm using #[near_bindgen] proc macro attribute 
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
+impl NFTContract{ //-- following methods will be compiled to wasm using #[near_bindgen] proc macro attribute 
 
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute 
     pub fn nft_mint(&mut self, token_id: TokenId, metadata: TokenMetadata, receiver_id: AccountId, perpetual_royalties: Option<HashMap<AccountId, u32>>){ //-- we've defined the self to be mutable and borrowed cause we want to mutate the state of token_metadata_by_id and tokens_by_id fields but don't want to lose the lifetime of the created instance of the contract after calling this method 
@@ -95,10 +95,10 @@ impl Market{ //-- following methods will be compiled to wasm using #[near_bindge
         }
         
         let token = Token{
-            owner_id: receiver_id, //-- the receiver_id is the one that this NFT will be belonged to him/her which can be either some random account_id or the contract owner (signer) account_id if that is a marketplace contract actor account since in marketplace we must mint all NFTs inside the marketplace contract actor account 
+            owner_id: receiver_id, //-- the receiver_id is the one that this NFT will be belonged to him/her 
             approved_account_ids: Default::default(), //-- creating an empty hashmap or {} for all approved account ids 
             next_approval_id: 0, //-- next approval id must be started from 0 when we're minting the token
-            royalty, //-- a mapping between owner_ids and their royalty percentage value to calculate the payout later for each owner based on the NFT amount - the main owner or the minter or creator will get 100 % - total perpetual royalties 
+            royalty, //-- a mapping between owner_ids or some charity or collaborator account_ids and their royalty percentage value to calculate the payout later for each owner based on the NFT amount - the old owner which can be the main owner or the minter or creator on second sell will get paid at the end - total perpetual royalties 
         };
 
         // utils::panic_not_self(); //-- the minter or the caller of this method must be the owner of the contract means the bluerangene itself can mint a new NFT which is the marketplace itself but for now anyone can mint a new NFT and let it be as it is :)

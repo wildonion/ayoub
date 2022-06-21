@@ -83,7 +83,7 @@ pub struct Token{ //-- contains the owner_id, approved accounts info for selling
     pub owner_id: AccountId, //-- owner of the token
     pub approved_account_ids: HashMap<AccountId, u64>, //-- a map between all approved account_ids and their approval id to transfer the token on behalf and their unique approval id - we've used hashmap instead of near collection cause we must have only one key or account_id per approval_id
     pub next_approval_id: u64, //-- the next approval id to transfer the token on behalf
-    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
+    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the old owner which can be the main owner or the minter or creator on second sell must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
 }
 
 
@@ -94,7 +94,7 @@ pub struct JsonToken{ //-- the token json info which will be returned from view 
     pub token_id: TokenId, //-- the id of the token which is of type String
     pub metadata: TokenMetadata, //-- the metadata of the token - metadata instance of the TokenMetadata struct will be serialized into the utf8 bytes using the serde Serializer 
     pub approved_account_ids: HashMap<AccountId, u64>, //-- a map between all approved account_ids to transfer the token on behalf and their unique approval id - we've used hashmap instead of near collection cause we must have only one key or account_id per approval_id  
-    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
+    pub royalty: HashMap<AccountId, u32> //-- since perpetual royalties will be on a per-token basis we added this field here - the percentage value in u32 bits or 4 bytes that must be used to calculate the total payout in $NEAR which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the old owner which can be the main owner or the minter or creator on second sell must get paid at the end which will have the more payout than the other owners) each time a buyer gets paid for that NFT by calling the nft_transfer_payout() method
 }
 
 
@@ -103,8 +103,8 @@ pub trait NoneFungibleTokenMetadata{ //-- defining an object safe trait for NFT 
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the extended interface (NoneFungibleTokenMetadata trait) of Market contract struct interface (in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli 
-impl NoneFungibleTokenMetadata for Market{ //-- implementing the NoneFungibleTokenMetadata trait for our main Market contract struct to extend its interface; bounding the mentioned trait to the Market contract struct to query NFT metadata infos
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the extended interface (NoneFungibleTokenMetadata trait) of `Contract` struct interface (in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli 
+impl NoneFungibleTokenMetadata for NFTContract{ //-- implementing the NoneFungibleTokenMetadata trait for our main `Contract` struct to extend its interface; bounding the mentioned trait to the `Contract` struct to query NFT metadata infos
     fn nft_metadata(&self) -> NFTContractMetadata{ //-- overriding the nft_metadata() method of the NFTContractMetadata trait
         self.metadata.get().unwrap() //-- since metadata field is inside the LazyOption we must get the actual data itself using get() method which will return the type (NFTContractMetadata in our case) inside an Option
     }

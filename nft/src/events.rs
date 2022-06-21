@@ -35,3 +35,17 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
+
+
+
+
+
+
+
+
+
+
+#[near_bindgen]
+impl NFTContract{
+
+}

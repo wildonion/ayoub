@@ -2,18 +2,6 @@
 
 
 
-creator vs current owner vs charity accounts
-complete marketplace to fix royalty issue
-nft batch mint
-ref issue
-readme todos
-discord emoji
-
-
-
-
-
-
 https://learnnear.club/near-live-contract-review-part-1-voting-contracts/
 https://learnnear.club/near-live-contract-review-part-2-staking-pool-contract/
 https://learnnear.club/near-live-contract-review-part-3-whitelist-and-staking-pool-factory/#
@@ -22,6 +10,8 @@ https://github.com/near/core-contracts
 https://github.com/near/near-sdk-rs
 https://learn.figment.io/protocols/near
 https://www.near-sdk.io/contract-structure/collections
+-------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------
 https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
 https://stackoverflow.com/questions/27831944/how-do-i-store-a-closure-in-a-struct-in-rust
@@ -141,8 +131,3 @@ TODO - an event streaming platform like VoD protocol like arvancloud based for s
         - convert uploaded videos to hls for multi bitrate conversion
         - create an endpoint api to point where the hls is
         - call the api to load in html5 video tag
-
-
-
-
-

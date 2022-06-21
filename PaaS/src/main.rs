@@ -152,7 +152,7 @@ mod services;
 
 
 
-#[tokio::main]
+#[tokio::main] //-- adding tokio proc macro attribute to make the main async
 async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
     
     

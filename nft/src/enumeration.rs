@@ -27,15 +27,15 @@ Coded by
 
 
 use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
-use crate::nft_core::NoneFungibleTokenCore; //-- based on the orphan rule we MUST import this trait to use the nft_token() method on the instance of the Market contract struct - we have to sepecify which trait has this method cause it might be another trait with this method exists inside this crate
+use crate::nft_core::NoneFungibleTokenCore; //-- based on the orphan rule we MUST import this trait to use the nft_token() method on the instance of the `Contract` struct - we have to sepecify which trait has this method cause it might be another trait with this method exists inside this crate
 
 
 
 
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on Market struct to compile all its methods to wasm so we can call them in near cli
-impl Market{ //-- following methods are view methods (none payable methods) and will be compiled to wasm using #[near_bindgen] proc macro attribute
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
+impl NFTContract{ //-- following methods are view methods (none payable methods) and will be compiled to wasm using #[near_bindgen] proc macro attribute
     
     
         
@@ -48,7 +48,7 @@ impl Market{ //-- following methods are view methods (none payable methods) and 
 
 
     pub fn nft_total_supply(&self) -> U128{ //-- query for the total supply or total amounts of nfts on this contract
-        U128(self.token_metadata_by_id.len() as u128) //-- converting the total length of all nfts inside this contract to u128 cause it might be lots of minted nfts in this contract; it might be the contract of a nft marketplace
+        U128(self.token_metadata_by_id.len() as u128) //-- converting the total length of all nfts inside this contract to u128 cause it might be lots of minted nfts in this contract
     }
 
     pub fn nft_tokens(&self, from_index: Option<U128>, limit: Option<u64>) -> Vec<JsonToken>{ //-- query for the tokens info on this contract regardless of their owners using pagination - we put from_index and limit params inside Option in order to have a default value for them on None match 

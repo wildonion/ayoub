@@ -3,8 +3,7 @@
 
 
 
-
-
+// NOTE - Escrow Contract for NFT Merchendise in `shop` Section for Paying out Owners
 // NOTE - all the transferred tokens must be locked in this contract account actor first 
 // NOTE - on every printable NFT product sell out inside the shop section, buy submitting the payout button the whole 
 //        payment money will be locked in here to take our percentage royalty first 

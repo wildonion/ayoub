@@ -61,9 +61,12 @@ use crate::*; // loading all defined crates, structs and functions from the root
 // NOTE - every cross contract calls for communicating between contract actor accounts in cross sharding pattern takes up cpu usage and network laoding costs which forces us to attach gas units in the contract method call in which the cross contract call method is calling to pass it through the calling of the cross contract call method
 // NOTE - a payable method usaully has &mut self as its first param and all calculated storage must of type u64 bits or 8 bytes maximum length (64 bits arch system usize) 
 // NOTE - caller in payable methods must deposit one yocot$NEAR for security purposes like always make sure that the user has some $NEAR in order to call this means only those one who have $NEARS can call this method to avoid DDOS attack on this method
-// NOTE - we'll give the owner or the minter of the token whatever is left from the total royalties at the end and he/she will get paid more than the other owners
+// NOTE - we'll give the old owner of the token whatever is left from the total royalties at the end and he/she will get paid more than the other owners
 // NOTE - royalty field is the hashmap of account_ids and their royalty percentage value to calculate their total payout
 // NOTE - Payout instance has the hashmap field which contains account_ids and their payout balance in u128 in $NEAR 
+// NOTE - on first sell of the NFT the onwer (minter) royalty payout won't be what is specified inside the royalty object and will be whatever is left after paying out collaborator or charity account_ids cause we're checking that if the owner was inside the royalty object just pass! and he/she sould get paid on second sell
+// NOTE - on second sell the owner (minter) royalty payout will be exactly what is specified inside the royalty object since the owner of the transferred token will not be the minter on second sell thus inside the iteration we'll calculate the minter payout and the old owner will get whatever is left outside the iteration after payingout other owners or collaborator or charity account_ids  
+
 
 
 
@@ -91,10 +94,10 @@ pub trait NoneFungibleTokenCore{ //-- defining an object safe trait for NFT core
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on Market struct to compile all its methods to wasm so we can call them in near cli
-impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCore trait for our main Market contract struct to extend its interface; bounding the mentioned trait to the Market contract struct to query NFT core (nft_* methods standards) infos
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
+impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTokenCore trait for our main `Contract` struct to extend its interface; bounding the mentioned trait to the `Contract` struct to query NFT core (nft_* methods standards) infos
 
-    fn nft_payout(&self, token_id: TokenId, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT - this method doesn't transfer the NFT but only calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
+    fn nft_payout(&self, token_id: TokenId, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT - this method doesn't transfer the NFT but only calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the old owner which can be the main owner or the minter or creator on second sell must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
         
         match self.tokens_by_id.get(&token_id){ //-- getting the token object related to the token_id (passed by reference to borrow it) if there is some token object from the self.tokens_by_id LookupMap
             Some(token) => { //-- if there was some token found with this token_id
@@ -105,19 +108,19 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
                     payout: HashMap::new() //-- an empty hashmap to keep track of the payout for each account_id or owner_id
                 };
                 let royalty = token.royalty; //-- getting the royalty hashmap of the token to calculate the payout for each owner_id based on their royalty percentage value
-                if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many owners - if there was too many choosed for payout gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR
-                    env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Owners Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+                if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids - if there was too many choosed for payout gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR
+                    env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
                 }
                 for (owner_id, royalty_percentage_value) in royalty.iter(){
                     let royalty_object_owner_id = owner_id.clone(); //-- we're cloning the owner_id each time since it'll move in each iteration by passing it through the insert() method of payout object
-                    if royalty_object_owner_id != token_current_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the current owner or the minter or creator at the end
+                    if royalty_object_owner_id != token_current_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the current owner (the minter or creator at second sell) at the end
                         let calculated_payout_from_royalty_value_and_nft_amount = royalty_to_payout(*royalty_percentage_value, balacnce_u128); //-- calculating the payout for an owner_id based on his/her royalty percentage value and the amount of the NFT
                         payout_object.payout.insert(royalty_object_owner_id, calculated_payout_from_royalty_value_and_nft_amount); //-- inserting the calculated payout related to an owner_id into the payout hashmap object - first param of this method is &mut self since we want to mutate the hashmap and have a valid lifetime of the payout object also after calling this method so we can call other method of the payout hashmap; actually by doing this we're borrowing the instance and its fields to have it in later scopes if we want to call other methods of the instance 
                         total_perpetual += *royalty_percentage_value; //-- we have to dereference the royalty_percentage_value cause is of type &u32
                     }
                 }
                 let token_current_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties 
-                let token_current_owner_payout = royalty_to_payout(token_current_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the current owner of the token or the minter 
+                let token_current_owner_payout = royalty_to_payout(token_current_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the current owner of the token or the minter at second sell 
                 payout_object.payout.insert(token_current_owner, token_current_owner_payout); //-- inserting the payout of the token_current_owner into the payout hashmap object
                 payout_object
             },
@@ -128,7 +131,7 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
     
     }
     
-    fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: Option<String>, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller get paid for his/her NFT - this method transfers the NFT exactly like nft_transfer() method but calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the main owner or minter or creator must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
+    fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: Option<String>, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller get paid for his/her NFT - this method transfers the NFT exactly like nft_transfer() method but calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the old owner which can be the main owner or the minter or creator on second sell must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
         
         // -------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------
@@ -153,19 +156,19 @@ impl NoneFungibleTokenCore for Market{ //-- implementing the NoneFungibleTokenCo
             payout: HashMap::new() //-- an empty hashmap to keep track of the payout for each account_id or owner_id
         };
         let royalty = transferred_token.royalty; //-- getting the royalty hashmap of the transferred token to calculate the payout for each owner_id based on their royalty percentage value
-        if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many owners - if there was too many choosed for payout gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR
-            env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Owners Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+        if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids - if there was too many choosed for payout gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR
+            env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
         }
         for (owner_id, royalty_percentage_value) in royalty.iter(){ // NOTE - if we use iter() method then we must dereference the key and the value to get their value cause iter() method element are borrowed type of keys and values or pointers to the key and value location (&'a key, &'a value) with a valid lifetime 
             let royalty_object_owner_id = owner_id.clone(); //-- we're cloning the owner_id each time since it'll move in each iteration by passing it through the insert() method of payout object since the insert() method get the type itself and the type will be moved by passing it into this method
-            if royalty_object_owner_id != token_old_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the old owner or the minter or creator at the end
+            if royalty_object_owner_id != token_old_owner{ //-- if the key isn't the owner we'll add it into the payout object hashmap with its calculated payout using royalty_to_payout() method cause we'll add the old owner (the minter or creator at second sell) at the end
                 let calculated_payout_from_royalty_value_and_nft_amount = royalty_to_payout(*royalty_percentage_value, balacnce_u128); //-- calculating the payout for an owner_id based on his/her royalty percentage value and the amount of the transferred NFT
                 payout_object.payout.insert(royalty_object_owner_id, calculated_payout_from_royalty_value_and_nft_amount); //-- inserting the calculated payout related to an owner_id into the payout hashmap object - first param of this method is &mut self since we want to mutate the hashmap and have a valid lifetime of the payout object also after calling this method so we can call other method of the payout hashmap; actually by doing this we're borrowing the instance and its fields to have it in later scopes if we want to call other methods of the instance 
                 total_perpetual += *royalty_percentage_value; //-- we have to dereference the royalty_percentage_value cause is of type &u32
             }
         }
-        let token_old_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties 
-        let token_old_owner_payout = royalty_to_payout(token_old_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the old owner of the transferred token or the minter 
+        let token_old_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties after paying charity or collaborator account_ids
+        let token_old_owner_payout = royalty_to_payout(token_old_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the old owner of the transferred token or the minter at second selll
         payout_object.payout.insert(token_old_owner, token_old_owner_payout); //-- inserting the payout of the token_old_owner into the payout hashmap object
         payout_object
 

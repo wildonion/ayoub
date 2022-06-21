@@ -1789,6 +1789,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nft"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "near-sdk",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
