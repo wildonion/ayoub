@@ -180,13 +180,13 @@ pub fn refund_approve_account_ids(account_id: AccountId, approved_account_ids: &
 }
 
 
-pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay: Balance) -> U128{ //-- calculating the total payout by convert the royalty percentage and amount to pay into a payout of type U128
+pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance) -> U128{ //-- calculating the total payout by convert the royalty percentage and amount to pay into a payout of type U128
     
     /*
 
         ----------------------------------------------------------------------------------------------------------
         [?] we gave 100 % a value of 10000 to keep track of all perpetual royalties in a u32 type 
-        [?] amount_to_pay is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT.
+        [?] amount_to_pay_for_nft is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT.
             here calculate the total payout that the owner must get paid using the amount of the 
             sold nft and his/her royalty percentage and in order to allow for percentage less 
             than 1 % we must give 100 % a value of 10_000 this means that the percentage for 
@@ -199,7 +199,7 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay: Balance) -> U12
 
     */
     
-    U128(royalty_percentage as u128 * amount_to_pay / 10_000u128) //-- 10_000 is the value of the 100 % - converting the percentage to the actual amount as u128 that should be paid by multiplying the percentage by the result of dividing the given amount_to_pay or balance by 10000 that should be paid
+    U128(royalty_percentage as u128 * amount_to_pay_for_nft / 10_000u128) //-- 10_000 is the value of the 100 % - converting the percentage to the actual amount as u128 that should be paid by multiplying the percentage by the result of dividing the given amount_to_pay_for_nft or balance by 10000 that should be paid
 }
 
 

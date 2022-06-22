@@ -2,6 +2,27 @@
 
 
 
+-----------
+discord bot
+-----------
+        [?] ranking bot based on invite, chat, quizz, game (poker)
+        [?] voting bot based on reaction
+        [?] Bitdad DAO bot
+        [?] captcha bot and wallet address checker bot for bitdad collections 
+        [?] bot for youtube and twitter
+        [?] discrod emojies
+
+
+
+
+
+
+
+
+
+
+
+
 https://learnnear.club/near-live-contract-review-part-1-voting-contracts/
 https://learnnear.club/near-live-contract-review-part-2-staking-pool-contract/
 https://learnnear.club/near-live-contract-review-part-3-whitelist-and-staking-pool-factory/#
@@ -126,10 +147,6 @@ TODO - an event streaming platform like VoD protocol like arvancloud based for s
         - convert uploaded videos to hls for multi bitrate conversion
         - create an endpoint api to point where the hls is
         - call the api to load in html5 video tag
-
-
-
-
 
 
 

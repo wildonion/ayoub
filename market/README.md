@@ -13,6 +13,8 @@
 
 > The caller must have called the `new()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
 
+> Market contract will use a cross contract call to the NFT contract which is deployed on the minter contract actor account for transferring and minting an NFT. 
+
 ### Compile Contract
 ```
 $ sudo chmod +x build.sh && ./build.sh 
@@ -43,3 +45,9 @@ $ sudo chmod +x test.sh && ./test.sh
 * Multiple NFT AirDrop Feature in a single Transaction Gas Fee using `batch` functions
 
 * Multiple Offer Feature for Biddings, Auctions and Buying NFTs like `gem.xyz` in a single Transaction Gas Fee using
+
+* Should We Call `nft_mint` method on Update NFT of a Collection?
+
+* Should We Pass the royalty of the Minter When We're Calling `nft_mint` method?
+
+* Should We Deploy the NFT Contract on Every Account that Wants to Mint NFT?

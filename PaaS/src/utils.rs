@@ -279,10 +279,10 @@ impl Struct{ ////// RETURN BY POINTER EXAMPLE //////
         Struct{}
     }
   
-    fn run_pool(num_thread: &u8) -> &Struct{
+    fn run_pool(num_thread: &u8) -> &Struct{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
         let t = Struct::new(); //-- since new() method of the Struct struct will return a new instance of the struct which will be owned by the function thus we can't return a reference to it or as a borrowed type
-        // &t //-- it's not ok to return a reference to `t` since `t` is a local variable which is owned by the current function
-        let t = &Struct{};
+        // &t //-- it's not ok to return a reference to `t` since `t` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
+        let t = &Struct{}; //-- since 
         t //-- it's ok to return a reference to `t` since  
     }
     
@@ -290,6 +290,7 @@ impl Struct{ ////// RETURN BY POINTER EXAMPLE //////
     pub fn cons(status: &u8) -> &str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
         let name = "wildonion";
         name //-- name has a lifetime as valid as the passed in status argument lifetime from the caller scope 
+    
     }
   
     // NOTE - first param can also be &mut self; a mutable reference to the instance and its fields
