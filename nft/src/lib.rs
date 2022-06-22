@@ -77,7 +77,7 @@ pub mod internal;
 
 // NOTE - this contract has an owner_id field which is the who is the signer and the owner of deploying this contract also is the owner of all the NFTs that will be minted to sell on marketplace 
 // NOTE - since this contract will be deployed on every contract actor account_id who wants to mint his/her all NFTs on his account_id to sell them on the marketplace thus the marketplace needs to be an approved account_id for the owner to transfer or list his/her all NFTs on behalf of him/her in there 
-// NOTE - the marketplace will make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account_id) like approval and transfer methods   
+// NOTE - the marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account_id) like approval and transfer methods to sell the NFT on behalf of the owner
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible
 // NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
 // NOTE - we can't impl Default trait for the contract if the PanicOnDefault trait is implemented for that contract

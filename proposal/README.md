@@ -11,7 +11,7 @@
 
 > For contract method `calls` and `views` see the list of all available APIs using `ayoub` PaaS cli with `./ayoub.sh list --api --controller nft` command.
 
-> The caller must have called the `new_default_meta()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
+> The caller must have called the `new_*()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
 
 
 ### Compile Contract

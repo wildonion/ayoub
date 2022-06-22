@@ -9,4 +9,5 @@ members = [
     "PaaS",
     "coiniXerr",
     "nft",
+    "tests",
 ]

@@ -3,7 +3,7 @@
 
 use std::sync::{Arc, mpsc::channel as heavy_mpsc};
 use std::thread;
-use std::sync::mpsc; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T out of the Arc
+use std::sync::mpsc; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T out of the Arc by locking it
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
 use rand::prelude::*;
@@ -280,8 +280,10 @@ impl Struct{ ////// RETURN BY POINTER EXAMPLE //////
     }
   
     fn run_pool(num_thread: &u8) -> &Struct{
-        let t = Struct::new();
-        &t //-- cannot return reference to local variable `t` returns a reference to data owned by the current function
+        let t = Struct::new(); //-- since new() method of the Struct struct will return a new instance of the struct which will be owned by the function thus we can't return a reference to it or as a borrowed type
+        // &t //-- it's not ok to return a reference to `t` since `t` is a local variable which is owned by the current function
+        let t = &Struct{};
+        t //-- it's ok to return a reference to `t` since  
     }
     
     // NOTE - argument can also be &mut u8
