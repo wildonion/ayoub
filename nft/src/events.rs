@@ -34,3 +34,23 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
+
+
+
+
+
+
+pub enum EventLogVariant{
+    NftMint(Vec<NftMintLog>),
+    NftTransfer(Vec<NftTransferLog>),   
+}
+
+
+pub struct NftMintLog{
+
+}
+
+
+pub struct NftTransferLog{
+
+}

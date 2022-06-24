@@ -10,13 +10,7 @@ discord bot
         [?] Bitdad DAO bot
         [?] captcha bot and wallet address checker bot for bitdad collections 
         [?] bot for youtube and twitter
-        [?] discrod emojies
-
-
-
-
-
-
+        [?] discrod channel's emojies
 
 
 
@@ -31,9 +25,6 @@ https://github.com/near/core-contracts
 https://github.com/near/near-sdk-rs
 https://learn.figment.io/protocols/near
 https://www.near-sdk.io/contract-structure/collections
--------------------------------------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------------------------------------
 https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
 https://stackoverflow.com/questions/27831944/how-do-i-store-a-closure-in-a-struct-in-rust
 https://rust-hosted-langs.github.io/book/introduction.html

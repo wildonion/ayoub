@@ -10,3 +10,7 @@ Ayoub PaaS Framework
 # 🧧 BlueRangene 
 
 Family Tree Smart Contracts (`escrow`, `event`, `market`, `nft`, `w2e` & `proposal`) on NEAR 
+
+# 📌 TODOs
+
+* Smart Contract Methods' Doc

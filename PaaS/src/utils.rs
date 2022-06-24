@@ -259,31 +259,31 @@ pub fn string_to_static_str(s: String) -> &'static str {
 
 
 
-pub struct Struct;
+pub struct Pack;
 trait Interface{}
 
-impl Interface for Struct{} //-- is required for return_box_trait() function
+impl Interface for Pack{} //-- is required for return_box_trait() function
 
 fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from function means we're implementing the trait for the object that is returning from the function regardless of its type that we're returning from the function cause compiler will detect the correct type in compile time and implement or bound the trait for that type
-    Struct {}
+    Pack {}
 }
 
 fn return_box_trait() -> Box<dyn Interface> { // NOTE - returning Box<dyn Trait> from function means we're returning a struct inside the Box which the trait has implemented for
-    Box::new(Struct {})
+    Box::new(Pack {})
 }
 
-impl Struct{ ////// RETURN BY POINTER EXAMPLE //////
+impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
 
 
     fn new() -> Self{
-        Struct{}
+        Pack{}
     }
   
-    fn run_pool(num_thread: &u8) -> &Struct{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
-        let t = Struct::new(); //-- since new() method of the Struct struct will return a new instance of the struct which will be owned by the function thus we can't return a reference to it or as a borrowed type
-        // &t //-- it's not ok to return a reference to `t` since `t` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
-        let t = &Struct{}; //-- since 
-        t //-- it's ok to return a reference to `t` since  
+    fn run_pool(num_thread: &u8) -> &Pack{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
+        let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which will be owned by the function thus we can't return a reference to it or as a borrowed type
+        // &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
+        let instance = &Pack{}; //-- since 
+        instance //-- it's ok to return a reference to `instance` since  
     }
     
     // NOTE - argument can also be &mut u8

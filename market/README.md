@@ -11,7 +11,7 @@
 
 > For contract method `calls` and `views` see the list of all available APIs using `ayoub` PaaS cli with `./ayoub.sh list --api --controller nft` command.
 
-> The caller must have called the `new()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
+> The caller must have called the `new_*()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
 
 > Market contract will use a cross contract call to the NFT contract which is deployed on the minter contract actor account for transferring and minting an NFT. 
 
@@ -46,8 +46,8 @@ $ sudo chmod +x test.sh && ./test.sh
 
 * Multiple Offer Feature for Biddings, Auctions and Buying NFTs like `gem.xyz` in a single Transaction Gas Fee using
 
-* Should We Call `nft_mint` method on Update NFT of a Collection?
+* Should We Call `nft_mint` Method on Update an NFT of a Collection?
 
-* Should We Pass the royalty of the Minter When We're Calling `nft_mint` method?
+* Should We Pass the Royalty of the Minter When We're Calling `nft_mint` Method?
 
 * Should We Deploy the NFT Contract on Every Account that Wants to Mint NFT?
