@@ -11,6 +11,7 @@ pub mod env{
     // ...
 
     use std::sync::mpsc as std_mpsc;
+    use borsh::{BorshSerialize, BorshDeserialize};
     use futures::channel::mpsc as future_mpsc;
     use tokio::sync::mpsc as tokio_mpsc;
     use futures::join as futures_join;
@@ -26,9 +27,59 @@ pub mod env{
 
 
 
+
+
+
+
+
+
+
+
+    #[derive(Clone, Debug)]
+    pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
+
+
+
+    // TODO - vector of || async move{} of events for an event manager struct 
+    // TODO - call new event every 5 seconds from vector of event of closures 
     
 
 
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...}, {...}]} or {"event": "serverless", "data": [{...}, {...}]}
+    #[serde(rename_all="snake_case")] //-- will convert all fields into snake_case
+    pub enum EventVariant{
+        Runime(Vec<RuntimeLog>),
+        Serverless(Vec<ServerlessLog>),
+    }
+
+
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct EventDataLog{
+        pub tiem: Option<i64>, //-- the time of the event data log
+        #[serde(flatten)] //-- flatten to not have "event": {<EventVariant>} in the JSON, just have the contents of {<EventVariant>} which is the value of the data key itself - we can use #[serde(flatten)] attribute on a field of a struct or enum in those cases that we don't know about the number of exact fields inside the struct or enum or what's exactly inside the body of an api comming from the client to decode or map it into the struct or enum thus we can use this attribute to hold additional data that is not captured by any other fields of the struct or enum
+        pub event: EventVariant, //-- the data which is a vector of all either Serverless or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
+    }
+
+    
+    #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
+    pub struct RuntimeLog{ // TODO - initialize this inside the main() function
+        pub id: u8,
+        pub path: String, //-- the path of the log file in server with lifetime 'p
+        #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
+        pub requested_at: Option<i64>, //-- the time of the log request
+        pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
+    }
+
+
+    #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
+    pub struct ServerlessLog{ // TODO - initialize this inside the main() function
+        pub id: u8,
+        pub path: String, //-- the path of the log file in server with lifetime 'p
+        #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
+        pub requested_at: Option<i64>, //-- the time of the log request
+        pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
+    }
 
 
     #[derive(Serialize, Deserialize, Copy, Clone, Debug)]

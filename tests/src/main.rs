@@ -93,4 +93,51 @@ fn main() {
 
 
 
+
+    use std::collections::HashMap;
+    use serde::{Serialize, Deserialize};
+    use serde_json::Value;
+
+    #[derive(Serialize, Deserialize)]
+    struct User {
+        id: String,
+        username: String,
+
+        #[serde(flatten)]
+        extra: HashMap<String, Value>,
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

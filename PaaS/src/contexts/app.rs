@@ -163,14 +163,6 @@ pub enum Mode{ //-- enum uses 8 bytes (usize which is 64 bits on 64 bits arch) t
 
 
 
-#[derive(Copy, Clone, Debug)]
-pub struct Log<'p>{ // TODO - initialize this inside the main() function 
-    pub path: &'p str, //-- the path of the log file in server
-    pub requested_at: Option<i64>, //-- the time of the log request
-}
-
-
-
 #[derive(Clone, Debug)]
 pub struct Cli{ // https://rust-cli.github.io/book/index.html
     pub service_name: String, // TODO - service_name argument

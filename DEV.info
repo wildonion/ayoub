@@ -2,18 +2,6 @@
 
 
 
------------
-discord bot
------------
-        [?] ranking bot based on invite, chat, quizz, game (poker)
-        [?] voting bot based on reaction
-        [?] Bitdad DAO bot
-        [?] captcha bot and wallet address checker bot for bitdad collections 
-        [?] bot for youtube and twitter
-        [?] discrod channel's emojies
-
-
-
 
 
 
@@ -125,9 +113,9 @@ NOTE - we'll divide the sequential data into tasks using divide and conquer algo
 
 
 
-===============================================================================================================================================
-TECH BUILDER BASED ON multi threading (job queue), message passing protocols like async mpsc channels and actix actors on top of tokio runtime
-===============================================================================================================================================
+=============================================================================================================================================================
+TECH BUILDER BASED ON multi threading (job queue), Arc<Mutex<T>> message passing protocols like async mpsc channels and actix actors on top of tokio runtime
+=============================================================================================================================================================
 TODO - paas cli like dockerizing, async file handling and ...
 TODO - download/upload manager like IDM/tus.io
 TODO - load balancer for coiniXerr for layer 1 and 2
@@ -138,7 +126,6 @@ TODO - an event streaming platform like VoD protocol like arvancloud based for s
         - convert uploaded videos to hls for multi bitrate conversion
         - create an endpoint api to point where the hls is
         - call the api to load in html5 video tag
-
 
 
 

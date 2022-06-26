@@ -264,6 +264,10 @@ trait Interface{}
 
 impl Interface for Pack{} //-- is required for return_box_trait() function
 
+fn return_none_trait<T>() -> () where T: Interface{ // NOTE - `T` type must be bound to Interface trait
+
+}
+
 fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from function means we're implementing the trait for the object that is returning from the function regardless of its type that we're returning from the function cause compiler will detect the correct type in compile time and implement or bound the trait for that type
     Pack {}
 }

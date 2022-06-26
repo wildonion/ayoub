@@ -42,14 +42,14 @@ pub type TokenId = String;
 
 
 #[derive(Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
 pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much per each sell of a specific NFT
     pub payout: HashMap<AccountId, U128>, // NOTE - HashMap has loaded inside the lib.rs before and we imported using use crete::* syntax 
 }
 
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone)]
-#[serde(crate="near_sdk::serde")] //-- loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
 pub struct NFTContractMetadata{ //-- token metadata info at contract level
     pub spec: String, //-- required, nft contract metadata version
     pub name: String, //-- required, nft contract metadata name
@@ -62,7 +62,7 @@ pub struct NFTContractMetadata{ //-- token metadata info at contract level
 
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
 pub struct TokenMetadata{ //-- token metadata info at token level itself
     pub title: Option<String>, //-- optional, token metadata title
     pub description: Option<String>, //-- optional, token metadata description
