@@ -10,6 +10,7 @@ pub mod env{
     // TODO - try different IO streaming and future traits on a defined buffer from the following crates like mpsc and Mutex data structures
     // ...
 
+    use std::fmt;
     use std::sync::mpsc as std_mpsc;
     use borsh::{BorshSerialize, BorshDeserialize};
     use futures::channel::mpsc as future_mpsc;
@@ -46,7 +47,7 @@ pub mod env{
 
 
     #[derive(Serialize, Deserialize, Debug)]
-    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...}, {...}]} or {"event": "serverless", "data": [{...}, {...}]}
+    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...RuntimeLog_instance...}, {...ServerlessLog_instance...}]} or {"event": "serverless", "data": [{...ServerlessLog_instance...}, {...ServerlessLog_instance...}]}
     #[serde(rename_all="snake_case")] //-- will convert all fields into snake_case
     pub enum EventVariant{
         Runime(Vec<RuntimeLog>),
@@ -59,6 +60,13 @@ pub mod env{
         pub tiem: Option<i64>, //-- the time of the event data log
         #[serde(flatten)] //-- flatten to not have "event": {<EventVariant>} in the JSON, just have the contents of {<EventVariant>} which is the value of the data key itself - we can use #[serde(flatten)] attribute on a field of a struct or enum in those cases that we don't know about the number of exact fields inside the struct or enum or what's exactly inside the body of an api comming from the client to decode or map it into the struct or enum thus we can use this attribute to hold additional data that is not captured by any other fields of the struct or enum
         pub event: EventVariant, //-- the data which is a vector of all either Serverless or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
+    }
+
+
+    impl fmt::Display for EventDataLog{
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
+            
+        }
     }
 
     
@@ -76,6 +84,7 @@ pub mod env{
     pub struct ServerlessLog{ // TODO - initialize this inside the main() function
         pub id: u8,
         pub path: String, //-- the path of the log file in server with lifetime 'p
+        pub method: String, //-- the method name that the log data is captured for
         #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
         pub requested_at: Option<i64>, //-- the time of the log request
         pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
@@ -126,7 +135,8 @@ pub mod env{
         type Cost; //-- the total cost of the serverless trait method calls during an especific period of time 
 
         fn run(&mut self) -> Self; // NOTE - the type that this trait which must be implemented for must be defined as mutable - the return type is the type that this trait will be implemented for
-
+        fn stop() -> Self; // NOTE - this is not object safe trait since we're returning the Self 
+        
     }
 
 
@@ -138,6 +148,18 @@ pub mod env{
         type Cost    = u128; 
 
         fn run(&mut self) -> Self{ //-- the first param is a shared mutable pointer to the instance of the runtime 
+            Self{
+                id: Uuid::new_v4(),
+                current_service: None,
+                link_to_server: None,
+                error: None,
+                node_addr: None,
+                last_crash: None,
+                first_init: Some(chrono::Local::now().timestamp()),
+            }
+        }
+
+        fn stop() -> Self{
             Self{
                 id: Uuid::new_v4(),
                 current_service: None,

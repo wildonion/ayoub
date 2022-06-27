@@ -16,22 +16,25 @@
 # ./ayoub.sh list --api --controller <CONTROLLER_NAME> -> list of all available apis related to a controller (game, auth, event and nft)
 
 
+# sudo chown -R root:root /home/wildonion/ayoub
 # cargo build --bin ayoub --release
 
-# ☢️ To run the `event` server: `cargo run auth 7436`
 
-# ☢️ To run the `auth` server: `cargo run event 7435`
 
-# ☢️ To run the `game` server: `cargo run event 7437`
+# ☢️ To run the `event` server: `cargo run event 7436`
+
+# ☢️ To run the `auth` server: `cargo run auth 7435`
+
+# ☢️ To run the `game` server: `cargo run game 7437`
 
 # ☢️ To run the `nft` server: `cargo run nft 7438`
 
 # -----------------------------------------------------------
 
-# ☢️ To run the `event` server: `./ayoub auth 7436`
+# ☢️ To run the `event` server: `./ayoub event 7436`
 
-# ☢️ To run the `auth` server: `./ayoub event 7435`
+# ☢️ To run the `auth` server: `./ayoub auth 7435`
 
-# ☢️ To run the `game` server: `./ayoub event 7437`
+# ☢️ To run the `game` server: `./ayoub game 7437`
 
 # ☢️ To run the `nft` server: `./ayoub nft 7438`

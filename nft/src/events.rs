@@ -76,6 +76,13 @@ pub struct EventLog{ //-- an interface to capture the data abount and event - th
 
 
 
+impl fmt::Display for EventLog{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
+
+    }
+}
+
+
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
