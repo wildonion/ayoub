@@ -55,19 +55,27 @@ pub mod env{
     }
 
 
+    
     #[derive(Serialize, Deserialize, Debug)]
-    pub struct EventDataLog{
+    pub struct EventLog{
         pub tiem: Option<i64>, //-- the time of the event data log
         #[serde(flatten)] //-- flatten to not have "event": {<EventVariant>} in the JSON, just have the contents of {<EventVariant>} which is the value of the data key itself - we can use #[serde(flatten)] attribute on a field of a struct or enum in those cases that we don't know about the number of exact fields inside the struct or enum or what's exactly inside the body of an api comming from the client to decode or map it into the struct or enum thus we can use this attribute to hold additional data that is not captured by any other fields of the struct or enum
         pub event: EventVariant, //-- the data which is a vector of all either Serverless or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
     }
 
 
-    impl fmt::Display for EventDataLog{
+
+    impl fmt::Display for EventLog{ //-- implementing the Display trait for the EventLog struct to show its instances' fields like EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]} in logging ops which is a formatted stream of strings - any value or type that implements the Display trait can be passed to format_args!() macro, as can any Debug implementation be passed to a {:?} within the formatting string; Debug must be implemented for the type
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
-            
+            f.write_fmt( //-- writing some formatted information using format_args!() macro into the formatter instance which is `f`
+                format_args!( //-- format_args!(), unlike its derived macros, avoids heap allocations
+                    "EVENT_JSON:{}", //-- it'll start with EVENT_JSON:{}
+                    &serde_json::to_string(self).map_err(|_| fmt::Error).unwrap() //-- formatting every field of the self which is the instance of the EventLog struct into the string to writ into the `f` and catch the error of each message or field if there was any when we're creating the stream by formatting the struct
+                ) 
+            )
         }
     }
+
 
     
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
@@ -78,6 +86,7 @@ pub mod env{
         pub requested_at: Option<i64>, //-- the time of the log request
         pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
     }
+
 
 
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait

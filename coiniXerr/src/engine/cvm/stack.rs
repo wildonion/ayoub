@@ -2,6 +2,7 @@
 
 
 
+
 // TODO - VM, interpreter and #[wowasm] proc macro attribute to write smart contracts with wo syntax to compile to wasm to run on near
 // ...
 
@@ -38,7 +39,7 @@ macro_rules! wowasm {
 
 
 #[macro_export]
-macro_rules! query {
+macro_rules! query { // NOTE - this is a macro with multiple syntax support
     
     ( $value_0:expr, $value_1:expr, $value_2:expr ) => { //-- passing multiple object syntax
         // ...
