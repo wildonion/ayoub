@@ -2,11 +2,11 @@
 
 
 
-
+use serde_json::Value;
 use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
 use argon2::{self, Config};
-use std::env;
+use std::{env, collections::HashMap};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 
@@ -94,7 +94,7 @@ pub struct UserUpdateResponse{
   -----------------------------------------------------------------------------------------------------------------------------
 | this struct will be used to deserialize the SMS response return part coming from the career to serialize to into this struct
 | -----------------------------------------------------------------------------------------------------------------------------
-|
+|                                             >>>>> NOT IMPORTANT SCHEMA <<<<<
 |
 */
 #[derive(Default, Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
@@ -108,7 +108,7 @@ pub struct SMSResponseReturn{
   ------------------------------------------------------------------------------------------------------------------------------
 | this struct will be used to deserialize the SMS response entries part coming from the career to serialize to into this struct
 | ------------------------------------------------------------------------------------------------------------------------------
-|
+|                                             >>>>> NOT IMPORTANT SCHEMA <<<<<
 |
 */
 #[derive(Default, Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
@@ -131,10 +131,12 @@ pub struct SMSResponseEntries{
 |
 |
 */
-#[derive(Default, Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)] //-- can't implement the Default trait for extra field cause Default is not implemented for Value enum
 pub struct SMSResponse{
-    pub r#return: SMSResponseReturn, //-- use r# to escape reserved keywords to use them as identifiers 
-    pub entries: Vec<SMSResponseEntries>,
+    #[serde(flatten)] // NOTE - #[serde(flatten)] proc macro attribute can be used for factoring common keys into a shared structure, or for capturing remaining fields into a map with arbitrary string keys
+    pub extra: HashMap<String, Value>, //-- the OTP career response after deserializing to this struct will be like so: {}
+    // pub r#return: SMSResponseReturn, //-- use r# to escape reserved keywords to use them as identifiers 
+    // pub entries: Vec<SMSResponseEntries>,
 }
 
 

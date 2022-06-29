@@ -85,9 +85,9 @@ impl NFTContract{ //-- we've defined the following methods of the `Contract` str
             }
             
             /////
-            /////// people that have been approved can also transfer NFTs on behalf of the owner means if the sender_id wasn't equal to the token owner_id doesn't mean that we can't transfer NFT at all cause the sender_id might be inside the approved_account_ids hashmap
-            /////// check if both the account trying to transfer is in the approved list and they correspond to the correct approval id
-            /////// approved_account_ids is a mapping based collection between all approved accounts and their approval_id corresponding to their index inside the hashmap which is the next_approval_id field and it started from 0 
+            /////// ➔ people that have been approved can also transfer NFTs on behalf of the owner means if the sender_id wasn't equal to the token owner_id doesn't mean that we can't transfer NFT at all cause the sender_id might be inside the approved_account_ids hashmap
+            /////// ➔ check if both the account trying to transfer is in the approved list and they correspond to the correct approval id
+            /////// ➔ approved_account_ids is a mapping based collection between all approved accounts and their approval_id corresponding to their index inside the hashmap which is the next_approval_id field and it started from 0 
             /////
             
             if let Some(enforced_approval_id) = approval_id{ //-- if there was an approval_id we must check that the sender's approval_id is the same as the once inside the approved_account_ids field
@@ -119,6 +119,45 @@ impl NFTContract{ //-- we've defined the following methods of the `Contract` str
         if let Some(memo) = memo{
             env::log_str(&format!("A Memo from {:?} to {:?} -> [{:?}]", sender_id, receiver_id, memo).as_str()) //-- format!() returns a String which takes 24 bytes storage, usize * 3 (pointer, len, capacity) bytes (usize is 64 bits or 24 bytes on 64 bits arch)
         }
+
+
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////// CONSTRUCTING THE TRANSFER LOG AS PER THE EVENTS STANDARD //////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////// 
+        //// ➔ shared reference can't dereference between threads and can't move out of it cause by 
+        ////     moving or dereferencing it it'll lose its ownership and lifetime while some methods and 
+        ////     threads are using it; we can sovle this using as_ref() method wich converts a &wrapped 
+        ////     type into &T or by cloning the type.
+        //// ➔ if the approval_id wasn't None means that sender_id can be aslo an approved account
+        ////    otherwise he/she is the owner of the NFT! 
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        let auth_sender_id = sender_id.clone(); //-- cloning the sender_id to prevent from moving since we can't dereference a shared reference that doesn't implement the Copy trait
+        let event_receiver_id = receiver_id.clone(); //-- cloning the receiver_id to prevent from moving since we can't dereference a shared reference that doesn't implement the Copy trait
+        let old_owner_id = token.owner_id.clone(); //-- cloning the owner_id to prevent the token from moving since we can't dereference a shared reference that doesn't implement the Copy trait
+        let authorized_id = if approval_id.is_some(){ //-- if the approval_id was provided, we set the authorized_id equal to the sender_id since the one who is transferring the NFT (sender_id) must be an approved account if he/she wasn't the owner of the NFT means if we have an approved account_id we can consider that the sender_id is an approved account_id thus we can set the authorized_id to the current sender_id  
+            Some(auth_sender_id) 
+        } else{
+            None //-- the authorized_id must be None since we have no approved account which means that sender is the owner of the token or NFT  
+        };
+        let nft_mint_log = EventLog{ //-- emitting the transferring event
+            standard: NFT_STANDARD_NAME.to_string(), //-- the current standard
+            version: NFT_METADATA_SPEC.to_string(), //-- the version of the standard based on near announcement
+            event: EventLogVariant::NftTransfer(vec![NftTransferLog{ //-- the data related with the transferring event stored in a vector 
+                authorized_id, //-- the authorized_id that might be None or equals to the sender_id if the approval_id wasn't None
+                old_owner_id,
+                new_owner_id: event_receiver_id,
+                token_ids: vec![token_id.to_string()], //-- list of all minted token ids; since it might be an airdrop or giveaway batch
+                memo: None, //-- the memo message which is None
+            }]),
+        }; // NOTE - since we've implemented the Display trait for the EventLog struct thus we can convert the nft_mint_log instance to string to log the nft transferring event info at runtime
+        env::log_str(&nft_mint_log.to_string()); //-- format!() returns a String which takes 24 bytes storage, usize * 3 (pointer, len, capacity) bytes (usize is 64 bits or 24 bytes on 64 bits arch)
+        //////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+        
         token //-- returning the transferred token
     
     }

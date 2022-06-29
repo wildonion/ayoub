@@ -6,7 +6,7 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 # 📌 TODOs
 
-* OTP response serde parser issue + API token
+* OTP API token
 
 * reserve APIs + API token
 

@@ -69,7 +69,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 // NOTE - a payable method can be used to pay the storage cost, the escrow price or the gas fee
 // NOTE - gas fee is the computational cost which must be paid if we’re doing cross contract call or moving between shards and actor cause this action will cost some cpu usage performance and must be attached separately in its related call from the cli 
 // NOTE - amount or deposit is the cost of the payable function which can be either the cost of the storage usage for mutating contract or the cost of some donation or escrow ops
-
+// NOTE - we have to log the event also in cross contract calls coming from other contract actor accounts like marketplace like inside the nft_transfer_call() method
 
 
 
@@ -101,7 +101,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 trait NoneFungibleTokenReceiver{ //-- this trait which contains the cross conract call methods will extend the interface of the receiver_id's contract actor with a name inside the #[ext_contract()] proc macro which specifies the extended interface contract name 
 
     /////
-    /////// following method must be called and executed inside the receiver_id's contract actor from this contract actor account therefore it'll take a param called account_id which is the one who should call this method on his/her contract actor account and must be the owner of his/her contract
+    /////// ➔ following method must be called and executed inside the receiver_id's contract actor from this contract actor account therefore it'll take a param called account_id which is the one who should call this method on his/her contract actor account and must be the owner of his/her contract
     /////
     fn nft_on_transfer(&mut self, sender_id: AccountId, previous_owner_id: AccountId, token_id: TokenId, msg: String) -> Promise; //-- this method will be used for cross contract call on the receiver_id's contract actor (which must be implemented on the receiver_id's contract actor) once the nft_transfer_call() method is called and will return true if the token should be returned back to the sender
 
@@ -183,10 +183,19 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
 
         utils::panic_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage on the contract by forcing the user to sign the transaction with his/her full access key; we'll refund any excess storage later after calculating the required storage cost
         let sender_id = env::predecessor_account_id(); //-- getting the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method
-        let transferred_token = self.internal_transfer(&sender_id, &receiver_id, &token_id, approval_id, memo); //-- transferring the NFT from the sender_id's contract actor to the receiver_id's contract actor and return the transferred token info object
+        let transferred_token = self.internal_transfer(&sender_id, &receiver_id, &token_id, approval_id, memo.clone()); //-- transferring the NFT from the sender_id's contract actor to the receiver_id's contract actor and return the transferred token info object
+        let auth_sender_id = sender_id.clone(); //-- cloning the sender_id to prevent from moving since we can't dereference a shared reference that doesn't implement the Copy trait
+        let authorized_id = if sender_id != transferred_token.owner_id{ //-- if the sender_id wasn't the owner of the transferred_token, we set the authorized_id equal to the sender_id since .......
+            Some(auth_sender_id) 
+        } else{
+            None
+        };
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for nft on transfer
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         extend_receiver_contract_for_none_fungible_token::ext(receiver_id.clone()) //--  we're cloning the receiver_id to avoid moving cause we want to use it inside the nft_resolve_transfer() method - the account_id that this method must be called and executed inside since the account_id param is the one who is responsible for making this call - no need to clone the receiver_id cause we're passing it by reference or as a borrowed type
             .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling nft_on_transfer() cross contract call promise method 
-            .with_static_gas(GAS_FOR_RESOLVE_TRANSFER) //-- prepaid_gas() method returns the amount of gas attached to the call via near cli that can be used to pay the gas fees | attached gas - required gas for calling nft_transfer_call() method is the total gas fee which will be deposited in yocot$NEAR from the caller wallet for this transaction call
+            .with_static_gas(GAS_FOR_NFT_TRANSFER_CALL) //-- prepaid_gas() method returns the amount of gas attached to the call via near cli that can be used to pay the gas fees | attached gas - required gas for calling nft_transfer_call() method is the total gas fee which will be deposited in yocot$NEAR from the caller wallet for this transaction call
             .nft_on_transfer( //-- initiating the receiver's corss contract call by creating a transaction which is a promise (future object) ActionReceipt object which returns obviously a promise or a future object which contains an async message including the data coming from the receiver_id's contract actor once it gets executed - calling the nft_on_transfer() cross contract call promise method on the receiver side from the extended receiver_id's contract actor interface which is `extend_receiver_contract_for_none_fungible_token`
                 sender_id, 
                 transferred_token.owner_id.clone(), 
@@ -194,17 +203,20 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
                 msg
             ).then( //-- wait for the scheduled transaction which is a promise (future object) ActionReceipt object on the receiver_id's contract actor to finish executing to resolve it using .then() method
                 ////////////
-                /////// by default ext() method will be attached to the contract struct annotated with #[near_bindgen] which avoids the requirement to re-define the interface with #[ext_contract] 
-                /////// and the method that will be attached to the struct is the same as ext_contract as ext(..) so we can call Self::ext(...) which remove the need to redefine interfaces twice
+                /////// ➔ by default ext() method will be attached to the contract struct annotated with #[near_bindgen] which avoids the requirement to re-define the interface with #[ext_contract] 
+                ///////    and the method that will be attached to the struct is the same as ext_contract as ext(..) so we can call Self::ext(...) which remove the need to redefine interfaces twice
+                /////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for resolve transfer
                 ////////////
                 Self::ext(env::current_account_id()) //-- the account_id that this method must be called and executed inside which is the current_account_id() and is the one who owns this contract - account_id param is the one who is responsible for making this call - no need to clone the current_account_id cause we're passing it by reference or as a borrowed type
                     .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling the nft_resolve_transfer() callback method
                     .with_static_gas(GAS_FOR_RESOLVE_TRANSFER) //-- total gas required for calling the callback method which has taken from the attached deposited when the caller called the nft_transfer_call() method
                     .nft_resolve_transfer( //-- calling nft_resolve_transfer() method from the extended interface of the current contract actor (our own contract) which is the `extend_this_contract` contract; since this is a private method only the owner of the this contract can call it means the caller must be the signer or the one who initiated, owned and signed the contract or the account of the contract itself or the sender him/her-self to mutate the state of the contract on chain thus we have to pass the current_id's or the sender_id's contract actor which is the owner of this contract actor
+                        authorized_id,
                         transferred_token.owner_id.clone(), 
-                        receiver_id, 
+                        receiver_id,
                         token_id, 
                         transferred_token.approved_account_ids, //-- passing the previous token approved_account_ids hashmap to nft_resolve_transfer() callback method cause we'll refund the owner inside the callback method since there would be still the possibility that the transfer gets reverted due to the result of nft_on_transfer() method thus we must keep track of what the approvals (those account_id which have access to transfer the NFT on behalf of the owner) were before and after transferring the NFT 
+                        memo
                     )
 
             )
@@ -251,7 +263,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
 // ----------------------------------
 trait NoneFungibleTokenResolver{ //-- this trait which contains the cross conract call methods will extend the interface of the current contract actor which is the sender_id's contract actor with a name inside the #[ext_contract()] proc macro which specifies the extended interface contract name
 
-    fn nft_resolve_transfer(&mut self, owner_id: AccountId, receiver_id: AccountId, token_id: TokenId, approved_account_ids: HashMap<AccountId, u64>) -> bool; //-- resolves the created promise on this contract of the cross contract call to the receiver contract, this is the callback from calling the nft_on_transfer() cross contract call promise method that we want to await on and solve it inside the nft_transfer_call() method which will analyze what happened in the cross contract call when nft_on_transfer was called as part of the nft_transfer_call method - we've passed the approval_account_ids in to this method so we can keep track of what the approvals (those account_id which have access to transfer the NFT on behalf of the owner) were before transferring the NFT
+    fn nft_resolve_transfer(&mut self, authorized_id: Option<AccountId>, owner_id: AccountId, receiver_id: AccountId, token_id: TokenId, approved_account_ids: HashMap<AccountId, u64>, memo: Option<String>) -> bool; //-- resolves the created promise on this contract of the cross contract call to the receiver contract, this is the callback from calling the nft_on_transfer() cross contract call promise method that we want to await on and solve it inside the nft_transfer_call() method which will analyze what happened in the cross contract call when nft_on_transfer was called as part of the nft_transfer_call method - we've passed the approval_account_ids in to this method so we can keep track of what the approvals (those account_id which have access to transfer the NFT on behalf of the owner) were before transferring the NFT
 
 }
 
@@ -260,7 +272,7 @@ trait NoneFungibleTokenResolver{ //-- this trait which contains the cross conrac
 impl NoneFungibleTokenResolver for NFTContract{ //-- implementing the NonFungibleTokenResolver trait for our main `Contract` struct (or any contract); extending the `Contract` struct interface to define the body of cross contract call promise methods which is the callback method for the current or the sender contract actor to fill the pending promise ActionReceipt object with the promise DataReceipt object coming from the receiver_id's contract actor
 
     #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
-    fn nft_resolve_transfer(&mut self, owner_id: AccountId, receiver_id: AccountId, token_id: TokenId, approved_account_ids: HashMap<AccountId, u64>) -> bool{ //-- returning a boolean to where it has called (the nft_transfer_call() method) based on the result of the nft_on_tranfer() cross contract call promise method - a callback which contains the result of the nft_on_transfer() promise
+    fn nft_resolve_transfer(&mut self, authorized_id: Option<AccountId>, owner_id: AccountId, receiver_id: AccountId, token_id: TokenId, approved_account_ids: HashMap<AccountId, u64>, memo: Option<String>) -> bool{ //-- returning a boolean to where it has called (the nft_transfer_call() method) based on the result of the nft_on_tranfer() cross contract call promise method - a callback which contains the result of the nft_on_transfer() promise
         
         /*
 
@@ -311,9 +323,50 @@ impl NoneFungibleTokenResolver for NFTContract{ //-- implementing the NonFungibl
         token.owner_id = owner_id; //-- updating the owner_id field of the token object with the last original owner_id
         
 
-        utils::refund_approve_account_ids(receiver_id, &token.approved_account_ids); //-- refunding the receiver for releasing the storage used up by the approved account ids based on the transferred token object since the receiver might be called nft_approve() method which has paid for approving an account; by doing this we are sure that the token didn't transferred successfully from sender (either the owner or an approved account_id) to the receiver_id's contract actor therefore we must immediately refund the receiver for all account_ids that he/she might has approved on his/her token - passing the approved_account_ids in its borrowed from by taking a reference to its location using & to prevent from moving and losing its ownership so we can have it in later scopes
+        utils::refund_approve_account_ids(receiver_id.clone(), &token.approved_account_ids); //-- cloning the receiver_id since we want to use it in NftTransferLog struct - refunding the receiver for releasing the storage used up by the approved account ids based on the transferred token object since the receiver might be called nft_approve() method which has paid for approving an account; by doing this we are sure that the token didn't transferred successfully from sender (either the owner or an approved account_id) to the receiver_id's contract actor therefore we must immediately refund the receiver for all account_ids that he/she might has approved on his/her token - passing the approved_account_ids in its borrowed from by taking a reference to its location using & to prevent from moving and losing its ownership so we can have it in later scopes
         token.approved_account_ids = approved_account_ids; //-- resetting the approved_account_ids field of the transferred token object to what they were before the transfer since the transfer didn't go through successfully we must update the approved_account_ids field again with the old one passed in nft_resolve_transfer() callback method
         self.tokens_by_id.insert(&token_id, &token); //-- insert the updated token back into the self.tokens_by_id collection, insert() method will update the value on second call if there was any entry with that key exists cause hashmap based data structures use the hash of the key to validate the uniquness of their values and we must use enum based storage key if we want to add same key twice but with different values
+        
+        
+        
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////// CONSTRUCTING THE TRANSFER LOG AS PER THE EVENTS STANDARD //////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////// 
+        //// ➔ shared reference can't dereference between threads and can't move out of it cause by 
+        ////     moving or dereferencing it it'll lose its ownership and lifetime while some methods and 
+        ////     threads are using it; we can sovle this using as_ref() method wich converts a &wrapped 
+        ////     type into &T or by cloning the type.
+        //// ➔ we need to log that the NFT was reverted back to the original owner
+        ////     the old_owner_id will be the receiver and the new_owner_id will be the
+        ////     original owner of the token since we're reverting the transfer.
+        //// ➔ if you only place the log in the internal_transfer function, the log will be emitted 
+        ////     and the indexer will think that the NFT was transferred if the transfer is reverted 
+        ////     during nft_resolve_transfer, however, that event should also be emittedanywhere that 
+        ////     an NFT could be transferred, we should add logs.
+        //// ➔ the old_owner_id will be the receiver_id that we've tried to transfer the NFT to it
+        ////     and the receiver_id will be the previous owner of the NFT since we haven't returned true, 
+        ////     that means that we should return the token to it's original owner.
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        let event_receiver_id = token.owner_id.clone(); //-- cloning the owner_id to prevent from moving since we can't dereference a shared reference that doesn't implement the Copy trait
+        let old_owner_id = receiver_id.clone(); //-- cloning the receiver_id to prevent the token from moving since we can't dereference a shared reference that doesn't implement the Copy trait
+        let nft_mint_log = EventLog{ //-- emitting the transferring event
+            standard: NFT_STANDARD_NAME.to_string(), //-- the current standard
+            version: NFT_METADATA_SPEC.to_string(), //-- the version of the standard based on near announcement
+            event: EventLogVariant::NftTransfer(vec![NftTransferLog{ //-- the data related with the transferring event stored in a vector 
+                authorized_id, //-- using the passed in authorized_id for logging the transfer event and it can be the NFT owner or an approved account like the marketplace account_id - if there was any approved account_id to transfer the NFT on behalf of the owner
+                old_owner_id, //-- the receiver id the old owner
+                new_owner_id: event_receiver_id, //-- the old owner is the new receiver
+                token_ids: vec![token_id.to_string()], //-- list of all minted token ids; since it might be an airdrop or giveaway batch
+                memo: None, //-- the memo message which is None
+            }]),
+        }; // NOTE - since we've implemented the Display trait for the EventLog struct thus we can convert the nft_mint_log instance to string to log the nft transferring event info at runtime
+        env::log_str(&nft_mint_log.to_string()); //-- format!() returns a String which takes 24 bytes storage, usize * 3 (pointer, len, capacity) bytes (usize is 64 bits or 24 bytes on 64 bits arch)
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        
+        
+        
         false //-- returning false to where this method has called which is inside the nft_transfer_call() method; since we haven't returned true, that means that we should return the token to it's original owner cause when we're here means nft_on_transfer() method returned true
     
     }

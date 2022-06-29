@@ -29,7 +29,7 @@ Coded by
 
 
 
-use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
+use crate::{*, events::EventLogVariant}; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
 
 
 
@@ -83,8 +83,12 @@ impl NFTContract{ //-- following methods will be compiled to wasm using #[near_b
 
         let initial_storage_usage = env::storage_usage(); //-- storage_usage() method calculate current total storage usage as u64 bits or 8 bytes maximum (usize on 64 bits arch system) of this smart contract that this account would be paying for - measuring the initial storage being uses on the contract 
         let mut royalty = HashMap::new(); //-- creating an empty royalty hashmap to keep track of the royalty percentage value for each owner_id that is passed in into the nft_mint() method, the perpetual_royalties param
+        
         match perpetual_royalties{ // NOTE - perpetual_royalties hashmap contains accounts that will get perpetual royalties whenever the token is sold, of course it has the owner or the minter or creator of the collection or the NFT in addition to some charity or collaborator account_ids to get paid them
             Some(royalties) => {
+                if royalties.len() >= 6{ //-- making sure that the length of the perpetual royalties is below 7 since we won't have enough gas fee to pay out that many people after selling the NFT and getting the payout object from the NFT contract which is deployed on the minter contract actor acctount 
+                    env::panic_str("You Are Allowed To Add Only 6 Royalties Per Token Minting!"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location   
+                }
                 for (owner_id, royalty_percentage_value) in royalties{ //-- NOTE - no need to call iter() method on royalties hashmap since we only want to insert the key and the value of perpetual_royalties hashmap into the royalty hashmap thus we don't the borrowed type of key and value
                     royalty.insert(owner_id, royalty_percentage_value); //-- filling the royalty hashmap with the incoming perpetual royalties from the call
                 }
@@ -110,6 +114,23 @@ impl NFTContract{ //-- following methods will be compiled to wasm using #[near_b
         self.token_metadata_by_id.insert(&token_id, &metadata); //-- inserting the token_id and its metadata into the token_metadata_by_id field
         self.internal_add_token_to_owner(&token.owner_id, &token_id); //-- passing the borrowed of token owner_id and its id - adding current token to the owner; it'll insert a new token with its id and the owner_id into the tokens_per_owner field
     
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////// CONSTRUCTING THE MINT LOG AS PER THE EVENTS STANDARD //////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////
+        let nft_mint_log = EventLog{ //-- emitting the minting event
+            standard: NFT_STANDARD_NAME.to_string(), //-- the current standard
+            version: NFT_METADATA_SPEC.to_string(), //-- the version of the standard based on near announcement
+            event: EventLogVariant::NftMint(vec![NftMintLog{ //-- the data related with the minting event stored in a vector 
+                owner_id: token.owner_id, // the owner of all the tokens that were minted; since it might be a collection minting
+                token_ids: vec![token_id], //-- list of all minted token ids; since it might be a collection minting
+                memo: None, //-- the memo message which is None
+            }]),
+        }; // NOTE - since we've implemented the Display trait for the EventLog struct thus we can convert the nft_mint_log instance to string to log the nft minting event info at runtime
+        env::log_str(&nft_mint_log.to_string()); //-- format!() returns a String which takes 24 bytes storage, usize * 3 (pointer, len, capacity) bytes (usize is 64 bits or 24 bytes on 64 bits arch)
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+
         let required_storage_in_bytes = env::storage_usage() - initial_storage_usage; // -- calculating the required storage in u64 bits or 8 bytes which is total used unitl now - the initial storage
         refund_deposit(required_storage_in_bytes); //-- depositing some $NEARs based on used bytes in the contract and get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account; if the caller didn't attach enough it'll panic 
     

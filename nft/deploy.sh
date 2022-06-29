@@ -27,6 +27,5 @@ else
     echo "[...] Deploying on Sub Master Account"
     near create-account $SUB_MASTER_CONTRACT_ID.$OWNER_ID --masterAccount $OWNER_ID --initialBalance 25
     NEAR_ENV=$NETWORK near deploy --wasmFile out/nft.wasm --accountId $SUB_MASTER_CONTRACT_ID.$OWNER_ID
-    combine="$SUB_MASTER_CONTRACT_ID.$OWNER_ID"
-    export SUB_MASTER_CONTRACT_ID=$combine
+    export SUB_MASTER_CONTRACT_ID=$SUB_MASTER_CONTRACT_ID.$OWNER_ID
 fi

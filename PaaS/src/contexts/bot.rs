@@ -4,7 +4,7 @@
 
 
 
-// TODO - discord bot for ayoub PaaS like checking services status by typing a command on the bot
+// TODO - discord bot for ayoub PaaS like checking services status by typing commands on the discord
 // ...
 // https://developers.facebook.com/blog/post/2020/09/30/build-discord-bot-with-rust-and-serenity/
 // https://betterprogramming.pub/writing-a-discord-bot-in-rust-2d0e50869f64

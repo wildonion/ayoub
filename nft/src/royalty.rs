@@ -97,6 +97,11 @@ pub trait NoneFungibleTokenCore{ //-- defining an object safe trait for NFT core
 #[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
 impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTokenCore trait for our main `Contract` struct to extend its interface; bounding the mentioned trait to the `Contract` struct to query NFT core (nft_* methods standards) infos
 
+
+    ////////////////////////////////////////////
+    ///// CALCULATING THE ROYALTY PAYOUTS //////
+    ////////////////////////////////////////////
+
     fn nft_payout(&self, token_id: TokenId, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT - this method doesn't transfer the NFT but only calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the old owner which can be the main owner or the minter or creator on second sell must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
         
         match self.tokens_by_id.get(&token_id){ //-- getting the token object related to the token_id (passed by reference to borrow it) if there is some token object from the self.tokens_by_id LookupMap
@@ -108,7 +113,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
                     payout: HashMap::new() //-- an empty hashmap to keep track of the payout for each account_id or owner_id
                 };
                 let royalty = token.royalty; //-- getting the royalty hashmap of the token to calculate the payout for each owner_id based on their royalty percentage value
-                if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids - if there was too many choosed for payout gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR
+                if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids at the same time - if there was too many choosed for payout, gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR 
                     env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
                 }
                 for (owner_id, royalty_percentage_value) in royalty.iter(){
@@ -131,6 +136,11 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
     
     }
     
+
+    //////////////////////////////////////////////////////////////////////
+    ///// TRANSFERRING THE NFT THEN CALCULATING THE ROYALTY PAYOUTS //////
+    //////////////////////////////////////////////////////////////////////
+
     fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: Option<String>, balance: U128, max_len_payout: u32) -> Payout{ //-- balance is the amount that the buyer has paid for the NFT or the seller get paid for his/her NFT - this method transfers the NFT exactly like nft_transfer() method but calculates the total payout in $NEAR for an NFT based on the passed in balance (the amount of the NFT which has been sold on marketplace) which must be paid by the marketplace to the account_ids (all the NFT owners or charity account_ids must get paid per each sell or transfer, also the old owner which can be the main owner or the minter or creator on second sell must get paid at the end which will have the more payout than the other owners) each time a buyer pays for that NFT
         
         // -------------------------------------------------------------------------------
@@ -156,7 +166,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
             payout: HashMap::new() //-- an empty hashmap to keep track of the payout for each account_id or owner_id
         };
         let royalty = transferred_token.royalty; //-- getting the royalty hashmap of the transferred token to calculate the payout for each owner_id based on their royalty percentage value
-        if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids - if there was too many choosed for payout gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR
+        if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids at the same time - if there was too many choosed for payout, gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR 
             env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
         }
         for (owner_id, royalty_percentage_value) in royalty.iter(){ // NOTE - if we use iter() method then we must dereference the key and the value to get their value cause iter() method element are borrowed type of keys and values or pointers to the key and value location (&'a key, &'a value) with a valid lifetime 

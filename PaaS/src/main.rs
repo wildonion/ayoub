@@ -114,7 +114,6 @@ Coded by
 use std::{net::SocketAddr, sync::Arc, env};
 use chrono::Local;
 use dotenv::dotenv;
-use utils::Struct;
 use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;
@@ -184,9 +183,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let auth_port = env::var("AYOUB_AUTH_PORT").expect("⚠️ no port variable set for auth service");
     let event_port = env::var("AYOUB_EVENT_PORT").expect("⚠️ no port variable set for event service");
     let game_port = env::var("AYOUB_GAME_PORT").expect("⚠️ no port variable set for game service");
+    let nft_port = env::var("AYOUB_NFT_PORT").expect("⚠️ no port variable set for nft service");
     let auth_server_addr = format!("{}:{}", host, auth_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     let event_server_addr = format!("{}:{}", host, event_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     let game_server_addr = format!("{}:{}", host, game_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
+    let nft_server_addr = format!("{}:{}", host, nft_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the oneshot channel
@@ -208,10 +209,14 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     //
     // ---------------------------------------------------------------------
     let args: Vec<String> = env::args().collect();
-    let service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args to service_name we'll lose the ownership of args (cause its ownership will be belonged to service_name) and args lifetime will be dropped from the ram 
+    let mut service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args to service_name we'll lose the ownership of args (cause its ownership will be belonged to service_name) and args lifetime will be dropped from the ram 
     let service_port = &args[2];
-    let server_addr = format!("{}:{}", host, service_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-
+    let mut server_addr: Option<SocketAddr> = if service_name != &"".to_string() && service_port != &"".to_string(){ //-- if none of the argument was empty we set the server_addr to the one that we've got from the cli input otherwise we set it to None to fill it later using the current_service as the service_name 
+        Some(format!("{}:{}", host, service_port).as_str().parse::<SocketAddr>().unwrap()) //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
+    } else{
+        service_name = &current_service; //-- setting the serivce_name to the current_service read from the .env file cause it's empty read from the cli input
+        None
+    };
 
     
 
@@ -297,7 +302,10 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     if service_name.as_str() == "auth"{
         info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let auth_serivce = services::auth::AuthSvc::new(db.clone()).await; //-- making a new auth server by passing the generated storage
-        let mut auth_server = Server::bind(&server_addr).serve(auth_serivce.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the auth_server as mutable cause we want to take a mutable raw pointer ot it
+        if server_addr == None{
+            server_addr = Some(auth_server_addr);
+        }
+        let mut auth_server = Server::bind(&server_addr.unwrap()).serve(auth_serivce.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the auth_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
         //     BUILDING RUNTIME OBJECT FROM AUTH SERVICE
         // ------------------------------------------------
@@ -339,7 +347,10 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     } else if service_name.as_str() == "event"{
         info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let event_service = services::event::EventSvc::new(db.clone()).await;
-        let mut event_server = Server::bind(&server_addr).serve(event_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the event_server as mutable cause we want to take a mutable raw pointer ot it
+        if server_addr == None{
+            server_addr = Some(auth_server_addr);
+        }
+        let mut event_server = Server::bind(&server_addr.unwrap()).serve(event_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the event_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
         //    BUILDING RUNTIME OBJECT FROM EVENT SERVICE
         // ------------------------------------------------
@@ -380,7 +391,10 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     } else if service_name.as_str() == "game"{
         info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let game_service = services::game::PlayerSvc::new(db.clone()).await;
-        let mut game_server = Server::bind(&server_addr).serve(game_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the game_server as mutable cause we want to take a mutable raw pointer ot it
+        if server_addr == None{
+            server_addr = Some(auth_server_addr);
+        }
+        let mut game_server = Server::bind(&server_addr.unwrap()).serve(game_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the game_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
         //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
         // ------------------------------------------------
@@ -421,7 +435,10 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     } else if service_name.as_str() == "nft"{
         info!("running nft server on port {} - {}", service_port, chrono::Local::now().naive_local());
         let nft_service = services::nft::NftSvc::new(db.clone()).await;
-        let mut nft_server = Server::bind(&server_addr).serve(nft_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the nft_server as mutable cause we want to take a mutable raw pointer ot it
+        if server_addr == None{
+            server_addr = Some(auth_server_addr);
+        }
+        let mut nft_server = Server::bind(&server_addr.unwrap()).serve(nft_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the nft_server as mutable cause we want to take a mutable raw pointer ot it
         // ------------------------------------------------
         //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
         // ------------------------------------------------

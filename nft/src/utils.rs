@@ -252,13 +252,14 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
         to fix this we can allocate a unique storage key for each collection like using that binding that key for each entry that comes into the collection
         and that unique storage key must be built from a utf8 bytes encoded unique indentifire like an enum variant:
         
+        #[derive(BorshSerialize, BorshDeserialize)]
         pub enum CollectStorageKey{
             CollectionOne,
             CollectionTwo,
         }
 
-        collection 1 storage key : 0 ---- built from the utf8 bytes encoded CollectionOne enum variant
-        collection 2 storage key : 1 ---- built from the utf8 bytes encoded CollectionTwo enum variant
+        collection 1 storage key : 0 ---- built from the utf8 bytes encoded CollectionOne enum variant (CollectStorageKey::CollectionOne.try_to_vec().unwrap())
+        collection 2 storage key : 1 ---- built from the utf8 bytes encoded CollectionTwo enum variant (CollectStorageKey::CollectionTwo.try_to_vec().unwrap())
         
         collection 1 keys : {1: "value64", 2: "value53", 3: "value24"} -> put all the keys inside the created storage key for the first collection like: {0: [1, 2, 3]} or as a unique prefix for the keys: {01: "value64", 02: "value53", 03: "value24"}
         collection 2 keys : {1: "anether", 2: "anither", 3: "another"} -> put all the keys inside the created storage key for the second collection like: {1: [1, 2, 3]} or as a unique prefix for the keys: {11: "anether", 12: "anither", 13: "another"}
@@ -277,7 +278,7 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
         NOTE - an enum is the size of the maximum of its variants plus a discriminant value to know which variant it is, rounded up to be efficiently aligned, the alignment depends on the platform
         NOTE - an enum size is equals to a variant with largest size + 8 bytes tag
         NOTE - enum size with a single f64 type variant would be 8 bytes and with four f64 variants would be 16 bytes cause one 8 bytes (the tag) wouldn't be enough because there would be no room for the tag
-        NOTE - the size of the following enum is 28 (is equals to its largest variant size which belongs to the Text variant) + 8 (the tag size) bytes 
+        NOTE - the size of the following enum is 24 (is equals to its largest variant size which belongs to the Text variant) + 8 (the tag size) bytes 
         
         pub enum UserID {
             Number(u64),
@@ -294,12 +295,12 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
 // -> with enum we can be sure that there will be only one collection (one of the following variant) at a time inside the storage that has been pointed by the enum tag.
 // -> hash of the account_id inside the TokensPer* structs is the unique key to use it as the prefix for creating the UnorderedSet to avoid data collision cause every account_id has a unique hash with 256 bits long
 pub enum Storagekey{ //-- defining an enum based unique storage key for every near collection to avoid collection collision which might be happened when two different collections share a same storage for their keys on the chain which will face us data collision at runtime
-    TokensPerOwner, ////////--------- converting this to vector (Storagekey::TokensPerOwner.try_to_vec().unwrap()) gives us an array of [0] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key 
+    TokensPerOwner, ////////---------➔ converting this to vector (Storagekey::TokensPerOwner.try_to_vec().unwrap()) gives us an array of [0] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key 
     TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length
-    TokensById, ////////--------- converting this to vector (Storagekey::TokensById.try_to_vec().unwrap()) gives us an array of [2] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
-    TokenMetadataById, ////////--------- converting this to vector (Storagekey::TokenMetadataById.try_to_vec().unwrap()) gives us an array of [3] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
-    NFTContractMetadata, ////////--------- converting this to vector (Storagekey::NFTContractMetadata.try_to_vec().unwrap()) gives us an array of [4] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
-    TokensPerType, ////////--------- converting this to vector (Storagekey::TokensPerType.try_to_vec().unwrap()) gives us an array of [5] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
+    TokensById, ////////---------➔ converting this to vector (Storagekey::TokensById.try_to_vec().unwrap()) gives us an array of [2] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
+    TokenMetadataById, ////////---------➔ converting this to vector (Storagekey::TokenMetadataById.try_to_vec().unwrap()) gives us an array of [3] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
+    NFTContractMetadata, ////////---------➔ converting this to vector (Storagekey::NFTContractMetadata.try_to_vec().unwrap()) gives us an array of [4] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
+    TokensPerType, ////////---------➔ converting this to vector (Storagekey::TokensPerType.try_to_vec().unwrap()) gives us an array of [5] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
     TokensPerTypeInner{token_type_hash: CryptoHash}, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length
-    TokenTypesLocked, ////////--------- converting this to vector (Storagekey::TokenTypesLocked.try_to_vec().unwrap()) gives us an array of [7] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
+    TokenTypesLocked, ////////---------➔ converting this to vector (Storagekey::TokenTypesLocked.try_to_vec().unwrap()) gives us an array of [7] which is the utf8 bytes encoded version of the current variant that can be used as a unique storage key for the collection prefix key
 }

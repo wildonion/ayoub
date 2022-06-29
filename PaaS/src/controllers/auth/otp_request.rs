@@ -7,7 +7,6 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
-use crate::utils::into_box_slice;
 use crate::utils::gen_random_idx;
 use std::{mem, slice, env, io::{BufWriter, Write}};
 use borsh::BorshDeserialize;
@@ -76,10 +75,11 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                         let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
                         let client = Client::new();
                         let mut sms_response_streamer = client.get(uri).await.unwrap();
+
                         
                         
-
-
+                        
+                        
 
 
 
@@ -92,7 +92,9 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                             let chunk = next?;
                             write!(stream, "{:#?}", chunk).unwrap(); //-- collecting each incoming chunks to write them into the defined stream buffer to deserialize from utf8 bytes into the SMSResponse struct to send back as json to user
                         }
-
+                        
+                        
+                        info!(">>>>>>>>> {:#?}", stream);
 
 
 
@@ -111,9 +113,9 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                 // --------------------------------------------------------------------
                                 let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
                                 let mut sms_response_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&sms_response).unwrap(); //-- converting the sms_response object into vector of utf8 bytes using serde
-                                let mut sms_response_serialized_into_vec_bytes_using_borsh = sms_response.try_to_vec().unwrap(); //-- converting the sms_response object into vector of utf8 bytes using borsh
+                                // let mut sms_response_serialized_into_vec_bytes_using_borsh = sms_response.try_to_vec().unwrap(); //-- converting the sms_response object into vector of utf8 bytes using borsh
                                 let deserialize_to_utf8_using_serde_from_slice = serde_json::from_slice::<schemas::auth::SMSResponse>(&sms_response_serialized_into_vec_bytes_using_serede).unwrap(); //-- passing the vector of utf8 bytes into the from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> into the from_slice() method 
-                                let deserialize_to_utf8_using_borsh_from_slice = schemas::auth::SMSResponse::try_from_slice(&sms_response_serialized_into_vec_bytes_using_borsh).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method
+                                // let deserialize_to_utf8_using_borsh_from_slice = schemas::auth::SMSResponse::try_from_slice(&sms_response_serialized_into_vec_bytes_using_borsh).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method
                                 // --------------------------------------------------------------------
                                 //                      CONVERTING Vec<u8> -> &[u8]
                                 // --------------------------------------------------------------------
@@ -123,10 +125,18 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                 let utf_bytes_dereference_from_box = &*boxed_utf8_bytes_using_box_slcie; //-- borrow the ownership of the dereferenced boxed_utf8_bytes_using_box_slcie using & to convert it to &[u8] with a valid lifetime since the dereferenced boxed_utf8_bytes_using_box_slcie has unknown size at compile time thus working with u8 slice needs to borrow them from the heap memory to have their location address due to implemented ?Sized for [u8]
 
 
-                                
+
+
+
+                                let message_response = sms_response.extra.get("message").unwrap().to_string(); //-- converting the message value into string as a response message to send through the response object - getting the message value from the extra field of SMSResponse struct which is flattened to capture all the incoming fields from the OTP career into a map with arbitrary string keys and values of type serde_json::Value since we don't know the type of each value or how many keys are in the OTP career response 
+                                let status_response = sms_response.extra.get("status").unwrap(); //-- getting the status value from from the extra field of SMSResponse struct which is flattened to capture all the incoming fields from the OTP career into a map with arbitrary string keys and values of type serde_json::Value since we don't know the type of each value or how many keys are in the OTP career response
+                                let serde_value = serde_json::to_value(200 as u8).unwrap(); //-- converting the 200 as u8 to a serde_json::Value cause the incoming status value from the OTP career is of type serde_json::Value since we're using the #[serde(flatten)] proc macro attribute which can be used for capturing remaining fields into a map with unknown key and values
                                 
 
-                                if sms_response.r#return.status == 200{ //-- means the code has been sent to telecommunications
+                                
+                                
+                                
+                                if status_response == &serde_value{ //-- if incoming status from the OTP career was 200 means the code has been sent to telecommunications - comapring the 200 of type u8 status with the incoming status from the OTP career, status_response is of type &Value thus in order to have compatible if condition we must take a reference to the serde_value
                                             
 
 
@@ -221,7 +231,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                 } else{
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
                                         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                        message: &sms_response.r#return.message, //-- converting String to &str by taking a reference to the String location inside the heap cause String will be coerced into &str at compile time
+                                        message: &message_response, //-- converting String to &str by taking a reference to the String location inside the heap cause String will be coerced into &str at compile time
                                         status: 406,
                                     };
                                     let response_body_json = serde_json::to_string(&response_body).unwrap();
