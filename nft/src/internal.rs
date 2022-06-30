@@ -139,7 +139,7 @@ impl NFTContract{ //-- we've defined the following methods of the `Contract` str
         let authorized_id = if approval_id.is_some(){ //-- if the approval_id was provided, we set the authorized_id equal to the sender_id since the one who is transferring the NFT (sender_id) must be an approved account if he/she wasn't the owner of the NFT means if we have an approved account_id we can consider that the sender_id is an approved account_id thus we can set the authorized_id to the current sender_id  
             Some(auth_sender_id) 
         } else{
-            None //-- the authorized_id must be None since we have no approved account which means that sender is the owner of the token or NFT  
+            None //-- the authorized_id must be None since we have no approved account which means that sender is the owner of the transferred token since no approval_id is passed  
         };
         let nft_mint_log = EventLog{ //-- emitting the transferring event
             standard: NFT_STANDARD_NAME.to_string(), //-- the current standard

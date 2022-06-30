@@ -66,7 +66,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
 
                         
                         // --------------------------------------------------------------------
-                        //          GENERATING RANDOM CODE TO SEND IT TO THE RECEPTOR
+                        //         GENERATING RANDOM CODE TO SEND IT TO THE RECEPTOR
                         // --------------------------------------------------------------------
                         let code: String = (0..4).map(|_|{
                             let idx = gen_random_idx(random::<u8>() as usize); //-- idx is one byte cause it's of type u8
@@ -75,163 +75,200 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                         let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
                         let client = Client::new();
                         let mut sms_response_streamer = client.get(uri).await.unwrap();
-
-                        
-                        
-                        
-                        
-
-
-
-                        // --------------------------------------------------------------------
-                        //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
-                        // --------------------------------------------------------------------
-                        let mut buffer = [0u8; IO_BUFFER_SIZE];
-                        let mut stream = BufWriter::new(buffer.as_mut()); //-- creating a new mutable buffer writer from the defined buffer mutably for streaming over sms response
-                        while let Some(next) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
-                            let chunk = next?;
-                            write!(stream, "{:#?}", chunk).unwrap(); //-- collecting each incoming chunks to write them into the defined stream buffer to deserialize from utf8 bytes into the SMSResponse struct to send back as json to user
-                        }
-                        
-                        
-                        info!(">>>>>>>>> {:#?}", stream);
+                        if sms_response_streamer.status() == 200{ /////// the status of the OTP career is 200 means the code has been sent successfully to the receiver
+                            
 
 
 
 
 
-                        // --------------------------------------------------------------------
-                        //       DESERIALIZING FROM ut8 BYTES INTO THE SMSResponse STRUCT
-                        // --------------------------------------------------------------------
-                        match serde_json::from_slice::<schemas::auth::SMSResponse>(stream.buffer()){ //-- we can also use from_reader() method which is slower than from_slice() method and deserialize the bytes of json text directly into the SMSResponse struct - the generic type of from_slice() method is SMSResponse struct - mapping (deserializing) the bytes of json text into the SMSResponse struct
-                            Ok(sms_response) => {
-                                
+
+                            // --------------------------------------------------------------------
+                            //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
+                            // --------------------------------------------------------------------
+                            let mut buffer = [0u8; IO_BUFFER_SIZE];
+                            let mut stream = BufWriter::new(buffer.as_mut()); //-- creating a new mutable buffer writer from the defined buffer mutably for streaming over sms response
+                            while let Some(next) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
+                                let chunk = next?;
+                                write!(stream, "{:#?}", chunk).unwrap(); //-- collecting each incoming chunks to write them into the defined stream buffer to deserialize from utf8 bytes into the either SMSResponse or OTPCareerResponse struct to send back as json to user
+                            }
 
 
-                                // --------------------------------------------------------------------
-                                //                   SERIALIZING USING serde & borsh
-                                // --------------------------------------------------------------------
-                                let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
-                                let mut sms_response_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&sms_response).unwrap(); //-- converting the sms_response object into vector of utf8 bytes using serde
-                                // let mut sms_response_serialized_into_vec_bytes_using_borsh = sms_response.try_to_vec().unwrap(); //-- converting the sms_response object into vector of utf8 bytes using borsh
-                                let deserialize_to_utf8_using_serde_from_slice = serde_json::from_slice::<schemas::auth::SMSResponse>(&sms_response_serialized_into_vec_bytes_using_serede).unwrap(); //-- passing the vector of utf8 bytes into the from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> into the from_slice() method 
-                                // let deserialize_to_utf8_using_borsh_from_slice = schemas::auth::SMSResponse::try_from_slice(&sms_response_serialized_into_vec_bytes_using_borsh).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method
-                                // --------------------------------------------------------------------
-                                //                      CONVERTING Vec<u8> -> &[u8]
-                                // --------------------------------------------------------------------
-                                let mut utf8_bytes_using_as_mut_slice = sms_response_serialized_into_vec_bytes_using_serede.as_mut_slice(); //-- converting Vec<u8> to mutable slice of &[u8] using as_mut_slice() method - remeber that sms_response_serialized_into_vec_bytes_using_serede must be defined as mutable
-                                let utf8_bytes_using_casting: &[u8] = &sms_response_serialized_into_vec_bytes_using_serede; //-- since the Vec<u8> will be coerced to &'a [u8] with a valid lifetime at compile time we can borrow the ownership of sms_response_serialized_into_vec_bytes_using_serede using & which by doing this we're borrowing a slice of Ve<u8> from the heap memory which will be coerced to &'a [u8] since we've specified the type of sms_response_serialized_into_utf8_bytes_using_serede which is &[u8]
-                                let boxed_utf8_bytes_using_box_slcie = sms_response_serialized_into_vec_bytes_using_serede.into_boxed_slice(); //-- converting the Vec<u8> to Box<u8> using into_boxed_slice() method 
-                                let utf_bytes_dereference_from_box = &*boxed_utf8_bytes_using_box_slcie; //-- borrow the ownership of the dereferenced boxed_utf8_bytes_using_box_slcie using & to convert it to &[u8] with a valid lifetime since the dereferenced boxed_utf8_bytes_using_box_slcie has unknown size at compile time thus working with u8 slice needs to borrow them from the heap memory to have their location address due to implemented ?Sized for [u8]
+                            /////// stream is empty ???????
+                            ///////////////
 
 
 
 
-
-                                let message_response = sms_response.extra.get("message").unwrap().to_string(); //-- converting the message value into string as a response message to send through the response object - getting the message value from the extra field of SMSResponse struct which is flattened to capture all the incoming fields from the OTP career into a map with arbitrary string keys and values of type serde_json::Value since we don't know the type of each value or how many keys are in the OTP career response 
-                                let status_response = sms_response.extra.get("status").unwrap(); //-- getting the status value from from the extra field of SMSResponse struct which is flattened to capture all the incoming fields from the OTP career into a map with arbitrary string keys and values of type serde_json::Value since we don't know the type of each value or how many keys are in the OTP career response
-                                let serde_value = serde_json::to_value(200 as u8).unwrap(); //-- converting the 200 as u8 to a serde_json::Value cause the incoming status value from the OTP career is of type serde_json::Value since we're using the #[serde(flatten)] proc macro attribute which can be used for capturing remaining fields into a map with unknown key and values
-                                
-
-                                
-                                
-                                
-                                if status_response == &serde_value{ //-- if incoming status from the OTP career was 200 means the code has been sent to telecommunications - comapring the 200 of type u8 status with the incoming status from the OTP career, status_response is of type &Value thus in order to have compatible if condition we must take a reference to the serde_value
-                                            
-
+                            // --------------------------------------------------------------------
+                            //                              CODEC OPS
+                            // --------------------------------------------------------------------
+                            match serde_json::from_slice::<schemas::auth::SMSResponse>(stream.buffer()){ //-- we can also use from_reader() method which is slower than from_slice() method and deserialize the bytes of json text directly into the SMSResponse struct - the generic type of from_slice() method is SMSResponse struct - mapping (deserializing) the bytes of json text into the SMSResponse struct
+                                Ok(sms_response) => {
+                                    
 
                                     // --------------------------------------------------------------------
-                                    //          GENERATING TWO MINS LATER EXPIRATION TIME FROM NOW
+                                    //                   SERIALIZING USING serde & borsh
                                     // --------------------------------------------------------------------
-                                    let now = Local::now();
-                                    let two_mins_later = (now + Duration::seconds(120)).naive_local().timestamp(); //-- generating a timestamp from now till the two mins later
+                                    let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
+                                    let mut sms_response_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&sms_response).unwrap(); //-- converting the sms_response object into vector of utf8 bytes using serde
+                                    let mut sms_response_serialized_into_vec_bytes_using_borsh = sms_response.try_to_vec().unwrap(); //-- converting the sms_response object into vector of utf8 bytes using borsh
+                                    let deserialize_to_utf8_using_serde_from_slice = serde_json::from_slice::<schemas::auth::SMSResponse>(&sms_response_serialized_into_vec_bytes_using_serede).unwrap(); //-- passing the vector of utf8 bytes into the from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> into the from_slice() method 
+                                    let deserialize_to_utf8_using_borsh_from_slice = schemas::auth::SMSResponse::try_from_slice(&sms_response_serialized_into_vec_bytes_using_borsh).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method
+                                    // --------------------------------------------------------------------
+                                    //                      CONVERTING Vec<u8> -> &[u8]
+                                    // --------------------------------------------------------------------
+                                    let mut utf8_bytes_using_as_mut_slice = sms_response_serialized_into_vec_bytes_using_serede.as_mut_slice(); //-- converting Vec<u8> to mutable slice of &[u8] using as_mut_slice() method - remeber that sms_response_serialized_into_vec_bytes_using_serede must be defined as mutable
+                                    let utf8_bytes_using_casting: &[u8] = &sms_response_serialized_into_vec_bytes_using_serede; //-- since the Vec<u8> will be coerced to &'a [u8] with a valid lifetime at compile time we can borrow the ownership of sms_response_serialized_into_vec_bytes_using_serede using & which by doing this we're borrowing a slice of Ve<u8> from the heap memory which will be coerced to &'a [u8] since we've specified the type of sms_response_serialized_into_utf8_bytes_using_serede which is &[u8]
+                                    let boxed_utf8_bytes_using_box_slcie = sms_response_serialized_into_vec_bytes_using_serede.into_boxed_slice(); //-- converting the Vec<u8> to Box<u8> using into_boxed_slice() method 
+                                    let utf_bytes_dereference_from_box = &*boxed_utf8_bytes_using_box_slcie; //-- borrow the ownership of the dereferenced boxed_utf8_bytes_using_box_slcie using & to convert it to &[u8] with a valid lifetime since the dereferenced boxed_utf8_bytes_using_box_slcie has unknown size at compile time thus working with u8 slice needs to borrow them from the heap memory to have their location address due to implemented ?Sized for [u8]
 
+
+                                },
+                                Err(e) => {
+
+
+                                    // handling any error here
+                                    // ...
+
+                                },
+                            }
+
+
+
+
+
+
+
+                            // --------------------------------------------------------------------
+                            //    DESERIALIZING FROM ut8 BYTES INTO THE OTPCareerResponse STRUCT
+                            // --------------------------------------------------------------------
+                            match serde_json::from_slice::<schemas::auth::OTPCareerResponse>(stream.buffer()){ //-- we can also use from_reader() method which is slower than from_slice() method and deserialize the bytes of json text directly into the OTPCareerResponse struct - the generic type of from_slice() method is OTPCareerResponse struct - mapping (deserializing) the bytes of json text into the OTPCareerResponse struct
+                                Ok(sms_response) => {
                                     
 
 
-                                    ////////////////////////////////// DB Ops
+                                    let message_response = sms_response.extra.get("message").unwrap().to_string(); //-- converting the message value into string as a response message to send through the response object - getting the message value from the extra field of OTPCareerResponse struct which is flattened to capture all the incoming fields from the OTP career into a map with arbitrary string keys and values of type serde_json::Value since we don't know the type of each value or how many keys are in the OTP career response 
+                                    let status_response = sms_response.extra.get("status").unwrap(); //-- getting the status value from from the extra field of OTPCareerResponse struct which is flattened to capture all the incoming fields from the OTP career into a map with arbitrary string keys and values of type serde_json::Value since we don't know the type of each value or how many keys are in the OTP career response
+                                    let serde_value = serde_json::to_value(200 as u8).unwrap(); //-- converting the 200 as u8 to a serde_json::Value cause the incoming status value from the OTP career is of type serde_json::Value since we're using the #[serde(flatten)] proc macro attribute which can be used for capturing remaining fields into a map with unknown key and values
                                     
-                                    let updated_at = Some(now.timestamp());
-                                    let serialized_updated_at = bson::to_bson(&updated_at).unwrap(); //-- we have to serialize the updated_at to BSON Document object in order to update the mentioned field inside the collection
-                                    let otp_info = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info"); //-- using OTPInfo struct to find and update an otp info inside the otp_info collection
-                                    match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, None).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
-                                        Some(otp_info) => { //-- once we get here means that the user is already exists in the collection and we have to save the generated new otp code along with a new expiration time for him/her
+
+                                    
+                                    
+                                    
+                                    if status_response == &serde_value{ //-- if incoming status from the OTP career was 200 means the code has been sent to telecommunications - comapring the 200 of type u8 status with the incoming status from the OTP career, status_response is of type &Value thus in order to have compatible if condition we must take a reference to the serde_value
+                                                
+
+
+                                        // --------------------------------------------------------------------
+                                        //          GENERATING TWO MINS LATER EXPIRATION TIME FROM NOW
+                                        // --------------------------------------------------------------------
+                                        let now = Local::now();
+                                        let two_mins_later = (now + Duration::seconds(120)).naive_local().timestamp(); //-- generating a timestamp from now till the two mins later
+
+                                        
+
+
+                                        ////////////////////////////////// DB Ops
+                                        
+                                        let updated_at = Some(now.timestamp());
+                                        let serialized_updated_at = bson::to_bson(&updated_at).unwrap(); //-- we have to serialize the updated_at to BSON Document object in order to update the mentioned field inside the collection
+                                        let otp_info = db.unwrap().database("ayoub").collection::<schemas::auth::OTPInfo>("otp_info"); //-- using OTPInfo struct to find and update an otp info inside the otp_info collection
+                                        match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, None).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
+                                            Some(otp_info) => { //-- once we get here means that the user is already exists in the collection and we have to save the generated new otp code along with a new expiration time for him/her
 
 
 
-                                            // Do what so ever with otp_info object :) 
-                                            // ---
-                                            // ...
+                                                // Do what so ever with otp_info object :) 
+                                                // ---
+                                                // ...
 
-                                            
+                                                
 
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                message: OTP_CODE_HAS_BEEN_SENT,
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap();
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK) //-- not found route or method not allowed
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                    .unwrap()
-                                            )
-                                        },
-                                        None => { //-- once we get here means that the user is trying to login for the first time in our app and we have to save a new otp info into our otp_info collection
-                                            let otp_info = db.unwrap().database("ayoub").collection::<schemas::auth::SaveOTPInfo>("otp_info"); //-- using SaveOTPInfo struct to insert new otp info into the otp_info collection
-                                            let now = Local::now();
-                                            let new_otp_info = schemas::auth::SaveOTPInfo{
-                                                exp_time: two_mins_later,
-                                                code, //-- no need to clone the code cause we won't use it inside other scope and this is the final place when we use it
-                                                phone, //-- no need to clone the phone cause we won't use it inside other scope and this is the final place when we use it
-                                                created_at: Some(now.timestamp()),
-                                                updated_at: Some(now.timestamp()),
-                                            };
-                                            match otp_info.insert_one(new_otp_info, None).await{
-                                                Ok(insert_result) => {
-                                                    let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
-                                                        data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                        message: INSERTED,
-                                                        status: 201,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap();
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::CREATED)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                            .unwrap() 
-                                                    )
-                                                },
-                                                Err(e) => {
-                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                                        status: 406,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap();
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::NOT_ACCEPTABLE)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                            .unwrap() 
-                                                    )
-                                                },
-                                            }
-                                        },
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                    message: OTP_CODE_HAS_BEEN_SENT,
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK) //-- not found route or method not allowed
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                        .unwrap()
+                                                )
+                                            },
+                                            None => { //-- once we get here means that the user is trying to login for the first time in our app and we have to save a new otp info into our otp_info collection
+                                                let otp_info = db.unwrap().database("ayoub").collection::<schemas::auth::SaveOTPInfo>("otp_info"); //-- using SaveOTPInfo struct to insert new otp info into the otp_info collection
+                                                let now = Local::now();
+                                                let new_otp_info = schemas::auth::SaveOTPInfo{
+                                                    exp_time: two_mins_later,
+                                                    code, //-- no need to clone the code cause we won't use it inside other scope and this is the final place when we use it
+                                                    phone, //-- no need to clone the phone cause we won't use it inside other scope and this is the final place when we use it
+                                                    created_at: Some(now.timestamp()),
+                                                    updated_at: Some(now.timestamp()),
+                                                };
+                                                match otp_info.insert_one(new_otp_info, None).await{
+                                                    Ok(insert_result) => {
+                                                        let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                                            data: Some(insert_result.inserted_id.as_object_id().unwrap()),
+                                                            message: INSERTED,
+                                                            status: 201,
+                                                        };
+                                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                        Ok(
+                                                            res
+                                                                .status(StatusCode::CREATED)
+                                                                .header(header::CONTENT_TYPE, "application/json")
+                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                .unwrap() 
+                                                        )
+                                                    },
+                                                    Err(e) => {
+                                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                            status: 406,
+                                                        };
+                                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                        Ok(
+                                                            res
+                                                                .status(StatusCode::NOT_ACCEPTABLE)
+                                                                .header(header::CONTENT_TYPE, "application/json")
+                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                .unwrap() 
+                                                        )
+                                                    },
+                                                }
+                                            },
+                                        }
+                                        
+                                        ////////////////////////////////// 
+
+                                        
+
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: &message_response, //-- converting String to &str by taking a reference to the String location inside the heap cause String will be coerced into &str at compile time
+                                            status: 406,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        Ok(
+                                            res
+                                                .status(StatusCode::NOT_ACCEPTABLE)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
                                     }
-                                    
-                                    ////////////////////////////////// 
 
-                                    
-
-                                } else{
+                                },
+                                Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
                                         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                        message: &message_response, //-- converting String to &str by taking a reference to the String location inside the heap cause String will be coerced into &str at compile time
+                                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                         status: 406,
                                     };
                                     let response_body_json = serde_json::to_string(&response_body).unwrap();
@@ -242,24 +279,22 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                             .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                             .unwrap() 
                                     )
-                                }
-
-                            },
-                            Err(e) => {
-                                let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                    status: 406,
-                                };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
-                                Ok(
-                                    res
-                                        .status(StatusCode::NOT_ACCEPTABLE)
-                                        .header(header::CONTENT_TYPE, "application/json")
-                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                        .unwrap() 
-                                )
-                            },
+                                },
+                            }
+                        } else{ /////// the status of the OTP career is not 200 means the code didn't send successfully to the receiver
+                            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                message: &"OTP didn't send from the career".to_string(), //-- message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                status: 503,
+                            };
+                            let response_body_json = serde_json::to_string(&response_body).unwrap();
+                            Ok(
+                                res
+                                    .status(StatusCode::SERVICE_UNAVAILABLE)
+                                    .header(header::CONTENT_TYPE, "application/json")
+                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                    .unwrap() 
+                            )   
                         }
                     },
                     Err(e) => {

@@ -185,10 +185,10 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
         let sender_id = env::predecessor_account_id(); //-- getting the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method
         let transferred_token = self.internal_transfer(&sender_id, &receiver_id, &token_id, approval_id, memo.clone()); //-- transferring the NFT from the sender_id's contract actor to the receiver_id's contract actor and return the transferred token info object
         let auth_sender_id = sender_id.clone(); //-- cloning the sender_id to prevent from moving since we can't dereference a shared reference that doesn't implement the Copy trait
-        let authorized_id = if sender_id != transferred_token.owner_id{ //-- if the sender_id wasn't the owner of the transferred_token, we set the authorized_id equal to the sender_id since .......
+        let authorized_id = if sender_id != transferred_token.owner_id{ //-- if the sender_id or the caller (like a marketplace account_id) wasn't the owner of the transferred_token, we set the authorized_id equal to the sender_id since the sender or the caller like the marketplace account_id (since this method can be called from the marketplace contract actor account using cross contract call) can't be still the owner of the transferred token thus the current sender is an approved account_id
             Some(auth_sender_id) 
         } else{
-            None
+            None //-- the authorized_id must be None since we have no approved account which means that sender is the owner of the transferred token (like the sender is the caller which is the marketplace which made a cross contract call which is not the real owner of the transferred token cause it has to be the approved account) thus can't be an approved account
         };
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for nft on transfer

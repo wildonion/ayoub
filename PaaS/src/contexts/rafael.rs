@@ -71,7 +71,7 @@ pub mod env{
             f.write_fmt( //-- writing some formatted information using format_args!() macro into the formatter instance which is `f`
                 format_args!( //-- format_args!(), unlike its derived macros, avoids heap allocations
                     "EVENT_JSON:{}", //-- it'll start with EVENT_JSON:{}
-                    &serde_json::to_string(self).map_err(|_| fmt::Error).unwrap() //-- formatting every field of the self which is the instance of the EventLog struct into the string to writ into the `f` and catch the error of each message or field if there was any when we're creating the stream by formatting the struct
+                    &serde_json::to_string(self).map_err(|_| fmt::Error).unwrap() //-- formatting every field of the self which is the instance of the EventLog struct into the string to writ into the `f` and catch the fmt::error of each message or field if there was any when we're creating the stream by formatting the struct
                 ) 
             ) // NOTE - we can print the string instance of the EventLog like so: println!("{:?}", event_log_instance.to_string()); since the Display trait is implemented for EventLog struct
         }

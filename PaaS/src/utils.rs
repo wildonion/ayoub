@@ -280,6 +280,28 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
 
 
     fn new() -> Self{
+        ///////////////////////////////////////////// ENUM MATCH TEST
+        enum Chie{
+            Avali(u8),
+            Dovomi(String),
+        }
+        
+        
+        let ine = Chie::Avali(12);
+        
+        match ine{
+            Chie::Avali(value) if value == 23 => {
+                println!("u8 eeee");
+        
+            },
+            Chie::Dovomi(value) if value == "wildonion".to_string() => {
+                println!("stringeeee");
+            },
+            _ => {
+                println!("none of them");
+            }
+        }
+        /////////////////////////////////////////////
         Pack{}
     }
   
@@ -287,7 +309,7 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
         let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which will be owned by the function thus we can't return a reference to it or as a borrowed type
         // &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
         let instance = &Pack{}; //-- since 
-        instance //-- it's ok to return a reference to `instance` since  
+        instance //-- it's ok to return the `instance` since  
     }
     
     // NOTE - argument can also be &mut u8
@@ -311,3 +333,5 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
 
 
 }
+
+
