@@ -40,6 +40,7 @@ pub const DEV_ACCESS: u8 = 0;
 pub const ADMIN_ACCESS: u8 = 1; // God access
 pub const USER_ACCESS: u8 = 2;
 pub const IO_BUFFER_SIZE: usize = 1024;
+pub const SMS_RESPONSE_IO_BUFFER_SIZE: usize = 286;
 pub const CHARSET: &[u8] = b"0123456789";
 pub const DEFAULT_STATUS: u8 = 0;
 pub const KICK_STATUS: u8 = 1;

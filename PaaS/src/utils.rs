@@ -287,14 +287,14 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
         }
         
         
-        let ine = Chie::Avali(12);
+        let ine = Chie::Avali(12); //-- the Dovomi variant is never constructed cause we've used the first variant  
         
         match ine{
-            Chie::Avali(value) if value == 23 => {
+            Chie::Avali(value) if value == 23 => { //-- matching on the Avali arm if the value was only 23
                 println!("u8 eeee");
         
             },
-            Chie::Dovomi(value) if value == "wildonion".to_string() => {
+            Chie::Dovomi(value) if value == "wildonion".to_string() => { //-- matching on the Dovomi arm if the value was only "wildonion" string
                 println!("stringeeee");
             },
             _ => {

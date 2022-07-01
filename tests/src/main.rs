@@ -151,7 +151,7 @@ fn main() {
 
 
 
-
+    #[derive(Serialize, Deserialize)]
     enum Chie{
         Avali(u8),
         Dovomi(String),
@@ -172,11 +172,6 @@ fn main() {
             println!("none of them");
         }
     }
-
-
-
-
-
 
 
 
