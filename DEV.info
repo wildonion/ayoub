@@ -128,8 +128,3 @@ TODO - an event streaming platform like VoD protocol like arvancloud based for s
         - convert uploaded videos to hls for multi bitrate conversion
         - create an endpoint api to point where the hls is
         - call the api to load in html5 video tag
-
-
-
-
-
