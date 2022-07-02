@@ -14,7 +14,7 @@ use std::fmt;
 
 
 
-#[derive(Serialize, Deserialize, BorshSerialize)]
+#[derive(Serialize, Deserialize, BorshSerialize, Debug)]
 pub enum Storagekey{
     TokensPerOwner, 
     TokenPerOwnerInner{account_id_hash: [u8; 2]},
@@ -38,6 +38,14 @@ fn main() {
 
 
 
+
+    let encoded = serde_json::to_vec(&Storagekey::TokensPerOwner);
+    let decoded = serde_json::from_slice::<Storagekey>(&encoded.as_ref().unwrap());
+
+
+
+
+
     let message = Arc::new(
                                                 Mutex::new(
                                                         Storagekey::TokenPerOwnerInner{ 
@@ -46,23 +54,13 @@ fn main() {
                                                     )
                                                 );
 
-    let mut first: HashMap<u8, String> = HashMap::new();
-    let mut second: HashMap<u8, String> = HashMap::new();
 
 
-    first.insert(1, "wildonion".to_string());
-    second.insert(1, "wildonion".to_string());
-
-
-    // println!(">>>>>>>>>>>>> storage key for the TokensPerOwner {:#?}", Storagekey::TokensPerOwner.try_to_vec().unwrap()); ////// 0
+    println!(">>>>>>>>>>>>> storage key for the TokensPerOwner {:#?} using serde", encoded.unwrap());
+    println!(">>>>>>>>>>>>> storage key for the TokensPerOwner {:#?} using serde", decoded.unwrap());
+    println!(">>>>>>>>>>>>> storage key for the TokensPerOwner {:#?}", Storagekey::TokensPerOwner.try_to_vec().unwrap()); ////// 0
     // println!(">>>>>>>>>>>>> storage key for the TokensById {:#?}", Storagekey::TokensById.try_to_vec().unwrap()); ////// 2
     // println!(">>>>>>>>>>>>> storage key for the TokenMetadataById {:#?}", Storagekey::TokenMetadataById.try_to_vec().unwrap()); ////// 3
-
-
-
-    // println!("{:#?}", first);
-    // println!("{:#?}", second);
-
 
 
 

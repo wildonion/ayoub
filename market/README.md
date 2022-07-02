@@ -30,19 +30,11 @@ $ sudo chmod +x deploy.sh && ./deploy.sh
 $ sudo chmod +x test.sh && ./test.sh
 ```
 
-# Contract Methods
-
-## View Methods
-
-## Payable Methods
-
-## Private Methods
-
 # 📌 TODOs
 
 * Market Royalty per Collection Minting 
 
-* Minting a Collection Contains Many NFTs in a single Transaction Gas Fee using `batch` functions 
+* Minting a Collection Contains Many NFTs in a single Transaction Gas Fee inside `nft_mint()` Method 
 
 * Multiple NFT AirDrop Feature in a single Transaction Gas Fee using `batch` functions
 

@@ -74,8 +74,8 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                         }).collect();
                         let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
                         let client = Client::new();
-                        let mut sms_response_streamer = client.get(uri).await.unwrap();
-                        if sms_response_streamer.status() == 200{ /////// the status of the OTP career is 200 means the code has been sent successfully to the receiver
+                        let mut sms_response_stream = client.get(uri).await.unwrap();
+                        if sms_response_stream.status() == 200{ /////// the status of the OTP career is 200 means the code has been sent successfully to the receiver
                             
 
 
@@ -88,7 +88,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                             //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
                             // --------------------------------------------------------------------
                             let mut buffer = [0u8; SMS_RESPONSE_IO_BUFFER_SIZE]; //-- creating an empty buffer of u8 bytes with the size of the sms response which 286
-                            while let Some(next) = sms_response_streamer.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
+                            while let Some(next) = sms_response_stream.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
                                 let chunk = next?; //-- unwrapping the incoming bytes from the hyper response body inside this iteration  
                                 let bytes_as_utf8 = chunk.as_ref(); //-- getting a &[u8] which is in fact a slice of the Bytes by converting or coercing the chunk of type Bytes to &[u8] using as_ref()
                                 buffer.copy_from_slice(bytes_as_utf8);
@@ -115,7 +115,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                                         //                   SERIALIZING USING serde & borsh
                                         // --------------------------------------------------------------------
                                         let sms_response_serialized_into_bytes: &[u8] = unsafe { slice::from_raw_parts(&sms_response as *const schemas::auth::SMSResponse as *const u8, mem::size_of::<schemas::auth::SMSResponse>()) }; //-- to pass the struct through the socket we have to serialize it into an array of utf8 bytes - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
-                                        let mut sms_response_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&sms_response).unwrap(); //-- converting the sms_response object into vector of utf8 bytes using serde
+                                        let mut sms_response_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&sms_response).unwrap(); //-- converting the sms_response object into a JSON utf8 byte vector using serde
                                         let mut sms_response_serialized_into_vec_bytes_using_borsh = sms_response.try_to_vec().unwrap(); //-- converting the sms_response object into vector of utf8 bytes using borsh
                                         let deserialize_to_utf8_using_serde_from_slice = serde_json::from_slice::<schemas::auth::SMSResponse>(&sms_response_serialized_into_vec_bytes_using_serede).unwrap(); //-- passing the vector of utf8 bytes into the from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> into the from_slice() method 
                                         let deserialize_to_utf8_using_borsh_from_slice = schemas::auth::SMSResponse::try_from_slice(&sms_response_serialized_into_vec_bytes_using_borsh).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method

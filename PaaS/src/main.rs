@@ -31,8 +31,9 @@ Coded by
 
 
 
-
+    [?] if the type was dropped from the memory then any reference to it is invalid due to the fact that the pointer might be a dangling pointer
     [?] due to avoiding use of dangling pointer in rust in order to return pointer in function body we could:
+        0) if we do not allocate memory on the stack inside the function body we can return references to the result which already lives in memory
         1) return by value like returning T instead of &T
         2) return by reference with a defined lifetime for the return type to extend its lifetime outside of the function cause we can not return a reference pointing to a local variable inside the function
         3) return by reference using the same lifetime of one of the passed in arguments which is a (mutable) reference (&T or &mut T and T can be any type) to the argument to copy the value that we want to create into the caller's memory space
