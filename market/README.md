@@ -40,6 +40,8 @@ $ sudo chmod +x test.sh && ./test.sh
 
 # 📌 TODOs
 
+* Market Royalty per Collection Minting 
+
 * Minting a Collection Contains Many NFTs in a single Transaction Gas Fee using `batch` functions 
 
 * Multiple NFT AirDrop Feature in a single Transaction Gas Fee using `batch` functions
