@@ -9,6 +9,8 @@ use log::info;
 use rand::prelude::*;
 use crate::constants::*;
 use crate::contexts::scheduler::ThreadPool;
+use serde::{Serialize, Deserialize};
+use borsh::{BorshDeserialize, BorshSerialize};
 
 
 
@@ -280,10 +282,23 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
 
 
     fn new() -> Self{
+
+
+        let hello = "Здравствуйте";
+        let s = &hello[0..2];
+        // every index is the place of an element inside the ram which has 1 byte size which is taken by that element
+        // in our case the first element takes 2 bytes thus the index 0 won't return 3 
+        // cause place 0 and 1 inside the ram each takes 1 byte and the size of the
+        // first element is two bytes thus &hello[0..2] which is index 0 and 1 both returns 3 
+        // and we can't have string indices in rust due to this reason!
+
+
         ///////////////////////////////////////////// ENUM MATCH TEST
+        #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
         enum Chie{
             Avali(u8),
             Dovomi(String),
+            Sevomi,
         }
         
         
@@ -301,15 +316,23 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
                 println!("none of them");
             }
         }
+
+        // --------------- CODEC OPS ON ENUM ---------------
+        let encoded = serde_json::to_vec(&Chie::Sevomi); ////// it'll print a vector of utf8 encoded JSON
+        let decoded = serde_json::from_slice::<Chie>(&encoded.as_ref().unwrap()); //-- as_ref() returns a reference to the original type
+
+        let encoded_borsh = Chie::Sevomi.try_to_vec().unwrap(); ////// it'll print 2
+        let decoded_borsh = Chie::try_from_slice(&encoded_borsh).unwrap();
+
         /////////////////////////////////////////////
         Pack{}
     }
   
     fn run_pool(num_thread: &u8) -> &Pack{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
-        let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which will be owned by the function thus we can't return a reference to it or as a borrowed type
+        let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which is allocated on the stack and is owned by the function thus we can't return a reference to it or as a borrowed type
         // &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
-        let instance = &Pack{}; //-- since 
-        instance //-- it's ok to return the `instance` since  
+        let instance = &Pack{}; //-- since we're allocating nothing on the stack inside this function thus by creating the instance directly using the the Pack struct and without calling the new() method which is already lives in memory with long enough lifetime we can return a reference to the location of the instance of the pack from the function
+        instance //-- it's ok to return a reference to `instance` since the instance does not allocate anything on the stack thus taking a reference to already allocated memory with long enough lifetime is ok  
     }
     
     // NOTE - argument can also be &mut u8
@@ -333,5 +356,3 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
 
 
 }
-
-

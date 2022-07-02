@@ -77,7 +77,7 @@ pub mod internal;
 
 
 
-// NOTE - this contract has an owner_id field which is the who is the signer and the owner of deploying this contract also is the owner of all the NFTs that will be minted to sell on marketplace 
+// NOTE - this contract has an owner_id field which is the who is the signer and the owner of deploying this contract also is the owner of all the NFTs that will be minted on this contract actor account to sell on marketplace 
 // NOTE - since this contract will be deployed on every contract actor account_id who wants to mint his/her all NFTs on his account_id to sell them on the marketplace thus the marketplace needs to be an approved account_id for the owner to transfer or list his/her all NFTs on behalf of him/her in there 
 // NOTE - the marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account_id) like approval and transfer methods to sell the NFT on behalf of the owner
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible

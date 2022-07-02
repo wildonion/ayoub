@@ -27,11 +27,3 @@ $ sudo chmod +x deploy.sh && ./deploy.sh
 ```
 $ sudo chmod +x test.sh && ./test.sh
 ```
-
-# Contract Methods
-
-## View Methods
-
-## Payable Methods
-
-## Private Methods

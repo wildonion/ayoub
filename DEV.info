@@ -1,18 +1,18 @@
 
 
-
-
-
-
-
 https://learnnear.club/near-live-contract-review-part-1-voting-contracts/
 https://learnnear.club/near-live-contract-review-part-2-staking-pool-contract/
 https://learnnear.club/near-live-contract-review-part-3-whitelist-and-staking-pool-factory/#
 https://learnnear.club/near-live-contract-review-part-4-berry-farm/
 https://github.com/near/core-contracts
 https://github.com/near/near-sdk-rs
+https://github.com/near-daos/
 https://learn.figment.io/protocols/near
 https://www.near-sdk.io/contract-structure/collections
+https://near-docs.io/
+https://www.near-sdk.io/
+
+
 https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
 https://stackoverflow.com/questions/27831944/how-do-i-store-a-closure-in-a-struct-in-rust
 https://rust-hosted-langs.github.io/book/introduction.html
@@ -118,6 +118,7 @@ NOTE - we'll divide the sequential data into tasks using divide and conquer algo
 =============================================================================================================================================================
 TECH BUILDER BASED ON multi threading (job queue), Arc<Mutex<T>> message passing protocols like async mpsc channels and actix actors on top of tokio runtime
 =============================================================================================================================================================
+TODO - object storage like MinIO and S3
 TODO - paas cli like dockerizing, async file handling and ...
 TODO - download/upload manager like IDM/tus.io
 TODO - load balancer for coiniXerr for layer 1 and 2
