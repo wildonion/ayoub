@@ -27,6 +27,7 @@ mongodb = "2"
 rust-argon2 = "1"
 rand = "0.8"
 rayon = "1.5.3"
+lazy_static = "1.4.0"
 
 
 

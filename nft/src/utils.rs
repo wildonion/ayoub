@@ -185,6 +185,9 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
     /*
 
         ----------------------------------------------------------------------------------------------------------
+        [?] we can't receive floating numbers from the front-end due to the fact that different cpu architectures 
+            handle floating numbers differently thus we have to multiply the royalty percentage in front-ent by
+            a specific value and that value would be 10_000.
         [?] we gave 100 % a value of 10000 to keep track of all perpetual royalties in a u32 type 
         [?] amount_to_pay_for_nft is the amount that the buyer has paid for the NFT or the seller must get for his/her NFT.
             here calculate the total payout that the owner must get paid using the amount of the 
@@ -199,7 +202,7 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
 
     */
     
-    U128(royalty_percentage as u128 * amount_to_pay_for_nft / 10_000u128) //-- 10_000 is the value of the 100 % - converting the percentage to the actual amount as u128 that should be paid by multiplying the percentage by the result of dividing the given amount_to_pay_for_nft or balance by 10000 that should be paid
+    U128(royalty_percentage as u128 * amount_to_pay_for_nft / 10_000u128) //-- converting the percentage to the actual amount as u128 that should be paid by multiplying the percentage by the result of dividing the given amount_to_pay_for_nft or balance by 10_000 (10_000 is the value of the 100 % ) that should be paid
 }
 
 
