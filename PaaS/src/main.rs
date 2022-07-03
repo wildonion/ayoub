@@ -120,7 +120,6 @@ use log::{info, error};
 use tokio::sync::oneshot;
 use hyper::server::{Server, conn::AddrIncoming};
 use self::contexts as ctx; // use crate::contexts as ctx;
-use actix::prelude::*;
 use ctx::rafael::env::Serverless; // NOTE - based on orphan rule Serverless trait is required to use the run() method on the runtime instance
 use constants::MainResult;
 
