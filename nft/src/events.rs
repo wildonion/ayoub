@@ -65,9 +65,9 @@ use crate::*; // loading all defined crates, structs and functions from the root
 #[non_exhaustive] // NOTE - this attribute indicates that more variants/fields may be added to an enum/struct in the future and prevents downstream crates from exhaustively listing out all variants/fields
 pub enum EventLogVariant{ //-- event log enum which can be either NFT mint or NFT transfer log 
     NftMint(Vec<NftMintLog>), //-- vector of all minting NFT events
-    NftTransfer(Vec<NftTransferLog>), //-- vector of all transferring NFT events
-    NftMerch(Vec<NftMerchandiseLog>), //////////////////////////////////// TODO - emit an event log for NFT merchandise
-    CollectionEvent(Vec<CollectionEventLog>), //////////////////////////////////// TODO - emit an event log for defining collection based event on marketplace
+    NftTransfer(Vec<NftTransferLog>), //-- vector of all transferring NFT events; on firing nft_transfer() method which is useful for airdrops and giveaways
+    NftMerch(Vec<NftMerchandiseLog>), //////////////////////////////////// TODO - emit an event log for NFT merchandise - vector of all merchandised NFT events
+    NftSell(Vec<SellEventLog>), //////////////////////////////////// TODO - emit an event log on selling on marketplace - vector of all sold NFT events; on firing nft_transfer_payout() method
 }
 
 
@@ -132,9 +132,8 @@ pub struct NftMerchandiseLog{
 
 
 
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
-pub struct CollectionEventLog{
+pub struct SellEventLog{
 
 }

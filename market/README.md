@@ -29,19 +29,3 @@ $ sudo chmod +x deploy.sh && ./deploy.sh
 ```
 $ sudo chmod +x test.sh && ./test.sh
 ```
-
-# 📌 TODOs
-
-* Market Royalty per Collection Minting 
-
-* Minting a Collection Contains Many NFTs in a single Transaction Gas Fee inside `nft_mint()` Method 
-
-* Multiple NFT AirDrop Feature in a single Transaction Gas Fee using `batch` functions
-
-* Multiple Offer Feature for Biddings, Auctions and Buying NFTs like `gem.xyz` in a single Transaction Gas Fee using
-
-* Should We Call `nft_mint` Method on Update an NFT of a Collection?
-
-* Should We Pass the Royalty of the Minter When We're Calling `nft_mint` Method?
-
-* Should We Deploy the NFT Contract on Every Account that Wants to Mint NFT?

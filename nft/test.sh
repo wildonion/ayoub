@@ -2,7 +2,6 @@
 
 
 
-
 near login # NTOE - use this to login with your account id to set for caller id
 echo "[?] Your Account ID For Calling Contract Methods - Logged In Account >>>"
 read CALLER_ID

@@ -261,7 +261,7 @@ pub fn string_to_static_str(s: String) -> &'static str {
 
 
 
-pub struct Pack;
+pub struct Pack; //-- we've allocated some space inside the stack for this struct which is live long enough
 trait Interface{}
 
 impl Interface for Pack{} //-- is required for return_box_trait() function
@@ -332,7 +332,7 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
         let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which is allocated on the stack and is owned by the function thus we can't return a reference to it or as a borrowed type
         // &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
         let instance = &Pack{}; //-- since we're allocating nothing on the stack inside this function thus by creating the instance directly using the the Pack struct and without calling the new() method which is already lives in memory with long enough lifetime we can return a reference to the location of the instance of the pack from the function
-        instance //-- it's ok to return a reference to `instance` since the instance does not allocate anything on the stack thus taking a reference to already allocated memory with long enough lifetime is ok  
+        instance //-- it's ok to return a reference to `instance` since the instance does not allocate anything on the stack thus taking a reference to already allocated memory with long enough lifetime is ok since the allocated memory is happened in struct definition line
     }
     
     // NOTE - argument can also be &mut u8
