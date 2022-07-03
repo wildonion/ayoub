@@ -203,8 +203,10 @@ impl Actor for EventSvc{
 
     fn stopped(&mut self, ctx: &mut Self::Context) {
         println!("Actor is stopped");
-     }
- 
+    }
+     
+
+    // TODO - actor (threading, async msg, mpsc) borsh simd rpc based for cross serverless calls like schdeduling future objects for executing them inside other servers' functions
     // TODO - send borsh encoded async message between runtimes' server using actor mpsc channel and rpc for tenet idea
     // ...
 

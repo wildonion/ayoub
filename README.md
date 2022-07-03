@@ -30,7 +30,7 @@ Ayoub PaaS Framework
 
 Family Tree Smart Contracts (`escrow`, `event`, `market`, `nft`, `w2e` & `proposal`) on NEAR
 
-> Each Contract Usage and Setup Guice Is Insde Their `README.md` file. 
+> Each Contract Usage and Setup Guice Is Inside Its `README.md` file. 
 
 # 📌 TODOs
 

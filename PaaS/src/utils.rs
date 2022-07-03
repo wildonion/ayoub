@@ -219,6 +219,12 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 
+
+
+
+
+
+
 // -----------------------------------
 // handling a recursive async function
 // -----------------------------------
@@ -261,7 +267,7 @@ pub fn string_to_static_str(s: String) -> &'static str {
 
 
 
-pub struct Pack; //-- we've allocated some space inside the stack for this struct which is live long enough
+pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime
 trait Interface{}
 
 impl Interface for Pack{} //-- is required for return_box_trait() function
