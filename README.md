@@ -26,11 +26,13 @@ An Actor and Sharded Based Design Pattern Runtime and Engine for uniXerr Cryptoc
 
 Ayoub PaaS Framework
 
-# 🧧 BlueRangene 
+# 🧧 BlueRangene
 
 Family Tree Smart Contracts (`escrow`, `event`, `market`, `nft`, `w2e` & `proposal`) on NEAR
 
-> Each Contract Usage and Setup Guice Is Inside Its `README.md` file. 
+> Each Contract Usage and Setup Guice Is Inside Its `README.md` file.
+
+> [Telegram Channel](https://t.me/bluerangene)
 
 # 📌 TODOs
 

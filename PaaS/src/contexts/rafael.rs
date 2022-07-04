@@ -133,7 +133,7 @@ pub mod env{
 
 
 
-    impl<S> Runtime<S>{ // TODO - add wasm bindgen attribute and rayon (divide and conquer simd based design pattern using std::thread pool and mpsc) to compile this to wasm to call the wasm compiled methods using ayoub cli and inside js
+    impl<S> Runtime<S>{ // TODO - add wasm bindgen attribute and rayon (split data using divide and conquer simd based design pattern and std::thread pool and mpsc) to compile this to wasm to call the wasm compiled methods using ayoub cli and inside js
         
         // https://crates.io/crates/rayon
         // https://crates.io/crates/wasm-bindgen-rayon
