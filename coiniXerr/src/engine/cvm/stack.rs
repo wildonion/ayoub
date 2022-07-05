@@ -28,6 +28,11 @@ macro_rules! wowasm {
         // NOTE - #[..] applies an attribute to the thing after it (struct, struct fields or crate) and  #![..] applies an attribute to the containing thing or crate
         // ...
         pub struct $iden(pub $ty);
+        impl Default for $iden{
+            fn default() -> Self{
+                todo!()
+            }
+        }
         
     };
 }
