@@ -36,9 +36,9 @@ async fn transaction(req: HttpRequest, mut body_payload: web::Payload, transacti
     let must_be_signed = true;
     if must_be_signed{
         deserialized_transaction_serde.signed = Some(chrono::Local::now().naive_local().timestamp()); //-- signing the incoming transaction with server time
-        // ----------------------------------------------------------------------
-        //          SERIALIZING SIGNED TRANSACTION INTO THE UTF8 BYTES
-        // ----------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------------------
+        //          SERIALIZING SIGNED TRANSACTION INTO THE UTF8 BYTES USING from_raw_parts() METHOD
+        // ----------------------------------------------------------------------------------------------------
         // NOTE - encoding or serializing process is converting struct object into utf8 bytes
         // NOTE - decoding or deserializing process is converting utf8 bytes into the struct object
         let signed_transaction_serialized_into_bytes: &[u8] = unsafe { //-- encoding process of new transaction by building the &[u8] using raw parts of the struct - serializing a new transaction struct into &[u8] bytes
@@ -47,10 +47,14 @@ async fn transaction(req: HttpRequest, mut body_payload: web::Payload, transacti
             //-- here number of elements or the len for a struct is the size of the total struct which is mem::size_of::<Transaction>()
             slice::from_raw_parts(deserialized_transaction_serde as *const Transaction as *const u8, mem::size_of::<Transaction>())
         };
+        // ----------------------------------------------------------------------------------------------------
+        //         SERIALIZING SIGNED TRANSACTION INTO THE UTF8 BYTES USING serde_json::to_vec() METHOD
+        // ----------------------------------------------------------------------------------------------------
+        let signed_transaction_serialized_into_bytes_using_serde = serde_json::to_vec(deserialized_transaction_serde).unwrap(); //-- serializing the signed transaction into vector of utf8 bytes; Vec<u8> will be coerced to &[u8] at compile time
         // ---------------------------------------------------------------------------------------
         //        SENDING SIGNED TRANSACTION TO DOWN SIDE OF THE CHANNEL FOR MINING PROCESS
         // ---------------------------------------------------------------------------------------
-        let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&signed_transaction_serialized_into_bytes).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
+        let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&signed_transaction_serialized_into_bytes_using_serde).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
         let arc_mutex_transaction = Arc::new(Mutex::new(signed_transaction_deserialized_from_bytes)); //-- putting the signed_transaction_deserialized_from_bytes inside a Mutex to borrow it as mutable inside Arc by locking the current thread 
         let cloned_arc_mutex_transaction = Arc::clone(&arc_mutex_transaction); //-- cloning the arc_mutex_transaction to send it through the mpsc job queue channel 
         transaction_sender.send(cloned_arc_mutex_transaction).await.unwrap(); //-- sending signed transaction through the mpsc job queue channel asynchronously for mining process

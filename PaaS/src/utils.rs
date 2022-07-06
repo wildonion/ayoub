@@ -267,7 +267,7 @@ pub fn string_to_static_str(s: String) -> &'static str {
 
 
 
-pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime
+pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime to initiate an instance from it using struct declaration and return a reference to that instance inside any function 
 trait Interface{}
 
 impl Interface for Pack{} //-- is required for return_box_trait() function

@@ -54,6 +54,8 @@ pub mod messanger{
     
     pub struct ServerMember;
     pub struct ChannelMember;
+    pub struct Level;
+    pub struct Role;
         
 
 

@@ -60,3 +60,11 @@ pub mod external;
 pub mod sale_views;
 pub mod sale;
 pub mod nft_callbacks;
+
+
+
+
+#[near_bindgen]
+pub struct MarketContract{
+
+}
