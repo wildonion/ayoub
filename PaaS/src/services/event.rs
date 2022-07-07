@@ -25,7 +25,7 @@
     specific controller inside a single crate to implement the above idea!
 
     we can't borrow the api object cause it'll be a shared reference and can't dereference it 
-    a shared reference across other threads.
+    a shared reference across other threads and struct methods.
 
     shared reference can't dereference between threads and can't move out of it cause by moving or dereferencing it it'll lose its ownership and lifetime while some methods and 
     threads are using it; we can sovle this using as_ref() method wich converts a &wrapped type into &T or by cloning the type.

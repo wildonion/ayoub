@@ -64,7 +64,16 @@ pub mod nft_callbacks;
 
 
 
+
+
+
+
+
+
+
+
+
 #[near_bindgen]
 pub struct MarketContract{
-
+    
 }

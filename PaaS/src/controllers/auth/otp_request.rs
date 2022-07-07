@@ -90,7 +90,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                             let mut buffer = [0u8; SMS_RESPONSE_IO_BUFFER_SIZE]; //-- creating an empty buffer of u8 bytes with the size of the sms response which 286
                             while let Some(next) = sms_response_stream.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
                                 let chunk = next?; //-- unwrapping the incoming bytes from the hyper response body inside this iteration  
-                                let bytes_as_utf8 = chunk.as_ref(); //-- getting a &[u8] which is in fact a slice of the Bytes by converting or coercing the chunk of type Bytes to &[u8] using as_ref() method
+                                let bytes_as_utf8 = chunk.as_ref(); //-- getting &[u8] which is in fact a slice of the Bytes (since we're pointing to its location using &) by converting or coercing the chunk of type Bytes to &[u8] using as_ref() method
                                 buffer.copy_from_slice(bytes_as_utf8); //-- copying all elements inside the bytes_as_utf8 into the buffer, the length of the bytes_as_utf8 must be the same as buffer which in our case the length of the chunk is 286 bytes
                             }
 

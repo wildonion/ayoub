@@ -153,7 +153,7 @@ mod services;
 
 
 #[tokio::main] //-- adding tokio proc macro attribute to make the main async
-async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to a static lifetime to be valid across the main function
+async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //-- generic types can also be bounded to lifetimes ('static in this case) and traits inside the Box<dyn ... > - since the error that may be thrown has a dynamic size at runtime we've put all these traits inside the Box (a heap allocation pointer) and bound the error to Sync, Send and the static lifetime to be valid across the main function and sendable and implementable between threads
     
     
 
@@ -251,9 +251,13 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
             }
         )
     );
-    let db = if db_engine.as_str() == "mongodb"{
+    let db =
+    
+    
+    
+    if db_engine.as_str() == "mongodb"{
         info!("switching to mongodb - {}", chrono::Local::now().naive_local());
-        match ctx::app::Db::new().await{ //-- passing '_ as the lifetime of engine and url field which are string slices or pointers to a part of the String
+        match ctx::app::Db::new().await{
             Ok(mut init_db) => {
                 init_db.engine = Some(db_engine);
                 init_db.url = Some(db_addr);
@@ -276,7 +280,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
             },
             Err(e) => {
                 error!("init db error {} - {}", e, chrono::Local::now().naive_local());
-                empty_app_storage
+                empty_app_storage //-- whatever the error is we have to return and empty app storage instance 
             }
         }
     } else{
