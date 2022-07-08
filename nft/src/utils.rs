@@ -227,7 +227,8 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
          ===========================
         | Data Collision Explanation 
          ===========================
-        | we need a unique indentifire key for each object from near collections, if two near collections share the same key, they share the 
+        | when initializing a data structure make sure to give it a unique ID, otherwise, it could point to other structure's key-value references;
+        | so we need a unique indentifire key for each object from near collections, if two near collections share the same key, they share the 
         | same data irregardless of whether it'll work or fail if you share memory between two different objects, like Vector and LookupMap.
         | If we use the same storage key, it will lead to error, complaining that: you already have an entry with the <KEY_NAME> stored in the collection, 
         | and we are repeatingly storage another value to that key, and this is not possible, we also want them to be independent of each other; 

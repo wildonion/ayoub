@@ -80,12 +80,12 @@ pub mod internal;
 // NOTE - this contract has an `owner_id` field which is the who is the signer and the owner of deploying process of this contract, also is the owner of all the NFTs that will be minted on this contract actor account to sell them on the marketplace
 // NOTE - since this contract will be deployed on every contract actor account who wants to mint his/her all NFTs on his `account_id` to sell them on the marketplace thus the marketplace needs to be an approved `account_id` for the owner to transfer or list his/her all NFTs on behalf of him/her in there 
 // NOTE - the marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account_id) like approval and transfer methods to sell the NFT on behalf of the owner
+// NOTE - our `NFTContract` has all the minted nfts info inside of it with a mapping between their metadata and the owner
+// NOTE - `NFTContract` struct contains some data structures to store on chain infos about tokens and their owners at runtime
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible
 // NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
 // NOTE - we can't impl Default trait for the contract if the PanicOnDefault trait is implemented for that contract
-// NOTE - our `Contract` has all the minted nfts info inside of it with a mapping between their metadata and the owner
 // NOTE - near hashmap and set based data structures or collections are LookupMap, LookupSet, UnorderedMap, UnorderedSet and TreeSet; each of them will be cached on chain instead of deserializing all entries each time the state and the app runtime is loaded like HashMap  
-// NOTE - `Contract` struct contains some data structures to store on chain infos about tokens and their owners at runtime
 // NOTE - current_account_id()     -> the id of the account that owns the current contract actor account
 // NOTE - predecessor_account_id() -> the id of the account that was the previous contract actor account in the chain of cross-contract calls and if this is the first contract, it is equal to signer_account_id - the last (current) caller of a contract actor method which created and signed the transaction by calling that method
 // NOTE - signer_account_id()      -> the id of the account that either signed the original transaction or issued the initial cross-contract call that led to this execution 
@@ -115,7 +115,7 @@ pub mod internal;
 
 */
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `NFTContract` struct to compile all its methods to wasm so we can call them in near cli
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)] //-- borsh is need for serde and codec ops; deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain   
 pub struct NFTContract{ //-- can't implement Default trait for this contract cause Default is not implemented for LazyOption, LookupMap and UnorderedMap structs - our contract keeps track of some mapping between owner_id, token_id and the token_metadata inside some collections
     pub owner_id: AccountId, //-- contract owner who called the initialization method which can be anyone; this is the owner_id of the one which this contract must get deployed on to mint all his/her all NFTs on  
@@ -126,8 +126,8 @@ pub struct NFTContract{ //-- can't implement Default trait for this contract cau
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
-impl NFTContract{ //-- we'll add bytes to the contract by creating entries in the data structures - we've defined the init methods of the `Contract` struct in here cause the lib.rs is our main crate
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `NFTContract` struct to compile all its methods to wasm so we can call them in near cli
+impl NFTContract{ //-- we'll add bytes to the contract by creating entries in the data structures - we've defined the init methods of the `NFTContract` struct in here cause the lib.rs is our main crate
 
     #[init] //-- means the following would be a contract initialization method which must be called by the contract owner and verifies that the contract state doesn't exist on chain which can only be called once and will be paniced on second call
     pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self{ //-- initialization function can only be called once when we first deploy the contract to runtime shards - this initializes the contract with metadata that was passed in and the owner_id

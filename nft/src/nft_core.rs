@@ -136,8 +136,8 @@ pub trait NoneFungibleTokenCore{ //-- defining a trait for nft core queries, we'
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the `Contract` struct in order to have a compiled trait methods for this contract struct so we can call it from the near cli
-impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTokenMetadata trait for our main `Contract` struct (or any contract); bounding the mentioned trait to the `Contract` struct to query nft metadata infos
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the `NFTContract` struct in order to have a compiled trait methods for this contract struct so we can call it from the near cli
+impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTokenMetadata trait for our main `NFTContract` struct (or any contract); bounding the mentioned trait to the `NFTContract` struct to query nft metadata infos
 
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute  
     fn nft_transfer(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: Option<u64>, memo: Option<String>){ //-- we've defined the self to be mutable and borrowed cause we want to mutate some fields and have the isntance with a valid lifetime after calling this method on it
@@ -268,8 +268,8 @@ trait NoneFungibleTokenResolver{ //-- this trait which contains the cross conrac
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the `Contract` struct in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli
-impl NoneFungibleTokenResolver for NFTContract{ //-- implementing the NonFungibleTokenResolver trait for our main `Contract` struct (or any contract); extending the `Contract` struct interface to define the body of cross contract call promise methods which is the callback method for the current or the sender contract actor to fill the pending promise ActionReceipt object with the promise DataReceipt object coming from the receiver_id's contract actor
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the `NFTContract` struct in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli
+impl NoneFungibleTokenResolver for NFTContract{ //-- implementing the NonFungibleTokenResolver trait for our main `NFTContract` struct (or any contract); extending the `NFTContract` struct interface to define the body of cross contract call promise methods which is the callback method for the current or the sender contract actor to fill the pending promise ActionReceipt object with the promise DataReceipt object coming from the receiver_id's contract actor
 
     #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
     fn nft_resolve_transfer(&mut self, authorized_id: Option<AccountId>, owner_id: AccountId, receiver_id: AccountId, token_id: TokenId, approved_account_ids: HashMap<AccountId, u64>, memo: Option<String>) -> bool{ //-- returning a boolean to where it has called (the nft_transfer_call() method) based on the result of the nft_on_tranfer() cross contract call promise method - a callback which contains the result of the nft_on_transfer() promise

@@ -35,7 +35,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
-pub type TokenId = String;
+
 
 
 
@@ -103,8 +103,8 @@ pub trait NoneFungibleTokenMetadata{ //-- defining an object safe trait for NFT 
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the extended interface (NoneFungibleTokenMetadata trait) of `Contract` struct interface (in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli 
-impl NoneFungibleTokenMetadata for NFTContract{ //-- implementing the NoneFungibleTokenMetadata trait for our main `Contract` struct to extend its interface; bounding the mentioned trait to the `Contract` struct to query NFT metadata infos
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the extended interface (NoneFungibleTokenMetadata trait) of `NFTContract` struct interface (in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli 
+impl NoneFungibleTokenMetadata for NFTContract{ //-- implementing the NoneFungibleTokenMetadata trait for our main `NFTContract` struct to extend its interface; bounding the mentioned trait to the `NFTContract` struct to query NFT metadata infos
     fn nft_metadata(&self) -> NFTContractMetadata{ //-- overriding the nft_metadata() method of the NFTContractMetadata trait
         self.metadata.get().unwrap() //-- since metadata field is inside the LazyOption we must get the actual data itself using get() method which will return the type (NFTContractMetadata in our case) inside an Option
     }

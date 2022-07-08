@@ -94,8 +94,8 @@ pub trait NoneFungibleTokenCore{ //-- defining an object safe trait for NFT core
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
-impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTokenCore trait for our main `Contract` struct to extend its interface; bounding the mentioned trait to the `Contract` struct to query NFT core (nft_* methods standards) infos
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `NFTContract` struct to compile all its methods to wasm so we can call them in near cli
+impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTokenCore trait for our main `NFTContract` struct to extend its interface; bounding the mentioned trait to the `NFTContract` struct to query NFT core (nft_* methods standards) infos
 
 
     ////////////////////////////////////////////

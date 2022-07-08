@@ -51,7 +51,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
-impl NFTContract{ //-- we've defined the following methods of the `Contract` struct in this crate cause this crate is related to all internal calculation functions and methods - we don't need to add #[near_bindgen] proc macro attribute on this impl cause these are none exporting methods and won't compile to wasm to call them from cli 
+impl NFTContract{ //-- we've defined the following methods of the `NFTContract` struct in this crate cause this crate is related to all internal calculation functions and methods - we don't need to add #[near_bindgen] proc macro attribute on this impl cause these are none exporting methods and won't compile to wasm to call them from cli 
 
     pub fn internal_add_token_to_owner(&mut self, account_id: &AccountId, token_id: &TokenId){ //-- we've defined the self to be mutable and borrowed cause we want to add the account_id and minted token info to tokens_per_owner field and have the isntance with a valid lifetime after calling this method on it - add the minted token to the set of token an owner has first
         

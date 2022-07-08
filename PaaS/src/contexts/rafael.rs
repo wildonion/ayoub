@@ -151,7 +151,7 @@ pub mod env{
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
-        type Cost; //-- the total cost of the serverless trait method calls during an especific period of time 
+        type Cost; //-- the total cost of the serverless trait method calls during an especific period of time based on amount of CPU, network, and IO, and the amount of data already stored in runtime storage which is the VPS ram 
 
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ pub mod env{
             // ....  
             // ....
             // let resp = Schedule::on(service_address)
-            //                  .data(arced_mutexed_data_object)
+            //                  .data(arced_mutexed_data_object) //-- this is the data that must be executed on second service
             //                  .run_in_parallel()
             //                  .then(self.callback());
             // let resp = self.current_service.send(msg).to(another_serivce).await;

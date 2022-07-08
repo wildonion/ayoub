@@ -27,14 +27,14 @@ Coded by
 
 
 use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
-use crate::nft_core::NoneFungibleTokenCore; //-- based on the orphan rule we MUST import this trait to use the nft_token() method on the instance of the `Contract` struct - we have to sepecify which trait has this method cause it might be another trait with this method exists inside this crate
+use crate::nft_core::NoneFungibleTokenCore; //-- based on the orphan rule we MUST import this trait to use the nft_token() method on the instance of the `NFTContract` struct - we have to sepecify which trait has this method cause it might be another trait with this method exists inside this crate
 
 
 
 
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `Contract` struct to compile all its methods to wasm so we can call them in near cli
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `NFTContract` struct to compile all its methods to wasm so we can call them in near cli
 impl NFTContract{ //-- following methods are view methods (none payable methods) and will be compiled to wasm using #[near_bindgen] proc macro attribute
     
     
