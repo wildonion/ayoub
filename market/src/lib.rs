@@ -67,6 +67,11 @@ pub mod nft_callbacks;
 
 
 
+
+
+
+
+
 // NOTE - The NEAR whitepaper mentions that 30% of all gas fees go to smart contract accounts on which the fees are expensed
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible
 // NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
@@ -80,18 +85,6 @@ pub mod nft_callbacks;
 
 
 
-
-
-
-
-
-
-
-#[derive(Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
-pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much per each sell of a specific NFT
-    pub payout: HashMap<AccountId, U128>, // NOTE - HashMap has loaded inside the lib.rs before and we imported using use crete::* syntax 
-}
 
 
 
@@ -119,7 +112,8 @@ pub struct Payout{ //-- payout type for the royalty standards which specifies wh
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)] //-- borsh is need for serde and codec ops; deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain 
 pub struct MarketContract{
     pub owner_id: AccountId, //-- keeping the track of the owner of the contract which is the one who has called the initialization method and sign the transaction
-    pub sales: UnorderedMap<ContractAndTokenId, Sale>, //-- keeping the track of the sales by mapping the ContractAndTokenId to a sale cause it's a unique identifier for every sale which is made up of the `contract actor account_id + DELIMETER + token_id` 
-    
-
+    pub sales: UnorderedMap<ContractAndTokenId, Sale>, //-- keeping the track of all the sales by mapping the ContractAndTokenId to a sale cause every sale has a unique identifier which is made up of the `contract actor account_id + DELIMETER + token_id` 
+    pub by_owner_id: LookupMap<AccountId, UnorderedSet<ContractAndTokenId>>, //-- keeping the track of all the sale ids which is made up of the `contract actor account_id + DELIMETER + token_id` inside a set for every account_id
+    pub by_nft_contract_id: LookupMap<AccountId, UnorderedSet<TokenId>>, //-- keeping the track of all the token_ids inside a set for a sale of a given account_id
+    pub storage_deposits: LookupMap<AccountId, Balance>, //-- mapping between all the storages paid by a specific account_id
 }

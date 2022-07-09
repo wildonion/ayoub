@@ -227,7 +227,7 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
          ===========================
         | Data Collision Explanation 
          ===========================
-        | when initializing a data structure make sure to give it a unique ID, otherwise, it could point to other structure's key-value references;
+        | when initializing a data structure make sure to give it a unique id, otherwise, it could point to other structure's key-value references;
         | so we need a unique indentifire key for each object from near collections, if two near collections share the same key, they share the 
         | same data irregardless of whether it'll work or fail if you share memory between two different objects, like Vector and LookupMap.
         | If we use the same storage key, it will lead to error, complaining that: you already have an entry with the <KEY_NAME> stored in the collection, 
@@ -300,11 +300,11 @@ pub fn royalty_to_payout(royalty_percentage: u32, amount_to_pay_for_nft: Balance
 // -> hash of the account_id inside the TokensPer* structs is the unique key to use it as the prefix for creating the UnorderedSet to avoid data collision cause every account_id has a unique hash with 256 bits long
 pub enum Storagekey{ //-- defining an enum based unique storage key for every near collection to avoid collection collision which might be happened when two different collections share a same storage for their keys on the chain which will face us data collision at runtime
     TokensPerOwner, ////////---------➔ converting this to vector (Storagekey::TokensPerOwner.try_to_vec().unwrap()) gives us an array of [0] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key 
-    TokenPerOwnerInner{account_id_hash: CryptoHash}, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length
+    TokenPerOwnerInner{ account_id_hash: CryptoHash }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length
     TokensById, ////////---------➔ converting this to vector (Storagekey::TokensById.try_to_vec().unwrap()) gives us an array of [2] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     TokenMetadataById, ////////---------➔ converting this to vector (Storagekey::TokenMetadataById.try_to_vec().unwrap()) gives us an array of [3] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     NFTContractMetadata, ////////---------➔ converting this to vector (Storagekey::NFTContractMetadata.try_to_vec().unwrap()) gives us an array of [4] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     TokensPerType, ////////---------➔ converting this to vector (Storagekey::TokensPerType.try_to_vec().unwrap()) gives us an array of [5] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
-    TokensPerTypeInner{token_type_hash: CryptoHash}, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length
+    TokensPerTypeInner{ token_type_hash: CryptoHash }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length
     TokenTypesLocked, ////////---------➔ converting this to vector (Storagekey::TokenTypesLocked.try_to_vec().unwrap()) gives us an array of [7] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
 }

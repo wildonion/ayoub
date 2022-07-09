@@ -13,6 +13,22 @@ https://near-docs.io/
 https://www.near-sdk.io/
 
 
+https://www.lpalmieri.com/posts/2019-12-01-taking-ml-to-production-with-rust-a-25x-speedup/
+https://www.lpalmieri.com/posts/2020-09-27-zero-to-production-4-are-we-observable-yet/
+https://www.lpalmieri.com/posts/fast-rust-docker-builds/
+https://www.lpalmieri.com/posts/an-introduction-to-property-based-testing-in-rust/
+https://www.lpalmieri.com/posts/zero-downtime-deployments/
+https://www.lpalmieri.com/posts/caching-types-in-a-microservice-architecture/
+https://lucumr.pocoo.org/2018/3/31/you-cant-rust-that/
+https://lucumr.pocoo.org/2021/11/14/abusing-serde/
+https://lucumr.pocoo.org/2022/1/7/as-any-hack/
+https://lucumr.pocoo.org/2022/1/6/rust-extension-map/
+https://lucumr.pocoo.org/2022/1/30/unsafe-rust/
+https://smallcultfollowing.com/babysteps/blog/2022/03/29/dyn-can-we-make-dyn-sized/
+https://smallcultfollowing.com/babysteps/blog/2022/04/12/implied-bounds-and-perfect-derive/
+https://smallcultfollowing.com/babysteps/blog/2022/04/17/coherence-and-crate-level-where-clauses/
+https://smallcultfollowing.com/babysteps/blog/2022/06/15/what-it-feels-like-when-rust-saves-your-bacon/
+https://smallcultfollowing.com/babysteps/blog/2022/06/27/many-modes-a-gats-pattern/
 https://without.boats/blog/
 https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
 https://stackoverflow.com/questions/27831944/how-do-i-store-a-closure-in-a-struct-in-rust

@@ -57,7 +57,7 @@
 
 
 
-                                https://github.com/wildonion/coiniXerr/blob/d20d6e8e434987e354a6bc419a17a32dcb8ae432/src/utils/scheduler.rs#L44
+                                -> coiniXerr project in scheduler.rs line 44
 
 
            Actor (address: alice.near)                                                                                                     Actor (address: bob.near)
