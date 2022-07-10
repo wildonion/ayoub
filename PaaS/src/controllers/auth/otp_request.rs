@@ -51,7 +51,7 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::auth::SendOTPRequest>(&json){ //-- the generic type of from_str() method is OTPRequest struct - mapping (deserializing) the json into the OTPRequest struct
+                match serde_json::from_str::<schemas::auth::SendOTPRequest>(&json){ //-- the generic type of from_str() method is OTPRequest struct - mapping (deserializing) the json string into the OTPRequest struct
                     Ok(otp_req) => { //-- we got the phone number of the user
                         
 

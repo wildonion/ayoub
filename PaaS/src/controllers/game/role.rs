@@ -54,7 +54,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::AddRoleRequest>(&json){ //-- the generic type of from_str() method is AddRoleRequest struct - mapping (deserializing) the json into the AddRoleRequest struct
+                                match serde_json::from_str::<schemas::game::AddRoleRequest>(&json){ //-- the generic type of from_str() method is AddRoleRequest struct - mapping (deserializing) the json string into the AddRoleRequest struct
                                     Ok(role_info) => {
 
 
@@ -322,7 +322,7 @@ pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::DisableRoleRequest>(&json){ //-- the generic type of from_str() method is DisableRoleRequest struct - mapping (deserializing) the json into the DisableRoleRequest struct
+                                match serde_json::from_str::<schemas::game::DisableRoleRequest>(&json){ //-- the generic type of from_str() method is DisableRoleRequest struct - mapping (deserializing) the json string into the DisableRoleRequest struct
                                     Ok(dis_info) => {
 
                                         

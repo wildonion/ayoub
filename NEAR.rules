@@ -114,6 +114,7 @@
     
 
 ☢️ near runtime will create promise action receipts from the transactions either by converting a contract method or one the following variant to send async message between shards 
+    https://near-docs.io/concepts/basics/transactions/overview
     pub enum Action { 
         CreateAccount(CreateAccountAction),
         DeployContract(DeployContractAction),

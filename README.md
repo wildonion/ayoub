@@ -36,6 +36,8 @@ Family Tree Smart Contracts (`escrow`, `event`, `market`, `nft`, `w2e` & `propos
 
 # 📌 TODOs
 
+* nft Contract Events
+
 * Ayoub PaaS TODOs
 
 * coiniXerr TODOs

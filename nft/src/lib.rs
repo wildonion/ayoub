@@ -129,21 +129,21 @@ pub struct NFTContract{ //-- can't implement Default trait for this contract cau
 #[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `NFTContract` struct to compile all its methods to wasm so we can call them in near cli
 impl NFTContract{ //-- we'll add bytes to the contract by creating entries in the data structures - we've defined the init methods of the `NFTContract` struct in here cause the lib.rs is our main crate
 
-    #[init] //-- means the following would be a contract initialization method which must be called by the contract owner and verifies that the contract state doesn't exist on chain which can only be called once and will be paniced on second call
+    #[init] //-- means the following would be a contract initialization method which must be called by the contract owner and verifies that the contract state doesn't exist on chain since can only be called once and will be paniced on second call
     pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self{ //-- initialization function can only be called once when we first deploy the contract to runtime shards - this initializes the contract with metadata that was passed in and the owner_id
         let accounts_message = format!("current account id is @{} | predecessor or the current caller account id is @{} | signer account id is @{}", env::current_account_id(), env::predecessor_account_id(), env::signer_account_id()); //-- format!() returns a String which takes 24 bytes storage, usize * 3 (pointer, len, capacity) bytes (usize is 64 bits or 24 bytes on 64 bits arch)
         // let accounts_message_bytes = accounts_message.as_bytes(); //-- as_bytes() returns &[u8] 
         env::log_str(&accounts_message); //-- passing the message in form of a borrowed type even though as_bytes() returns &[u8]
         Self{ //-- the return type is of type Self or the contract itself with initialized fields - this function will default all the collections to be empty
             owner_id,
-            metadata: LazyOption::new(Storagekey::NFTContractMetadata.try_to_vec().unwrap(), Some(&metadata)), //-- LazyOption takes a vector of u8 bytes as the prefix from the current storage taken by NFTContractMetadata collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
-            tokens_per_owner: LookupMap::new(utils::Storagekey::TokensPerOwner.try_to_vec().unwrap()), //-- LookupMap takes a vector of u8 bytes as the prefix from the current storage taken by TokensPerOwner collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
-            tokens_by_id: LookupMap::new(Storagekey::TokensById.try_to_vec().unwrap()), //-- LookupMap takes a vector of u8 bytes as the prefix from the current storage taken by TokensById collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
-            token_metadata_by_id: UnorderedMap::new(Storagekey::TokenMetadataById.try_to_vec().unwrap()), //-- UnorderedMap takes a vector of u8 bytes as the prefix from the current storage taken by TokenMetadataById collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
+            metadata: LazyOption::new(Storagekey::NFTContractMetadata.try_to_vec().unwrap(), Some(&metadata)), //-- LazyOption takes a vector of u8 bytes in it constructor argument as the prefix from the current storage taken by NFTContractMetadata collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
+            tokens_per_owner: LookupMap::new(utils::Storagekey::TokensPerOwner.try_to_vec().unwrap()), //-- LookupMap takes a vector of u8 bytes in it constructor argument as the prefix from the current storage taken by TokensPerOwner collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
+            tokens_by_id: LookupMap::new(Storagekey::TokensById.try_to_vec().unwrap()), //-- LookupMap takes a vector of u8 bytes in it constructor argument as the prefix from the current storage taken by TokensById collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
+            token_metadata_by_id: UnorderedMap::new(Storagekey::TokenMetadataById.try_to_vec().unwrap()), //-- UnorderedMap takes a vector of u8 bytes in it constructor argument as the prefix from the current storage taken by TokenMetadataById collection or the 64 bits (8 bytes) address of the enum tag which is pointing to the current variant
         }
     }
 
-    #[init] //-- means the following would be a contract initialization method which must be called by the contract owner and verifies that the contract state doesn't exist on chain which can only be called once and will be paniced on second call
+    #[init] //-- means the following would be a contract initialization method which must be called by the contract owner and verifies that the contract state doesn't exist on chain since can only be called once and will be paniced on second call
     pub fn new_default_meta(owner_id: AccountId) -> Self{ //-- initialization function can only be called once when we first deploy the contract to runtime shards - this initializes the contract with default metadata so the user don't have to manually type metadata
         Self::new( //-- calling new() method with some default metadata params and the owner_id passed in
             owner_id,

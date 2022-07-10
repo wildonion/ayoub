@@ -120,7 +120,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::event::GetEventRequest>(&json){ //-- the generic type of from_str() method is GetEventRequest struct - mapping (deserializing) the json into the GetEventRequest struct
+                match serde_json::from_str::<schemas::event::GetEventRequest>(&json){ //-- the generic type of from_str() method is GetEventRequest struct - mapping (deserializing) the json string into the GetEventRequest struct
                     Ok(event_info) => { //-- we got the username and password inside the login route
 
 

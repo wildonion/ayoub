@@ -58,7 +58,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::auth::UserRoleUpdateRequest>(&json){ //-- the generic type of from_str() method is UserRoleUpdateRequest struct - mapping (deserializing) the json into the UserRoleUpdateRequest struct
+                                match serde_json::from_str::<schemas::auth::UserRoleUpdateRequest>(&json){ //-- the generic type of from_str() method is UserRoleUpdateRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                     Ok(update_info) => { //-- we got the username and password inside the login route
                                         
 
@@ -239,7 +239,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::auth::UserSideUpdateRequest>(&json){ //-- the generic type of from_str() method is UserSideUpdateRequest struct - mapping (deserializing) the json into the UserRoleUpdateRequest struct
+                                match serde_json::from_str::<schemas::auth::UserSideUpdateRequest>(&json){ //-- the generic type of from_str() method is UserSideUpdateRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                     Ok(update_info) => { //-- we got the username and password inside the login route
 
                                         ////////////////////////////////// DB Ops
@@ -415,7 +415,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::auth::UserStatusUpdateRequest>(&json){ //-- the generic type of from_str() method is UserStatusUpdateRequest struct - mapping (deserializing) the json into the UserRoleUpdateRequest struct
+                                match serde_json::from_str::<schemas::auth::UserStatusUpdateRequest>(&json){ //-- the generic type of from_str() method is UserStatusUpdateRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                     Ok(update_info) => { //-- we got the username and password inside the login route
                                         
                                         ////////////////////////////////// DB Ops
@@ -593,7 +593,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::UpdatePlayerRoleAbilityRequest>(&json){ //-- the generic type of from_str() method is UpdatePlayerRoleAbilityRequest struct - mapping (deserializing) the json into the UserRoleUpdateRequest struct
+                                match serde_json::from_str::<schemas::game::UpdatePlayerRoleAbilityRequest>(&json){ //-- the generic type of from_str() method is UpdatePlayerRoleAbilityRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                     Ok(update_info) => { //-- we got the username and password inside the login route
                                         
                                         ////////////////////////////////// DB Ops
@@ -763,7 +763,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::InsertPlayerChainToRequest>(&json){ //-- the generic type of from_str() method is InsertPlayerChainToRequest struct - mapping (deserializing) the json into the UserRoleUpdateRequest struct
+                                match serde_json::from_str::<schemas::game::InsertPlayerChainToRequest>(&json){ //-- the generic type of from_str() method is InsertPlayerChainToRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                     Ok(update_info) => { //-- we got the username and password inside the login route
                                         
                                         ////////////////////////////////// DB Ops
@@ -934,7 +934,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::GetPlayerRequest>(&json){ //-- the generic type of from_str() method is GetPlayerRequest struct - mapping (deserializing) the json into the GetPlayerRequest struct
+                                match serde_json::from_str::<schemas::game::GetPlayerRequest>(&json){ //-- the generic type of from_str() method is GetPlayerRequest struct - mapping (deserializing) the json string into the GetPlayerRequest struct
                                     Ok(player_info) => { //-- we got the username and password inside the login route
 
 

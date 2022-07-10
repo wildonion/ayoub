@@ -56,7 +56,7 @@ pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::event::InsertPhaseRequest>(&json){ //-- the generic type of from_str() method is InsertPhaseRequest struct - mapping (deserializing) the json into the InsertPhaseRequest struct
+                                match serde_json::from_str::<schemas::event::InsertPhaseRequest>(&json){ //-- the generic type of from_str() method is InsertPhaseRequest struct - mapping (deserializing) the json string into the InsertPhaseRequest struct
                                     Ok(phase_info) => {
 
 

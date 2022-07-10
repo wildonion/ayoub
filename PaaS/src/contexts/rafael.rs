@@ -151,7 +151,7 @@ pub mod env{
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
-        type Cost; //-- the total cost of the serverless trait method calls during an especific period of time based on amount of CPU, network, and IO, and the amount of data already stored in runtime storage which is the VPS ram 
+        type Cost; //-- storage cost of api calls or the total cost of the serverless trait method calls during an especific period of time based on amount of CPU, network, and IO, and the amount of data already stored in runtime storage which is the VPS ram 
 
 
         ////////////////////////////////////////////////////////////////////////////////

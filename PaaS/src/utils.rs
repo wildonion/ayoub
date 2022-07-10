@@ -355,7 +355,7 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
     }
   
     // NOTE - 'a lifetime has generated from the caller scope by the compiler
-    pub fn ref_to_str_specific_lifetime<'a>() -> &'a str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we've defined a valid lifetime for the pointer of the return type to return the pointer from the function which &'a str
+    pub fn ref_to_str_specific_lifetime<'a>(status: u8) -> &'a str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we've defined a valid lifetime for the pointer of the return type to return the pointer from the function which &'a str
         let name = "wildonion";
         name //-- name has a lifetime as valid as the generated lifetime from the caller scope by the compiler and will be valid as long as the caller scope is valid
     }

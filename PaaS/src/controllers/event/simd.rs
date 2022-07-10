@@ -180,7 +180,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
             Ok(value) => { //-- making a serde value from the buffer which is a IO stream of future chunk coming from the client
                 let data: serde_json::Value = value;
                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                match serde_json::from_str::<schemas::event::Simd>(&json){ //-- the generic type of from_str() method is Simd struct - mapping (deserializing) the json into the Simd struct
+                match serde_json::from_str::<schemas::event::Simd>(&json){ //-- the generic type of from_str() method is Simd struct - mapping (deserializing) the json string into the Simd struct
                     Ok(simd) => { //-- we got the 32 bits number
                     
                         

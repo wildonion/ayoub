@@ -50,8 +50,10 @@ pub mod messanger{
         pub name: String,
         pub members: Vec<ChannelMember>,
         pub threads: Vec<Thread>,
+        pub permissions: Vec<Permission>,
     }
     
+    pub struct Permission;
     pub struct ServerMember;
     pub struct ChannelMember;
     pub struct Level;

@@ -88,7 +88,7 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::AddGroupRequest>(&json){ //-- the generic type of from_str() method is AddGroupRequest struct - mapping (deserializing) the json into the AddGroupRequest struct
+                                match serde_json::from_str::<schemas::game::AddGroupRequest>(&json){ //-- the generic type of from_str() method is AddGroupRequest struct - mapping (deserializing) the json string into the AddGroupRequest struct
                                     Ok(group_info) => {
 
 
@@ -288,7 +288,7 @@ pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::UpdateGroupRequest>(&json){ //-- the generic type of from_str() method is UpdateGroupRequest struct - mapping (deserializing) the json into the UpdateGroupRequest struct
+                                match serde_json::from_str::<schemas::game::UpdateGroupRequest>(&json){ //-- the generic type of from_str() method is UpdateGroupRequest struct - mapping (deserializing) the json string into the UpdateGroupRequest struct
                                     Ok(update_info) => { //-- we got the username and password inside the login route
                                     
 

@@ -57,7 +57,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::AddSideRequest>(&json){ //-- the generic type of from_str() method is AddSideRequest struct - mapping (deserializing) the json into the AddSideRequest struct
+                                match serde_json::from_str::<schemas::game::AddSideRequest>(&json){ //-- the generic type of from_str() method is AddSideRequest struct - mapping (deserializing) the json string into the AddSideRequest struct
                                     Ok(side_info) => {
 
 
@@ -322,7 +322,7 @@ pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                                 let data: serde_json::Value = value;
                                 let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                                match serde_json::from_str::<schemas::game::DisableSideRequest>(&json){ //-- the generic type of from_str() method is DisableSideRequest struct - mapping (deserializing) the json into the DisableSideRequest struct
+                                match serde_json::from_str::<schemas::game::DisableSideRequest>(&json){ //-- the generic type of from_str() method is DisableSideRequest struct - mapping (deserializing) the json string into the DisableSideRequest struct
                                     Ok(dis_info) => {
 
                                         
