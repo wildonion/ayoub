@@ -4,7 +4,7 @@ export WASM_NAME=nft.wasm
 RUSTFLAGS='-C link-args=-s' rustup target add wasm32-unknown-unknown
 cargo build --target wasm32-unknown-unknown --release
 cp ../target/wasm32-unknown-unknown/release/*.wasm out/$WASM_NAME
-apt install binaryen wabt && cargo install wasm-snip wasm-gc
+sudo apt install binaryen wabt && cargo install wasm-snip wasm-gc
 for p in "$@"; do
     w=$(basename -- $p)
     echo "Minifying $w, make sure it is not stripped"
