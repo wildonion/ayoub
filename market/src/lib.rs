@@ -165,7 +165,7 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
         let owner_id = env::predecessor_account_id(); //-- getting the account_id of the current caller which is the owner of the withdraw process
 
 
-
+        // once the NFT is sold out we have to release the allocated storage by the sell object related to that NFT on the chain thus we have to payout the seller the amount of he/she deposited before for the his/her sell object 
         // TODO - market royalty from each sell???
         // ...
 
