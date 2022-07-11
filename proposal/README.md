@@ -13,6 +13,7 @@
 
 > The caller must have called the `new_*()` method in first call of the contract in order to initialize the state of the contract on chain and use other methods, calling this method will panic on second call.
 
+> To update the state of the contract in production like migrating to a new data structure see https://www.near-sdk.io/upgrading/production-basics
 
 ### Compile Contract
 ```

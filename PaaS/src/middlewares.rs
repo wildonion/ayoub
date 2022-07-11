@@ -72,7 +72,7 @@ pub mod auth{
         
         use hyper::Body;
         use crate::schemas;
-        use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
+        use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 
         
 

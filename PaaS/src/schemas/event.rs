@@ -5,7 +5,7 @@
 
 
 use serde::{Serialize, Deserialize};
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use uuid::Uuid;
 
 

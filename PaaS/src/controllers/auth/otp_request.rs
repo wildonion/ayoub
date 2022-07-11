@@ -16,7 +16,7 @@ use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is u
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body_bytes and stream buffer
 use hyper::{body::HttpBody, Client, header, StatusCode, Body}; //-- HttpBody trait is required to call the data() method on a hyper response body to get the next future IO stream of coming data from the server
 use log::info;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use mongodb::Client as MC;
 use rand::prelude::*;
 use chrono::prelude::*;

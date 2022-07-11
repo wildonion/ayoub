@@ -1,7 +1,7 @@
 
 
 
-
+// https://learn.figment.io/tutorials/build-a-crowdfunding-dapp-on-near
 // https://near-docs.io/tutorials/examples/donation
 // TODO - escrow crowdfunding campaigns contract for paying the coders out based on github commits and defined deadline tasks 
 // NOTE - Escrow Contract for NFT Merchendise in `shop` Section for Paying out Owners, Supplier and Collection Creator

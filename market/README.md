@@ -15,6 +15,8 @@
 
 > Market contract will use a cross contract call to the NFT contract which is deployed on the minter contract actor account for transferring and minting an NFT. 
 
+> To update the state of the contract in production like migrating to a new data structure see https://www.near-sdk.io/upgrading/production-basics
+
 ### Compile Contract
 ```
 $ sudo chmod +x build.sh && ./build.sh 

@@ -19,6 +19,8 @@
 
 > The marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account) like approval and transfer methods to sell the NFT on behalf of the owner.
 
+> To update the state of the contract in production like migrating to a new data structure see https://www.near-sdk.io/upgrading/production-basics
+
 ### Compile Contract
 ```
 $ sudo chmod +x build.sh && ./build.sh 

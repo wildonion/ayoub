@@ -14,7 +14,7 @@ use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_bo
 use hyper::{header, StatusCode, Body, Response};
 use log::info;
 use mongodb::Client;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itset cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 
 
 

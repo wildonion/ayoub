@@ -36,11 +36,22 @@ Coded by
 use serde_json::json;
 use std::future;
 use std::{fmt, collections::HashMap};
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize}; //-- self referes to the borsh struct itset cause there is a struct called borsh inside the borsh.rs file
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize}; //-- self referes to the borsh struct itself cause there is a struct called borsh inside the borsh.rs file
 use near_sdk::collections::{LazyOption, LookupMap, UnorderedMap, UnorderedSet}; //-- LookupMap and UnorderedMap are non-iterable implementations of a map that stores their contents directly on the trie - LazyOption stores a value in the storage lazily! 
 use near_sdk::json_types::{Base64VecU8, U128, U64}; //-- Base64VecU8 is used to serialize/deserialize Vec<u8> to base64 string
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{Gas, ext_contract, PromiseResult, env, near_bindgen, assert_one_yocto, AccountId, Balance, CryptoHash, PanicOnDefault, Promise, PromiseOrValue, BorshStorageKey}; //-- Promise struct is needed to handle async cross contract calls or message passing between contract actors - PanicOnDefault macro must be used in case that the contract is required to be initialized with init methods which will be paniced on implemnted Default trait for the contract - also we're using the assert_one_yocto() function from the near_sdk cause it's using the env::panic_str() one the background
+use near_sdk::{ 
+                env::STORAGE_PRICE_PER_BYTE, //-- loading the price of each byte in yocto$NEAR
+                Gas, ext_contract, PromiseResult, env, near_bindgen, assert_one_yocto, //-- we're using the assert_one_yocto() function from the near_sdk cause it's using the env::panic_str() one the background 
+                AccountId, Balance, CryptoHash, Promise, //-- Promise struct is needed to handle async cross contract calls or message passing between contract actors
+                PanicOnDefault, PromiseOrValue, BorshStorageKey //-- PanicOnDefault macro must be used in case that the contract is required to be initialized with init methods which will be paniced on implemnted Default trait for the contract
+            }; 
+
+
+
+
+
+
 use crate::utils::*;
 use crate::constants::*;
 use crate::external::*;
@@ -72,6 +83,9 @@ pub mod nft_callbacks;
 
 
 
+
+// NOTE - try to validate the input, context, state and access using require! before taking any actions; the earlier you panic, the more gas you will save for the caller
+// NOTE - borsh is used for internal STATE serialization and serde for external JSON serialization
 // NOTE - if a function requires a deposit, we need a full access key of the user to sign that transaction which will redirect them to the NEAR wallet
 // NOTE - gas fee is the computational fee paied as raward to validators by attaching them (in gas units) in scheduling function calls in which they mutate the state of the contract which face us cpu usage costs; and also the remaining deposit will get pay back as a refund to the caller by the near protocol
 // NOTE - deposit or amount is the cost of the method and must be attached (in yocot$NEAR or near) for scheduling payable function calls based on storages they've used by mutating the state of the contract on chain like updating a collection field inside the contract struct and we have to get pay back the remaining deposit as a refund to the caller and that's what the refund_deposit() function does
@@ -86,7 +100,7 @@ pub mod nft_callbacks;
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible
 // NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
 // NOTE - we can't impl Default trait for the contract if the PanicOnDefault trait is implemented for that contract
-// NOTE - near hashmap and set based data structures or collections are LookupMap, LookupSet, UnorderedMap, UnorderedSet and TreeSet; each of them will be cached on chain instead of deserializing all entries each time the state and the app runtime is loaded like HashMap  
+// NOTE - near hashmap and set based data structures or collections are LookupMap, LookupSet, UnorderedMap, UnorderedSet and TreeSet; each of them will be cached on chain instead of deserializing all entries each time the state and the app runtime is loaded like HashMap o to minimize the amount of gas used the SDK collections should be used in most cases
 // NOTE - current_account_id()     -> the id of the account that owns the current contract actor account
 // NOTE - predecessor_account_id() -> the id of the account that was the previous contract actor account in the chain of cross-contract calls and if this is the first contract, it is equal to signer_account_id - the last (current) caller of a contract actor method which created and signed the transaction by calling that method
 // NOTE - signer_account_id()      -> the id of the account that either signed the original transaction or issued the initial cross-contract call that led to this execution 
@@ -150,8 +164,9 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
     pub fn storage_deposit(&mut self, account_id: Option<AccountId>){ //-- since we're mutating the state of the contract by adding a new entry into the storage_deposit collection thus we must define the first param as &mut self with an optional account_id who wants to pay for storage cost of an allocated sale object on chain which can be either the seller or anyone who wants to pay for another contract actor account_id - this method will cover the cost of storing sale object on the contract on chain 
 
 
-        // the required cost per sell object is 0.01 $NEAR or 10^19 in yocto$NEAR
-        // ...
+
+        let deposit = env::attached_deposit(); //-- getting the attached deposit to the call by the caller in yocot$NEAR which is of type u128 - the required cost per sell object is 0.01 $NEAR or 10^19 in yocto$NEAR
+
 
 
 
@@ -165,12 +180,14 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
         let owner_id = env::predecessor_account_id(); //-- getting the account_id of the current caller which is the owner of the withdraw process
 
 
-        // once the NFT is sold out we have to release the allocated storage by the sell object related to that NFT on the chain thus we have to payout the seller the amount of he/she deposited before for the his/her sell object 
+
+
+        // when an NFT is sold out we have to release the allocated storage by the sell object related to that NFT on the chain thus we have to payout the seller the amount of he/she deposited before for the his/her sell object and he/she must withdraw the amount 
         // TODO - market royalty from each sell???
         // ...
 
 
-
+        // scheduling a transferring promise or future action receipt object to be executed later by the NEAR protocol which contains an async message which is transferring NEARs to other contract actor accounts  
 
 
     }

@@ -81,7 +81,8 @@
 ☢️ every contract and shard is an actor which can communicate with each other using promise or 
    future objects which contains transaction info or receipts through the mpsc channel.
    and each transaction which is built by the runtime from method calls or pre defind actions 
-   is a receipt which has a unique id.
+   is a receipt which has a unique id. and batch actions (like transferring NEARs or calling other contract method) 
+   can be executed in the same receipt created by the runtime.
 
 
 

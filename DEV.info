@@ -2,25 +2,6 @@
 
 
 
-
-
-https://near-docs.io/develop/contracts/storage
-https://learnnear.club/near-live-contract-review-part-1-voting-contracts/
-https://learnnear.club/near-live-contract-review-part-2-staking-pool-contract/
-https://learnnear.club/near-live-contract-review-part-3-whitelist-and-staking-pool-factory/#
-https://learnnear.club/near-live-contract-review-part-4-berry-farm/
-https://github.com/near/core-contracts
-https://github.com/near/near-sdk-rs
-https://learn.figment.io/protocols/near
-https://www.near-sdk.io/contract-structure/collections
-
-
-
-
-
-
-
-
 https://www.lpalmieri.com/posts/2019-12-01-taking-ml-to-production-with-rust-a-25x-speedup/
 https://www.lpalmieri.com/posts/2020-09-27-zero-to-production-4-are-we-observable-yet/
 https://www.lpalmieri.com/posts/fast-rust-docker-builds/
@@ -113,7 +94,6 @@ https://stackoverflow.com/questions/41823321/how-to-get-pointer-offset-of-an-enu
 https://stackoverflow.com/questions/27324821/why-does-an-enum-require-extra-memory-size
 https://docs.tendermint.com/master/
 https://fasterthanli.me/articles/remote-development-with-rust-on-fly-io
-https://stackoverflow.com/questions/3982501/mutex-lock-what-does-blocking-mean
 
 
 
@@ -130,12 +110,12 @@ NOTE - first allocate some bytes on server ram for the incoming file from the cl
 NOTE - DRL model to reward validator in PoS pattern based on coiniXerr NFT owners' feedback  
 NOTE - sharded blockchain means that every shard is an actor which contains multiple blocks and each will communicates with each other using addr object like passing data by calling a contract method inside block a to another contract method inside the block b asyncly
 NOTE - near uses actor based model to call smart contract methods and pass data between them asyncly using their address (Addr object) which means we can have multi threading in wasm file
-NOTE - split sequential input (borsh encoded async future object data) data into smaller part or async task (spawned by tokio which can be a request coming from an opened socket and each opened socket is a client) 
+NOTE - split sequential input (borsh encoded async future object data) data into smaller part or async task (can be a request coming from an opened socket and each opened socket is a client) 
 with divide and conquer algorithm to feed into the actix actors (processor will choose a free thread from the pool in just a single core to mutex and lock the task to avoid deadlock inside the selected thread) and solve them in there separately (run on separate threads in a thread pool of each actor) then send the each result asyncly to other actor if needed; by moving the Arc<Mutex<T>> betweeen actix actor threads using mpsc channel which T is the result then combine the results and compile the whole method to wasm like simd and rayon
-NOTE - we'll divide the sequential data into tasks using divide and conquer algo which will be an async job or a task which is like a closure with async body which contains heavy computation on some mutable Arc<Mutex<Data>> like querying a db thus every job must get solved in separate thread by joining its scheduled thread containing the job in parallel to the executor and we can communicate between threads of objects using message passing channels like mpsc
+NOTE - we'll divide the sequential data into tasks using divide and conquer algo which will be an async job or a task is a closure with async body which contains heavy computation on some mutable Arc<Mutex<Data>> like querying a db thus every job must get solved in separate thread by joining its scheduled thread containing the job in parallel to the executor and we can communicate between threads of objects using message passing channels like mpsc
 NOTE - threadpool app examples: sharding based app like blockchains, actix actors, rayon for simultaneous heavy computations and its wasm bindgen which is handled by the simd design pattern, image processing and 3d design apps
 NOTE - it seems that a thread can handle so many task at a time but it's a false fact; due to avoiding dealock and data race condition every single thread can handle a task of type Arc<Mutex<T>> at a time but it'll done so fast which it seems that it can handle some many tasks at a time
-NOTE - spawn a async task like a closure using tokio::spawn(async move{}) to solve the task inside a free thread of an actor or the tokio green thread then we can send some result inside the body of the async task to another thread using mpsc channel
+
 
 
 
@@ -153,6 +133,6 @@ TODO - video codec ((de)compression or (de)serializing) like ffmepg or gstreamer
 TODO - add p2p based JSON-RPC over HTTP2 for coiniXerr network inside apis/rpc folder
 TODO - coiniXerr hash for a transaction and transaction signature, block and merkle root and wallet address using Argon2
 TODO - an event streaming platform like VoD protocol like arvancloud based for streaming over video chunks using ffmpeg and gstreamer in rust based on hls which is an adaptive bitrate method 
-        1 - convert uploaded videos to hls for multi bitrate conversion
-        2 - create an endpoint api to point where the hls is
-        3 - call the api to load in html5 video tag 
+        - convert uploaded videos to hls for multi bitrate conversion
+        - create an endpoint api to point where the hls is
+        - call the api to load in html5 video tag

@@ -35,7 +35,7 @@ Coded by
 
 use serde_json::json;
 use std::{fmt, collections::HashMap};
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize}; //-- self referes to the borsh struct itset cause there is a struct called borsh inside the borsh.rs file
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize}; //-- self referes to the borsh struct itself cause there is a struct called borsh inside the borsh.rs file
 use near_sdk::collections::{LazyOption, LookupMap, UnorderedMap, UnorderedSet}; //-- LookupMap and UnorderedMap are non-iterable implementations of a map that stores their contents directly on the trie - LazyOption stores a value in the storage lazily! 
 use near_sdk::json_types::{Base64VecU8, U128}; //-- Base64VecU8 is used to serialize/deserialize Vec<u8> to base64 string
 use near_sdk::serde::{Deserialize, Serialize};
@@ -77,6 +77,8 @@ pub mod internal;
 
 
 
+// NOTE - try to validate the input, context, state and access using require! before taking any actions; the earlier you panic, the more gas you will save for the caller
+// NOTE - borsh is used for internal STATE serialization and serde for external JSON serialization
 // NOTE - this contract has an `owner_id` field which is the who is the signer and the owner of deploying process of this contract, also is the owner of all the NFTs that will be minted on this contract actor account to sell them on the marketplace
 // NOTE - since this contract will be deployed on every contract actor account who wants to mint his/her all NFTs on his `account_id` to sell them on the marketplace thus the marketplace needs to be an approved `account_id` for the owner to transfer or list his/her all NFTs on behalf of him/her in there 
 // NOTE - the marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account_id) like approval and transfer methods to sell the NFT on behalf of the owner
@@ -85,7 +87,7 @@ pub mod internal;
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible
 // NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
 // NOTE - we can't impl Default trait for the contract if the PanicOnDefault trait is implemented for that contract
-// NOTE - near hashmap and set based data structures or collections are LookupMap, LookupSet, UnorderedMap, UnorderedSet and TreeSet; each of them will be cached on chain instead of deserializing all entries each time the state and the app runtime is loaded like HashMap  
+// NOTE - near hashmap and set based data structures or collections are LookupMap, LookupSet, UnorderedMap, UnorderedSet and TreeSet; each of them will be cached on chain instead of deserializing all entries each time the state and the app runtime is loaded like HashMap o to minimize the amount of gas used the SDK collections should be used in most cases  
 // NOTE - current_account_id()     -> the id of the account that owns the current contract actor account
 // NOTE - predecessor_account_id() -> the id of the account that was the previous contract actor account in the chain of cross-contract calls and if this is the first contract, it is equal to signer_account_id - the last (current) caller of a contract actor method which created and signed the transaction by calling that method
 // NOTE - signer_account_id()      -> the id of the account that either signed the original transaction or issued the initial cross-contract call that led to this execution 
