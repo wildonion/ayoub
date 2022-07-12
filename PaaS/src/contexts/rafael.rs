@@ -5,7 +5,8 @@
 pub mod env{ 
 
     const APP_NAME: &str = "Ayoub";
- 
+     
+    // TODO - .wasm file optimization using wasm-gc, wasm-snip, wasm-opt and wasm-strip
     // TODO - env functions to mutate the state of the runtime object
     // TODO - try different IO streaming and future traits on a defined buffer from the following crates like mpsc and Mutex data structures
     // ...
