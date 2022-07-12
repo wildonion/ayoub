@@ -1,7 +1,7 @@
 
 
 
-
+https://near-docs.io/
 https://www.lpalmieri.com/posts/2019-12-01-taking-ml-to-production-with-rust-a-25x-speedup/
 https://www.lpalmieri.com/posts/2020-09-27-zero-to-production-4-are-we-observable-yet/
 https://www.lpalmieri.com/posts/fast-rust-docker-builds/
@@ -94,6 +94,8 @@ https://stackoverflow.com/questions/41823321/how-to-get-pointer-offset-of-an-enu
 https://stackoverflow.com/questions/27324821/why-does-an-enum-require-extra-memory-size
 https://docs.tendermint.com/master/
 https://fasterthanli.me/articles/remote-development-with-rust-on-fly-io
+https://rust-unofficial.github.io/patterns/
+https://medium.com/@knoldus/design-patterns-in-rust-programming-e5c5ad6ec1a7
 
 
 

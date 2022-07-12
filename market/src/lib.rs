@@ -172,7 +172,7 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
             let panic_message = format!("The Minimum Deposit Must be {}", STORAGE_PRICE_PER_BYTE);
             env::panic_str(panic_message.as_str()); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
         }
-        let mut account_id_balance = self.storage_deposits.get(&storage_account_id).unwrap_or(0); //-- getting storage deposit of the passed in account_id and if the account_id wasn't inside the map we default to a balance of 0
+        let mut account_id_balance = self.storage_deposits.get(&storage_account_id).unwrap_or(0); //-- getting storage deposit amount out of the Option using map of the passed in account_id and if the account_id wasn't inside the map we default to a balance of 0
         account_id_balance += storage_deposit; //-- updating the current balance of the passed in account_id with the deposited storage
         self.storage_deposits.insert(&storage_account_id, &account_id_balance); //-- inserting the updated balance related to the passed in account_id by passing storage_account_id and account_id_balance in their borrowed form to have them in later scopes - insert() method will update the value on second call if there was any entry with that key exists cause hashmap based data structures use the hash of the key to validate the uniquness of their values and we must use enum based storage key if we want to add same key twice but with different values in two different collections to avoid data collision
     }
@@ -182,13 +182,19 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
         assert_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess storage later
         let owner_id = env::predecessor_account_id(); //-- getting the account_id of the current caller which is the owner of the withdraw process
         let mut amount = self.storage_deposits.remove(&owner_id).unwrap_or(0); //-- getting the deposited amount for the current caller of this method to remove it from the map and if it wasn't any account_id matches with this caller we simply fill the amount with 0  
+        let sales = self.by_owner_id.get(&owner_id); //-- getting the set of all the sale objects ids which is of type String for the current caller of this method
+        let total_sales = sales.map(|s| s.len()).unwrap_or_default(); //-- getting the total length of the sale object ids inside the set by mapping the wrapped UnorderedSet<String> into a none wrapped type to get its length and default will be set if there wasn't any sale object id inside the set  
+        let total_storage_deposited_amount = u128::from(total_sales) * STORAGE_PRICE_PER_BYTE; //-- getting the total $NEARs which is being used up for all the current sale objects for the current caller of this method on this contract in yocto$NEAR which is of type u128 
 
 
 
-
-        // when an NFT is sold out we have to release the allocated storage by the sell object related to that NFT on the chain thus we have to payout the seller the amount of he/she deposited before, for the his/her sell object and he/she must withdraw the amount 
+        // when an NFT is sold out we have to release the allocated storage by the sell object related to that NFT on the chain thus we have to payout the seller the amount of he/she deposited before, for the his/her sell object and he/she must withdraw the amount; the market contract actor account must have enough balance to pay the withdrawer
         // TODO - market royalty from each sell???
         // ...
+
+
+
+
 
 
         // scheduling a transferring promise or future action receipt object to be executed later by the NEAR protocol which contains an async message which is the process of transferring NEARs to another contract actor account
