@@ -15,7 +15,7 @@
 
 > This contract has an `owner_id` field which is the who is the signer and the owner of deploying process of this contract, also is the owner of all the NFTs that will be minted on this contract actor account to sell them on the marketplace.
 
-> Since this contract will be deployed on every contract actor account who wants to mint his/her all NFTs on his `account_id` to sell them on the marketplace thus the marketplace needs to be an approved `account_id` for the owner to transfer or list his/her all NFTs on behalf of him/her in there.
+> Since this contract will be deployed on every contract actor account who wants to mint his/her all NFTs on his `account_id` to sell and list them on the marketplace thus the marketplace needs to be an approved `account_id` for the owner to transfer or list his/her all NFTs on behalf of him/her in there.
 
 > The marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account) like approval and transfer methods to sell the NFT on behalf of the owner.
 

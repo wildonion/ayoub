@@ -23,6 +23,8 @@ Coded by
     ░     ░      ░  ░   ░        ░ ░           ░  ░      ░ ░           ░ 
                       ░                                                  
 
+            https://www.near-sdk.io/contract-structure/collections ➔ Near Sdk Collection Performence
+
 
 
 */
@@ -77,9 +79,10 @@ pub mod internal;
 
 
 
+// NOTE - HashMap keeps all data in memory, to access it, the contract needs to deserialize the whole map and it deserializes (and serializes) the entire collection in one storage operation; accessing the entire collection is cheaper in gas than accessing all elements through N storage operations
 // NOTE - try to validate the input, context, state and access using require! before taking any actions; the earlier you panic, the more gas you will save for the caller
 // NOTE - borsh is used for internal STATE serialization and serde for external JSON serialization
-// NOTE - this contract has an `owner_id` field which is the who is the signer and the owner of deploying process of this contract, also is the owner of all the NFTs that will be minted on this contract actor account to sell them on the marketplace
+// NOTE - this contract has an `owner_id` field which is the who is the signer and the owner of deploying process of this contract, also is the owner of all the NFTs that will be minted on this contract actor account to sell and list them on the marketplace
 // NOTE - since this contract will be deployed on every contract actor account who wants to mint his/her all NFTs on his `account_id` to sell them on the marketplace thus the marketplace needs to be an approved `account_id` for the owner to transfer or list his/her all NFTs on behalf of him/her in there 
 // NOTE - the marketplace can make a cross contract call to all implemented methods in this contract (which is deployed on minter or creator contract actor account_id) like approval and transfer methods to sell the NFT on behalf of the owner
 // NOTE - our `NFTContract` has all the minted nfts info inside of it with a mapping between their metadata and the owner

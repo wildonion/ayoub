@@ -126,14 +126,14 @@ pub fn actor_ds_ex(){
 // -------------------------------------------------------------------------------------------------
 pub fn panic_not_self(){
     if env::current_account_id() != env::predecessor_account_id(){ //-- current_account_id() is the one who owns this contract - the owner or the signer of the contract is not the previous contract actor account or the last (current) caller of this method
-        env::panic_str("last caller is not the signer or the owner of this contract"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unkown size at compile time we must borrow it by taking a pointer to its location
+        env::panic_str("last caller is not the signer or the owner of this contract"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unkown size at compile time we must borrow it by taking a pointer to its location
     }
 }
 
 
 pub fn panic_one_yocto(){
     if env::attached_deposit() != 1{
-        env::panic_str("Requires attached deposit of exactly 1 yocot$NEAR"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unkown size at compile time we must borrow it by taking a pointer to its location
+        env::panic_str("Requires attached deposit of exactly 1 yocot$NEAR"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unkown size at compile time we must borrow it by taking a pointer to its location
     }
 }
 
@@ -150,7 +150,7 @@ pub fn refund_deposit(storage_used: u64){ //-- refunding the initial deposit bas
     let attached_deposit = env::attached_deposit(); //-- getting the attached deposit - attached_deposit() method will get the balance that was attached to the call that will be immediately deposited before the contract execution starts; this is the minimum balance required to call the nft_mint() method 0.1 $NEAR is attached and the caller will get refunded any excess that is unused at the end 
     if required_cost > attached_deposit{ //-- 1 yocto is 10^-24
         let panic_message = format!("Need {} yocto$NEAR for the storage cost", required_cost); //-- format!() returns a String which takes 24 bytes storage, usize * 3 (pointer, len, capacity) bytes (usize is 64 bits or 24 bytes on 64 bits arch)
-        env::panic_str(panic_message.as_str()); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+        env::panic_str(panic_message.as_str()); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
     }
     let refund = attached_deposit - required_cost; //-- refunding the owner account by subtracting the required_cost from his/her attached_deposit in yocto$NEAR
     if refund > 1{ //-- if the refund was greater than 1 yocto$NEAR, means we have to get pay back the remaining deposit as a refund to the predecessor_account_id - refund is of type u128 or 16 bytes

@@ -23,6 +23,8 @@ Coded by
     ░     ░      ░  ░   ░        ░ ░           ░  ░      ░ ░           ░ 
                       ░                                                  
 
+            https://www.near-sdk.io/contract-structure/collections ➔ Near Sdk Collection Performence
+
 
 
 */
@@ -83,7 +85,7 @@ pub mod nft_callbacks;
 
 
 
-
+// NOTE - HashMap keeps all data in memory, to access it, the contract needs to deserialize the whole map and it deserializes (and serializes) the entire collection in one storage operation; accessing the entire collection is cheaper in gas than accessing all elements through N storage operations
 // NOTE - try to validate the input, context, state and access using require! before taking any actions; the earlier you panic, the more gas you will save for the caller
 // NOTE - borsh is used for internal STATE serialization and serde for external JSON serialization
 // NOTE - if a function requires a deposit, we need a full access key of the user to sign that transaction which will redirect them to the NEAR wallet
@@ -153,31 +155,33 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
         env::log_str(&accounts_message); //-- passing the message in form of a borrowed type even though as_bytes() returns &[u8]
         Self{ //-- the return type is of type Self or the contract itself with initialized fields - this function will default all the collections to be empty
             owner_id,
-            sales: UnorderedMap::new(Storagekey::Sales.try_to_vec().unwrap()),  //-- UnorderedMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called Sales defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the UnorderedMap sales keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection
-            by_owner_id: LookupMap::new(Storagekey::ByOwnerId.try_to_vec().unwrap()),  //-- LookupMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called ByOwnerId defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the LookupMap by_owner_id keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection
-            by_nft_contract_id: LookupMap::new(Storagekey::ByNFTContractId.try_to_vec().unwrap()),  //-- UnorderedMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called ByNFTContractId defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the LookupMap by_nft_contract_id keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection
-            storage_deposits: LookupMap::new(Storagekey::StorageDeposits.try_to_vec().unwrap()),  //-- UnorderedMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called StorageDeposits defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the LookupMap storage_deposits keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection
+            sales: UnorderedMap::new(Storagekey::Sales.try_to_vec().unwrap()),  //-- UnorderedMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called Sales defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the UnorderedMap sales keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection - the prefix can be also the utf8 encoded of a unique string like b"sales" which is the name of the collection field
+            by_owner_id: LookupMap::new(Storagekey::ByOwnerId.try_to_vec().unwrap()),  //-- LookupMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called ByOwnerId defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the LookupMap by_owner_id keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection - the prefix can be also the utf8 encoded of a unique string like b"by_owner_id" which is the name of the collection field
+            by_nft_contract_id: LookupMap::new(Storagekey::ByNFTContractId.try_to_vec().unwrap()),  //-- UnorderedMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called ByNFTContractId defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the LookupMap by_nft_contract_id keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection - the prefix can be also the utf8 encoded of a unique string like b"by_nft_contract_id" which is the name of the collection field
+            storage_deposits: LookupMap::new(Storagekey::StorageDeposits.try_to_vec().unwrap()),  //-- UnorderedMap takes a unique vector of u8 bytes (to have unique encoding we've used an enum variant called StorageDeposits defined in utils::Storagekey) in it constructor argument as the prefix that must be append before the LookupMap storage_deposits keys to avoid data collision with other keys of other collections of the `MarketContract` fields since they might be same keys inside two different collection - the prefix can be also the utf8 encoded of a unique string like b"storage_deposits" which is the name of the collection field
         }
     }
 
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute  
     pub fn storage_deposit(&mut self, account_id: Option<AccountId>){ //-- since we're mutating the state of the contract by adding a new entry into the storage_deposit collection attached from the caller for selling an NFT sell object thus we must define the first param as &mut self with an optional account_id who wants to pay for storage cost of an allocated sale object on chain which can be either the seller or anyone who wants to pay for another contract actor account_id - this method will cover the cost of storing sale object on the contract on chain 
-
-
-
-        let deposit = env::attached_deposit(); //-- getting the attached deposit to the call by the caller in yocot$NEAR which is of type u128 - the required cost per sell object is 0.01 $NEAR or 10^19 in yocto$NEAR which will be deposited on chain inside the storage_deposit collection
-
-
-
-
+        let storage_deposit = env::attached_deposit(); //-- getting the attached deposit to the call by the caller in yocot$NEAR which is of type u128 - the required cost per sell object is 0.01 $NEAR or 10^19 in yocto$NEAR which will be deposited on chain inside the storage_deposit collection
+        let storage_account_id = account_id
+                                                .map(|a| a.into()) //-- mapping the account_id inside the Option to convert it into a valid account_id using .into() method which will return the T
+                                                .unwrap_or_else(env::predecessor_account_id); //-- using the current caller account_id which might be the seller or anyone who wants to deposit the storage cost for a sell object related to a sepecific NFT
+        if storage_deposit >= STORAGE_PRICE_PER_BYTE{ //-- making sure that the deposited amount
+            let panic_message = format!("The Minimum Deposit Must be {}", STORAGE_PRICE_PER_BYTE);
+            env::panic_str(panic_message.as_str()); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+        }
+        let mut account_id_balance = self.storage_deposits.get(&storage_account_id).unwrap_or(0); //-- getting storage deposit of the passed in account_id and if the account_id wasn't inside the map we default to a balance of 0
+        account_id_balance += storage_deposit; //-- updating the current balance of the passed in account_id with the deposited storage
+        self.storage_deposits.insert(&storage_account_id, &account_id_balance); //-- inserting the updated balance related to the passed in account_id by passing storage_account_id and account_id_balance in their borrowed form to have them in later scopes - insert() method will update the value on second call if there was any entry with that key exists cause hashmap based data structures use the hash of the key to validate the uniquness of their values and we must use enum based storage key if we want to add same key twice but with different values in two different collections to avoid data collision
     }
 
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute 
     pub fn storage_withdraw(&mut self){ //-- since we're mutating the state of the contract by removing an entry from the storage_deposit collection thus we must define the first param as &mut self - this method allows users (which can be sellers or anyone who has paid for the stroage cost of the sell object related to an NFT) to withdraw any excess storage that they're not using by the allocated sell object since the sell object might be sold out and no need to list it for the last seller anymore on the chain 
-        
-
         assert_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess storage later
         let owner_id = env::predecessor_account_id(); //-- getting the account_id of the current caller which is the owner of the withdraw process
+        let mut amount = self.storage_deposits.remove(&owner_id).unwrap_or(0); //-- getting the deposited amount for the current caller of this method to remove it from the map and if it wasn't any account_id matches with this caller we simply fill the amount with 0  
 
 
 
@@ -189,10 +193,14 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
 
         // scheduling a transferring promise or future action receipt object to be executed later by the NEAR protocol which contains an async message which is the process of transferring NEARs to another contract actor account
 
-        
-        
 
     }
+
+
+
+
+    
+
 
 
 }

@@ -114,7 +114,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
                 };
                 let royalty = token.royalty; //-- getting the royalty hashmap of the token to calculate the payout for each owner_id based on their royalty percentage value
                 if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids at the same time - if there was too many choosed for payout, gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR 
-                    env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+                    env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
                 }
                 for (owner_id, royalty_percentage_value) in royalty.iter(){
                     let royalty_object_owner_id = owner_id.clone(); //-- we're cloning the owner_id each time since it'll move in each iteration by passing it through the insert() method of payout object
@@ -130,7 +130,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
                 payout_object
             },
             None => { //-- means we found no token with the passed in token_id
-                env::panic_str("Found No Token"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+                env::panic_str("Found No Token"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
             },
         }
     
@@ -168,7 +168,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
         };
         let royalty = transferred_token.royalty; //-- getting the royalty hashmap of the transferred token to calculate the payout for each owner_id based on their royalty percentage value
         if royalty.len() as u32 > max_len_payout{ //-- we're making sure that are not paying out to too many account_ids at the same time - if there was too many choosed for payout, gas fee will limit this condition since this is a view method we don't force the caller to deposit yocto$NEAR 
-            env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes cause it's just the size of the str itself on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+            env::panic_str("Marketplace Can't Payout to That Many Receivers; 100 Receivers Max"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
         }
         for (owner_id, royalty_percentage_value) in royalty.iter(){ // NOTE - if we use iter() method then we must dereference the key and the value to get their value cause iter() method element are borrowed type of keys and values or pointers to the key and value location (&'a key, &'a value) with a valid lifetime 
             let royalty_object_owner_id = owner_id.clone(); //-- we're cloning the owner_id each time since it'll move in each iteration by passing it through the insert() method of payout object since the insert() method get the type itself and the type will be moved by passing it into this method
