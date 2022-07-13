@@ -36,6 +36,8 @@ Family Tree Smart Contracts (`escrow`, `event`, `market`, `nft`, `w2e` & `propos
 
 # 📌 TODOs
 
+* market royalty from each sell
+
 * `DEV.info` refs
 
 * nft Contract Events

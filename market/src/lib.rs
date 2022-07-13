@@ -196,7 +196,7 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
 
 
 
-
+        // transferring the excess amount of storage deposit from the market contract actor account to the current caller of this method or the withdrawer
         // scheduling a transferring promise or future action receipt object to be executed later by the NEAR protocol which contains an async message which is the process of transferring NEARs to another contract actor account
 
 
