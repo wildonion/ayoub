@@ -45,6 +45,29 @@ use crate::*;  // loading all defined crates, structs and functions from the roo
 
 
 
+// ------------------------------ internal functions 
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+pub fn hash_account_id(account_id: &AccountId) -> CryptoHash{ //-- we'll pass the account_id as a borrowed type to this function - account_id in CryptoHash format is a 32 bytes or 256 bits which will be 64 chars in hex
+    let mut hash = CryptoHash::default(); //-- getting the default hash which will be 32 elements of utf8 bytes (8 bits or 1 byte long for each)
+    hash.copy_from_slice(&env::sha256(account_id.as_bytes())); //-- extending the defined hash with the borrowed type of the bytes of the hash of the account_id by converting its String into utf8 bytes first; the source or the length of the hash of the account_id bytes must be the same as the defined hash variable 
+    hash
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #[derive(Serialize, Deserialize)]
 #[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
 pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much per each sell of a specific NFT
