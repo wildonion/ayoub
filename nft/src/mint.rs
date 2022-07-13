@@ -85,7 +85,7 @@ impl NFTContract{ //-- following methods will be compiled to wasm using #[near_b
         let initial_storage_usage = env::storage_usage(); //-- storage_usage() method calculate current total storage usage as u64 bits or 8 bytes maximum (usize on 64 bits arch system) of this smart contract that this account would be paying for - measuring the initial storage being uses on the contract 
         let mut royalty = HashMap::new(); //-- creating an empty royalty hashmap to keep track of the royalty percentage value for each owner_id that is passed in into the nft_mint() method, the perpetual_royalties param
         
-        match perpetual_royalties{ // NOTE - perpetual_royalties hashmap contains accounts that will get perpetual royalties whenever the token is sold, of course it has the owner or the minter or creator of the collection or the NFT in addition to some charity or collaborator account_ids to get paid them and the minter will get paid on second sell
+        match perpetual_royalties{ // NOTE - perpetual_royalties hashmap contains accounts that will get perpetual royalties whenever the token is sold, of course it has the owner or the minter or creator of the collection or the NFT in addition to some charity or collaborator (like the profit of market contract actor account itself) account_ids to get paid them and the minter will get paid on second sell
             Some(royalties) => {
                 if royalties.len() >= 6{ //-- making sure that the length of the perpetual royalties is below 7 since we won't have enough gas fee to pay out that many people after selling the NFT and getting the payout object from the NFT contract which is deployed on the minter contract actor acctount 
                     env::panic_str("You Are Allowed To Add Only 6 Royalties Per Token Minting!"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location   
@@ -103,7 +103,7 @@ impl NFTContract{ //-- following methods will be compiled to wasm using #[near_b
             owner_id: receiver_id, //-- the receiver_id is the one that this NFT will be belonged to him/her 
             approved_account_ids: Default::default(), //-- creating an empty hashmap or {} for all approved account ids 
             next_approval_id: 0, //-- next approval id must be started from 0 when we're minting the token
-            royalty, //-- a mapping between owner_ids or some charity or collaborator account_ids and their royalty percentage value to calculate the payout later for each owner based on the NFT amount - the old owner which can be the main owner or the minter or creator on second sell will get paid at the end - total perpetual royalties 
+            royalty, //-- a mapping between owner_ids or some charity or collaborator (like the profit of market contract actor account itself) account_ids and their royalty percentage value to calculate the payout later for each owner based on the NFT amount - the old owner which can be the main owner or the minter or creator on second sell will get paid at the end - total perpetual royalties 
         };
 
         // utils::panic_not_self(); //-- the minter or the caller of this method must be the owner of the contract to mint a new NFT

@@ -64,8 +64,8 @@ use crate::*; // loading all defined crates, structs and functions from the root
 // NOTE - we'll give the old owner of the token whatever is left from the total royalties at the end and he/she will get paid more than the other owners
 // NOTE - royalty field is the hashmap of account_ids and their royalty percentage value to calculate their total payout
 // NOTE - Payout instance has the hashmap field which contains account_ids and their payout balance in u128 in $NEAR 
-// NOTE - on first sell of the NFT the onwer (minter) royalty payout won't be what is specified inside the royalty object and will be whatever is left after paying out collaborator or charity account_ids cause we're checking that if the owner was inside the royalty object just pass! and he/she sould get paid on second sell
-// NOTE - on second sell the owner (minter) royalty payout will be exactly what is specified inside the royalty object since the owner of the transferred token will not be the minter on second sell thus inside the iteration we'll calculate the minter payout and the old owner will get whatever is left outside the iteration after payingout other owners or collaborator or charity account_ids  
+// NOTE - on first sell of the NFT the onwer (minter) royalty payout won't be what is specified inside the royalty object and will be whatever is left after paying out collaborator (like the profit of market contract actor account itself) or charity account_ids cause we're checking that if the owner was inside the royalty object just pass! and he/she sould get paid on second sell
+// NOTE - on second sell the owner (minter) royalty payout will be exactly what is specified inside the royalty object since the owner of the transferred token will not be the minter on second sell thus inside the iteration we'll calculate the minter payout and the old owner will get whatever is left outside the iteration after payingout other owners or collaborator (like the profit of market contract actor account itself) or charity account_ids  
 
 
 
@@ -145,7 +145,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
         
         // -------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------
-        // NOTE - per each NFT sell all collaborators will be paid based on their royalty percentage 
+        // NOTE - per each NFT sell all collaborator (like the profit of market contract actor account itself)s will be paid based on their royalty percentage 
         // NOTE - we've cloned the owner_id of the transferred_token in refund_approve_account_ids() 
         //        method to prevent it from moving cause we'll use it to get the old owner for payout ops
         // NOTE - we have to first transfer the token and refund the owner for releasing 
@@ -178,7 +178,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
                 total_perpetual += *royalty_percentage_value; //-- we have to dereference the royalty_percentage_value cause is of type &u32
             }
         }
-        let token_old_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties after paying charity or collaborator account_ids
+        let token_old_owner_royalty_percentage_value = 10000 - total_perpetual; //-- the royalty percentage value is equals to subtracting the total_perpetual percentage values from the 10000 since we gave 100 % a value of 10000 - we'll give the owner of the token whatever is left from the total_perpetual royalties after paying charity or collaborator (like the profit of market contract actor account itself) account_ids
         let token_old_owner_payout = royalty_to_payout(token_old_owner_royalty_percentage_value, balacnce_u128); //-- calculating the total payout for the old owner of the transferred token or the minter at second selll
         payout_object.payout.insert(token_old_owner, token_old_owner_payout); //-- inserting the payout of the token_old_owner into the payout hashmap object
         payout_object
