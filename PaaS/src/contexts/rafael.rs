@@ -6,6 +6,7 @@ pub mod env{
 
     const APP_NAME: &str = "Ayoub";
      
+    // TODO - consider every service a shard which can communicate (like executing each other's methods) with each other using their actors which has been implemented for each service through mpsc channels  
     // TODO - .wasm file optimization using wasm-gc, wasm-snip, wasm-opt and wasm-strip
     // TODO - env functions to mutate the state of the runtime object
     // TODO - try different IO streaming and future traits on a defined buffer from the following crates like mpsc and Mutex data structures

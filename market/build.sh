@@ -10,4 +10,4 @@ wasm-gc out/temp-$WASM_NAME
 wasm-strip out/temp-$WASM_NAME
 wasm-opt -Oz out/temp-$WASM_NAME -o out/minified-$WASM_NAME # execute default optimization, passes, super-focusing on code
 sudo rm out/temp-$WASM_NAME
-echo $w `stat -c "%s" $p` "bytes ->" `stat -c "%s" minified-$w` "bytes, see minified-$w"
+echo $w `stat -c "%s" $p` "bytes ->" `stat -c "%s" out/minified-$WASM_NAME` "bytes, see out/minified-$WASM_NAME"
