@@ -111,19 +111,19 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
 
             */
             
-            self.storage_deposits.insert(&owner_id, &total_storage_deposited_amount_for_all_sales); //-- inserting the total storage deposited amount for all sales back into the storage_deposits if its greater than 0 - passing the owner_id and the amount of balance by reference and no need to clone the owner_id cause we won't use it in later scopes  
+            self.storage_deposits.insert(&owner_id, &total_storage_deposited_amount_for_all_sales); //-- inserting the total storage deposited amount for all sales back into the storage_deposits if its greater than 0 - passing the owner_id and the amount of all sale objects by reference and no need to clone the owner_id cause we won't use it in later scopes  
         }
 
 
     }
 
 
-    pub fn storage_minimum_balance(&self) -> U128{
+    pub fn storage_minimum_balance(&self) -> U128{ //-- view method to see the minimum balance required for a storing one sale object
         U128(STORAGE_PER_SALE) //-- returning the amount of the storage required per each sell in yocto$NEAR
     }
 
 
-    pub fn storage_balance_of(&self, account_id: AccountId) -> U128{
+    pub fn storage_balance_of(&self, account_id: AccountId) -> U128{ //-- view method to see the total balance deposited for the storage of a specific owner_id
         U128(self.storage_deposits.get(&account_id).unwrap_or(0)) //-- passing the account_id in its borrowed type - returning the total deposited storage for the passed in account_id in form u128 which is the type of yocto$NEAR
     }
 
