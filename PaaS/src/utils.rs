@@ -73,7 +73,11 @@ pub mod jwt{
 
 
 
-// ------------------------------ into box slice method
+
+
+
+
+// ------------------------------ utility methods
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -85,6 +89,47 @@ pub async fn into_box_slice(u8_vector: &Vec<u8>) -> Result<Box<[u8; 4]>, String>
         Err(o) => return Err(format!("vector length must be 4 but it's {}", o.len())),
     };
 }
+
+
+
+// -----------------------------------
+// handling a recursive async function
+// -----------------------------------
+// https://rust-lang.github.io/async-book/07_workarounds/04_recursion.html
+// NOTE - Future trait is an object safe trait thus we have to Box it with dyn keyword to have kinda a pointer to the heap where the object is allocated in runtime
+// NOTE - a recursive `async fn` will always return a Future object which must be rewritten to return a boxed `dyn Future` to prevent infinite size allocation in runtime from heppaneing some kinda maximum recursion depth exceeded prevention process
+pub fn async_gen_random_idx(idx: usize) -> BoxFuture<'static, usize>{ // NOTE - pub type BoxFuture<'a, T> = Pin<alloc::boxed::Box<dyn Future<Output = T> + Send + 'a>>
+    async move{
+        if idx <= CHARSET.len(){
+            idx
+        } else{
+            gen_random_idx(random::<u8>() as usize)
+        }
+    }.boxed() //-- wrap the future in a Box, pinning it
+}
+
+
+
+
+
+pub fn gen_random_idx(idx: usize) -> usize{
+    if idx < CHARSET.len(){
+        idx
+    } else{
+        gen_random_idx(random::<u8>() as usize)
+    }
+}
+
+
+
+
+
+pub fn string_to_static_str(s: String) -> &'static str {
+    // TODO - use other Box methods
+    // ...
+    Box::leak(s.into_boxed_str())
+}
+
 
 
 
@@ -162,7 +207,6 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
 
 
-
 // ------------------------------ simd using mpsc channel + tokio + native thread
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -224,48 +268,10 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 
-
-// -----------------------------------
-// handling a recursive async function
-// -----------------------------------
-// https://rust-lang.github.io/async-book/07_workarounds/04_recursion.html
-// NOTE - Future trait is an object safe trait thus we have to Box it with dyn keyword to have kinda a pointer to the heap where the object is allocated in runtime
-// NOTE - a recursive `async fn` will always return a Future object which must be rewritten to return a boxed `dyn Future` to prevent infinite size allocation in runtime from heppaneing some kinda maximum recursion depth exceeded prevention process
-pub fn async_gen_random_idx(idx: usize) -> BoxFuture<'static, usize>{ // NOTE - pub type BoxFuture<'a, T> = Pin<alloc::boxed::Box<dyn Future<Output = T> + Send + 'a>>
-    async move{
-        if idx <= CHARSET.len(){
-            idx
-        } else{
-            gen_random_idx(random::<u8>() as usize)
-        }
-    }.boxed() //-- wrap the future in a Box, pinning it
-}
-
-
-
-
-
-pub fn gen_random_idx(idx: usize) -> usize{
-    if idx < CHARSET.len(){
-        idx
-    } else{
-        gen_random_idx(random::<u8>() as usize)
-    }
-}
-
-
-
-
-
-pub fn string_to_static_str(s: String) -> &'static str {
-    // TODO - use other Box methods
-    // ...
-    Box::leak(s.into_boxed_str())
-}
-
-
-
-
+// ------------------------------ testing ownership and borrowing rule
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
 
 pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime to initiate an instance from it using struct declaration and return a reference to that instance inside any function 
 trait Interface{}

@@ -51,6 +51,7 @@ pub mod messanger{
         pub members: Vec<ChannelMember>,
         pub threads: Vec<Thread>,
         pub permissions: Vec<Permission>,
+        pub cmds: Commands, //-- pre builtin commands for this channel 
     }
     
     pub struct Permission;
@@ -58,6 +59,11 @@ pub mod messanger{
     pub struct ChannelMember;
     pub struct Level;
     pub struct Role;
+    pub enum Commands{
+        Ban,
+        Kick,
+        Mute,
+    }
         
 
 
