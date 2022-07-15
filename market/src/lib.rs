@@ -60,7 +60,6 @@ use crate::constants::*;
 use crate::external::*;
 use crate::nft_callbacks::*;
 use crate::sale::*;
-use crate::sale_views::*;
 use crate::internal::*;
 use crate::storage::*;
 
@@ -74,7 +73,6 @@ pub mod constants;
 pub mod utils; //-- or crate::utils
 pub mod internal;
 pub mod external;
-pub mod sale_views;
 pub mod sale;
 pub mod nft_callbacks;
 

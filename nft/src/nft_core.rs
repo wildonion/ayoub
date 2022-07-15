@@ -97,7 +97,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 // ----------------------------------------
 //     CROSS CONTRACT CALLS' INTERFACES
 // ----------------------------------------
-#[ext_contract(extend_receiver_contract_for_none_fungible_token)] //-- extend_receiver_contract_for_none_fungible_token name that we passed in #[ext_contract()] proc macro is the name of the contract (a hypothetical contract of course) that we're extending its interface for cross contract call and creating transaction which is a promise (future object) ActionReceipt object and means we want to call the following methods inside that contract which contains a transaction which is a promise (future object) ActionReceipt object to be executed later
+#[ext_contract(extend_receiver_contract_for_none_fungible_token)] //-- extend_receiver_contract_for_none_fungible_token name that we passed in #[ext_contract()] proc macro is the name of the contract (a hypothetical contract of course) that we're extending its interface for cross contract call and creating transaction which is a promise (future object) ActionReceipt object and means we want to call the following methods inside that contract which contains a transaction which is a promise (future object) ActionReceipt object that must be executed later
 trait NoneFungibleTokenReceiver{ //-- this trait which contains the cross conract call methods will extend the interface of the receiver_id's contract actor with a name inside the #[ext_contract()] proc macro which specifies the extended interface contract name 
 
     /////
@@ -169,7 +169,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
 
             for every cross contract calls we have to extend the interface of our contract struct by impl a trait for that to define the cross contract call promise methods 
                 nft_transfer_call()     ----- inside the sender_id's contract actor
-                nft_on_transfer()       ----- inside the receiver_id's contract actor
+                nft_on_transfer()       ----- inside the receiver_id's contract actor - it must already be defined in there so we can schedule it in caller contract to be executed on receiver_id's contract actor account  
                 nft_resolve_transfer()  ----- inside the sender_id's contract actor to solve and fill the pending promise ActionReceipt object with the promise DataReceipt object coming from the receiver_id's contract actor
 
         

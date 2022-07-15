@@ -59,7 +59,7 @@ use std::{env, slice, mem, thread};
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 use std::net::SocketAddr; //-- these structures are not async; to be async in reading and writing from and to socket we must use tokio::net 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use dotenv::dotenv;
 use actix::{*, prelude::*}; //-- loading actix actors and handlers for validator actor's threads communication using their address and defined events 
 use actix_web::{http::StatusCode, App, HttpServer, HttpRequest, middleware, web, get, post, Error, HttpResponse};

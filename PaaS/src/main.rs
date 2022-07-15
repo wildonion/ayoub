@@ -113,6 +113,7 @@ Coded by
 
 
 
+use constants::MainResult;
 use std::{net::SocketAddr, sync::Arc, env};
 use chrono::Local;
 use dotenv::dotenv;
@@ -122,7 +123,6 @@ use tokio::sync::oneshot;
 use hyper::server::{Server, conn::AddrIncoming};
 use self::contexts as ctx; // use crate::contexts as ctx;
 use ctx::rafael::env::Serverless; // NOTE - based on orphan rule Serverless trait is required to use the run() method on the runtime instance
-use constants::MainResult;
 
 
 
@@ -341,7 +341,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
         // -----------------------------------------------------
         let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); 
+        app.run(); //-- run the runtime app in serverless mode  
 
         // 
         // ...
@@ -386,7 +386,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
         // -----------------------------------------------------
         let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); 
+        app.run(); //-- run the runtime app in serverless mode  
 
         // 
         // ...
@@ -430,7 +430,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
         // -----------------------------------------------------
         let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); 
+        app.run(); //-- run the runtime app in serverless mode  
 
         // 
         // ...
@@ -474,7 +474,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
         // -----------------------------------------------------
         let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); 
+        app.run(); //-- run the runtime app in serverless mode  
 
 
         // 

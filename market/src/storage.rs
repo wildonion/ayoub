@@ -72,7 +72,7 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
     pub fn storage_withdraw(&mut self){ //-- since we're mutating the state of the contract by removing an entry from the storage_deposit collection thus we must define the first param as &mut self - this method allows users (which can be sellers or anyone who has paid for the stroage cost of the sell object related to an NFT) to withdraw any excess storage that they're not using by the allocated sell object since the sell object might be sold out and no need to list it for the last seller anymore on the chain 
         assert_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
         let owner_id = env::predecessor_account_id(); //-- getting the account_id of the current caller which is the owner of the withdraw process
-        let all_current_storage_deposited_amount = self.storage_deposits.remove(&owner_id).unwrap_or(0); //-- getting the total deposited amount for the current caller of this method to remove it from the map and if it wasn't any account_id matches with this caller we simply fill the amount with 0  
+        let all_current_storage_deposited_amount = self.storage_deposits.remove(&owner_id).unwrap_or(0); //-- getting the total deposited amounts for the current caller of this method to remove it from the map and if it wasn't any account_id matches with this caller we simply fill the amount with 0  
         let all_sale_ids_for_the_caller = self.by_owner_id.get(&owner_id); //-- getting the set of all the sale objects ids which is of type String for the current caller of this method
         let length_of_all_sale_ids = all_sale_ids_for_the_caller.map(|s| s.len()).unwrap_or_default(); //-- getting the total length of the sale object ids inside the set by mapping the wrapped UnorderedSet<String> into a none wrapped type to get its length and default will be set if there wasn't any sale object id inside the set  
         let total_storage_deposited_amount_for_all_sales = u128::from(length_of_all_sale_ids) * STORAGE_PER_SALE; //-- getting the total $NEARs which is being used up for all the current sale objects for the current caller of this method on this contract in yocto$NEAR which is of type u128 
@@ -93,21 +93,42 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
             
             /*
 
-                ------------------------------------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
 
                 since the amount of deposited storage from a seller might be higher (calling self.storage_deposit() 
                 for each listing or for example attach 10 $NEARs in just one call) than the storage amount of total 
                 sale objects related to that seller (since the seller might had deposited too many $NEARs for the 
-                storage but only a few of his/her NFTs has sold out thus his/her total deposited amount inside the 
+                storage but only a few of his/her NFTs has sold out thus his/her total deposited amounts inside the 
                 self.storage_deposits is greater than the total amount of his/her remaining sale objects calculated 
                 using the length of all sale objects inside the self.by_owner_id collection) thus we have to send 
                 back the total amounts of all remaining sale objects inside the self.deposit_storages if the amount 
                 of them is only greater than 0 since there are other listed NFTs in there that are not sold out yet!
-                
-                for example: if the user had 500 sale objects listed remaining on the market, we insert that value here so
-                            if those sales get taken down, the user can then go and withdraw 500 sales worth of storage.
 
-                ------------------------------------------------------------------------------------
+
+                for example: a seller deposits 10 $NEARs for his sell which covers 1000 listings on the market
+                            since the creator must approve the market contract actor account by calling the nft_approve() method
+                            on the NFT contract for a specific NFT thus we might have only a few NFTs which are approved to be listed
+                            and transferred on behalf of the owner or the creator on the market; but the seller has deposited 1000 listings 
+                            which will cover the future listings also; therefore the total deposited amounts for a sepecific account_id
+                            inside the self.storage_deposits collection might be greater than the total amounts of the listing NFTs 
+                            or all sale objects listed inside the self.by_owner_id collection and due to this fact we must insert
+                            the total amounts of all sale objects related to the seller back to the self.storage_deposits collection
+                            if it was greater than 0; by doing this we're updating the amount of deposited_storage for the seller 
+                            with the amount of all remaining sale objects to make sure that the seller has covered the cost of 
+                            his/her other listings on the market inside the self.deposit_storages collection on chain and if the user 
+                            had 500 sale objects listed remaining on the market, we insert that value here so if those sales 
+                            get taken down, the user can then go and withdraw 500 sales worth of storage.
+
+                
+                NOTE - listing an NFT is done first by calling the nft_approve() method of the NFT contract actor account
+                       which has been deployed on the creator account and second by scheduling a future object inside the
+                       mentioned method to be executed on the market contract actor account inside the nft_on_approve() method
+                       through a cross contract call.
+                
+                NOTE - by executing the nft_on_approve() method on the market contract actor account an NFT will be listed 
+                       to be sold out on the market on chain on behalf of the owner or the creator. 
+
+                ----------------------------------------------------------------------------------------------------------
 
             */
             

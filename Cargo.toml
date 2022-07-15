@@ -10,4 +10,5 @@ members = [
     "coiniXerr",
     "nft",
     "tests",
+    "PaaS/src/runtime/",
 ]

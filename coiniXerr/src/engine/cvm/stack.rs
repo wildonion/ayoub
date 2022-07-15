@@ -67,3 +67,44 @@ macro_rules! log {
         $crate::env::log(format!($($arg)*).as_bytes()) //-- log function only accepts utf8 bytes
     };
 }
+
+
+#[macro_export]
+macro_rules! impl_engine_constructor {
+    ($( $new:ident: [ $( $pos:expr ),* ] anchored at $anchor:expr; )*) => {
+        $(
+            pub fn $new() -> Self{
+                Self{
+                    positions: [$( $pos ),*].into_iter().collect(),
+                    anchor: $anchor,
+                }
+            }
+        )* //-- * m//eans defining function for every new Pos
+    };
+}
+
+
+// #[derive(Debug, Clone)]
+// pub struct Shape{
+//     typ: &'static str,
+//     positions: HashSet<Pos>,
+//     anchor: Pos,
+// }
+
+
+// #[derive(Debug, Clone, Copy)]
+// pub struct Pos(pub i32, pub i32);
+
+
+
+// impl Shape {
+//     impl_engine_constructor! {
+//       new_i "🟦": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(3, 0)] @ Pos(1, 0);
+//       new_o "🟨": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
+//       new_t "🟫": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(1, 1)] @ Pos(1, 0);
+//       new_j "🟪": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(-1, 2)] @ Pos(0, 1);
+//       new_l "🟧": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(1, 2)] @ Pos(0, 1);
+//       new_s "🟩": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(-1, 1)] @ Pos(0, 0);
+//       new_z "🟥": [Pos(0, 0), Pos(-1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
+//     }
+// }
