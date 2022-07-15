@@ -154,8 +154,23 @@ impl RafaelRuntime{
     
     
     #[wasm_bindgen(constructor)]
-    pub fn new() -> u8{
-        0
+    pub fn new(id: u8, current_service: &str, node_addr: &str) -> Self{
+        let service = match current_service{
+            "auth" => Service::Auth,
+            "event" => Service::Event,
+            "nft" => Service::Nft,
+            _ => Service::Game,
+        };
+
+        Self{
+            id, 
+            current_service: service,
+            link_to_server: None,
+            error: None,
+            node_addr: node_addr.to_string(),
+            last_crash: None,
+            first_init: Some(chrono::Local::now().timestamp()),
+        }
     }
 
 

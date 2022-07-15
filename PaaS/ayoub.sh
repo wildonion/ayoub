@@ -16,6 +16,7 @@
 # ./ayoub.sh list --api --controller <CONTROLLER_NAME> -> list of all available apis related to a controller (game, auth, event and nft)
 
 
+# sudo chmod 777 -R /home/wildonion/ayoub
 # sudo chown -R root:root /home/wildonion/ayoub
 # cargo build --bin ayoub --release
 
