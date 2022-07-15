@@ -182,14 +182,6 @@ impl RafaelRuntime{
 
 
 
-    // #[wasm_bindgen(getter)]
-    // pub fn get_id(&self) -> String{ 
-    //     let buffer_id = self.id.as_ref();
-    //     let id_string = std::str::from_utf8(&buffer_id).unwrap().to_string();
-    //     id_string
-    // }
-
-
     #[wasm_bindgen]
     pub fn get_id(&self) -> u8{
         self.id
