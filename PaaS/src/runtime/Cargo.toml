@@ -46,3 +46,9 @@ features = [
 crate-type = ["cdylib", "rlib"]
 name = "rafael"
 path = "lib.rs"
+
+
+
+
+[profile.release]
+lto = true

@@ -117,13 +117,13 @@ pub struct LoadBalancer; // TODO - clients -request-> middleware server -request
 
 
 
-// ---------------------------------------------------------------------------
-// wasm runtime structure and its methods to bind it into js to run in browser  
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------
+// wasm runtime structure and its methods to bind it into js  
+// ---------------------------------------------------------
 
-#[wasm_bindgen] //-- bounding the Runtime struct to wasm_bindgen proc macro attribute to compile it to wasm to generate a binding for js and convert it into js codes to run in browser
+#[wasm_bindgen] //-- bounding the Runtime struct to wasm_bindgen proc macro attribute to compile it to wasm to generate a binding for js and convert it into js codes
 #[derive(Serialize, Deserialize, Clone)]
-pub struct WasmRuntime{
+pub struct RafaelRuntime{
     pub id: u8, //-- using u8 as the id instead of Uuid since the Uuid can't be convert to wasm
     pub current_service: self::Service, //-- current service variant
     pub link_to_server: Option<LinkToService>, //-- we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
@@ -136,7 +136,7 @@ pub struct WasmRuntime{
 
 
 #[wasm_bindgen]
-impl WasmRuntime{
+impl RafaelRuntime{
     
 
 
@@ -148,8 +148,6 @@ impl WasmRuntime{
     // https://crates.io/crates/wasm-bindgen-rayon
     // split data using divide and conquer simd based design pattern and std::thread pool and mpsc
     // run multithreading in wasm to bind it into js to run in js using rayon
-    // build .wasm using wasm-pack command and .wasm file optimization using wasm-gc, wasm-snip, wasm-opt and wasm-strip 
-    // wasm-pack build --target web
     // ...
     
 
