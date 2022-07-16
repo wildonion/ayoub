@@ -12,7 +12,7 @@
 
 > tests: ```cargo run --bin tests```
 
-> Rafael Runtime: ```sudo chmod +x PaaS/src/runtime/build.sh && cd PaaS/src/runtime/ && ./build.sh```
+> Rafael WASM Runtime: ```sudo chmod +x PaaS/src/runtime/build.sh && cd PaaS/src/runtime/ && ./build.sh```
 
 # ☣️ Build for Production
 

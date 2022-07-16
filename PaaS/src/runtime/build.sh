@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+cargo install wasm-pack
 sudo npm i wasm-opt -g
 # wasm-pack build --target web
 wasm-pack build --target nodejs

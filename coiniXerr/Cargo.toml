@@ -31,6 +31,7 @@ rand = "0.8"
 # libraries don't have entry points, you can't run them,they're used for functionality sharing like binding a .wasm into js codes
 # we need lib.rs and crate type of cdylib for none binary like .wasm, .so, .dylib and .dll files
 crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
 
 
 
