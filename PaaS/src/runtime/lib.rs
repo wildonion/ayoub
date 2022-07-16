@@ -4,9 +4,8 @@
 
 
 
-const APP_NAME: &str = "Rafael";
+mod constants;
 use wasm_bindgen::prelude::*;
-use std::fmt;
 use borsh::{BorshSerialize, BorshDeserialize};
 use std::sync::mpsc as std_mpsc;
 use serde::{Serialize, Deserialize};
@@ -30,61 +29,6 @@ use serde::{Serialize, Deserialize};
 //          RAFAEL WASM BINDING DATA STRUCTURES
 // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...RuntimeLog_instance...}, {...ServerlessLog_instance...}]} or {"event": "serverless", "data": [{...ServerlessLog_instance...}, {...ServerlessLog_instance...}]}
-#[serde(rename_all="snake_case")] //-- will convert all fields into snake_case
-pub enum EventVariant{
-    Runime(Vec<RuntimeLog>),
-    Serverless(Vec<ServerlessLog>),
-}
-
-
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct EventLog{ //-- an interface to capture the data about and event - this is the EVENT_JSON
-    pub time: Option<i64>, //-- the time of the event data log
-    #[serde(flatten)] //-- flatten to not have "event": {<EventVariant>} in the JSON, just have the contents of {<EventVariant>} which is the value of the data key itself - we can use #[serde(flatten)] attribute on a field of a struct or enum in those cases that we don't know about the number of exact fields inside the struct or enum or what's exactly inside the body of an api comming from the client to decode or map it into the struct or enum thus we can use this attribute to hold additional data that is not captured by any other fields of the struct or enum
-    pub event: EventVariant, //-- the data which is a vector of all either Serverless or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
-}
-
-
-
-impl fmt::Display for EventLog{ //-- implementing the Display trait for the EventLog struct to show its instances' fields like EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]} when we're calling logging functions like println!() which is a formatted stream of strings - any value or type that implements the Display trait can be passed to format_args!() macro, as can any Debug implementation be passed to a {:?} within the formatting string; Debug must be implemented for the type
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
-        f.write_fmt( //-- writing some formatted information using format_args!() macro into the formatter instance which is `f`
-            format_args!( //-- format_args!(), unlike its derived macros, avoids heap allocations
-                "EVENT_JSON:{}", //-- it'll start with EVENT_JSON:{} when you log the instance of the EventLog
-                &serde_json::to_string(self).map_err(|_| fmt::Error).unwrap() //-- formatting every field of the self which is the instance of the EventLog struct into the string to writ into the `f` and catch the fmt::error of each message or field if there was any when we're creating the stream by formatting the struct
-            ) 
-        ) // NOTE - we can print the string instance of the EventLog like so: println!("{:?}", event_log_instance.to_string()); since the Display trait is implemented for EventLog struct
-    }
-}
-
-
-
-#[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
-pub struct RuntimeLog{ // TODO - initialize this inside the main() function
-    pub id: u8,
-    pub path: String, //-- the path of the log file in server with lifetime 'p
-    #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
-    pub requested_at: Option<i64>, //-- the time of the log request
-    pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
-}
-
-
-
-#[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
-pub struct ServerlessLog{ // TODO - initialize this inside the main() function
-    pub id: u8,
-    pub path: String, //-- the path of the log file in server with lifetime 'p
-    pub method: String, //-- the method name that the log data is captured for
-    #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
-    pub requested_at: Option<i64>, //-- the time of the log request
-    pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
-}
-
-
 
 #[wasm_bindgen]
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)] // TODO - use error derive proc macro attributes on the following enum fields
@@ -193,7 +137,7 @@ impl RafaelRuntime{
     pub fn get_status(&self) -> String{
         let last_crash_time = self.last_crash.unwrap(); 
         let error_caused = self.error.unwrap();
-        let status_message = format!("{} ::: The last crash was on {} caused by {:?}", APP_NAME, last_crash_time, error_caused);
+        let status_message = format!("{} ::: The last crash was on {} caused by {:?}", constants::APP_NAME, last_crash_time, error_caused);
         status_message
     }
 
