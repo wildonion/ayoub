@@ -21,8 +21,6 @@ serde = {version = "1", features = ["derive"] }
 # libraries don't have entry points, you can't run them,they're used for functionality sharing like binding a .wasm into js codes
 # we need lib.rs and crate type of cdylib for none binary like .wasm, .so, .dylib and .dll files
 crate-type = ["cdylib", "rlib"]
-name = "enginer"
-path = "src/lib.rs"
 
 
 

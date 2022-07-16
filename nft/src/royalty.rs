@@ -145,6 +145,7 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
         
         // -------------------------------------------------------------------------------
         // -------------------------------------------------------------------------------
+        // NOTE - every old owner which is not inside the perpetual royalty object of the token can only be paid only once since the old owner will get paid at the end
         // NOTE - per each NFT sell all collaborator (like the profit of market contract actor account itself)s will be paid based on their royalty percentage 
         // NOTE - we've cloned the owner_id of the transferred_token in refund_approve_account_ids() 
         //        method to prevent it from moving cause we'll use it to get the old owner for payout ops

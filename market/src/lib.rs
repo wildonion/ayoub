@@ -44,6 +44,7 @@ use near_sdk::collections::{LazyOption, LookupMap, UnorderedMap, UnorderedSet}; 
 use near_sdk::json_types::{Base64VecU8, U128, U64}; //-- Base64VecU8 is used to serialize/deserialize Vec<u8> to base64 string
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{ 
+                promise_result_as_success, //-- returns the result of the promise if successful, otherwise returns None
                 env::STORAGE_PRICE_PER_BYTE, //-- loading the price of each byte in yocto$NEAR
                 Gas, ext_contract, PromiseResult, env, near_bindgen, assert_one_yocto, //-- we're using the assert_one_yocto() function from the near_sdk cause it's using the env::panic_str() one the background 
                 AccountId, Balance, CryptoHash, Promise, //-- Promise struct is needed to handle async cross contract calls or message passing between contract actors
@@ -139,7 +140,7 @@ pub mod nft_callbacks;
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)] //-- borsh is need for serde and codec ops; deserialize or map utf8 bytes into this struct from where the contract has called and serialize it to utf8 bytes for compilling it to wasm to run on near blockchain 
 pub struct MarketContract{ // NOTE - UnorderedMap is an iterable implementation of the map where as the LookupMap is a none iterable of the map
     pub owner_id: AccountId, //-- keeping the track of the owner of the contract which is the one who has called the initialization method and sign the transaction
-    pub sales: UnorderedMap<ContractAndTokenId, Sale>, //-- keeping the track of all the sales by mapping the ContractAndTokenId to a sale cause every sale has a unique identifier which is made up of the `contract actor account_id + DELIMETER + token_id` 
+    pub sales: UnorderedMap<ContractAndTokenId, Sale>, //-- sale_id: sale object - keeping the track of all the sales by mapping the ContractAndTokenId to a sale cause every sale has a unique identifier which is made up of the `contract actor account_id + DELIMETER + token_id` 
     pub by_owner_id: LookupMap<AccountId, UnorderedSet<ContractAndTokenId>>, //-- account_id: sale_id - keeping the track of all the sale ids which is made up of the `contract actor account_id + DELIMETER + token_id` inside a set for every account_id
     pub by_nft_contract_id: LookupMap<AccountId, UnorderedSet<TokenId>>, //-- account_id: token_id - keeping the track of all the token_ids inside a set for a sale of a given account_id
     pub storage_deposits: LookupMap<AccountId, Balance>, //-- account_id: balance - mapping between all the storages paid in yocto$NEAR of type u128 by a specific account_id
