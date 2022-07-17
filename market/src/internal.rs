@@ -38,6 +38,8 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
+// NOTE - sale.owner_id is the one who wants to sell his/her NFT and lists on the market
+
 
 
 
@@ -57,7 +59,7 @@ impl MarketContract{ //-- we've defined the following methods of the `MarketCont
         };
         
         
-        let mut sale_ids = match self.by_owner_id.get(&sale.owner_id){ //-- getting the set of all sale ids related to an owner_id 
+        let mut sale_ids = match self.by_owner_id.get(&sale.owner_id){ //-- getting the set of all sale ids related to an owner_id of the NFT which is the seller
             Some(sale_ids) => {
                 sale_ids //-- returning the set of all sale ids related to a specific owner
             },
@@ -65,7 +67,7 @@ impl MarketContract{ //-- we've defined the following methods of the `MarketCont
                 env::panic_str("Found No Sale Ids"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
             },
         };
-        let mut nft_ids = match self.by_nft_contract_id.get(&nft_contract_id){ //-- getting the set of all nft ids related to a specific owner
+        let mut nft_ids = match self.by_nft_contract_id.get(&nft_contract_id){ //-- getting the set of all nft ids related to the passed in nft_contract_id which is the owner of the NFT which is the seller
             Some(nft_ids) => {
                 nft_ids //-- returning the set of all nft ids related to a specific owner
             },

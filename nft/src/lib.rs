@@ -27,6 +27,27 @@ Coded by
 
 
 
+
+            all NoneFungibleTokenCore trait methods {
+                nft_approve
+                nft_is_approved
+                nft_revoke
+                nft_revoke_all
+                nft_transfer
+                nft_transfer_call
+                nft_token
+                nft_payout
+                nft_transfer_payout
+            }
+            
+            must be implemented for:
+
+            impl NoneFungibleTokenCore for NFTContract{
+
+            }
+
+
+
 */
 
 

@@ -79,7 +79,7 @@ use crate::{*, events::EventLogVariant}; // loading all defined crates, structs 
 #[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `NFTContract` struct to compile all its methods to wasm so we can call them in near cli
 impl NFTContract{ //-- following methods will be compiled to wasm using #[near_bindgen] proc macro attribute 
 
-    #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute 
+    #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute 
     pub fn nft_mint(&mut self, token_id: TokenId, metadata: TokenMetadata, receiver_id: AccountId, perpetual_royalties: Option<HashMap<AccountId, u32>>){ //-- we've defined the self to be mutable and borrowed cause we want to mutate the state of token_metadata_by_id and tokens_by_id fields but don't want to lose the lifetime of the created instance of the contract after calling this method 
 
         let initial_storage_usage = env::storage_usage(); //-- storage_usage() method calculate current total storage usage as u64 bits or 8 bytes maximum (usize on 64 bits arch system) of this smart contract that this account would be paying for - measuring the initial storage being uses on the contract 
@@ -133,7 +133,7 @@ impl NFTContract{ //-- following methods will be compiled to wasm using #[near_b
 
 
         let required_storage_in_bytes = env::storage_usage() - initial_storage_usage; // -- calculating the required storage in u64 bits or 8 bytes which is total used unitl now - the initial storage
-        refund_deposit(required_storage_in_bytes); //-- depositing some $NEARs based on used bytes in the contract and get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account; if the caller didn't attach enough it'll panic 
+        refund_deposit(required_storage_in_bytes); //-- depositing some $NEARs based on used bytes in the contract and get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol; if the caller didn't attach enough it'll panic 
     
     }
 

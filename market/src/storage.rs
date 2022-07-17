@@ -41,6 +41,38 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
+// --------------------------------
+// --- payable function process ---
+//      1 - ensure that the user has attached at least on yoctoNAER for the storage cost and security reasons like avoiding the DDOS attack on the contract by making sure that the caller has enough amount to call this and is not an intruder
+//      2 - then calculate the storage used in u64 bits or 8 bytes maximum (usize on 64 bits arch system) of mutating the state of the contract like mutating any collection inside the contract struct like the total size of a new entry added inside the collection or the total size of the removed entries 
+//      3 - finally call something like refund_deposit() method to calculate the total costs for that bytes and refund to the caller any execess if there was an attached which was larger than the total storage cost or any removal entry process which will free up some storage which we must refund the caller based on the freed up storage bytes
+
+
+
+
+// NOTE - if a function requires a deposit, we need a full access key of the user to sign that transaction which will redirect them to the NEAR wallet
+// NOTE - gas fee is the computational fee paied as raward to validators by attaching them (in gas units) in scheduling function calls in which they mutate the state of the contract which face us cpu usage costs; and also the remaining deposit will get pay back as a refund to the caller by the near protocol
+// NOTE - deposit or amount is the cost of the method and must be attached (in yocot$NEAR or near) for scheduling payable function calls based on storages they've used by mutating the state of the contract on chain like updating a collection field inside the contract struct and we have to get pay back the remaining deposit as a refund to the caller and that's what the refund_deposit() function does
+// NOTE - if a contract method mutate the state like adding a data into a collection field inside the contract struct; the method must be a payable method (we need to tell the caller attach deposit to cover the cost) and we have to calculate the storage used for updating the contract state inside the function to tell the caller deposit based on the used storage in bytes (like the total size of the new entry inside a collection) then refund the caller with the extra tokens he/she attached
+// NOTE - a payable method has &mut self as its first param and all calculated storage must of type u64 bits or 8 bytes maximum length (64 bits arch system usize)
+// NOTE - caller in payable methods must deposit one yocot$NEAR for security purposes like always make sure that the user has some $NEAR in order to call this means only those one who have $NEARS can call this method to avoid DDOS attack on this method
+// NOTE - a payable method can be used to pay the storage cost, the escrow price or the gas fee and the excess will be refunded by the contract method or the NEAR protocol
+// NOTE - gas fee is the computational cost which must be paid if we’re doing cross contract call or moving between shards and actor cause this action will cost some cpu usage performance and must be attached separately in its related call from the cli 
+// NOTE - amount or deposit is the cost of the payable function which can be either the cost of the storage usage for mutating contract or the cost of some donation or escrow ops
+// NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
+// NOTE - a view method can also force the user to attach yocot$NEAR to the call to prevent contract from DDOSing
+// NOTE - if a method of the contract is going to mutate the state of the contract the first param of that method must be &mut self and it can be a none payable method like private method
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -52,8 +84,8 @@ use crate::*; // loading all defined crates, structs and functions from the root
 impl MarketContract{ //-- we'll add bytes to the contract by creating entries in the data structures - we've defined the init methods of the `MarketContract` struct in here cause the lib.rs is our main crate
     
     
-    #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute  
-    pub fn storage_deposit(&mut self, account_id: Option<AccountId>){ //-- since we're mutating the state of the contract by adding a new entry into the storage_deposit collection attached from the caller for selling an NFT sell object thus we must define the first param as &mut self with an optional account_id who wants to pay for storage cost of an allocated sale object on chain which can be either the seller or anyone who wants to pay for another contract actor account_id - this method will cover the cost of storing sale object on the contract on chain 
+    #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute  
+    pub fn storage_deposit(&mut self, account_id: Option<AccountId>){ //-- since we're mutating the state of the contract (and due to the fact that payable methods' first param must be &mut self) by adding a new entry into the storage_deposit collection attached from the caller for selling an NFT sell object thus we must define the first param as &mut self with an optional account_id who wants to pay for storage cost of an allocated sale object on chain which can be either the NFT owner which is the seller or anyone who wants to pay for the seller contract actor account_id (the withdraw process must be done by transferring the deposited amount to the NFT owner or the seller) - this method will cover the cost of storing sale object on the contract on chain 
         let storage_deposit = env::attached_deposit(); //-- getting the attached deposit to the call by the caller in yocot$NEAR which is of type u128 - the required cost per sell object is 0.01 $NEAR or 10^19 in yocto$NEAR which will be deposited on chain inside the storage_deposit collection
         let storage_account_id = account_id
                                                 .map(|a| a.into()) //-- mapping the account_id inside the Option to convert it into a valid account_id using .into() method which will return the T
@@ -68,8 +100,8 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
     }
 
 
-    #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute 
-    pub fn storage_withdraw(&mut self){ //-- since we're mutating the state of the contract by removing an entry from the storage_deposit collection thus we must define the first param as &mut self - this method allows users (which can be sellers or anyone who has paid for the stroage cost of the sell object related to an NFT) to withdraw any excess storage that they're not using by the allocated sell object since the sell object might be sold out and no need to list it for the last seller anymore on the chain 
+    #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute 
+    pub fn storage_withdraw(&mut self){ //-- since we're mutating the state of the contract (and due to the fact that payable methods' first param must be &mut self) by removing an entry from the storage_deposit collection thus we must define the first param as &mut self - this method allows users (which can be sellers or anyone who has paid for the stroage cost of the sell object related to an NFT) to withdraw any excess storage that they're not using by the allocated sell object since the sell object might be sold out and no need to list it for the last seller anymore on the chain 
         assert_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
         let owner_id = env::predecessor_account_id(); //-- getting the account_id of the current caller which is the owner of the withdraw process
         let all_current_storage_deposited_amount = self.storage_deposits.remove(&owner_id).unwrap_or(0); //-- getting the total deposited amounts for the current caller of this method to remove it from the map and if it wasn't any account_id matches with this caller we simply fill the amount with 0  
@@ -85,7 +117,7 @@ impl MarketContract{ //-- we'll add bytes to the contract by creating entries in
 
 
         if updated_current_storage_deposited_amount > 0{ //-- once an NFT has been sold out we have to release the allocated storage by the sell object related to that NFT on the chain thus we have to payout the seller the amount of he/she deposited before, for the his/her sell object and he/she must withdraw the amount; the market contract actor account must have enough balance to pay the withdrawer
-            Promise::new(owner_id.clone()).transfer(updated_current_storage_deposited_amount); //-- transferring the excess amount of storage deposit from the market contract actor account budget to the current caller of this method or the withdrawer - scheduling a transferring promise or future action receipt object to be executed later by the NEAR protocol which contains an async message which is the process of transferring NEARs to another contract actor account
+            Promise::new(owner_id.clone()).transfer(updated_current_storage_deposited_amount); //-- transferring the excess amount of storage deposit from the market contract actor account budget to the current caller of this method or the withdrawer - scheduling a transferring promise or future action receipt object to be executed later by the NEAR protocol which contains an async message which is the process of transferring NEARs to another contract actor account (the NFT owner which is the seller in this case)
         }
 
 
