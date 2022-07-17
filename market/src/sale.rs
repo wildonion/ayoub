@@ -198,9 +198,12 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
 
         let sale = self.internal_remove_sale(nft_contract_id.clone(), token_id.clone()); //-- removing the listed sale object contains the NFT info from the market - cloning the nft_contract_id and the token_id to have them in later scopes 
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for nft_transfer_payout
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////// ➔ defaulting GAS weight to 1, attached 1 yocto$NEAR deposit, and static GAS equal to the GAS for nft_transfer_payout
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        // NOTE - we must attach 1 yocto$NEAR in the following cross contract call since inside the nft_transfer_payout() method we've enforced the caller to attach 1 yocto$NEAR for security reasons like prevent the contract call from DDOSing 
+
         // extend_receiver_contract_for_none_fungible_token::ext(receiver_id.clone()) //--  we're cloning the receiver_id to avoid moving cause we want to use it inside the nft_resolve_transfer() method - the account_id that this method must be called and executed inside since the account_id param is the one who is responsible for making this call like the market contract actor account - no need to clone the receiver_id cause we're passing it by reference or as a borrowed type
         //     .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling nft_on_transfer() cross contract call promise method 
         //     .with_static_gas(GAS_FOR_NFT_TRANSFER_CALL) //-- prepaid_gas() method returns the amount of gas attached to the call via near cli that can be used to pay the gas fees | attached gas - required gas for calling nft_transfer_call() method is the total gas fee which will be deposited in yocot$NEAR from the caller wallet for this transaction call
@@ -228,9 +231,6 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
         //             )
 
         //     )
-
-
-
 
 
 

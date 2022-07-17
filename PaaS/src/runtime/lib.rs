@@ -84,6 +84,7 @@ impl RafaelRuntime{
     
 
 
+    
     // https://rustwasm.github.io/
     // https://docs.rs/wasm-bindgen-futures
     // https://crates.io/crates/wasm-react
@@ -97,6 +98,7 @@ impl RafaelRuntime{
 
     
     
+    // JS CODE => let rt = new RafaelRuntime(1837, "auth", "0.0.0.0:2424"); 
     #[wasm_bindgen(constructor)]
     pub fn new(id: u8, current_service: &str, node_addr: &str) -> Self{
         let service = match current_service{
@@ -142,11 +144,33 @@ impl RafaelRuntime{
     }
 
 
+
     #[wasm_bindgen(getter)]
     pub fn get_current_service(&self) -> Service{
         self.current_service //-- no need to clone the current_service cause Copy trait is implemented for the Service enum
     }
 
+
+
+    #[wasm_bindgen(setter)]
+    pub fn set_current_service(&mut self, current_service: &str) -> Self{ //-- since we want to mutate tbe state of structure we've defined the first param as &mut self
+        let service = match current_service{
+            "auth" => Service::Auth,
+            "game" => Service::Game,
+            "event" => Service::Event,
+            _ => Service::Nft,
+        };
+        self.current_service = service;
+        Self{
+            id: self.id,
+            current_service: self.current_service,
+            link_to_server: self.link_to_server,
+            error: self.error,
+            node_addr: self.node_addr.clone(), //-- cloning the self.node_addr since cannot move out of `self.node_addr` which is behind a mutable reference move occurs because `self.node_addr` has type `std::string::String`, which does not implement the `Copy` trait
+            last_crash: self.last_crash,
+            first_init: self.first_init, 
+        }
+    }
 
 
 }

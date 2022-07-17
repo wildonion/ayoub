@@ -263,7 +263,10 @@ impl NoneFungibleTokenCore for NFTContract{ //-- implementing the NoneFungibleTo
 //   NFT RESOLVER INTERFACE METHODS
 // ----------------------------------
 trait NoneFungibleTokenResolver{ //-- this trait which contains the cross conract call methods will extend the interface of the current contract actor which is the sender_id's contract actor with a name inside the #[ext_contract()] proc macro which specifies the extended interface contract name
-
+    
+    ////
+    /////// ➔ we'll use this method as a callback inside this contract to get the result of the cross contract call the nft_on_transfer() method which has been scheduled inside the nft_transfer_call() method to be executed on a receiver contract actor account
+    //// 
     fn nft_resolve_transfer(&mut self, authorized_id: Option<AccountId>, owner_id: AccountId, receiver_id: AccountId, token_id: TokenId, approved_account_ids: HashMap<AccountId, u64>, memo: Option<String>) -> bool; //-- resolves the created promise on this contract of the cross contract call to the receiver contract, this is the callback from calling the nft_on_transfer() cross contract call promise method that we want to await on and solve it inside the nft_transfer_call() method which will analyze what happened in the cross contract call when nft_on_transfer was called as part of the nft_transfer_call method - we've passed the approval_account_ids in to this method so we can keep track of what the approvals (those account_id which have access to transfer the NFT on behalf of the owner) were before transferring the NFT
 
 }
