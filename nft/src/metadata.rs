@@ -42,14 +42,14 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 #[derive(Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much per each sell of a specific NFT
     pub payout: HashMap<AccountId, U128>, // NOTE - HashMap has loaded inside the lib.rs before and we imported using use crete::* syntax 
 }
 
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct NFTContractMetadata{ //-- token metadata info at contract level
     pub spec: String, //-- required, nft contract metadata version
     pub name: String, //-- required, nft contract metadata name
@@ -62,7 +62,7 @@ pub struct NFTContractMetadata{ //-- token metadata info at contract level
 
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct TokenMetadata{ //-- token metadata info at token level itself
     pub title: Option<String>, //-- optional, token metadata title
     pub description: Option<String>, //-- optional, token metadata description
@@ -103,7 +103,7 @@ pub trait NoneFungibleTokenMetadata{ //-- defining an object safe trait for NFT 
 }
 
 
-#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the extended interface (NoneFungibleTokenMetadata trait) of `NFTContract` struct interface (in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli 
+#[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on the trait implementation for the extended interface (NoneFungibleTokenMetadata trait) of `NFTContract` struct interface in order to have a compiled wasm trait methods for this contract struct so we can call it from the near cli 
 impl NoneFungibleTokenMetadata for NFTContract{ //-- implementing the NoneFungibleTokenMetadata trait for our main `NFTContract` struct to extend its interface; bounding the mentioned trait to the `NFTContract` struct to query NFT metadata infos
     fn nft_metadata(&self) -> NFTContractMetadata{ //-- overriding the nft_metadata() method of the NFTContractMetadata trait
         self.metadata.get().unwrap() //-- since metadata field is inside the LazyOption we must get the actual data itself using get() method which will return the type (NFTContractMetadata in our case) inside an Option

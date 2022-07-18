@@ -122,6 +122,11 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
         OnStorage, //-- caused by storage services errors 
     }
     
+
+    
+    #[derive(Clone, Debug)]
+    pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
+
     
     
     // NOTE - #[wasm_bindgen] proc macro attribute is used to compile structs and their methods into .wasm file to bind it into js to run in browser
@@ -206,6 +211,9 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
         fn schedule(&self) -> Self{
 
             
+            // TODO - actors will send encoded data through the mpsc channel, so we have to deserialize them when we resolve them outside of the fulfilled future object 
+            // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
+            // TODO - scheduling a promise of future object contains the method call (ActionReceipt) and get the resolved of the pending DataReceipt object from the executed future object inside a callback inside where we've scheduled the call
             // TODO - try different IO streaming and future traits on a defined buffer from the following crates like mpsc and Mutex data structures
             // TODO - consider every service a shard which can communicate (like executing each other's methods asyncly) with each other using their actors which has been implemented for each service through mpsc channels  
             // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service 
@@ -215,6 +223,7 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct 
             // TODO - call new event every 5 seconds from vector of event of closures 
+            // TODO - use functional programming design pattern to call nested method on a return type of a struct method
             // ....  
             // ....
             // let resp = Schedule::on(service_address)

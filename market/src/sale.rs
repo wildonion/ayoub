@@ -49,17 +49,19 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 // NOTE - if a function requires a deposit, we need a full access key of the user to sign that transaction which will redirect them to the NEAR wallet
 // NOTE - gas fee is the computational fee paied as raward to validators by attaching them (in gas units) in scheduling function calls in which they mutate the state of the contract which face us cpu usage costs; and also the remaining deposit will get pay back as a refund to the caller by the near protocol
-// NOTE - deposit or amount is the cost of the method and must be attached (in yocot$NEAR or near) for scheduling payable function calls based on storages they've used by mutating the state of the contract on chain like updating a collection field inside the contract struct and we have to get pay back the remaining deposit as a refund to the caller and that's what the refund_deposit() function does
+// NOTE - deposit or amount is the cost of the method and must be attached (in yocto$NEAR or near) for scheduling payable function calls based on storages they've used by mutating the state of the contract on chain like updating a collection field inside the contract struct and we have to get pay back the remaining deposit as a refund to the caller and that's what the refund_deposit() function does
 // NOTE - if a contract method mutate the state like adding a data into a collection field inside the contract struct; the method must be a payable method (we need to tell the caller attach deposit to cover the cost) and we have to calculate the storage used for updating the contract state inside the function to tell the caller deposit based on the used storage in bytes (like the total size of the new entry inside a collection) then refund the caller with the extra tokens he/she attached
 // NOTE - a payable method has &mut self as its first param and all calculated storage must of type u64 bits or 8 bytes maximum length (64 bits arch system usize)
-// NOTE - caller in payable methods must deposit one yocot$NEAR for security purposes like always make sure that the user has some $NEAR in order to call this means only those one who have $NEARS can call this method to avoid DDOS attack on this method
+// NOTE - caller in payable methods must deposit one yocto$NEAR for security purposes like always make sure that the user has some $NEAR in order to call this means only those one who have $NEARS can call this method to avoid DDOS attack on this method
 // NOTE - a payable method can be used to pay the storage cost, the escrow price or the gas fee and the excess will be refunded by the contract method or the NEAR protocol
 // NOTE - gas fee is the computational cost which must be paid if we’re doing cross contract call or moving between shards and actor cause this action will cost some cpu usage performance and must be attached separately in its related call from the cli 
 // NOTE - amount or deposit is the cost of the payable function which can be either the cost of the storage usage for mutating contract or the cost of some donation or escrow ops
-// NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
-// NOTE - a view method can also force the user to attach yocot$NEAR to the call to prevent contract from DDOSing
+// NOTE - all payable methods needs to deposit some yocto$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
+// NOTE - a view method can also force the user to attach yocto$NEAR to the call to prevent contract from DDOSing
 // NOTE - if a method of the contract is going to mutate the state of the contract the first param of that method must be &mut self and it can be a none payable method like private method
 // NOTE - in order to get the result of the cross contract call method we have to define a method inside the sender's or the caller's contract actor account by extending its contract struct interface by defining a trait which contains the definition of the callback method 
+// NOTE - in order to call and schedule a promise or future object method from other contract actor account we have to define a trait and bound it to #[ext_contract()] proc macro which contains the method signature of the second contract actor account finally we can call in here and catch the the result of the scheduled promise of future object using the NEAR cross contract call syntax
+// NOTE - callback methods inside the caller contract actor account must be defined private since no one except the caller contract can resolve the result of the executed promise scheduled in cross contract inside the receiver contract actor account, thus they must be defined as private methods   
 
 
 
@@ -76,8 +78,18 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
+
+
+
+
+
+
+
+// ----------------------------------------
+//              SALE STRUCTURE
+// ----------------------------------------
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct Sale{
     pub owner_id: AccountId, //-- the owner_id of this sale object or the NFT which is the seller account_id 
     pub approval_id: u64, //-- market contract actor approval_id to transfer the NFT on behalf of the owner 
@@ -89,16 +101,83 @@ pub struct Sale{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ----------------------------------------
+//     CROSS CONTRACT CALLS' INTERFACES
+// ----------------------------------------
+#[ext_contract(nft_contract)] //-- nft_contract name that we passed in #[ext_contract()] proc macro is the name of the contract (a hypothetical contract name of course) that we're extending its interface for cross contract call and creating transaction which is a promise (future object) ActionReceipt object and means we want to call the following methods inside that contract which contains a transaction which is a promise (future object) ActionReceipt object that must be executed later
+trait NftContractReceiver{ //-- this trait which contains the cross conract call methods will extend the interface of the receiver_id's contract actor with a name inside the #[ext_contract()] proc macro which specifies the extended interface contract name on this contract 
+
+    /////
+    /////// ➔ following method must be called and executed inside the receiver_id's contract actor account (thus it must be existed and defined on receiver contract actor account) from this contract actor account therefore it'll take a param called account_id which is the one who should call this method on his/her contract actor account and must be the owner of his/her contract
+    /////// ➔ receiver_id: purchaser (person to transfer the NFT to) | token_id: the id of the NFT to transfer | approval_id: market contract's approval_id in order to transfer the token on behalf of the owner | memo: memo (to include some context) | balance: the price that the token was purchased for, this will be used in conjunction with the royalty percentages for the token in order to determine how much money should go to which account | max_len_payout: the maximum amount of accounts the market can payout at once (this is limited by gas fee) 
+    ///// 
+    fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: String, balance: U128, max_len_payout: u64); //-- this method will be used for cross contract call on the receiver_id's contract actor (which must be implemented on the receiver_id's contract actor) once the nft_transfer_call() method is called and will return true if the token should be returned back to the sender
+
+}
+
+
+#[ext_contract(market_contract)] //-- market_contract name that we passed in #[ext_contract()] proc macro is the name of the contract (a hypothetical contract name of course) that we're extending its interface to get the result of cross contract call and creating transaction which is a promise (future object) DataReceipt object and means we want to get the result of the cross contract call (which is a promise (future object) ActionReceipt object which has been executed) using the following methods inside this contract
+trait MarketContractReceiver{ //-- this trait which contains the cross conract call methods will extend the interface of the current contract actor which is the market's contract actor account with a name (market_contract) inside the #[ext_contract()] proc macro which specifies the extended interface contract name
+
+    ////
+    /////// ➔ we'll use this method as a callback inside this contract to get the result of the cross contract call the nft_transfer_payout() method which has been scheduled inside the process_purchase() method to be executed on a receiver contract actor account which will be the NFT contract of the NFT owner which is the seller
+    ////
+    fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> Promise; //-- resolves the pending DataReceipt object of the created and scheduled promise on this contract of the cross contract call to the receiver contract (NFT owner which is the seller), this is the callback from calling the nft_transfer_payout() cross contract call promise method that we want to await on and solve it inside the process_purchase() method which will analyze what happened in the cross contract call when nft_transfer_payout was called as part of the process_purchase method
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------------
+//      SALE & CROSS CONTRACT CALL METHODS OF THE MarketContract STRUCTURE 
+// -----------------------------------------------------------------------------
 #[near_bindgen] //-- implementing the #[near_bindgen] proc macro attribute on `MarketContract` struct to compile all its methods to wasm so we can call them in near cli
 impl MarketContract{ //-- following methods will be compiled to wasm using #[near_bindgen] proc macro attribute 
 
+
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// ➔ PAYABLE METHODS //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
 
     // -------------------------
     //      SELLER METHOD
     // -------------------------
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute
     pub fn remove_sale(&mut self, nft_contract_id: AccountId, token_id: TokenId){ //-- since we're mutating the state of the contract (and due to the fact that payable methods' first param must be &mut self) by removing an entry from all collections on chain thus we must define the first param as &mut self - this method will remove a sale object from the market and only the owner of the NFT which has been listed can do this means the caller of this method must be the owner of the NFT which is the seller 
-        assert_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
+        assert_one_yocto(); //-- ensuring that the user has attached exactly one yocto$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocto$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
         let sale = self.internal_remove_sale(nft_contract_id, token_id); //-- getting the sale object that we've just removed it from every where on chain
         let caller_account_id = env::predecessor_account_id(); //-- getting the caller of this method which must be the NFT owner which is the seller
         if caller_account_id != sale.owner_id{ //-- if this fails, the remove sale will revert
@@ -112,7 +191,7 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
     // -------------------------
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute
     pub fn update_price(&mut self, nft_contract_id: AccountId, token_id: TokenId, price: U128){ //-- since we're mutating the state of the contract (and due to the fact that payable methods' first param must be &mut self) by updating an entry inside the self.sales collection thus we must define the first param as &mut self - this method will update the sale object price which is in yocto$NEAR inside the self.sales collection and only the owner of the NFT which has been listed can do this means the caller of this method must be the owner of the NFT which is the seller 
-        assert_one_yocto(); //-- ensuring that the user has attached exactly one yocot$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocot$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
+        assert_one_yocto(); //-- ensuring that the user has attached exactly one yocto$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocto$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
         let contract_id: AccountId = nft_contract_id.into(); //-- converting the nft_contract_id into the AccountId which will be used to create the unique sale id - the current place of the NFT which can be the contract actor account_id of the minter on first sell or another owner on later sales which is the seller 
         let contract_and_token_id = format!("{}{}{}", contract_id, DELIMETER, token_id); //-- creating the unique id for a sale object from the nft_contract_id and the token_id
         let caller_account_id = env::predecessor_account_id(); //-- getting the caller of this method which must be the NFT owner which is the seller
@@ -131,6 +210,12 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
             },
         }
     }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// ➔ BUYER METHODS //////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////
 
     // -------------------------
     //       BUYER METHOD
@@ -163,11 +248,17 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// ➔ MARKET METHODS //////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+
     // -------------------------
     //       MARKET METHOD
     // -------------------------
     #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
-    pub fn process_purchase(&mut self, nft_contract_id: AccountId, token_id: TokenId, price: U128, buyer_id: AccountId) -> Promise{ 
+    pub fn process_purchase(&mut self, nft_contract_id: AccountId, token_id: TokenId, price: U128, buyer_id: AccountId) -> Promise{ //-- since the removal process will mutate the state of the contract on chain; we've defined the first param of self.internal_remove_sale() method as &mut self thus we must define the first param of the self.process_purchase() method as &mut self too otherwise we'll face the error of: cannot borrow `*self` as mutable, as it is behind a `&` reference, so the data it refers to cannot be borrowed as mutable since we're calling a mutable method inside of it which is the self.internal_remove_sale() method therefore the first param must be &mut self - this method initiate a cross contract call to the nft contract, this will transfer the token to the buyer and return a payout object used for the market to distribute funds to the appropriate accounts
 
         /*
 
@@ -202,41 +293,82 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
         ////////////// ➔ defaulting GAS weight to 1, attached 1 yocto$NEAR deposit, and static GAS equal to the GAS for nft_transfer_payout
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
-        // NOTE - we must attach 1 yocto$NEAR in the following cross contract call since inside the nft_transfer_payout() method we've enforced the caller to attach 1 yocto$NEAR for security reasons like prevent the contract call from DDOSing 
 
-        // extend_receiver_contract_for_none_fungible_token::ext(receiver_id.clone()) //--  we're cloning the receiver_id to avoid moving cause we want to use it inside the nft_resolve_transfer() method - the account_id that this method must be called and executed inside since the account_id param is the one who is responsible for making this call like the market contract actor account - no need to clone the receiver_id cause we're passing it by reference or as a borrowed type
-        //     .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling nft_on_transfer() cross contract call promise method 
-        //     .with_static_gas(GAS_FOR_NFT_TRANSFER_CALL) //-- prepaid_gas() method returns the amount of gas attached to the call via near cli that can be used to pay the gas fees | attached gas - required gas for calling nft_transfer_call() method is the total gas fee which will be deposited in yocot$NEAR from the caller wallet for this transaction call
-        //     .nft_on_transfer( //-- initiating the receiver's corss contract call by creating a transaction which is a promise (future object) ActionReceipt object which returns obviously a promise or a future object which contains an async message including the data coming from the receiver_id's contract actor once it gets executed - calling the nft_on_transfer() cross contract call promise method on the receiver side from the extended receiver_id's contract actor interface which is `extend_receiver_contract_for_none_fungible_token`
-        //         sender_id, 
-        //         transferred_token.owner_id.clone(), 
-        //         token_id.clone(), 
-        //         msg
-        //     ).then( //-- wait for the scheduled transaction which is a promise (future object) ActionReceipt object on the receiver_id's contract actor to finish executing to resolve it using .then() method
-        //         ////////////
-        //         /////// ➔ by default ext() method will be attached to the contract struct annotated with #[near_bindgen] which avoids the requirement to re-define the interface with #[ext_contract] 
-        //         ///////    and the method that will be attached to the struct is the same as ext_contract as ext(..) so we can call Self::ext(...) which remove the need to redefine interfaces twice
-        //         /////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for resolve transfer
-        //         ////////////
-        //         Self::ext(env::current_account_id()) //-- the account_id that this method must be called and executed inside which is the current_account_id() and is the one who owns this contract - account_id param is the one who is responsible for making this call like the market contract actor account - no need to clone the current_account_id cause we're passing it by reference or as a borrowed type
-        //             .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling the nft_resolve_transfer() callback method since this method doesn't require any deposit amount
-        //             .with_static_gas(GAS_FOR_RESOLVE_TRANSFER) //-- total gas required for calling the callback method which has taken from the attached deposited when the caller called the nft_transfer_call() method
-        //             .nft_resolve_transfer( //-- calling nft_resolve_transfer() method from the extended interface of the current contract actor (our own contract) which is the `extend_this_contract` contract; since this is a private method only the owner of the this contract can call it means the caller must be the signer or the one who initiated, owned and signed the contract or the account of the contract itself or the sender him/her-self to mutate the state of the contract on chain thus we have to pass the current_id's or the sender_id's contract actor which is the owner of this contract actor
-        //                 authorized_id,
-        //                 transferred_token.owner_id.clone(), 
-        //                 receiver_id,
-        //                 token_id, 
-        //                 transferred_token.approved_account_ids, //-- passing the previous token approved_account_ids hashmap to nft_resolve_transfer() callback method cause we'll refund the owner inside the callback method since there would be still the possibility that the transfer gets reverted due to the result of nft_on_transfer() method thus we must keep track of what the approvals (those account_id which have access to transfer the NFT on behalf of the owner) were before and after transferring the NFT 
-        //                 memo
-        //             )
+        nft_contract::ext(nft_contract_id) //-- the account_id that this method must be called and executed inside since the account_id param is the one who is responsible for executing this call which is the NFT owner which is the seller contract actor account
+            .with_attached_deposit(1) //-- we must attach 1 yocto$NEAR in the following cross contract call since inside the nft_transfer_payout() method we've enforced the caller to attach 1 yocto$NEAR for security reasons like prevent the contract call from DDOSing 
+            .with_static_gas(GAS_FOR_NFT_TRANSFER) //-- the total gas fee which will be deposited in yocto$NEAR from the caller wallet for this transaction cross contract call
+            .nft_transfer_payout( //-- initiating a corss contract call by creating a transaction which is a promise (future object) ActionReceipt object which must be executed on receiver_id's contract actor account (NFT owner which is the seller) to transfer the NFT to the buyer contract actor account and fulfill the pending DataReceipt future object (which is an async message) with the cross contract call result inside the resolve_purchase() callback method using .then() since the fulfilled DataReceipt future object contains a payout object used for the market to distribute funds to the appropriate accounts - - calling the nft_transfer_payout() cross contract call promise method on the receiver side (NFT owner which is the seller) from the extended receiver_id's contract actor interface which is `nft_contract`
+                buyer_id.clone(), 
+                token_id, 
+                sale.approval_id, //-- passing the approval_id from removed sale object from the on chain market collections   
+                "payout from market".to_string(), 
+                price, //-- the price that the token was purchased for, this will be used in conjunction with the royalty percentages for the token in order to determine how much money should go to which account
+                10 //-- this is the maximum amount of accounts the market can payout at once (the number is limited by gas fee since we may run out of gas fee by transferring $NEARs with a single attached gas to nft_resolve_transfer() callback method)
+            ).then( //-- wait for the scheduled transaction which is a promise (future object) ActionReceipt object on the receiver_id's contract actor (NFT owner which is the seller) to finish executing to resolve it using .then() method inside resolve_purchase() method
+                //////////
+                /////// ➔ by default ext() method will be attached to the contract struct annotated with #[near_bindgen] which avoids the requirement to re-define the interface with #[ext_contract] 
+                ///////    and the method that will be attached to the struct is the same as ext_contract as ext(..) so we can call Self::ext(...) which remove the need to redefine interfaces twice
+                /////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for resolve transfer
+                ////////////
+                Self::ext(env::current_account_id()) //-- the account_id that this method must be called and executed inside which is the current_account_id() and is the one who owns this contract which is the market itself - account_id param is the one who is responsible for executing this call which is the market itself
+                    .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling the nft_resolve_transfer() callback method since this method doesn't require any deposit amount
+                    .with_static_gas(GAS_FOR_RESOLVE_PURCHASE) //-- total gas required for calling the callback method which has taken from the attached deposited (contract budget) when the caller called the nft_transfer_call() method
+                    .resolve_purchase( //-- calling resolve_purchase() method from the extended interface of the current contract actor (market contract) which is the `market_contract` contract; since this is a private method only the owner of the this contract can call it means the caller must be the signer or the one who initiated, owned and signed the contract or the account of the contract itself which is the market itself; since callback methods are private thus the caller of them must be the owner of the contract
+                        ////
+                        /////// ➔ the buyer_id and the price are passed in incase something goes wrong and we need to refund the buyer
+                        ////
+                        buyer_id,
+                        price //-- passing the price to calculate the perpetual royalties
+                    ) //-- resolve_purchase() method will return a U128 price which is in yocto$NEAR
+            ) //-- returning the promise from this method 
+        
 
-        //     )
+    }
+
+    // -------------------------
+    //       MARKET METHOD
+    // -------------------------
+    #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
+    pub fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> U128{ //-- this method is a private method which will be used as a callback to handle the result of the executed nft_transfer_payout() promise or future object which will take the payout object and check to see if it's authentic and there's no problems, if everything is fine, it will pay the accounts, otherwise it will refund the buyer for the price he/she has paid for 
+
+
+
+
+
+    
+        //-- actors will send encoded data through the mpsc channel, so we have to deserialize them when we resolve them outside of the fulfilled future object like deserializing the msg param which has been passed to the nft_on_approve() on the market contract actor account method inside the nft_approve() method on the NFT contract actor account
+        // ...
+        
+        
+        
+        // reason we're using &mut self
+        // why we're returning u128 in here????
+
+
+
+        
+
 
 
 
 
 
     }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// ➔ VIEW METHODS //////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+
+    
+
+
+
+
+
+
+
 
 
 }

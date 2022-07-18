@@ -109,7 +109,7 @@ pub mod internal;
 // NOTE - our `NFTContract` has all the minted nfts info inside of it with a mapping between their metadata and the owner
 // NOTE - `NFTContract` struct contains some data structures to store on chain infos about tokens and their owners at runtime
 // NOTE - whenever a function is called an ActionReceipt object will be created by NEAR runtime from the transaction in which the state will be loaded and deserialized, so it's important to keep this amount of data loaded as minimal as possible
-// NOTE - all payable methods needs to deposit some yocot$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
+// NOTE - all payable methods needs to deposit some yocto$NEAR since they might be mutations on contract state and ensuring that the user is not DDOSing on the method thus the cost must be paid by the caller not by the contract owner and will refunded any excess that is unused
 // NOTE - we can't impl Default trait for the contract if the PanicOnDefault trait is implemented for that contract
 // NOTE - near hashmap and set based data structures or collections are LookupMap, LookupSet, UnorderedMap, UnorderedSet and TreeSet; each of them will be cached on chain to minimize the amount of gas and the SDK collections should be used in most cases to reduce the gas fee since these collections deserialize the exact data that we need it instead of deserializing all entries each time the state and the app runtime is loaded like HashMap
 // NOTE - current_account_id()     -> the id of the account that owns the current contract actor account
@@ -187,7 +187,7 @@ impl NFTContract{ //-- we'll add bytes to the contract by creating entries in th
 
     #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
     pub fn only_owner(&mut self){
-        utils::panic_not_self(); //-- panic on env::current_account_id() != env::predecessor_account_id() condition
+        utils::panic_not_self(); //-- panic on env::current_account_id() != env::predecessor_account_id() condition; although the #[private] proc macro attribute will check this on the background
     }
 
 

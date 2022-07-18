@@ -40,7 +40,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
-
+pub const NO_DEPOSIT: Balance = 0;
 pub const GAS_FOR_RESOLVE_PURCHASE: Gas = Gas(115_000_000_000_000); //-- the required gas to resolve the result of cross contract call nft_transfer_payout() 
 pub const GAS_FOR_NFT_TRANSFER: Gas = Gas(15_000_000_000_000); //-- the required gas to transfer for cross contract call nft_transfer_payout() method on the NFT owner which is the seller contract actor account
 pub const STORAGE_PER_SALE: u128 = 1000 * STORAGE_PRICE_PER_BYTE; //-- the required storage cost per sell would be 10^19 yocto$NEAR per byte or 0.01 $NEARs per kb - this is the required minimum storage to have one sell on the market contract since we have to cover the storage cost of mutating the state of the contract on the chain by creating a sell object

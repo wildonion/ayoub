@@ -61,7 +61,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag="event", content="data")] // NOTE - the deserialized data of the following enum  will be : {"event": "nft_mint", "data": [{...NftMintLog_instance...}, {...NftMintLog_instance...}]} or {"event": "nft_transfer", "data": [{...NftTransferLog_instance...}, {...NftTransferLog_instance...}]}
 #[serde(rename_all="snake_case")] //-- converting all fields' name to snake_case format like nft_ming_log
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 #[non_exhaustive] // NOTE - this attribute indicates that more variants/fields may be added to an enum/struct in the future and prevents downstream crates from exhaustively listing out all variants/fields
 pub enum EventLogVariant{ //-- event log enum which can be either NFT mint or NFT transfer log 
     NftMint(Vec<NftMintLog>), //-- vector of all minting NFT events
@@ -74,7 +74,7 @@ pub enum EventLogVariant{ //-- event log enum which can be either NFT mint or NF
 
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct EventLog{ //-- an interface to capture the data about and event - this is the EVENT_JSON 
     pub standard: String,
     pub version: String,
@@ -98,7 +98,7 @@ impl fmt::Display for EventLog{ //-- implementing the Display trait for the Even
 
 
 #[derive(Serialize, Deserialize, Debug)] 
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct NftMintLog{ //-- event log to capture token minting
     pub owner_id: AccountId, //-- the account_id of the minter who owns the NFT
     pub token_ids: Vec<TokenId>, //-- it might be a collection minting process!
@@ -110,7 +110,7 @@ pub struct NftMintLog{ //-- event log to capture token minting
 
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct NftTransferLog{ //-- event log to capture token transfer
     #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
     pub authorized_id: Option<AccountId>, //-- if there was any approved account_id to transfer the NFT on behalf of the owner like the sender itself when we're calling nft_transfer() for selling the NFT method from the market contract using the cross contract call
@@ -125,7 +125,7 @@ pub struct NftTransferLog{ //-- event log to capture token transfer
 
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct NftMerchandiseLog{
 
 }
@@ -133,7 +133,7 @@ pub struct NftMerchandiseLog{
 
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct SellEventLog{
 
 }

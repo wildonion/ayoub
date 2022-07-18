@@ -56,11 +56,6 @@ pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer 
 
 
 
-#[derive(Clone, Debug)]
-pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
-
-
-
 // ---------------------------------------------------------
 // wasm runtime structure and its methods to bind it into js  
 // ---------------------------------------------------------
@@ -91,8 +86,9 @@ impl RafaelRuntime{
     // https://crates.io/crates/wasm-bindgen
     // https://crates.io/crates/rayon
     // https://crates.io/crates/wasm-bindgen-rayon
-    // split data using divide and conquer simd based design pattern and std::thread pool and mpsc
-    // run multithreading in wasm to bind it into js to run in js using rayon
+    // TODO - split data using divide and conquer simd based design pattern and std::thread pool and mpsc
+    // TODO - run multithreading in wasm to bind it into js to run in js using rayon
+    // TODO - use functional programming design pattern to call nested method on a return type of a struct method
     // ...
     
 

@@ -133,7 +133,7 @@ pub fn panic_not_self(){
 
 pub fn panic_one_yocto(){
     if env::attached_deposit() != 1{
-        env::panic_str("Requires attached deposit of exactly 1 yocot$NEAR"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unkown size at compile time we must borrow it by taking a pointer to its location
+        env::panic_str("Requires attached deposit of exactly 1 yocto$NEAR"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unkown size at compile time we must borrow it by taking a pointer to its location
     }
 }
 

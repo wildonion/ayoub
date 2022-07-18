@@ -65,11 +65,25 @@ pub fn hash_account_id(account_id: &AccountId) -> CryptoHash{ //-- we'll pass th
 
 
 
-
-
-
 #[derive(Serialize, Deserialize)]
-#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
+pub struct SaleArgs {
+    pub sale_conditions: SalePriceInYoctoNear, //-- the price of the NFT in u128 type in yocto$NEAR
+}
+
+
+
+
+
+
+
+
+
+
+
+// NOTE - we'll use this structure to deserialize the result of the executed nft_transfer_payout() promise or future object
+#[derive(Serialize, Deserialize)]
+#[serde(crate="near_sdk::serde")] //-- must be added right down below of the serde derive proc macro attributes - loading serde crate instance from near_sdk crate using the #[serde()] proc macro attribute itself
 pub struct Payout{ //-- payout type for the royalty standards which specifies which account_id must get paid how much per each sell of a specific NFT
     pub payout: HashMap<AccountId, U128>, // NOTE - HashMap has loaded inside the lib.rs before and we imported using use crete::* syntax 
 }
