@@ -271,3 +271,7 @@
 
 ☢️ all near contracts are smart objects with some pre defined methods which can call each other's methods 
     asyncly through mpsc channel by scheduling a future object contains the method name.
+
+
+
+☢️ the instructions in near code must be supported by the near VM means adding extra libs won't be compiled by the near VM and we'll face us to `wasm unreachable opcode`    

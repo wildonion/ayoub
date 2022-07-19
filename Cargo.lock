@@ -940,20 +940,14 @@ dependencies = [
 name = "escrow"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "near-sdk",
- "serde",
- "serde_json",
 ]
 
 [[package]]
 name = "event"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "near-sdk",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -1494,7 +1488,6 @@ dependencies = [
 name = "market"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "near-sdk",
 ]
 
@@ -1793,7 +1786,6 @@ dependencies = [
 name = "nft"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "near-sdk",
 ]
 
@@ -2054,10 +2046,7 @@ dependencies = [
 name = "proposal"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "near-sdk",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -3113,10 +3102,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 name = "w2e"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "near-sdk",
- "serde",
- "serde_json",
 ]
 
 [[package]]

@@ -114,6 +114,9 @@ pub struct Sale{
 
 
 
+
+
+
 // ----------------------------------------
 //     CROSS CONTRACT CALLS' INTERFACES
 // ----------------------------------------
@@ -135,7 +138,7 @@ trait MarketContractReceiver{ //-- this trait which contains the cross conract c
     ////
     /////// ➔ we'll use this method as a callback inside this contract to get the result of the cross contract call the nft_transfer_payout() method which has been scheduled inside the process_purchase() method to be executed on a receiver contract actor account which will be the NFT contract of the NFT owner which is the seller
     ////
-    fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> Promise; //-- resolves the pending DataReceipt object of the created and scheduled promise on this contract of the cross contract call to the receiver contract (NFT owner which is the seller), this is the callback from calling the nft_transfer_payout() cross contract call promise method that we want to await on and solve it inside the process_purchase() method which will analyze what happened in the cross contract call when nft_transfer_payout was called as part of the process_purchase method
+    fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> U128; //-- resolves the pending DataReceipt object of the created and scheduled promise on this contract of the cross contract call to the receiver contract (NFT owner which is the seller), this is the callback from calling the nft_transfer_payout() cross contract call promise method that we want to await on and solve it inside the process_purchase() method which will analyze what happened in the cross contract call when nft_transfer_payout was called as part of the process_purchase method
 
 }
 
@@ -172,9 +175,7 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
     ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
 
-    // -------------------------
-    //      SELLER METHOD
-    // -------------------------
+
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute
     pub fn remove_sale(&mut self, nft_contract_id: AccountId, token_id: TokenId){ //-- since we're mutating the state of the contract (and due to the fact that payable methods' first param must be &mut self) by removing an entry from all collections on chain thus we must define the first param as &mut self - this method will remove a sale object from the market and only the owner of the NFT which has been listed can do this means the caller of this method must be the owner of the NFT which is the seller 
         assert_one_yocto(); //-- ensuring that the user has attached exactly one yocto$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocto$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
@@ -186,9 +187,7 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
         }
     }
 
-    // -------------------------
-    //      SELLER METHOD
-    // -------------------------
+
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute
     pub fn update_price(&mut self, nft_contract_id: AccountId, token_id: TokenId, price: U128){ //-- since we're mutating the state of the contract (and due to the fact that payable methods' first param must be &mut self) by updating an entry inside the self.sales collection thus we must define the first param as &mut self - this method will update the sale object price which is in yocto$NEAR inside the self.sales collection and only the owner of the NFT which has been listed can do this means the caller of this method must be the owner of the NFT which is the seller 
         assert_one_yocto(); //-- ensuring that the user has attached exactly one yocto$NEAR to the call to pay for the storage and security reasons (only those caller that have at least 1 yocto$NEAR can call this method; by doing this we're avoiding DDOS attack on the contract) on the contract by forcing the users to sign the transaction with his/her full access key which will redirect them to the NEAR wallet; we'll refund any excess amount from the storage later after calculating the required storage cost
@@ -211,15 +210,14 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
         }
     }
 
+
     //////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////// ➔ BUYER METHODS //////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////
 
-    // -------------------------
-    //       BUYER METHOD
-    // -------------------------
+    
     #[payable] //-- means the following would be a payable method and the caller must pay for that and must get pay back the remaining deposit or any excess that is unused at the end by refunding the caller account by our contract (something like refund_deposit() method) or the NEAR protocol - we should bind the #[near_bindgen] proc macro attribute to the contract struct in order to use this proc macro attribute
     pub fn offer(&mut self, nft_contract_id: AccountId, token_id: TokenId){ //-- since payable method first param must be &mut self cause they might change the state of the contract on chain we'e defined the first param as &mut self
         let deposit = env::attached_deposit(); //-- getting the attached deposit to this call
@@ -248,15 +246,14 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
         }
     }
 
+
     ///////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////// ➔ MARKET METHODS //////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////
 
-    // -------------------------
-    //       MARKET METHOD
-    // -------------------------
+
     #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
     pub fn process_purchase(&mut self, nft_contract_id: AccountId, token_id: TokenId, price: U128, buyer_id: AccountId) -> Promise{ //-- since the removal process will mutate the state of the contract on chain; we've defined the first param of self.internal_remove_sale() method as &mut self thus we must define the first param of the self.process_purchase() method as &mut self too otherwise we'll face the error of: cannot borrow `*self` as mutable, as it is behind a `&` reference, so the data it refers to cannot be borrowed as mutable since we're calling a mutable method inside of it which is the self.internal_remove_sale() method therefore the first param must be &mut self - this method initiate a cross contract call to the nft contract, this will transfer the token to the buyer and return a payout object used for the market to distribute funds to the appropriate accounts
 
@@ -309,7 +306,8 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
                 /////// ➔ by default ext() method will be attached to the contract struct annotated with #[near_bindgen] which avoids the requirement to re-define the interface with #[ext_contract] 
                 ///////    and the method that will be attached to the struct is the same as ext_contract as ext(..) so we can call Self::ext(...) which remove the need to redefine interfaces twice
                 /////// ➔ defaulting GAS weight to 1, no attached deposit, and static GAS equal to the GAS for resolve transfer
-                ////////////
+                /////// ➔ since ext() method will be attached to the contract struct thus we don't need to define a trait containing the callback method impl it for the struct cause we can define the method as a private one inside the contract struct and use it as a callback method to get the result of the executed promise cross contract call
+                //////////
                 Self::ext(env::current_account_id()) //-- the account_id that this method must be called and executed inside which is the current_account_id() and is the one who owns this contract which is the market itself - account_id param is the one who is responsible for executing this call which is the market itself
                     .with_attached_deposit(NO_DEPOSIT) //-- no deposit is required from the caller for calling the nft_resolve_transfer() callback method since this method doesn't require any deposit amount
                     .with_static_gas(GAS_FOR_RESOLVE_PURCHASE) //-- total gas required for calling the callback method which has taken from the attached deposited (contract budget) when the caller called the nft_transfer_call() method
@@ -325,18 +323,12 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
 
     }
 
-    // -------------------------
-    //       MARKET METHOD
-    // -------------------------
+
     #[private] //-- means the following would be a private method and the caller or the predecessor_account_id which is the previous contract actor account and the last (current) caller of this method to mutate the state of the contract on chain must be the signer (who initiated and signed the contract)
-    pub fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> U128{ //-- this method is a private method which will be used as a callback to handle the result of the executed nft_transfer_payout() promise or future object which will take the payout object and check to see if it's authentic and there's no problems, if everything is fine, it will pay the accounts, otherwise it will refund the buyer for the price he/she has paid for 
-
-
-        // reason we're using &mut self
-        // why we're returning u128 in here????
+    pub fn resolve_purchase(&self, buyer_id: AccountId, price: U128) -> U128{ //-- this method is a private method which will be used as a callback to handle the result of the executed nft_transfer_payout() promise or future object which will take the payout object and check to see if it's authentic and there's no problems, if everything is fine, it will pay the accounts, otherwise it will refund the buyer for the price he/she has paid for 
         
         ////
-        /////// ➔ actors will send utf8 encoded data through the mpsc channel, so we have to deserialize them when we resolve them outside of the fulfilled future object like deserializing the msg param which has been passed to the nft_on_approve() on the market contract actor account method inside the nft_approve() method on the NFT contract actor account
+        /////// ➔ actors will send utf8 encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object like deserializing the msg param which has been passed to the nft_on_approve() on the market contract actor account method inside the nft_approve() method on the NFT contract actor account
         /////// ➔ the following code flow is based on successful result of everything
         ////
         let payout_result = promise_result_as_success().and_then(|value|{ //-- promise_result_as_success() function uses env::promise_result() function under the hood - getting the result of the executed promise, the nft_transfer_payout() cross contract call; if it was successful we have the value in utf8 encoded form (since data between actors will be sent asyncly and serialized through the mpsc channel) which we have to deserialize it otherwise we'll get the None if the result of the promise wasn't successful
@@ -344,18 +336,48 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
                 .ok() //-- get the deserialized payout object only if the deserialization was ok
                 .and_then(|payout_object|{ //-- and_then() returns an Option of either the parent method result or the result of the passed in closure which in our case we've passed in a closure with deserialized payout object as its arg
                     if payout_object.payout.len() > 10 || payout_object.payout.is_empty(){
-                        
+                        ////
+                        /////// ➔ codes after env::panic_str() are unreachable cause by panicking the main thread future codes will not be compiled
+                        ////
+                        env::log_str("Can't Payout More Than 10 Royalties"); //-- &str allocates low cost storage than the String which will get usize (usize is 64 bits or 24 bytes on 64 bits arch) * 3 (pointer, len, capacity) bytes; cause it's just the size of the str itself which is the total length of its utf8 bytes array on either stack, heap or binary which is equals to its length of utf8 bytes and due to its unknown size at compile time we must borrow it by taking a pointer to its location
+                        None //-- returning None since everything wasn't ok with the payout object
+                    } else{ //-- if the total royalties are smaller or equals than 10 accounts we move forward and can payout them 
+                        let mut reminder = price.0; //-- price if of type U128 which we have to get its first element cause it's a unit like struct - keeping track of how much the NFT contract wants us to payout, we'll start at the full price payed by the buyer and will subtract by the value of each royalty inside the loop
+                        for &value in payout_object.payout.values(){ //-- iterating through the payout object which is a hashmap in form HashMap<AccountId, U128> - the values (are of type U128 means we must get their first element in order to have their actual value, cause they are unit like struct) inside the hashmap are the payout values in yocto$NEAR that royaltie account_ids must get paid based on their royaly percentage calculated inside the nft_transfer_payout() method
+                            reminder = reminder.checked_sub(value.0).unwrap(); //-- updating the reminder by subtracting the first element of each value (since they are unit like struct) from the total price of the NFT which buyer has paid for - checked_sub() method will ompute self - passed in param and will return None if overflow occurred
+                        }
+                        ////
+                        /////// ➔ if the reminder was 0 means that the NFT contract wanted us the total amount of the NFT price to be paid all royalties out since it might be too many royalties that forced us to spent all the price of the NFT for NEAR payout process to pay the royalty account_ids out
+                        /////// ➔ if the reminder was 1 means that the NFT contract wanted us the 90 % of the total amount of the NFT price to be paid all royalties out since the sum of all royalty percentage value inside the token.perpetual_royalties hashmap might be 9999 which is equals to 10000 - 1 (the valud of 100 % is 10000) which means all royalties payout cost us 90 % of the total amount of the NFT price 
+                        ////
+                        if reminder == 0 || reminder == 1{
+                            Some(payout_object.payout) //-- returning the payout object of type Option for NEAR payout process
+                        } else{
+                            None //-- returning None if the reminder was anything but 1 or 0 since paying out all the royalties didn't go well and we have some yocto$NEAR which is greater than 1 since we're subtracting each value of every royalty account_id from the NFT price to keep track of the total amount from the NFT price that the NFT contract wants us to payout
+                        }                
                     }
                 })
         });
         
 
+        let payout = if let Some(payout_option) = payout_result{ //-- getting the payout object out of the payout_result for NEAR payout process 
+            payout_option //-- return the payout object for NEAR payouts process
+        } else{ //-- if we're here means that the payout_result is None since everything didn't go well with the payout object deserialized from the incoming data from the executed promise
+            Promise::new(buyer_id).transfer(u128::from(price)); //-- transferring the price of the NFT back to the buyer contract actor account since the payout object is None 
+            return price; //-- returning the price of the NFT that the buyer has paid for
+        };
 
 
+        for (receiver_id, amount) in payout{ //-- iterating through the payout object to transferr the royalty amount to royalty account_ids - payout is of type HashMap<AccountId, U128> in which all values is of type u128 in yocto$NEAR and is the amount that a specific account_id must get paid based on his/her royalty percentage calculated inside the nft_transfer_payout() method
+            Promise::new(receiver_id).transfer(amount.0); //-- transferring the amount in yocto$NEAR related to each royalty account_id from the sold out NFT; if we're here means that everything went well and the payout object wasn't None 
+        }
 
+
+        price //-- returning the price of the sold out NFT
 
 
     }
+
 
     /////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////

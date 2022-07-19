@@ -143,7 +143,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         
         // TODO - 
         // ...
-        // match super::env::future_get_result_of(idx){
+        // match super::env::future_get_result_of(idx){ // TODO - future_get_result_of() function must return Result<FutureResult, FutureError>
         //     Err(FutureResult::Pending) => FutureResult::Pending,
         //     Err(FutureResult::Failed) => FutureResult::Failed,
         //     Ok(()) => {
@@ -238,7 +238,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         fn schedule(&self) -> Self{
 
             
-            // TODO - actors will send encoded data through the mpsc channel, so we have to deserialize them when we resolve them outside of the fulfilled future object 
+            // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
             // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
             // TODO - scheduling a promise of future object contains the method call (ActionReceipt) and get the resolved of the pending DataReceipt object from the executed future object inside a callback inside where we've scheduled the call
             // TODO - try different IO streaming and future traits on a defined buffer from the following crates like mpsc and Mutex data structures
@@ -269,9 +269,32 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // TODO - a callback method to get the response of the executed event in a specific service actor
             // ... 
 
-            if let FutureResult::Successful(encoded_result) = super::env::future_result(0){
+            
+            // -------------
+            // if let syntax
+            // -------------
+            if let FutureResult::Successful(encoded_result) = super::env::future_result(0){ //-- getting the result of the future object only if it was successful
                 // TODO - deserialize the result of the executed future object into a pre defined structure
                 // ... 
+            }
+
+
+            // -------------
+            // match pattern
+            // -------------
+            match super::env::future_result(0){
+                FutureResult::Successful(data) => {
+                    
+                },
+                FutureResult::Failed => {
+
+                },
+                FutureResult::Pending => {
+
+                },
+                _ => {
+
+                },
             }
 
             todo!()
