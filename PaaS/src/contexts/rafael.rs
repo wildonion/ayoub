@@ -14,7 +14,7 @@
 
 
 
-pub mod env{ //-- env functions to mutate the state of the runtime object
+pub mod env{ //-- rafael env functions to mutate the state of the runtime object like near-sdk env
 
 
 
@@ -22,7 +22,7 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
 
 
     const APP_NAME: &str = "Rafless";
-    use std::fmt;
+    use std::{fmt, env};
     use crate::services;
     use crate::contexts::app::Api;
     use futures::channel::mpsc as future_mpsc;
@@ -54,7 +54,7 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
 
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    //                RAFAEL DATA STRUCTURES
+    //          RAFAEL DATA STRUCTURES & FUNCTIONS
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 
@@ -129,6 +129,33 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
 
     
     
+    #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
+    pub enum FutureResult{
+        Successful(Vec<u8>), //-- the successful result of the future object in form utf8 bytes
+        Pending, //-- future is not ready
+        Failed, //-- the fail result of the future object 
+    }
+
+
+
+
+    pub fn future_result(idx: u64) -> FutureResult{
+        
+        // TODO - 
+        // ...
+        // match super::env::future_get_result_of(idx){
+        //     Err(FutureResult::Pending) => FutureResult::Pending,
+        //     Err(FutureResult::Failed) => FutureResult::Failed,
+        //     Ok(()) => {
+        //         let data = super::env::expect_register(read_register(ATOMIC_OP_REGISTER));
+        //         FutureResult::Successful(data)
+        //     } 
+        // }
+        
+        todo!()
+    }
+
+
     // NOTE - #[wasm_bindgen] proc macro attribute is used to compile structs and their methods into .wasm file to bind it into js to run in browser
     // NOTE - can't bind the #[wasm_bindgen] proc macro attribute since it doesn't supprt generic type, lifetimes (means can't return a borrowed type inside the structure method) 
     //        and raw unix socket since we can't run socket server inside the browser or js; we can only setup websocket client. 
@@ -238,8 +265,15 @@ pub mod env{ //-- env functions to mutate the state of the runtime object
 
         fn callback(&self) -> Self{
             
+
             // TODO - a callback method to get the response of the executed event in a specific service actor
             // ... 
+
+            if let FutureResult::Successful(encoded_result) = super::env::future_result(0){
+                // TODO - deserialize the result of the executed future object into a pre defined structure
+                // ... 
+            }
+
             todo!()
         }
 

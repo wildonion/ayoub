@@ -36,7 +36,6 @@ Coded by
 
 
 
-use serde_json::json;
 use std::future;
 use std::{fmt, collections::HashMap};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize}; //-- self referes to the borsh struct itself cause there is a struct called borsh inside the borsh.rs file
@@ -44,6 +43,7 @@ use near_sdk::collections::{LazyOption, LookupMap, UnorderedMap, UnorderedSet}; 
 use near_sdk::json_types::{Base64VecU8, U128, U64}; //-- Base64VecU8 is used to serialize/deserialize Vec<u8> to base64 string
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{ 
+                serde_json,
                 promise_result_as_success, //-- returns the result of the promise if successful, otherwise returns None
                 env::STORAGE_PRICE_PER_BYTE, //-- loading the price of each byte in yocto$NEAR
                 Gas, ext_contract, PromiseResult, env, near_bindgen, assert_one_yocto, //-- we're using the assert_one_yocto() function from the near_sdk cause it's using the env::panic_str() one the background 

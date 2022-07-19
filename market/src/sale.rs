@@ -332,20 +332,22 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
     pub fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> U128{ //-- this method is a private method which will be used as a callback to handle the result of the executed nft_transfer_payout() promise or future object which will take the payout object and check to see if it's authentic and there's no problems, if everything is fine, it will pay the accounts, otherwise it will refund the buyer for the price he/she has paid for 
 
 
-
-
-
-    
-        //-- actors will send encoded data through the mpsc channel, so we have to deserialize them when we resolve them outside of the fulfilled future object like deserializing the msg param which has been passed to the nft_on_approve() on the market contract actor account method inside the nft_approve() method on the NFT contract actor account
-        // ...
-        
-        
-        
         // reason we're using &mut self
         // why we're returning u128 in here????
-
-
-
+        
+        ////
+        /////// ➔ actors will send utf8 encoded data through the mpsc channel, so we have to deserialize them when we resolve them outside of the fulfilled future object like deserializing the msg param which has been passed to the nft_on_approve() on the market contract actor account method inside the nft_approve() method on the NFT contract actor account
+        /////// ➔ the following code flow is based on successful result of everything
+        ////
+        let payout_result = promise_result_as_success().and_then(|value|{ //-- promise_result_as_success() function uses env::promise_result() function under the hood - getting the result of the executed promise, the nft_transfer_payout() cross contract call; if it was successful we have the value in utf8 encoded form (since data between actors will be sent asyncly and serialized through the mpsc channel) which we have to deserialize it otherwise we'll get the None if the result of the promise wasn't successful
+            serde_json::from_slice::<Payout>(&value) //-- deserializing the encoded payout object in form utf8 into the Payout struct
+                .ok() //-- get the deserialized payout object only if the deserialization was ok
+                .and_then(|payout_object|{ //-- and_then() returns an Option of either the parent method result or the result of the passed in closure which in our case we've passed in a closure with deserialized payout object as its arg
+                    if payout_object.payout.len() > 10 || payout_object.payout.is_empty(){
+                        
+                    }
+                })
+        });
         
 
 
