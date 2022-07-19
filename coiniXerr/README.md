@@ -5,3 +5,7 @@
 ### Production Setup
 
 ```cargo build --bin coiniXerr --release```
+
+# 📌 TODOs
+
+`DEV.info` links
