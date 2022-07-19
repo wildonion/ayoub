@@ -132,20 +132,6 @@ trait NftContractReceiver{ //-- this trait which contains the cross conract call
 }
 
 
-#[ext_contract(market_contract)] //-- market_contract name that we passed in #[ext_contract()] proc macro is the name of the contract (a hypothetical contract name of course) that we're extending its interface to get the result of cross contract call and creating transaction which is a promise (future object) DataReceipt object and means we want to get the result of the cross contract call (which is a promise (future object) ActionReceipt object which has been executed) using the following methods inside this contract
-trait MarketContractReceiver{ //-- this trait which contains the cross conract call methods will extend the interface of the current contract actor which is the market's contract actor account with a name (market_contract) inside the #[ext_contract()] proc macro which specifies the extended interface contract name
-
-    ////
-    /////// ➔ we'll use this method as a callback inside this contract to get the result of the cross contract call the nft_transfer_payout() method which has been scheduled inside the process_purchase() method to be executed on a receiver contract actor account which will be the NFT contract of the NFT owner which is the seller
-    ////
-    fn resolve_purchase(&mut self, buyer_id: AccountId, price: U128) -> U128; //-- resolves the pending DataReceipt object of the created and scheduled promise on this contract of the cross contract call to the receiver contract (NFT owner which is the seller), this is the callback from calling the nft_transfer_payout() cross contract call promise method that we want to await on and solve it inside the process_purchase() method which will analyze what happened in the cross contract call when nft_transfer_payout was called as part of the process_purchase method
-
-}
-
-
-
-
-
 
 
 
@@ -313,6 +299,8 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
                     .with_static_gas(GAS_FOR_RESOLVE_PURCHASE) //-- total gas required for calling the callback method which has taken from the attached deposited (contract budget) when the caller called the nft_transfer_call() method
                     .resolve_purchase( //-- calling resolve_purchase() method from the extended interface of the current contract actor (market contract) which is the `market_contract` contract; since this is a private method only the owner of the this contract can call it means the caller must be the signer or the one who initiated, owned and signed the contract or the account of the contract itself which is the market itself; since callback methods are private thus the caller of them must be the owner of the contract
                         ////
+                        /////// ➔ we'll use this method as a callback inside this contract to get the result of the cross contract call the nft_transfer_payout() method which has been scheduled inside the process_purchase() method to be executed on a receiver contract actor account which will be the NFT contract of the NFT owner which is the seller
+                        /////// ➔ resolves the pending DataReceipt object of the created and scheduled promise on this contract of the cross contract call to the receiver contract (NFT owner which is the seller), this is the callback from calling the nft_transfer_payout() cross contract call promise method that we want to await on and solve it inside the process_purchase() method which will analyze what happened in the cross contract call when nft_transfer_payout was called as part of the process_purchase method
                         /////// ➔ the buyer_id and the price are passed in incase something goes wrong and we need to refund the buyer
                         ////
                         buyer_id,
@@ -350,7 +338,7 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
                         /////// ➔ if the reminder was 0 means that the NFT contract wanted us the total amount of the NFT price to be paid all royalties out since it might be too many royalties that forced us to spent all the price of the NFT for NEAR payout process to pay the royalty account_ids out
                         /////// ➔ if the reminder was 1 means that the NFT contract wanted us the 90 % of the total amount of the NFT price to be paid all royalties out since the sum of all royalty percentage value inside the token.perpetual_royalties hashmap might be 9999 which is equals to 10000 - 1 (the valud of 100 % is 10000) which means all royalties payout cost us 90 % of the total amount of the NFT price 
                         ////
-                        if reminder == 0 || reminder == 1{
+                        if reminder == 0 || reminder == 1{ //-- if NFT contract wants us the 100 % or 90 % of the total price of the NFT we can return the payout obejct for NEAR payout process
                             Some(payout_object.payout) //-- returning the payout object of type Option for NEAR payout process
                         } else{
                             None //-- returning None if the reminder was anything but 1 or 0 since paying out all the royalties didn't go well and we have some yocto$NEAR which is greater than 1 since we're subtracting each value of every royalty account_id from the NFT price to keep track of the total amount from the NFT price that the NFT contract wants us to payout
@@ -386,9 +374,21 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
     /////////////////////////////////////////////////////////////////////////////////
 
     
+    pub fn get_supply_sales(&self) -> U64{ //-- return the length of the total sales inside the self.sales collection
+        U64(self.sales.len())
+    }
 
 
+    pub fn get_supply_by_owner_id(&self, owner_id: AccountId) -> U64{ //-- get the length of the sale set for a given owner
+        let all_sales_by_owner_id = self.by_owner_id.get(&owner_id);
+        if let Some(sales) = all_sales_by_owner_id{
+            U64(sales.len())
+        } else{
+            U64(0)
+        }
+    }
 
+    
 
 
 

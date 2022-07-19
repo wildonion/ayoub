@@ -251,11 +251,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
             }
         )
     );
-    let db =
-    
-    
-    
-    if db_engine.as_str() == "mongodb"{
+    let db = if db_engine.as_str() == "mongodb"{
         info!("switching to mongodb - {}", chrono::Local::now().naive_local());
         match ctx::app::Db::new().await{
             Ok(mut init_db) => {
