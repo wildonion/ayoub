@@ -125,7 +125,7 @@ trait NftContractReceiver{ //-- this trait which contains the cross conract call
 
     /////
     /////// ➔ following method must be called and executed inside the receiver_id's contract actor account (thus it must be existed and defined on receiver contract actor account) from this contract actor account therefore it'll take a param called account_id which is the one who should call this method on his/her contract actor account and must be the owner of his/her contract
-    /////// ➔ receiver_id: purchaser (person to transfer the NFT to) | token_id: the id of the NFT to transfer | approval_id: market contract's approval_id in order to transfer the token on behalf of the owner | memo: memo (to include some context) | balance: the price that the token was purchased for, this will be used in conjunction with the royalty percentages for the token in order to determine how much money should go to which account | max_len_payout: the maximum amount of accounts the market can payout at once (this is limited by gas fee) 
+    /////// ➔ receiver_id: purchaser (person to transfer the NFT to) | token_id: the id of the NFT to transfer | approval_id: market contract's approval_id in order to transfer the token on behalf of the owner | memo: memo (to include some context) | balance: the price that the token was purchased for, this will be used in conjunction with the royalty percentages for the token& in order to determine how much money should go to which account | max_len_payout: the maximum amount of accounts the market can payout at once (this is limited by gas fee) 
     ///// 
     fn nft_transfer_payout(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: u64, memo: String, balance: U128, max_len_payout: u64); //-- this method will be used for cross contract call on the receiver_id's contract actor (which must be implemented on the receiver_id's contract actor) once the nft_transfer_call() method is called and will return true if the token should be returned back to the sender
 
@@ -372,15 +372,16 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
     ////////////////////////////////// ➔ VIEW METHODS //////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////
-
+    ////////// NOTE - view methods don't need to have &mut self as their first param
+    
     
     pub fn get_supply_sales(&self) -> U64{ //-- return the length of the total sales inside the self.sales collection
         U64(self.sales.len())
     }
 
 
-    pub fn get_supply_by_owner_id(&self, owner_id: AccountId) -> U64{ //-- get the length of the sale set for a given owner
-        let all_sales_by_owner_id = self.by_owner_id.get(&owner_id);
+    pub fn get_supply_by_owner_id(&self, owner_id: AccountId) -> U64{ //-- return the length of the sale set for a given owner
+        let all_sales_by_owner_id = self.by_owner_id.get(&owner_id); //-- getting the set of all sales for a given owner
         if let Some(sales) = all_sales_by_owner_id{
             U64(sales.len())
         } else{
@@ -389,10 +390,58 @@ impl MarketContract{ //-- following methods will be compiled to wasm using #[nea
     }
 
     
+    pub fn get_sales_by_owner_id(&self, account_id: AccountId, from_index: Option<U128>, limit: Option<U128>) -> Vec<Sale>{ //-- return all sale objects for a given account
+        let all_owner_id_sales = self.by_owner_id.get(&account_id); //-- getting the set of all sales for a given owner
+        let sales_for_owner_id = if let Some(sales) = all_owner_id_sales{ //-- can't use match cause the return type must be equal in each match arm and we have either an empty vector or an UnorderedSet of Strings - getting the UnorderedSet of sale objects for a given owner
+            sales
+        } else{
+            return vec![]; //-- return an empty vector of sale objects since the passed in owner_id doesn't have any sales yet or all his/her sales might be removed 
+        };
+        let sales_vector = sales_for_owner_id.as_vector(); //-- converting the set of all sales into a vector
+        let start = u128::from(from_index.unwrap_or(U128(0))); //-- this where we'll start the pagination; if we have a from_index we'll use that otherwise start from 0 index
+        let limit = u128::from(limit.unwrap_or(U128(50))); //-- to take the first `limit` elements in the vector
+        sales_vector.iter() //-- iterating through the vector of all sale objects  
+              .skip(start as usize) //-- skipping `start` elements until `start` elements are skipped; usize can be either 32 bits or 64 bits long - it'll return an iterator so we can map over it
+              .take(limit as usize) //-- yielding `limit` elements until `limit` elements are yeilded; usize can be either 32 bits or 64 bits long - it'll return an iterator so we can map over it
+              .map(|sale_id| self.sales.get(&sale_id).unwrap()) //-- returning the sale object for this sale_id using self.sales map collection - mappiung over sale_ids to get their sale object to collect them into a vector
+              .collect() //-- collecting all the sale objects related to the passed in account_id
+    }
+
+    
+    pub fn get_supply_by_nft_contract_id(&self, nft_contract_id: AccountId) -> U64{ //-- return the length of the set of all the token_ids inside a given NFT contract
+        let all_tokens_ids_by_nft_contract_id = self.by_nft_contract_id.get(&nft_contract_id);
+        if let Some(token_ids_set) = all_tokens_ids_by_nft_contract_id{
+            U64(token_ids_set.len())
+        } else{
+            U64(0)
+        }
+    }
 
 
+    pub fn get_sales_by_nft_contract_id(&self, nft_contract_id: AccountId, from_index: Option<U128>, limit: Option<U128>) -> Vec<Sale>{ //-- return all sale objects for a given NFT contract
+        let all_token_ids_by_nft_contract_id = self.by_nft_contract_id.get(&nft_contract_id);
+        let token_ids_set = if let Some(token_ids) = all_token_ids_by_nft_contract_id{
+            token_ids
+        } else{
+            return vec![];
+        };
+        let token_ids_vector = token_ids_set.as_vector(); //-- converting the set of all token_ids into a vector
+        let start = u128::from(from_index.unwrap_or(U128(0))); //-- this where we'll start the pagination; if we have a from_index we'll use that otherwise start from 0 index
+        let limit = u128::from(limit.unwrap_or(U128(50))); //-- to take the first `limit` elements in the vector
+        token_ids_vector.iter() //-- iterating through the vector of all token_ids
+            .skip(start as usize) //-- skipping `start` elements until `start` elements are skipped; usize can be either 32 bits or 64 bits long - it'll return an iterator so we can map over it
+            .take(limit as usize) //-- yielding `limit` elements until `limit` elements are yeilded; usize can be either 32 bits or 64 bits long - it'll return an iterator so we can map over it
+            .map(|token_id| self.sales.get(&format!("{}{}{}", &nft_contract_id, DELIMETER, token_id)).unwrap()) //-- returning the sale object for this sale_id which is created using the token_id inside the vector of all token_ids using self.sales map collection - mappiung over token_ids to get their sale object by creating the unique sale_id to collect them into a vector
+            .collect() //-- collecting all the token_ids related to the passed in NFT contract
+    }
 
 
-
+    pub fn get_sale(&self, nft_contract_token_id: ContractAndTokenId) -> Option<Sale>{ //-- return the a sale object inside an Option (since it might be no sale for a given unique sale_id or a given nft_contract_token_id) for a given unique sale_id which is `nft_contract_actor_account_id + DELIMETER + token_id`
+        match self.sales.get(&nft_contract_token_id){ //-- getting a sale object related to a unique sale_id
+            Some(sale) => Some(sale),
+            None => None
+        }
+    }
+    
 
 }

@@ -274,4 +274,5 @@
 
 
 
-☢️ the instructions in near code must be supported by the near VM means adding extra libs won't be compiled by the near VM and we'll face us to `wasm unreachable opcode`    
+☢️ the instructions in near code must be supported by the near VM means adding extra libs won't be compiled by the near VM and we'll face us to `wasm unreachable opcode`
+    reseaon for unreachable wasm opcode => https://discordapp.com/channels/490367152054992913/855524499755499520/999047499958456320    
