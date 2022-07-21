@@ -90,6 +90,7 @@ https://veykril.github.io/tlborm/
 https://actix.rs/book/actix/sec-2-actor.html
 https://rust-cli.github.io/book/
 https://nomicon.io/RuntimeSpec/ -> use near design pattern cause it's a sharded based blockchain
+https://github.com/Bitdad-Dev/bitzio-nft-near-contracts/blob/master/NEAR.rules -> near design pattern explained 
 https://stackoverflow.com/questions/41823321/how-to-get-pointer-offset-of-an-enum-member-in-bytes
 https://stackoverflow.com/questions/27324821/why-does-an-enum-require-extra-memory-size
 https://docs.tendermint.com/master/
