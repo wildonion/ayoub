@@ -36,7 +36,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
         
         
         
-        // calling mint method of the deployed bluerangene contract 
+        // calling mint method of the deployed contract 
         // near call $NFT_CONTRACT_ID nft_mint '{"token_id": "token-1", "metadata": {"title": "My Non Fungible Team Token", "description": "The Team Most Certainly Goes :)", "media": "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif"}, "receiver_id": "'$NFT_CONTRACT_ID'"}' --accountId $NFT_CONTRACT_ID --amount 0.1
         // ...
         

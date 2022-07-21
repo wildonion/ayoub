@@ -17,7 +17,8 @@
 pub mod env{ //-- rafael env functions to mutate the state of the runtime object like near-sdk env
 
 
-
+    
+    // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module
 
 
 
@@ -248,7 +249,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // TODO - coming scheduled event from a thread of the first service actor inside a free thread of the second service actor 
             //        must be of type Arc<Mutex<T>> in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
-            // TODO - vector of || async move{} of events for an event manager struct 
+            // TODO - vector of || async move{} of events for an event manager struct like event loop schema 
             // TODO - call new event every 5 seconds from vector of event of closures 
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method
             // ....  

@@ -2,7 +2,7 @@
 
 
 
-// viewing nft metadata and the token itself methods of the deployed bluerangene contract
+// viewing nft metadata and the token itself methods of the deployed contract
 // ...
 // near view $NFT_CONTRACT_ID nft_token '{"token_id": "token-1"}'
 // near view $NFT_CONTRACT_ID nft_tokens_for_owner '{"account_id": "'$NFT_CONTRACT_ID'", "limit": 5}'

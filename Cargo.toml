@@ -1,14 +1,8 @@
 [workspace]
 
 members = [
-    "escrow",
-    "event",
-    "market",
-    "proposal",
-    "w2e",
     "PaaS",
     "coiniXerr",
-    "nft",
     "tests",
     "PaaS/src/runtime/",
 ]

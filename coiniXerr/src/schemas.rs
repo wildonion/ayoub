@@ -208,7 +208,7 @@ pub struct RuntimeInfo(pub HashMap<Uuid, MetaData>); //-- MetaData struct should
 impl RuntimeInfo{
 
     pub fn new() -> Self{
-        RuntimeInfo(HashMap::new()) //-- unit like struct
+        RuntimeInfo(HashMap::new()) //-- tuple like struct
     }
 
     pub fn add(mut rti: Self, meta_data: self::MetaData) -> Uuid{ //-- &rti means borrowing the ownership of all RuntimeInfo fields - it must be mutable cause we want to insert into its hash map field

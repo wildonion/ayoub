@@ -4,7 +4,7 @@
 
 
 
-// TODO - use either near rest api or cli for calling deployed bluerangene contract methods 
+// TODO - use either near rest api or cli for calling deployed contract methods 
 // https://docs.near.org/docs/api/rest-server/overview
 // ...
 

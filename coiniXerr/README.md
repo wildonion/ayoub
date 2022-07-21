@@ -8,4 +8,4 @@
 
 # 📌 TODOs
 
-`DEV.info` links
+`DEV.info` infos
