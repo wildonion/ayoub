@@ -53,6 +53,11 @@ impl Api{
     //        for hyper Request and Response structs error.
     // NOTE - the body of the `cb` in post and get methods is an async move{} means it'll return a future object
     //        which we can solve it using .await later.
+    // NOTE - since we can't put & behind the mut self thus we can't have the instance of the Api in later scopes
+    //        after calling its post or get methods and due to this fact we've built controllers which implements
+    //        only one Api instance per writing api pattern, means since we can have only one Api instance inside
+    //        a crate therefore we must have one controller per each Api instance to handle the incoming request
+    //        inside that controller which is related to a specific route (MVC like design pattern).  
     // -----------------------------------------------------------------------------------------------------------------------------
 
     pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>) -> Self{
@@ -72,7 +77,7 @@ impl Api{
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();
         let res = self.res.unwrap();
-        let cb_res = cb(req, res).await.unwrap(); //-- this would be of type either hyper::Response<Body> or hyper::Error
+        let cb_res = cb(req, res).await.unwrap(); //-- calling the passed in closure to the post method by passing the request and response objects since this closure callback contains the body of the controller method - this would be of type either hyper::Response<Body> or hyper::Error
         Ok(cb_res)
     }
 
@@ -84,7 +89,7 @@ impl Api{
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();
         let res = self.res.unwrap();
-        let cb_res = cb(req, res).await.unwrap(); //-- this would be of type either hyper::Response<Body> or hyper::Error
+        let cb_res = cb(req, res).await.unwrap(); //-- calling the passed in closure to the post method by passing the request and response objects since this closure callback contains the body of the controller method - this would be of type either hyper::Response<Body> or hyper::Error
         Ok(cb_res)
     }
 

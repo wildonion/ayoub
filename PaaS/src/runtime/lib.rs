@@ -79,13 +79,15 @@ impl RafaelRuntime{
     
 
 
-    
+
+    // https://github.com/yewstack/yew
     // https://rustwasm.github.io/
     // https://docs.rs/wasm-bindgen-futures
     // https://crates.io/crates/wasm-react
     // https://crates.io/crates/wasm-bindgen
     // https://crates.io/crates/rayon
     // https://crates.io/crates/wasm-bindgen-rayon
+    // TODO - use yew to build web pages using its html!{} macro in rust macro which will be compiled to wasm and bundled with rollup  
     // TODO - split data using divide and conquer simd based design pattern and std::thread pool and mpsc
     // TODO - run multithreading in wasm to bind it into js to run in js using rayon
     // TODO - use functional programming design pattern to call nested method on a return type of a struct method
