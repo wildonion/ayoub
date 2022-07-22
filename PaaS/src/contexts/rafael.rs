@@ -18,7 +18,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
     
-    // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module
+    // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module for promises or futures
 
 
 
@@ -239,6 +239,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         fn schedule(&self) -> Self{
 
             
+            // TODO - use Arc<Mutex<T>> in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
             // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
             // TODO - scheduling a promise of future object contains the method call (ActionReceipt) and get the resolved of the pending DataReceipt object from the executed future object inside a callback inside where we've scheduled the call
@@ -249,9 +250,8 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // TODO - coming scheduled event from a thread of the first service actor inside a free thread of the second service actor 
             //        must be of type Arc<Mutex<T>> in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
-            // TODO - vector of || async move{} of events for an event manager struct like event loop schema 
-            // TODO - call new event every 5 seconds from vector of event of closures 
-            // TODO - use functional programming design pattern to call nested method on a return type of a struct method
+            // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
+            // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
             // ....  
             // ....
             // let resp = Schedule::on(service_address)
@@ -259,7 +259,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             //                  .run_in_parallel()
             //                  .then(self.callback());
             // let resp = self.current_service.send(msg).to(another_serivce).await;
-            
+
             
             todo!()
         }
@@ -274,10 +274,14 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // -------------
             // if let syntax
             // -------------
-            if let FutureResult::Successful(encoded_result) = super::env::future_result(0){ //-- getting the result of the future object only if it was successful
+            let fut_res = if let FutureResult::Successful(encoded_result) = super::env::future_result(0){ //-- getting the result of the future object only if it was successful
                 // TODO - deserialize the result of the executed future object into a pre defined structure
                 // ... 
-            }
+            } else if let FutureResult::Failed = super::env::future_result(0){
+                
+            } else{
+
+            };
 
 
             // -------------
