@@ -201,6 +201,8 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         fn stop() -> Self; // NOTE - this is not object safe trait since we're returning the Self 
         fn schedule(&self) -> Self; //-- NOTE - not an object safe trait since we have self in method param and returning signature 
         fn callback(&self) -> Self;
+        fn refund(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by refunding an account
+        fn deposit(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by adding some amount to an account 
         
     }
 
@@ -222,6 +224,18 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
                 last_crash: None,
                 first_init: Some(chrono::Local::now().timestamp()),
             }
+        }
+
+        fn refund(&mut self) -> Self{
+
+            todo!()
+
+        }
+
+        fn deposit(&mut self) -> Self{
+
+            todo!()
+
         }
 
         fn stop() -> Self{
