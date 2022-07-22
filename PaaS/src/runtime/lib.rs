@@ -151,7 +151,7 @@ impl RafaelRuntime{
 
 
     #[wasm_bindgen(setter)]
-    pub fn set_current_service(&mut self, current_service: &str) -> Self{ //-- since we want to mutate tbe state of structure we've defined the first param as &mut self
+    pub fn set_service(&mut self, current_service: &str) -> Self{ //-- since we want to mutate tbe state of structure we've defined the first param as &mut self
         let service = match current_service{
             "auth" => Service::Auth,
             "game" => Service::Game,
