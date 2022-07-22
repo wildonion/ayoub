@@ -57,7 +57,8 @@ Coded by
 
 
 
-
+    NOTE - when we use & in struct methods we can use the lifetime of the self to return pointer to a type from the method body 
+    NOTE - wehn we use & in struct methods means we can call other methods inside the scope where the instance is, right after calling a method on the instance
     NOTE - it's ok to setup app storage and api object inside each controller instead of setting them up in main.rs to have single instance of them in the whole lifetime of the app since rust doesn't have garbage collector thus based on borrowing and ownership rules each app storage and api object inside each controller function lifetime will be valid till the end of function scope or body   
     NOTE - 'static trait bound means the type does not contain any non-static references, the receiver (function or the struct field) can hold on to the type for as long as they want and it will never become invalid until they drop it also any owned data always passes a 'static lifetime bound, but a reference to that owned data generally does not
     NOTE - based on orphan rule future traits must be imported to call their methods on hyper instances of the request and response body struct
