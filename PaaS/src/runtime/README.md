@@ -2,10 +2,10 @@
 
 
 
-# Binding `Runtime` Struct to `.wasm` to Load in `js` Codes to Run in Browser
+## Binding `Runtime` Struct to `.wasm` to Load in `js` Codes to Run in Browser
 
 
-## Build: 
+### Build: 
 
 ```sudo chmod +x build.sh && ./build.sh```
 
