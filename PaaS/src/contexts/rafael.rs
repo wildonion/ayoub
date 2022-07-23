@@ -269,7 +269,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // ....  
             // ....
             // let resp = Schedule::on(service_address)
-            //                  .data(arced_mutexed_data_object) //-- this is the data that must be executed on second service
+            //                  .data(arced_mutexed_data_object) //-- this is the data that must be executed on second service and it can be the name of a method inside that service 
             //                  .run_in_parallel()
             //                  .then(self.callback());
             // let resp = self.current_service.send(msg).to(another_serivce).await;
