@@ -55,6 +55,15 @@ pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::R
                     Ok(otp_req) => { //-- we got the phone number of the user
                         
 
+                        
+
+                        ///////////////////////////
+                        // unpacking struct syntax
+                        ///////////////////////////
+                        // let schemas::auth::SendOTPRequest{phone} = serde_json::from_str(&json);
+
+
+
 
                         let phone = otp_req.phone;
                         let sms_api_token = env::var("SMS_API_TOKEN").expect("⚠️ no sms api token variable set");
