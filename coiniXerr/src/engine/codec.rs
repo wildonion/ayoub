@@ -10,6 +10,7 @@
 // NOTE - to send some data back to the user we must serialize that data struct into the json and from there to utf8 to pass through the socket
 // NOTE - to send fetched data from mongodb which is a bson object back to the user we must first deserialize the bson into its related struct and then serialize it to json to send back to the user through the socket
 // NOTE - borsh like codec ops : Box<[u8]> (automatic lifetime) or &'a [u8] <-> vec[u8] <-> struct
+// NOTE - &[u8] bytes to str using std::from_utf8() -> parse it and build the hashmap -> map the hashmap key and value str into the struct  
 
 
 
