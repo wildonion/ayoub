@@ -158,10 +158,9 @@ impl RafaelRuntime{
             "event" => Service::Event,
             _ => Service::Nft,
         };
-        self.current_service = service;
         Self{
             id: self.id,
-            current_service: self.current_service,
+            current_service: service, //-- new field
             link_to_server: self.link_to_server,
             error: self.error,
             node_addr: self.node_addr.clone(), //-- cloning the self.node_addr since cannot move out of `self.node_addr` which is behind a mutable reference move occurs because `self.node_addr` has type `std::string::String`, which does not implement the `Copy` trait
