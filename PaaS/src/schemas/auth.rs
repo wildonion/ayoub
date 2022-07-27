@@ -135,8 +135,6 @@ pub struct SMSResponseEntries{
 pub struct OTPCareerResponse{
     #[serde(flatten)] // NOTE - #[serde(flatten)] proc macro attribute can be used for factoring common keys into a shared structure, or for capturing remaining fields into a map with arbitrary string keys
     pub extra: HashMap<String, Value>, //-- the OTP career response after deserializing to this struct will be like so: {"return": {"status": ..., "message": ...}, "entries": [{"messageid": ..., ...}]}
-    // pub r#return: SMSResponseReturn, //-- use r# to escape reserved keywords to use them as identifiers 
-    // pub entries: Vec<SMSResponseEntries>,
 }
 
 

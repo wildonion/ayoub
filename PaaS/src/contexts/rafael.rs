@@ -157,12 +157,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     }
 
 
-    // NOTE - #[wasm_bindgen] proc macro attribute is used to compile structs and their methods into .wasm file to bind it into js to run in browser
-    // NOTE - can't bind the #[wasm_bindgen] proc macro attribute since it doesn't supprt generic type, lifetimes (means can't return a borrowed type inside the structure method) 
-    //        and raw unix socket since we can't run socket server inside the browser or js; we can only setup websocket client. 
-    // NOTE - struct public fields are automatically infered to generate accessors in js but they're required to be Copy thus we have to implement the
-    //        Copy trait for our structs and enums; since the Copy is not implemented for heap data structures due to their unknown size at compile time
-    //        we must avoid exporting those fields into wasm using #[wasm_bindgen(skip)] and use setter and getter methods in struct impl block. 
+
     #[derive(Serialize, Deserialize)]
     pub struct Runtime<S>{ 
         pub id: Uuid,
@@ -309,10 +304,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
                 FutureResult::Failed => {
 
                 },
-                FutureResult::Pending => {
-
-                },
-                _ => {
+                _ => { //-- if it was Pending
 
                 },
             }

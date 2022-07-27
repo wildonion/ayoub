@@ -4,7 +4,7 @@
 
 > ``sudo chown -R root:root /home/wildonion/ayoub && sudo chmod 777 -R /home/wildonion/ayoub```
 
-> ayoub PaaS: ```cargo run --bin ayoub``` or ```cargo run --bin ayoub -- <SERVICE_NAME> <SERVICE_PORT>``` 
+> ayoub PaaS: ```cargo run --bin ayoub``` or ```cargo run --bin ayoub -- <SERVICE_NAME> <SERVICE_PORT>``` like ```cargo run --bin ayoub -- auth 37465``` 
 
 * If you don't pass the required arguments, it'll set the current service and its port from `.env` file.
 

@@ -24,6 +24,10 @@ use serde::{Serialize, Deserialize};
 
 
 
+
+
+
+
 // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 //          RAFAEL WASM BINDING DATA STRUCTURES
@@ -59,7 +63,12 @@ pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer 
 // ---------------------------------------------------------
 // wasm runtime structure and its methods to bind it into js  
 // ---------------------------------------------------------
-
+// NOTE - #[wasm_bindgen] proc macro attribute is used to compile structs and their methods into .wasm file to bind it into js to run in browser
+// NOTE - can't bind the #[wasm_bindgen] proc macro attribute since it doesn't supprt generic type, lifetimes (means can't return a borrowed type inside the structure method) 
+//        and raw unix socket since we can't run socket server inside the browser or js; we can only setup websocket client. 
+// NOTE - struct public fields are automatically infered to generate accessors in js but they're required to be Copy thus we have to implement the
+//        Copy trait for our structs and enums; since the Copy is not implemented for heap data structures due to their unknown size at compile time
+//        we must avoid exporting those fields into wasm using #[wasm_bindgen(skip)] and use setter and getter methods in struct impl block. 
 #[wasm_bindgen] //-- bounding the Runtime struct to wasm_bindgen proc macro attribute to compile it to wasm to generate a binding for js and convert it into js codes
 #[derive(Serialize, Deserialize, Clone)]
 pub struct RafaelRuntime{
@@ -158,7 +167,7 @@ impl RafaelRuntime{
             "event" => Service::Event,
             _ => Service::Nft,
         };
-        Self{
+        Self{ 
             id: self.id,
             current_service: service, //-- new field
             link_to_server: self.link_to_server,
