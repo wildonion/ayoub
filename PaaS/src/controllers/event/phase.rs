@@ -36,7 +36,7 @@ pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/event/update/phases/add", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/event/update/phases/add", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {

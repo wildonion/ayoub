@@ -35,13 +35,11 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/god/create/group", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/god/create/group", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
 
         // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
         // TODO - upload image for group prof like tus resumable upload file
-        // TODO - first allocate some bytes inside the server ram buffer for the incoming file from the client then on every incoming io streaming of chunks of the file from the client save that chunk into the created file on server from the allocated buffer and seek the cursor to the saved position of the file to resume on reconnecting to the server
-        // TODO - streaming all over the incoming chunks of the file to save them one by one inside a buffer located on the server ram on corruption condition to gather those bytes to form the whole file
         // ...
         /*
             --------------------------------------------------------------------------------------------------------------------------------------------    
@@ -268,7 +266,7 @@ pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/god/update/group/", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/god/update/group/", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -445,7 +443,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
     
-    api.post("/game/get/group/all", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
+    api.post("/game/get/group/all", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once     
 
 
         ////////////////////////////////// DB Ops

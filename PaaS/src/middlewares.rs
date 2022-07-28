@@ -43,7 +43,7 @@ pub mod auth{
                             let token = authen_str[6..authen_str.len()].trim();
                             match jwt::deconstruct(token).await{
                                 Ok(token_data) => {
-                                    authenticate_pass = true;
+                                    authenticate_pass = true; //-- means we've found the token inside the request header and decoded successfully 
                                     user_data_inside_token = Some(token_data);
                                 },
                                 Err(e) => {
@@ -91,14 +91,6 @@ pub mod auth{
      
         }
 
-
-        // pub async fn access(req: hyper::Request<Body>, level: u8) -> bool{
-        //     if req.user.access_level <= level{ // TODO - put the user object inside the req object; req.user design pattern 
-        //         true
-        //     } else{
-        //         false
-        //     }
-        // }
 
     }
 

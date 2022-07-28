@@ -57,7 +57,11 @@ impl Api{
     //        after calling its post or get methods and due to this fact we've built controllers which implements
     //        only one Api instance per writing api pattern, means since we can have only one Api instance inside
     //        a crate therefore we must have one controller per each Api instance to handle the incoming request
-    //        inside that controller which is related to a specific route (MVC like design pattern).  
+    //        inside that controller which is related to a specific route (MVC like design pattern).
+    // NOTE - we can't have api.post().await and api.get().await inside the same scope from one instance since with the first 
+    //        use the api instance will be moved and its lifetime will be dropped due to the above third NOE.  
+    // NOTE - since both api.post() and api.get() methods are async thus we have to await on them to run their callback closures
+    //        which contain the logic of the whole controller. 
     // -----------------------------------------------------------------------------------------------------------------------------
 
     pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>) -> Self{

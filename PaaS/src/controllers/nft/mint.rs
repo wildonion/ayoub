@@ -31,7 +31,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local());
     
-    api.post("/nft/mint", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/nft/mint", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
 
         

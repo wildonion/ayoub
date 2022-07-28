@@ -33,7 +33,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/deck/add", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/deck/add", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
 
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -229,7 +229,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
     
-    api.post("/game/deck/get/availables", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
+    api.post("/game/deck/get/availables", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once     
 
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -355,7 +355,7 @@ pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
     
-    api.post("/game/deck/diable", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/deck/diable", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
 
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {

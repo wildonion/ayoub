@@ -29,7 +29,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/auth/signup", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
+    api.post("/auth/signup", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once     
         
         
         let whole_body_bytes = hyper::body::aggregate(req.into_body()).await.unwrap(); //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all futures stream or chunks which is utf8 bytes - since we don't know the end yet, we can't simply stream the chunks as they arrive (cause all futures stream or chunks which are called chunks are arrived asynchronously), so here we do `.await` on the future, waiting on concatenating the full body after all chunks arrived then afterwards the content can be reversed
@@ -72,7 +72,7 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                             username: user_info.username,
                                             phone: user_info.phone,
                                             pwd: hash,
-                                            access_level: Some(USER_ACCESS), //-- default access is the user access
+                                            access_level: Some(DEFAULT_USER_ACCESS), //-- default access is the user access
                                             status: DEFAULT_STATUS, //-- setting the user (player) status to default which is 0
                                             role_id: None,
                                             side_id: None,

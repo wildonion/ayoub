@@ -125,8 +125,6 @@ pub fn gen_random_idx(idx: usize) -> usize{
 
 
 pub fn string_to_static_str(s: String) -> &'static str {
-    // TODO - use other Box methods
-    // ...
     Box::leak(s.into_boxed_str())
 }
 
@@ -366,6 +364,12 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
     pub fn ref_to_str_specific_lifetime<'a>(status: u8) -> &'a str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we've defined a valid lifetime for the pointer of the return type to return the pointer from the function which &'a str
         let name = "wildonion";
         name //-- name has a lifetime as valid as the generated lifetime from the caller scope by the compiler and will be valid as long as the caller scope is valid
+    }
+
+    // NOTE - 'static lifetime will be valid as long as the whole lifetime of the caller scope (it can be the main function which depends on the whole lifetime of the app)
+    pub fn ref_to_str_static() -> &'static str{
+        let name = "wildonion";
+        name //-- name has static lifetime valid as long as the whol lifetime of the caller scope which can be the main function which will be valid as long as the main or the app is valid
     }
 
 

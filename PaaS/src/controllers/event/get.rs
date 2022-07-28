@@ -32,7 +32,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
     
-    api.post("/event/get/availables", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
+    api.post("/event/get/availables", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once     
 
 
         ////////////////////////////////// DB Ops
@@ -104,7 +104,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
     
-    api.post("/event/get/single", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that    
+    api.post("/event/get/single", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once     
 
 
 

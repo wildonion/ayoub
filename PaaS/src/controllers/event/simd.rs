@@ -105,7 +105,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/event/simd", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/event/simd", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
 
 
         let heavy_func = |chunk: u8| {

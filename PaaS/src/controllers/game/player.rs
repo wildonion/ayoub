@@ -38,7 +38,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/player/update/role", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/update/role", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -219,7 +219,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/player/update/side", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/update/side", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
        
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -395,7 +395,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
     
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/player/update/status", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/update/status", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -573,7 +573,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/player/update/role-ability", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/update/role-ability", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -743,7 +743,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/player/chain", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/chain", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
@@ -912,7 +912,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
-    api.post("/game/player/get/single", |req, res| async move{ // NOTE - api will be moved here cause neither trait Copy nor Clone is not implemented for that
+    api.post("/game/player/get/single", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
        
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => {
