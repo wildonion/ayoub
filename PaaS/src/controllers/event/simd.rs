@@ -99,7 +99,7 @@ use std::time::Instant;
 
 
 // -------------------------------- simd controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 

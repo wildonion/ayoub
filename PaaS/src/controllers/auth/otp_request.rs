@@ -35,7 +35,7 @@ use serde::{Serialize, Deserialize}; //-- to use the deserialize() and serialize
 
 
 // -------------------------------- OTP request controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn main(db: Option<&MC>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{

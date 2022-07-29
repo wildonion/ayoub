@@ -31,7 +31,7 @@ use hyper::http::Uri;
 
 
 // -------------------------------- update player role controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -212,7 +212,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
 
 
 // -------------------------------- update player side controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -388,7 +388,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
 
 
 // -------------------------------- update player status controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -566,7 +566,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
 
 
 // -------------------------------- update player role ability controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -736,7 +736,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
 
 
 // -------------------------------- chain player to another player controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // ----------------------------------------------------------------------------------
 
 pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -905,7 +905,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
 
 
 // -------------------------------- get a single player info controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // ----------------------------------------------------------------------------------
 
 pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{

@@ -28,7 +28,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 // -------------------------------- create group controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -259,7 +259,7 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
 
 // -------------------------------- update group controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -437,7 +437,7 @@ pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
 
 
 // -------------------------------- get all groups controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     

@@ -30,7 +30,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 // -------------------------------- get all users controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{

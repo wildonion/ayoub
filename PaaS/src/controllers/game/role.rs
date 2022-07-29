@@ -27,7 +27,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 // -------------------------------- add role controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -228,7 +228,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- get all roles controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
@@ -296,7 +296,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- disable role controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 

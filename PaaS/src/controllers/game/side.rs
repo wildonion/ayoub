@@ -30,7 +30,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 // -------------------------------- add side controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -227,7 +227,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- get all sides controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
@@ -296,7 +296,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- disable side controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 

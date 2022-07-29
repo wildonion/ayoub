@@ -29,7 +29,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 // -------------------------------- update event phases (add new phase) controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------------------
 
 pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- inserting a new passed event for the current event

@@ -15,7 +15,7 @@ use hyper::{header, StatusCode, Body, Response};
 
 
 // -------------------------------- not found controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn main() -> GenericResult<hyper::Response<Body>, hyper::Error>{

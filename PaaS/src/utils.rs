@@ -266,15 +266,21 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 
-// ------------------------------ testing ownership and borrowing rule
+// ------------------------------ testing ownership, borrowing rule and generics
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
 // https://github.com/wildonion/extrust/blob/4a3e72184ea5159d0ec6d4e8325e481019023b4f/_trash/_garbage.rs#L323
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
 
+pub const SIZE: usize = 325;
+pub type Context<'a, Pack> = Unpack<'a, Pack, SIZE>;
+pub struct Unpack<'l, T: Interface + 'l, const U: usize>{ //-- T is of type Pack struct which is bounded to 'l lifetime and the Interface trait and U (constant generic) must be a constant usize type - Unpack takes a generic type of any kind which will be bounded to a trait and a lifetime but it must be referred to a field or be inside a PhantomData since T and the lifetime will be unused and reserved by no variables inside the ram
+    pub pack: &'l T, //-- pack is a pointer or a reference and is pointing to T which is a generic type and bounded to a trait and a valid lifetime as long as the lifetime of the struct instance
+}
+
 pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime to initiate an instance from it using struct declaration and return a reference to that instance inside any function 
-trait Interface{}
+pub trait Interface{}
 
 impl Interface for Pack{} //-- is required for return_box_trait() function
 

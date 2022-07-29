@@ -41,6 +41,11 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 
+
+
+// -------------------------------- process payment controller
+// ➝ Return : Hyper Response Body or Hyper Error
+// -------------------------------------------------------------------------
 pub async fn process_payment(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     

@@ -26,7 +26,7 @@ use log::info;
 
 
 // -------------------------------- add deck controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
 pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
@@ -223,7 +223,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- get all decks controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
@@ -349,7 +349,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- disable deck controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 

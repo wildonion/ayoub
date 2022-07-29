@@ -26,7 +26,7 @@ use hyper::http::Uri;
 
 
 // -------------------------------- get all events controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
@@ -98,7 +98,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
 
 
 // -------------------------------- get a single event controller
-//
+// ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
