@@ -178,7 +178,7 @@ fn main() {
 
 
 
-
+    std::fs::create_dir("assets/images").expect("what");
 
 
 

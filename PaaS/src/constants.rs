@@ -44,6 +44,7 @@ pub static NOT_FOUND_PLAYER: &str = "Player Not Found";
 pub static NOT_IMPLEMENTED: &str = "Not Implemented";
 pub static OTP_CODE_HAS_BEEN_SENT: &str = "OTP Code Has Been Sent Successfully";
 pub static EXPIRED_OTP_CODE: &str = "OTP Code Has Been Expored";
+pub const UPLOAD_PATH: &str = "assets/images/group/"; //-- this the root of the project path
 pub const DEV_ACCESS: u8 = 0;
 pub const ADMIN_ACCESS: u8 = 1; // God access
 pub const DEFAULT_USER_ACCESS: u8 = 2;

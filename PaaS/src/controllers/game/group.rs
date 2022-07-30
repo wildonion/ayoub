@@ -44,6 +44,13 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
         /*
             --------------------------------------------------------------------------------------------------------------------------------------------    
 
+
+            TODO - PUT THE FOLLOWING LOGIC INSIDE THE utils::upload_asset() FUNCTION
+            TODO - let filename = utils::upload_asset(path, payload).await; //-- passing the incoming utf8 bytes payload to build the image
+            // ...
+
+
+            ===============================================
             fs::create_dir_all(constants::UPLOAD_PATH)?;
             let mut filename = "".to_string();
             while let Ok(Some(mut field)) = prof_img.try_next().await{
@@ -56,6 +63,9 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
                 }
             }
+            ===============================================
+
+
             let res = UploadFile{
                 name: filename,
                 time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),

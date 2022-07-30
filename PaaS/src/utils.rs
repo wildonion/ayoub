@@ -124,10 +124,17 @@ pub fn gen_random_idx(idx: usize) -> usize{
 
 
 
-pub fn string_to_static_str(s: String) -> &'static str {
+pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of the return str is static and is valid as long as the entire lifetime of the app
     Box::leak(s.into_boxed_str())
 }
 
+
+
+
+
+pub async fn upload_asset(path: &str){
+
+}
 
 
 
@@ -277,6 +284,7 @@ pub const SIZE: usize = 325;
 pub type Context<'a, Pack> = Unpack<'a, Pack, SIZE>;
 pub struct Unpack<'l, T: Interface + 'l, const U: usize>{ //-- T is of type Pack struct which is bounded to 'l lifetime and the Interface trait and U (constant generic) must be a constant usize type - Unpack takes a generic type of any kind which will be bounded to a trait and a lifetime but it must be referred to a field or be inside a PhantomData since T and the lifetime will be unused and reserved by no variables inside the ram
     pub pack: &'l T, //-- pack is a pointer or a reference and is pointing to T which is a generic type and bounded to a trait and a valid lifetime as long as the lifetime of the struct instance
+    pub arr: &'l [u8; U],
 }
 
 pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime to initiate an instance from it using struct declaration and return a reference to that instance inside any function 
