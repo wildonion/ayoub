@@ -132,7 +132,23 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str){
+pub async fn upload_asset(path: &str, payload: &[u8]){
+    
+    // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
+    // TODO - writing utf8 bytes payload into the sepcified path to create the file
+    // ...
+    // fs::create_dir_all(constants::UPLOAD_PATH)?;
+    // let mut filename = "".to_string();
+    // while let Ok(Some(mut field)) = prof_img.try_next().await{
+    //     let content_type = field.content_disposition().unwrap();
+    //     filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), content_type.get_filename().unwrap());
+    //     let filepath = format!("{}/{}", constants::UPLOAD_PATH, sanitize_filename::sanitize(&filename));
+    //     let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
+    //     while let Some(chunk) = field.next().await{
+    //         let data = chunk.unwrap();
+    //         f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+    //     }
+    // }
 
 }
 

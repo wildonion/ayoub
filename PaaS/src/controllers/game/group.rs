@@ -36,50 +36,9 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
     api.post("/game/god/create/group", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
-        
-
-        // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
-        // TODO - upload image for group prof like tus resumable upload file
-        // ...
-        /*
-            --------------------------------------------------------------------------------------------------------------------------------------------    
-
-
-            TODO - PUT THE FOLLOWING LOGIC INSIDE THE utils::upload_asset() FUNCTION
-            TODO - let filename = utils::upload_asset(path, payload).await; //-- passing the incoming utf8 bytes payload to build the image
-            // ...
-
-
-            ===============================================
-            fs::create_dir_all(constants::UPLOAD_PATH)?;
-            let mut filename = "".to_string();
-            while let Ok(Some(mut field)) = prof_img.try_next().await{
-                let content_type = field.content_disposition().unwrap();
-                filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), content_type.get_filename().unwrap());
-                let filepath = format!("{}/{}", constants::UPLOAD_PATH, sanitize_filename::sanitize(&filename));
-                let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
-                while let Some(chunk) = field.next().await{
-                    let data = chunk.unwrap();
-                    f = web::block(move || f.write_all(&data).map(|_| f)).await?;
-                }
-            }
-            ===============================================
-
-
-            let res = UploadFile{
-                name: filename,
-                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-            };
-            let user = QueryableUser::update_prof_img(id.into_inner(), res).await?;
-            Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
-
-            --------------------------------------------------------------------------------------------------------------------------------------------
-
-        */
-
-
+    
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -99,6 +58,24 @@ pub async fn create(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                                 match serde_json::from_str::<schemas::game::AddGroupRequest>(&json){ //-- the generic type of from_str() method is AddGroupRequest struct - mapping (deserializing) the json string into the AddGroupRequest struct
                                     Ok(group_info) => {
 
+
+
+
+
+
+                                        // TODO - let filename = utils::upload_asset(path, payload).await; //-- passing the incoming utf8 bytes payload to build the image
+                                        // ...
+                                        // let res = UploadFile{
+                                        //     name: filename,
+                                        //     time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+                                        // };
+                                        // let user = QueryableUser::update_prof_img(id.into_inner(), res).await?;
+                                        // Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
+
+
+
+
+                                        
 
 
                                         let group_name = group_info.clone().name; //-- cloning to prevent from moving
@@ -279,7 +256,7 @@ pub async fn update(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
     api.post("/game/god/update/group/", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
