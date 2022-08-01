@@ -41,7 +41,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
     api.post("/game/player/update/role", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -222,7 +222,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
     api.post("/game/player/update/side", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
        
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -398,7 +398,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
     api.post("/game/player/update/status", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -576,7 +576,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
     api.post("/game/player/update/role-ability", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -746,7 +746,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
     api.post("/game/player/chain", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -915,7 +915,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
     api.post("/game/player/get/single", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
        
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
                 

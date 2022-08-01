@@ -36,7 +36,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
     api.post("/game/deck/add", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
 
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -232,7 +232,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
     api.post("/game/deck/get/availables", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once     
 
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         
@@ -358,7 +358,7 @@ pub async fn disable(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
     api.post("/game/deck/diable", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
 
         match middlewares::auth::pass(req).await{
-            Ok((token_data, req)) => {
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
                 
         

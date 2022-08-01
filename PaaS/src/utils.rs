@@ -132,7 +132,23 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str){
+pub async fn upload_asset(path: &str, payload: &[u8]){
+    
+    // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
+    // TODO - writing utf8 bytes payload into the sepcified path to create the file
+    // ...
+    // fs::create_dir_all(constants::UPLOAD_PATH)?;
+    // let mut filename = "".to_string();
+    // while let Ok(Some(mut field)) = prof_img.try_next().await{
+    //     let content_type = field.content_disposition().unwrap();
+    //     filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), content_type.get_filename().unwrap());
+    //     let filepath = format!("{}/{}", constants::UPLOAD_PATH, sanitize_filename::sanitize(&filename));
+    //     let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
+    //     while let Some(chunk) = field.next().await{
+    //         let data = chunk.unwrap();
+    //         f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+    //     }
+    // }
 
 }
 
@@ -505,11 +521,12 @@ impl Otp for Auth{
 pub enum Storagekey{ //-- defining an enum based unique storage key for every our collections to avoid collection collision which might be happened when two different collections share a same storage for their keys on the chain which will face us data collision at runtime
     Sales, ////////---------➔ converting this to vector (Storagekey::Sales.try_to_vec().unwrap()) gives us an array of [0] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key 
     ByOwnerId, ////////---------➔ converting this to vector (Storagekey::ByOwnerId.try_to_vec().unwrap()) gives us an array of [1] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
-    ByOwnerIdInner { account_id_hash: [u8; 32] }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
+    ByOwnerIdInner { account_id_hash: CryptoHash }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
     ByNFTContractId, ////////---------➔ converting this to vector (Storagekey::ByNFTContractId.try_to_vec().unwrap()) gives us an array of [3] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
-    ByNFTContractIdInner { account_id_hash: [u8; 32] }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
+    ByNFTContractIdInner { account_id_hash: CryptoHash }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
     ByNFTTokenType, ////////---------➔ converting this to vector (Storagekey::ByNFTTokenType.try_to_vec().unwrap()) gives us an array of [5] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
-    ByNFTTokenTypeInner { token_type_hash: [u8; 32] }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
+    ByNFTTokenTypeInner { token_type_hash: CryptoHash }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
     FTTokenIds, ////////---------➔ converting this to vector (Storagekey::FTTokenIds.try_to_vec().unwrap()) gives us an array of [7] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     StorageDeposits, ////////---------➔ converting this to vector (Storagekey::StorageDeposits.try_to_vec().unwrap()) gives us an array of [8] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
+    Collection, ////////---------➔ converting this to vector (Storagekey::Collection.try_to_vec().unwrap()) gives us an array of [9] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
 }
