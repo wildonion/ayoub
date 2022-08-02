@@ -68,7 +68,7 @@ use crate::actors::{parathread::{Parachain, Communicate}, peer::{Validator, Cont
 use crate::utils::scheduler;
 use crate::schemas::{Transaction, RuntimeInfo, MetaData, Block, Slot, Chain, Staker};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
-use crate::utils::response::ResponseBody; 
+use crate::utils::res::ResponseBody; 
 use futures::StreamExt; //-- a trait for streaming utf8 bytes data
 use tokio::sync::mpsc::Sender;
 use serde::{Deserialize, Serialize};

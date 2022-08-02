@@ -179,7 +179,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     //              RAFAEL SERVERLESS METHODS
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    pub trait Serverless{ /////// a functional Serverless trait for Runtimes
+    pub trait Serverless{ /////// a functional Serverless trait for Runtimes - this trait is not object safe trait since we're returning the self and Self in method param and the returning signature 
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
@@ -193,11 +193,13 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
         fn run(&mut self) -> Self; // NOTE - the type that this trait which must be implemented for must be defined as mutable - the return type is the type that this trait will be implemented for
-        fn stop() -> Self; // NOTE - this is not object safe trait since we're returning the Self 
-        fn schedule(&self) -> Self; //-- NOTE - not an object safe trait since we have self in method param and returning signature 
+        fn stop() -> Self; 
+        fn schedule(&self) -> Self; 
         fn callback(&self) -> Self;
         fn refund(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by refunding an account
-        fn deposit(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by adding some amount to an account 
+        fn deposit(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by adding some amount to an account
+        fn storage_usage(&self) -> u64; //-- no need to add &mut self for the first param since we want to return the total used bytes 
+        fn storage_byte_cost(&self) -> Self::Cost; //-- no need to add &mut self for the first param since we want to return the total cost of the total used bytes
         
     }
 
@@ -311,6 +313,24 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             }
 
             todo!()
+        }
+
+        fn storage_usage(&self) -> u64 {
+
+            // TODO - the total bytes in u64 bits (8 bytes) format used by the runtime
+            // ...
+
+            todo!()
+
+        }
+
+        fn storage_byte_cost(&self) -> Self::Cost {
+            
+            // TODO - the cost of the total used storage by the runtime
+            // ...
+
+            todo!()
+
         }
 
 

@@ -2,7 +2,7 @@
 
 
 
-pub mod response;
+pub mod res;
 pub mod scheduler;
 pub mod req;
 pub mod hexy;
