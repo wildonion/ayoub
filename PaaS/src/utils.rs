@@ -415,6 +415,43 @@ impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
 
 
 
+// ---------------------------------------- interfaces
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+
+pub struct OTPSuccess;
+pub struct OTPErr;
+pub struct PhoneNumber;
+pub struct Auth;
+
+pub trait Otp{
+
+    type Message;
+
+    fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>;
+
+}
+
+impl Otp for Auth{
+
+    type Message = Stirng;
+    
+    fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>{
+
+        todo!()
+
+    }
+
+}
+
+
+
+
+
+
+
 
 
 
