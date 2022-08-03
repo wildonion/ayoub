@@ -294,6 +294,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 // -----------------------------------------------------------------------------------------
 // https://github.com/wildonion/extrust/blob/4a3e72184ea5159d0ec6d4e8325e481019023b4f/_trash/_garbage.rs#L323
 // -----------------------------------------------------------------------------------------
+// NOTE - generic types in function signature can be bounded to lifetimes and traits so we can use the lifetime to avoid dangling pointer return in function body and traits to extend the type interface
 // -----------------------------------------------------------------------------------------
 
 impl<'a, Pack: Interface + 'a> Into<Vec<u8>> for Unpack<'a, Pack, SIZE>{ //-- based on orphan rule we have to import the trait inside where the struct is or bound the instance of the struct into the Into trait in function calls - we wanto to return the T inside the wrapper thus we can implement the Into trait for the wrapper struct which will return the T from the wrapper field
