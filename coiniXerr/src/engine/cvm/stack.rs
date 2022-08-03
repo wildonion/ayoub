@@ -44,7 +44,7 @@ macro_rules! wowasm {
 
 
 #[macro_export]
-macro_rules! query { // NOTE - this is a macro with multiple syntax support
+macro_rules! query { // NOTE - this is a macro with multiple syntax support and if any pattern matches with the caller pattern, then the code block of that pattern will be emitted
     
     ( $value_0:expr, $value_1:expr, $value_2:expr ) => { //-- passing multiple object syntax
         // ...

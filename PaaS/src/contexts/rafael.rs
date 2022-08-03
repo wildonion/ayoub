@@ -249,7 +249,6 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
         fn schedule(&self) -> Self{
 
-            
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc calls like near protocol
             // TODO - use Arc<Mutex<T>> in multithreaded env and RefCell<Rc<T>> in single threaded env
@@ -270,8 +269,13 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // let resp = Schedule::on(service_address)
             //                  .data(arced_mutexed_data_object) //-- this is the data that must be executed on second service and it can be the name of a method inside that service 
             //                  .run_in_parallel()
-            //                  .then(self.callback());
-            // let resp = self.current_service.send(msg).to(another_serivce).await;
+            //                  .then(self.callback()); //-- wait to solve the future
+            // NOTE - scheduling a promise object which will call the built-in method of the near protocol the transfer() method which will be executed later asyncly to transfer Ⓝ to the creator contract acctor account
+            // let resp = Schedule::on(service_address) //-- scheduling a future object in here on another service which must gets executed later asyncly to run the scheduled method which in our case is the transfer() method
+            //                  .transfer(3) //-- this is the amount that must gets transferred to the second service
+            //                  .run_in_parallel()
+            //                  .then(self.callback()); //-- wait to solve the future
+            // let resp = self.current_service.send(msg).to(another_serivce).await; //-- msg must be a json stringified in form "{ \"key\": \"value\" }" like "{ \"amount\": \"5\" }" which can be decoded in destination service 
 
             
             todo!()

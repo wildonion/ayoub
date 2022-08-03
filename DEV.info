@@ -44,6 +44,10 @@ http://zderadicka.eu/hyper-websocket/
 https://rustwasm.github.io/docs/book/introduction.html
 https://danielkeep.github.io/practical-intro-to-macros.html
 https://blog.logrocket.com/macros-in-rust-a-tutorial-with-examples/
+https://www.youtube.com/watch?v=j0zDvzQr7WE&ab_channel=CodingTech
+https://steveklabnik.com/writing/an-overview-of-macros-in-rust
+https://hub.packtpub.com/creating-macros-in-rust-tutorial/
+https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/macros.html
 https://blog.logrocket.com/procedural-macros-in-rust/
 https://doc.rust-lang.org/reference/attributes.html
 http://gradebot.org/doc/ipur/trait.html
