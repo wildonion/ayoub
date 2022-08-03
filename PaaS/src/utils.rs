@@ -436,7 +436,7 @@ pub trait Otp{
 
 impl Otp for Auth{
 
-    type Message = Stirng;
+    type Message = String;
     
     fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>{
 
