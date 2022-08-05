@@ -76,7 +76,7 @@ pub struct RafaelRuntime{
     pub current_service: self::Service, //-- current service variant
     pub link_to_server: Option<LinkToService>, //-- we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
     pub error: Option<AppError>, //-- any runtime error caused either by the runtime itself or the storage crash
-    #[wasm_bindgen(skip)] //-- skip exporting this field to wasm bindgen since the Copy trait is not implemented for String and heap data structures
+    #[wasm_bindgen(skip)] //-- skip exporting this field to wasm bindgen since the Copy trait is not implemented for String and heap data structures thus we can't have String field in a structure which has bounded to #[wasm_bindgen] proc macro attribute or other heap data structures
     pub node_addr: String, //-- socket address of this node of type String since we can't use &str when we're bounding our struct into #[wasm_bindgen] proc macro attribute
     pub last_crash: Option<i64>, //-- last crash timestamp
     pub first_init: Option<i64>, //-- first initialization timestamp 

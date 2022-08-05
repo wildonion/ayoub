@@ -60,6 +60,7 @@ https://github.com/zupzup/warp-websockets-example
 https://github.com/tokio-rs/tokio/tree/master/examples
 https://blog.softwaremill.com/multithreading-in-rust-with-mpsc-multi-producer-single-consumer-channels-db0fc91ae3fa
 https://danielkeep.github.io/tlborm/book/
+https://danielkeep.github.io/tlborm/book/mbe-macro-rules.html
 https://cetra3.github.io/blog/implementing-a-jobq/
 https://cetra3.github.io/blog/implementing-a-jobq-with-tokio/
 https://docs.rs/tokio/1.12.0/tokio/sync/index.html
@@ -129,10 +130,10 @@ NOTE - DRL model to reward validator in PoS pattern based on coiniXerr NFT owner
 NOTE - sharded blockchain means that every shard is an actor which contains multiple blocks and each will communicates with each other using addr object like passing data by calling a contract method inside block a to another contract method inside the block b asyncly
 NOTE - near uses actor based model to call smart contract methods and pass data between them asyncly using their address (Addr object) which means we can have multi threading in wasm file
 NOTE - split sequential input (borsh encoded async future object data) data into smaller part or async task (can be a request coming from an opened socket and each opened socket is a client) 
-with divide and conquer algorithm to feed into the actix actors (processor will choose a free thread from the pool in just a single core to mutex and lock the task to avoid deadlock inside the selected thread) and solve them in there separately (run on separate threads in a thread pool of each actor) then send the each result asyncly to other actor if needed; by moving the Arc<Mutex<T>> betweeen actix actor threads (clone the mutex to move it between threads since the Copy and Clone traits are not implemented for the Mutex and by putting the Mutex in Arc this issue will be fixed) using mpsc channel which T is the result then combine the results and compile the whole method to wasm like simd and rayon
+with divide and conquer algorithm to feed into the actix actors (processor will choose a free thread from the pool in just a single core to mutex and lock the task to avoid deadlock inside the selected thread) and solve them in there separately (run on separate threads in a thread pool of each actor) then send the each result asyncly to other actor if needed; by moving the Arc<Mutex<T>> (T can be Receiver<T>) betweeen actix actor threads (clone the mutex to move it between threads since the Copy and Clone traits are not implemented for the Mutex and by putting the Mutex in Arc this issue will be fixed) using mpsc channel which T is the result then combine the results and compile the whole method to wasm like simd and rayon
 NOTE - we'll divide the sequential data into tasks using divide and conquer algo which will be an async job or a task is a closure with async body which contains heavy computation on some mutable Arc<Mutex<Data>> like querying a db thus every job must get solved in separate thread by joining its scheduled thread containing the job in parallel to the executor and we can communicate between threads of objects using message passing channels like mpsc
 NOTE - threadpool app examples: sharding based app like blockchains, actix actors, rayon for simultaneous heavy computations and its wasm bindgen which is handled by the simd design pattern, image processing and 3d design apps
-NOTE - it seems that a thread can handle so many task at a time but it's a false fact; due to avoiding dealock and data race condition every single thread can handle a task of type Arc<Mutex<T>> at a time but it'll done so fast which it seems that it can handle some many tasks at a time
+NOTE - it seems that a thread can handle so many task at a time but it's a false fact; due to avoiding dealock and data race condition every single thread can handle a task of type Arc<Mutex<T>> (T can be Receiver<T>) at a time but it'll done so fast which it seems that it can handle some many tasks at a time
 
 
 
@@ -141,7 +142,7 @@ NOTE - it seems that a thread can handle so many task at a time but it's a false
 
 
 =============================================================================================================================================================
-TECH BUILDER BASED ON multi threading (job queue), Arc<Mutex<T>> message passing protocols like async mpsc channels and actix actors on top of tokio runtime
+TECH BUILDER BASED ON multi threading (job queue), Arc<Mutex<T>> (T can be Receiver<T>) message passing protocols like async mpsc channels and actix actors on top of tokio runtime
 =============================================================================================================================================================
 TODO - object storage like MinIO and S3
 TODO - paas cli like dockerizing, async file handling and ...

@@ -23,8 +23,9 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
     const APP_NAME: &str = "Rafless";
-    use std::{fmt, env};
+    use std::{fmt, env, sync::{Arc, Mutex}};
     use crate::services;
+    use crate::utils;
     use crate::contexts::app::Api;
     use futures::channel::mpsc as future_mpsc;
     use tokio::sync::mpsc as tokio_mpsc;
@@ -251,7 +252,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc calls like near protocol
-            // TODO - use Arc<Mutex<T>> in multithreaded env and RefCell<Rc<T>> in single threaded env
+            // TODO - use Arc<Mutex<T>> (T can be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
             // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
             // TODO - scheduling a promise of future object contains the method call (ActionReceipt) and get the resolved of the pending DataReceipt object from the executed future object inside a callback inside where we've scheduled the call
@@ -259,15 +260,22 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // TODO - consider every service a shard which can communicate (like executing each other's methods asyncly) with each other using their actors which has been implemented for each service through mpsc channels  
             // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service 
             //        to be executed and triggered inside the second service and get the response inside a callback method using .then()
-            // TODO - coming scheduled event from a thread of the first service actor inside a free thread of the second service actor 
-            //        must be of type Arc<Mutex<T>> in order to avoid data races and dead locks 
+            // TODO - incoming scheduled event from a thread of the first service actor inside a free thread of the second service actor 
+            //        must be of type Arc<Mutex<T>> (T can be Receiver<T>) in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
             // ....  
             // ....
+            // let message = Arc::new( //-- we can send this message asyncly between each services actors threads using mpsc channel since mpsc means multiple thread can access the Arc<Mutex<T>> (T can be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
+            //     Mutex::new(
+            //             utils::Storagekey::ByNFTContractIdInner{ 
+            //                 account_id_hash: [23, 24] 
+            //             }
+            //         )
+            //     );
             // let resp = Schedule::on(service_address)
-            //                  .data(arced_mutexed_data_object) //-- this is the data that must be executed on second service and it can be the name of a method inside that service 
+            //                  .data(message) //-- this is the data that must be executed on second service and it can be the name of a method inside that service 
             //                  .run_in_parallel()
             //                  .then(self.callback()); //-- wait to solve the future
             // NOTE - scheduling a promise object which will call the built-in method of the near protocol the transfer() method which will be executed later asyncly to transfer Ⓝ to the creator contract acctor account
@@ -277,8 +285,9 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             //                  .then(self.callback()); //-- wait to solve the future
             // let resp = self.current_service.send(msg).to(another_serivce).await; //-- msg must be a json stringified in form "{ \"key\": \"value\" }" like "{ \"amount\": \"5\" }" which can be decoded in destination service 
 
-            
             todo!()
+
+
         }
 
         fn callback(&self) -> Self{
@@ -317,6 +326,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             }
 
             todo!()
+
         }
 
         fn storage_usage(&self) -> u64 {

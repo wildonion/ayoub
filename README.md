@@ -32,6 +32,6 @@ Ayoub PaaS Framework
 
 # 📌 TODOs
 
-* Ayoub PaaS TODOs (`main.rs`, `app.rs`, `group.rs` and `reserve.rs`)
+* Ayoub PaaS TODOs
 
 * coiniXerr TODOs

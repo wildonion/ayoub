@@ -1,9 +1,8 @@
 
 
 
-use std::sync::{Arc, mpsc::channel as heavy_mpsc};
-use std::thread;
-use std::sync::mpsc; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> but only one of them can mutate the T out of the Arc by locking it
+use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (T can be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
+use std::thread; 
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
 use rand::prelude::*;
@@ -132,7 +131,7 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str, payload: &[u8]){
+pub async fn upload_asset(path: &str, payload: &[u8]){ //-- mapping the incoming utf8 bytes payload into a file
     
     // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
     // TODO - writing utf8 bytes payload into the sepcified path to create the file
@@ -324,7 +323,7 @@ fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from f
     Pack {}
 }
 
-fn return_box_trait() -> Box<dyn Interface> { // NOTE - returning Box<dyn Trait> from function means we're returning a struct inside the Box which the trait has implemented for
+fn return_box_trait() -> Box<dyn Interface + 'static> { // NOTE - returning Box<dyn Trait> from function means we're returning a struct inside the Box which the trait has implemented for and since traits have unknown size at compile time we must put them inside the Box with a valid lifetime like 'static
     Box::new(Pack {})
 }
 
@@ -531,10 +530,211 @@ pub enum Storagekey{ //-- defining an enum based unique storage key for every ou
     ByOwnerId, ////////---------➔ converting this to vector (Storagekey::ByOwnerId.try_to_vec().unwrap()) gives us an array of [1] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     ByOwnerIdInner { account_id_hash: [u8; 32] }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
     ByNFTContractId, ////////---------➔ converting this to vector (Storagekey::ByNFTContractId.try_to_vec().unwrap()) gives us an array of [3] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
-    ByNFTContractIdInner { account_id_hash: [u8; 32] }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
+    ByNFTContractIdInner { account_id_hash: [u8; 2] }, //-- 2 bytes or 256 bits (cause it's an array of 2 elements of type u8 which is 2 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
     ByNFTTokenType, ////////---------➔ converting this to vector (Storagekey::ByNFTTokenType.try_to_vec().unwrap()) gives us an array of [5] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     ByNFTTokenTypeInner { token_type_hash: [u8; 32] }, //-- 32 bytes or 256 bits (cause it's an array of 32 elements of type u8 which is 32 elements with 1 byte size) of the hash which will be 64 chars in hex which is the account_id length; use this to cover the prefix of the collection storage key based on a struct which contains the hash of the account_id
     FTTokenIds, ////////---------➔ converting this to vector (Storagekey::FTTokenIds.try_to_vec().unwrap()) gives us an array of [7] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     StorageDeposits, ////////---------➔ converting this to vector (Storagekey::StorageDeposits.try_to_vec().unwrap()) gives us an array of [8] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
     Collection, ////////---------➔ converting this to vector (Storagekey::Collection.try_to_vec().unwrap()) gives us an array of [9] which is the utf8 bytes encoded version of the current variant (the offset in memory) that can be used as a unique storage key for the collection prefix key
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ------------------------------ utility macros
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+// https://doc.rust-lang.org/reference/procedural-macros.html
+// TODO - build function like macro like query!() and custom inner and outter trait like proc macro attributes and derive like; on structs, fields, modules and functions like #[near_bindgen] and #[borsh_skip] proc macro attribute, #[custom(token_stream)] and #[derive(Clone)] style 
+// TODO - write proc macro attributes and derives with TokenStream arg using proc_macro2 crate and proc-macro = true flag inside the lib.rs file by using #[proc_macro], #[proc_macro_attribute] and #[proc_macro_derive] attributes  
+// TODO - a proc macro attribute to convert a trait into a module and its methods into static methods of that module and add extra args like the ones for nft_on_transfer() and nft_on_approve() methods when the user is implementing these methods
+// TODO - VM, interpreter and #[wowasm] proc macro attribute to write smart contracts with wo syntax to compile to wasm to run on near
+// TODO - create a new language with macro based syntax
+// NOTE - we can use [], {} or () to call macros
+// NOTE - #[derive(Trait, SomeMacro)] bounds a struct to a trait or a macro
+// NOTE - #[..] applies an attribute to the thing after it (struct, struct fields or crate) and  #![..] applies an attribute to the containing thing or crate
+// ...
+
+
+/*
+
+    item      ➔ an Item | an item, like a function, struct, module, etc.
+    block     ➔ a BlockExpression | a block (i.e. a block of statements and/or an expression, surrounded by braces)
+    stmt      ➔ a Statement without the trailing semicolon (except for item statements that require semicolons)
+    pat_param ➔ a PatternNoTopAlt
+    pat       ➔ at least any PatternNoTopAlt, and possibly more depending on edition
+    expr      ➔ an Expression
+    ty        ➔ a Type
+    ident     ➔ an IDENTIFIER_OR_KEYWORD or RAW_IDENTIFIER
+    path      ➔ a TypePath style path | a path (e.g. foo, ::std::mem::replace, transmute::<_, int>, …)
+    tt        ➔ a TokenTree (a single token or tokens in matching delimiters (), [], or {})
+    meta      ➔ an Attr, the contents of an attribute | a meta item; the things that go inside #[...] and #![...] attributes
+    lifetime  ➔ a LIFETIME_TOKEN
+    vis       ➔ a possibly empty Visibility qualifier
+    literal   ➔ matches -?LiteralExpression
+
+
+*/
+
+
+#[macro_use]
+pub mod macros{
+
+    pub fn even(x: i32) -> bool{
+        x%2 == 0
+    }
+    
+    pub fn odd(x: i32) -> bool{
+        x%2 != 0
+    }
+    
+    #[macro_export]
+    macro_rules! list {
+        ($id1:ident | $id2:ident <- [$start:expr; $end:expr], $cond:expr) => { //-- the match pattern can be any syntax :) - only ident can be followed by some symbols and words like <-, |, @ and etc
+            { //.... code block to return vec since using let statements must be inside {} block
+                let mut vec = Vec::new();
+                for num in $start..$end + 1{
+                    if $cond(num){
+                        vec.push(num);
+                    }
+                }
+                vec
+            } //....
+        };
+    }
+    //////
+    /// let evens = list![x | x <- [1; 10], even];
+    //////
+    
+
+    #[macro_export]
+    macro_rules! dict {
+        ($($key:expr => $val:expr)*) => { //-- if this pattern matches the input the following code will be executed - * means we can pass more than one key => value statement
+            { //.... code block to return vec since using let statements must be inside {} block
+                use std::collections::HashMap;
+                let mut map = HashMap::new();
+                $(
+                    map.insert($key, $value);
+                )* //-- * means we're inserting multiple key => value statement inside the map 
+                map
+            } //....
+        };
+    }
+    //////
+    /// let d = dict!{"wildonion" => 1, "another_wildonion" => 2};
+    //////
+    
+    #[macro_export]
+    macro_rules! exam {
+        ($l:expr; and $r:expr) => { //-- logical and match 
+            $crate::macros::even(); //-- calling even() function which is inside the macros module
+            println!("{}", $l && $r);
+        };
+    
+        ($l:expr; or $r:expr) => { //-- logical or match 
+            println!("{}", $l || $r);
+        };
+    }
+    //////
+    /// exam!(1 == 2; and 3 == 2+1)
+    /// exam!(1 == 2; or 3 == 2+1)
+    //////
+    
+    
+    #[macro_export]
+    macro_rules! wowasm {
+        ($iden:ident, $ty: tt) => {
+            pub struct $iden(pub $ty);
+            impl Default for $iden{
+                fn default() -> Self{
+                    todo!()
+                }
+            }  
+        };
+    
+        ($func_name:ident) => {
+            fn $func_name(){
+                println!("you've just called {:?}()", stringify!($func_name));
+            }
+        }
+    }
+    
+    
+    #[macro_export]
+    macro_rules! query { // NOTE - this is a macro with multiple syntax support and if any pattern matches with the caller pattern, then the code block of that pattern will be emitted
+        
+        ( $value_0:expr, $value_1:expr, $value_2:expr ) => { //-- passing multiple object syntax
+            // ...
+        };
+    
+        ( $($name:expr => $value:expr)* ) => { //-- passing multiple key => value syntax 
+            // ...
+    
+        };
+    
+    }
+    
+    
+    #[macro_export]
+    macro_rules! log {
+        ($arg:tt) => { //-- passing single String message 
+            $crate::env::log($arg.as_bytes()) //-- log function only accepts utf8 bytes
+        };
+        ($($arg:tt)*) => { //-- passing multiple String messages 
+            $crate::env::log(format!($($arg)*).as_bytes()) //-- log function only accepts utf8 bytes
+        };
+    }
+    
+    
+    #[macro_export]
+    macro_rules! impl_engine_constructor {
+        ($( $new:ident: [ $( $pos:expr ),* ] anchored at $anchor:expr; )*) => { //-- the match pattern can be any syntax :) - only ident can be followed by some symbols and words like <-, |, @ and etc 
+            $(
+                pub fn $new() -> Self{
+                    Self{
+                        positions: [$( $pos ),*].into_iter().collect(),
+                        anchor: $anchor,
+                    }
+                }
+            )* //-- * means defining function for every new Pos
+        };
+    }
+    
+    
+    // #[derive(Debug, Clone)]
+    // pub struct Shape{
+    //     typ: &'static str,
+    //     positions: HashSet<Pos>,
+    //     anchor: Pos,
+    // }
+    
+    
+    // #[derive(Debug, Clone, Copy)]
+    // pub struct Pos(pub i32, pub i32);
+    
+    
+    
+    // impl Shape {
+    //     impl_engine_constructor! {
+    //       new_i "🟦": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(3, 0)] @ Pos(1, 0);
+    //       new_o "🟨": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
+    //       new_t "🟫": [Pos(0, 0), Pos(1, 0), Pos(2, 0), Pos(1, 1)] @ Pos(1, 0);
+    //       new_j "🟪": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(-1, 2)] @ Pos(0, 1);
+    //       new_l "🟧": [Pos(0, 0), Pos(0, 1), Pos(0, 2), Pos(1, 2)] @ Pos(0, 1);
+    //       new_s "🟩": [Pos(0, 0), Pos(1, 0), Pos(0, 1), Pos(-1, 1)] @ Pos(0, 0);
+    //       new_z "🟥": [Pos(0, 0), Pos(-1, 0), Pos(0, 1), Pos(1, 1)] @ Pos(0, 0);
+    //     }
+    // }
 }

@@ -10,10 +10,12 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * reserve APIs + API token
 
-* ayoub nft APIs for deployed contracts' methods
-
 * make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`)
 
-* complete all todos
+* upload group's picture in `create()` function controller
+
+* complete all TODOs
+
+* ayoub nft APIs for deployed contracts' methods
 
 * postman collection (status and access level constants + unix timestamps doc)
