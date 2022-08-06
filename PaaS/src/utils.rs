@@ -1,6 +1,7 @@
 
 
 
+use std::sync::Mutex;
 use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (T can be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
 use std::thread; 
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
@@ -165,7 +166,38 @@ pub async fn upload_asset(path: &str, payload: &[u8]){ //-- mapping the incoming
 // ----------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------
 pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would be an associated function not a method
-        
+    
+
+    /*
+
+       ➔ in order to move the T between threads T must be bounded to Send and if it wasn't bound to Sync we have to clone it to move it between threads 
+          and if it wasn't bound to Clone trait we must put it inside the Arc and to change it inside other thread we must put the Arc-ed type inside 
+          the Mutex like mutating the Receiver<T> content inside other threads which must be in form Arc<Mutex<Receiver<T>>> since the Receiver is 
+          not bounded to Sync (cause &Receiver is not bouned to Send cause there is no clone trait implemented for the Receiver thus it can't be copy 
+          thus we can't have &Receiver and can't be clone) therefore we can't move it between threads due to the fact that the type T (Receiver in our case) 
+          must be used by only one consumer or thread at a time by blocking threads waiting for the lock to become available.
+       ➔ based on mpsc rules multiple threads can read the T and also T can be moved to those threads safely (since Send is implemented for that which 
+          let us to have multiple owners for a type (or a resource) owned by other threads) but only single thread can write into the T to mutate it this is because 
+          of rust ownership and borrowing rules which says that multiple immutable reference can be defined for T but one mutable reference can be there for T
+          and rust concurrency is based on this rule which is safe to use.
+
+
+
+
+        -- passing data between threads is done using mpsc channel which multiple threads can own a resource immutable referece but only on of them can mutate that resource at a time
+        -- to pass data between thread the type must clonable and sender must be cloned since inside a thread all env vars before that are moved to its scope.
+        -- in order to mutate a type inside a thread the type must be inside Mutex since the receiver can't be referenced by multiple threads at a time thus is a single consumer means that it can't be cloned and moved to other threads 
+        -- Send means that a type is safe to move from one thread to another
+        -- Sync makes the type safe (&T nmust be Send) to access shared reference across threads at the same time 
+        -- Clone trait is implemented for the mpsc sender and is bounded to Send but not Sync and due to this reason we have to clone it in order we can have it in multiple threads (multi producer)
+        -- Clone trait is not implemented for the mpsc receiver and we must put it inside Arc also is not Sync means it can't be referenced by multiple threads at the same time due to the fact that only one thread can mutate its content at a time (single consumer) thus we have to put it inside a Mutex
+        -- in order to pass the receiver between threads safely and mutate its content by locking on it we must put the receiver inside Arc and Mutex like Arc<Mutex<Receiver<T>>>
+        -- recv() will block the current thread if there are no messages available
+        -- receiver can't be cloned cause it's single consumer to make it clonable and sharable (some kina syncable) we have to put it inside Arc<Mutex<Receiver<T>>>
+
+    */
+
+
         
     ////////////////////////////////// multi threading ops
     let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
@@ -180,33 +212,48 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     //////////////////////////////////
     
 
-    let mat = x_train;
-    let NTHREADS: usize = 4; // number of threads inside the pool
-    let NJOBS: usize = mat.len(); // number of tasks of the process (incoming x_train matrix) to share each one between threads inside the pool
+    
+    let mat = x_train; //-- the data that we want to do some heavy computational on it
+    let NTHREADS: usize = 4; //-- number of threads inside the pool
+    let NJOBS: usize = mat.len(); //-- number of tasks of the process (incoming x_train matrix) to share each one between threads inside the pool
     let pool = ThreadPool::new(NTHREADS);
-    let (sender, receiver) = heavy_mpsc();
-    let arc_mat = Arc::new(mat);
-    let arc_recv = Arc::new(&receiver); //-- take a reference to the receiver to borrow it for putting it inside an Arc
+    let (sender, receiver) = heavy_mpsc::<f64>();
+
+    let mutexed_receiver = Mutex::new(&receiver); //-- putting the &receiver in its borrowed form inside the Mutex to get its data by locking on it inside other threads since the Sync is not implemented for the receiver and in order to get its data inside other threads we have to make clonable using Arc and some kina syncable using Mutext
+    let arced_mutexed_receiver = Arc::new(&mutexed_receiver); //-- putting the &mutexed_receiver in its borrowed form inside the Arc
     let mut mult_of_all_sum_cols = 1.0;
     let mut children = Vec::new();
+
+    
     let future_res = async { //-- we can also use tokio::spawn() to run the async task in the background using tokio event loop and green threads
+        
         for i in 0..NJOBS{ //-- iterating through all the jobs of the process - this can be an infinite loop like waiting for a tcp connection
-            let cloned_receiver = Arc::clone(&arc_recv); // can't clone receiver, in order to move it between threads we have to clone it using Arc
-            let cloned_sender = sender.clone(); // NOTE - sender can be cloned because it's multiple producer
-            let cloned_mat = Arc::clone(&arc_mat);
-            children.push(pool.execute(move || { // NOTE - pool.execute() will spawn threads or workers to solve the incoming job inside a free thread - incoming job can be an async task spawned using tokio::spawn() method
+            let cloned_arced_mutexed_receiver = arced_mutexed_receiver.clone();
+            let cloned_sender = sender.clone(); //-- cloning the sender since it's multiple producer and Clone trait is implemented for that
+            let cloned_mat = mat.clone();
+            children.push(pool.execute(move || { //-- pool.execute() will spawn threads or workers to solve the incoming job inside a free thread - incoming job can be an async task spawned using tokio::spawn() method
                 let sum_cols = cloned_mat[0][i] + cloned_mat[1][i] + cloned_mat[2][i];
                 cloned_sender.send(sum_cols).unwrap();
             }));
-            println!("job {} finished!", i);
+            /* -------- logging -------- */ println!("job {} finished!", i);
+            thread::spawn(move || {
+                while let Ok(mut data) = cloned_arced_mutexed_receiver.lock().unwrap().recv(){
+                    data = 0.0; //-- mutating the data that we've just received
+                    
+                    cloned_sender.send(data).unwrap(); //-- sending the mutated data to the channel
+                }
+            });
         }
-        // NOTE - recv() will block the current thread if there are no messages available
-        // NOTE - receiver can't be cloned cause it's single consumer
+
+
         let ids: Vec<f64> = receiver.iter().take(NJOBS).collect();
         println!("the order that all messages were sent => {:?}", ids);
         ids.into_iter().map(|s_cols| mult_of_all_sum_cols *= s_cols).collect::<Vec<_>>();
         mult_of_all_sum_cols
+    
     };
+    
+
     let res = block_on(future_res); //-- will block the current thread to run the future to completion
     // let res = future_res.await; //-- .awaiting a future will suspend the current function's execution until the executor has run the future to completion means doesn't block the current thread, allowing other tasks to run if the future is currently unable to make progress
     // let res = join!(future_res); //-- join! only allowed inside `async` functions and blocks and is like .await but can wait for multiple futures concurrently
