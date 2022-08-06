@@ -77,6 +77,8 @@ pub mod jwt{
 
 
 
+
+
 // ------------------------------ utility methods
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -183,7 +185,9 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
 
 
-
+        -- share reference or share access means multiple threads can read and access a resource or a type but only on of them can mutate it and the channel for this task is the mpsc
+        -- the type that wants to be sent between threads must be Send but not Sync necessarily like sender and receiver
+        -- it's better not to pass the receiver between threads due to the rule of mpsc since we can't mutate a data simply inside a thread while others are reading it we have to block that thread that wants to mutate the type using Mutex
         -- passing data between threads is done using mpsc channel which multiple threads can own a resource immutable referece but only on of them can mutate that resource at a time
         -- to pass data between thread the type must clonable and sender must be cloned since inside a thread all env vars before that are moved to its scope.
         -- in order to mutate a type inside a thread the type must be inside Mutex since the receiver can't be referenced by multiple threads at a time thus is a single consumer means that it can't be cloned and moved to other threads 
@@ -196,28 +200,14 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
         -- receiver can't be cloned cause it's single consumer to make it clonable and sharable (some kina syncable) we have to put it inside Arc<Mutex<Receiver<T>>>
 
     */
-
-
-        
-    ////////////////////////////////// multi threading ops
-    let thread = thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
-        info!("inside the native thread");
-        let async_task = tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model - 
-            info!("inside tokio green thread");
-            ////////
-            // ....
-            ////////
-       });
-    });
-    //////////////////////////////////
     
-
     
     let mat = x_train; //-- the data that we want to do some heavy computational on it
     let NTHREADS: usize = 4; //-- number of threads inside the pool
     let NJOBS: usize = mat.len(); //-- number of tasks of the process (incoming x_train matrix) to share each one between threads inside the pool
     let pool = ThreadPool::new(NTHREADS);
     let (sender, receiver) = heavy_mpsc::<f64>();
+
 
     let mutexed_receiver = Mutex::new(&receiver); //-- putting the &receiver in its borrowed form inside the Mutex to get its data by locking on it inside other threads since the Sync is not implemented for the receiver and in order to get its data inside other threads we have to make clonable using Arc and some kina syncable using Mutext
     let arced_mutexed_receiver = Arc::new(&mutexed_receiver); //-- putting the &mutexed_receiver in its borrowed form inside the Arc
@@ -228,21 +218,29 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     let future_res = async { //-- we can also use tokio::spawn() to run the async task in the background using tokio event loop and green threads
         
         for i in 0..NJOBS{ //-- iterating through all the jobs of the process - this can be an infinite loop like waiting for a tcp connection
-            let cloned_arced_mutexed_receiver = arced_mutexed_receiver.clone();
+            let cloned_arced_mutexed_receiver = arced_mutexed_receiver.clone(); //-- in order to move the receiver between threads we must have it in Arc<Mutex<Receiver<T>>> form 
             let cloned_sender = sender.clone(); //-- cloning the sender since it's multiple producer and Clone trait is implemented for that
             let cloned_mat = mat.clone();
-            children.push(pool.execute(move || { //-- pool.execute() will spawn threads or workers to solve the incoming job inside a free thread - incoming job can be an async task spawned using tokio::spawn() method
-                let sum_cols = cloned_mat[0][i] + cloned_mat[1][i] + cloned_mat[2][i];
-                cloned_sender.send(sum_cols).unwrap();
-            }));
-            /* -------- logging -------- */ println!("job {} finished!", i);
-            thread::spawn(move || {
-                while let Ok(mut data) = cloned_arced_mutexed_receiver.lock().unwrap().recv(){
-                    data = 0.0; //-- mutating the data that we've just received
-                    
-                    cloned_sender.send(data).unwrap(); //-- sending the mutated data to the channel
-                }
+            children.push(
+                pool.execute(move || { //-- pool.execute() will spawn threads or workers to solve the incoming job inside a free thread - incoming job can be an async task spawned using tokio::spawn() method
+                    let sum_cols = cloned_mat[0][i] + cloned_mat[1][i] + cloned_mat[2][i];
+                    cloned_sender.send(sum_cols).unwrap();
+                })
+            );
+            
+            info!("job {} finished!", i);
+            
+            /* -------- receiving inside another native and tokio threads inside the lopp -------- */ 
+            /* ----------------------------------------------------------------------------------- */
+            thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
+                tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model
+                    while let Ok(mut data) = cloned_arced_mutexed_receiver.lock().unwrap().recv(){
+                        data = 0.0; //-- mutating the data that we've just received
+                        cloned_sender.send(data).unwrap(); //-- sending the mutated data to the channel  
+                    }
+               });
             });
+            /* ----------------------------------------------------------------------------------- */
         }
 
 
