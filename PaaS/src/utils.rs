@@ -2,7 +2,7 @@
 
 
 use std::sync::Mutex;
-use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (T can be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
+use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
 use std::thread; 
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
@@ -163,6 +163,11 @@ pub async fn upload_asset(path: &str, payload: &[u8]){ //-- mapping the incoming
 
 
 
+
+
+
+
+
 // ------------------------------ heavy computational calculation using async and multithreading design patterns
 // ----------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------
@@ -178,15 +183,19 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
           not bounded to Sync (cause &Receiver is not bouned to Send cause there is no clone trait implemented for the Receiver thus it can't be copy 
           thus we can't have &Receiver and can't be clone) therefore we can't move it between threads due to the fact that the type T (Receiver in our case) 
           must be used by only one consumer or thread at a time by blocking threads waiting for the lock to become available.
-       ➔ based on mpsc rules multiple threads can read the T and also T can be moved to those threads safely (since Send is implemented for that which 
-          let us to have multiple owners for a type (or a resource) owned by other threads) but only single thread can write into the T to mutate it this is because 
-          of rust ownership and borrowing rules which says that multiple immutable reference can be defined for T but one mutable reference can be there for T
-          and rust concurrency is based on this rule which is safe to use.
+       ➔ based on the rust ownership and borrowing rule we can have multiple immutable references to a type but only one mutable pointer at a time must be exists
+          and due to this rule we can have a safe concurrency in such a way that multiple threads can be the owner of a type to read its content but only on of them
+          can mutate the content of the type (like reading from the receiver which is a mutable operation) therefore we can have mpsc message passing channel based on this rule
+          the sender of the channel is Send but not Sync and can be cloned to send data between threads for reading (multiple producer) but the receiver is not Send and Sync and can't be cloned 
+          since it can't be move or transfer to other threads cause the reading process from the receiver is a mutable operation and we can't have multiple mutable operations or references 
+          at the same time with multiple threads thus only one thread at a time can do this job.
+       ➔ since the reading from the receiver is a mutable process and it can't be cloned thus in order to read from it inside multiple thread we have to write 
+          the receiver in form of Arc<Mutex<Receiver<T>>> and lock on the receiver to read the content of what we're receiving.   
 
 
 
         -- share reference or share access means multiple threads can read and access a resource or a type but only on of them can mutate it and the channel for this task is the mpsc
-        -- the type that wants to be sent between threads must be Send but not Sync necessarily like sender and receiver
+        -- the type that wants to be sent between threads must be Send but not Sync necessarily like sender which is not Sync but it's Send and receiver is not Sync and Send
         -- it's better not to pass the receiver between threads due to the rule of mpsc since we can't mutate a data simply inside a thread while others are reading it we have to block that thread that wants to mutate the type using Mutex
         -- passing data between threads is done using mpsc channel which multiple threads can own a resource immutable referece but only on of them can mutate that resource at a time
         -- to pass data between thread the type must clonable and sender must be cloned since inside a thread all env vars before that are moved to its scope.
@@ -195,9 +204,8 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
         -- Sync makes the type safe (&T nmust be Send) to access shared reference across threads at the same time 
         -- Clone trait is implemented for the mpsc sender and is bounded to Send but not Sync and due to this reason we have to clone it in order we can have it in multiple threads (multi producer)
         -- Clone trait is not implemented for the mpsc receiver and we must put it inside Arc also is not Sync means it can't be referenced by multiple threads at the same time due to the fact that only one thread can mutate its content at a time (single consumer) thus we have to put it inside a Mutex
-        -- in order to pass the receiver between threads safely and mutate its content by locking on it we must put the receiver inside Arc and Mutex like Arc<Mutex<Receiver<T>>>
+        -- in order to pass the receiver between threads safely and mutate its content by locking on it we must put the receiver inside Arc and Mutex like let shareable_receiver = Arc<Mutex<Receiver<T>>> then clone it using Arc::new(&shareable_receiver) or shareable_receiver.clone()
         -- recv() will block the current thread if there are no messages available
-        -- receiver can't be cloned cause it's single consumer to make it clonable and sharable (some kina syncable) we have to put it inside Arc<Mutex<Receiver<T>>>
 
     */
     
@@ -209,16 +217,17 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     let (sender, receiver) = heavy_mpsc::<f64>();
 
 
-    let mutexed_receiver = Mutex::new(&receiver); //-- putting the &receiver in its borrowed form inside the Mutex to get its data by locking on it inside other threads since the Sync is not implemented for the receiver and in order to get its data inside other threads we have to make clonable using Arc and some kina syncable using Mutext
-    let arced_mutexed_receiver = Arc::new(&mutexed_receiver); //-- putting the &mutexed_receiver in its borrowed form inside the Arc
-    let mut mult_of_all_sum_cols = 1.0;
+    let mutexed_receiver = Mutex::new(receiver); //-- putting the &receiver in its borrowed form inside the Mutex to get its data by locking on it inside other threads since the Sync is not implemented for the receiver and in order to get its data inside other threads we have to make clonable using Arc and some kina syncable using Mutext
+    let arced_mutexed_receiver = Arc::new(mutexed_receiver); //-- putting the &mutexed_receiver in its borrowed form inside the Arc
+    pub static mut MULT_OF_ALL_SUM: f64 = 1.0;
+    let mut mult_of_all_sum: &'static f64 = &1.0;
     let mut children = Vec::new();
 
     
     let future_res = async { //-- we can also use tokio::spawn() to run the async task in the background using tokio event loop and green threads
         
         for i in 0..NJOBS{ //-- iterating through all the jobs of the process - this can be an infinite loop like waiting for a tcp connection
-            let cloned_arced_mutexed_receiver = arced_mutexed_receiver.clone(); //-- in order to move the receiver between threads we must have it in Arc<Mutex<Receiver<T>>> form 
+            let cloned_arced_mutexed_receiver = Arc::clone(&arced_mutexed_receiver); //-- in order to move the receiver between threads we must have it in Arc<Mutex<Receiver<T>>> form and clone the &arced_mutexed_receiver which is the borrowed form of the arced and mutexed of the receiver or we can have arced_mutexed_receiver.clone()
             let cloned_sender = sender.clone(); //-- cloning the sender since it's multiple producer and Clone trait is implemented for that
             let cloned_mat = mat.clone();
             children.push(
@@ -230,25 +239,46 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
             
             info!("job {} finished!", i);
             
-            /* -------- receiving inside another native and tokio threads inside the lopp -------- */ 
             /* ----------------------------------------------------------------------------------- */
+            /* -------- receiving inside another native and tokio threads inside the loop -------- */ 
+            /* ----------------------------------------------------------------------------------- */
+            // thread::spawn(move || loop{});
             thread::spawn(|| async move{ //-- the body of the closure is an async block means it'll return a future object (trait Future has implemented for that) for with type either () or a especific type
                 tokio::spawn(async move{ //-- spawning async task to solve it on the background using tokio green threads based on its event loop model
-                    while let Ok(mut data) = cloned_arced_mutexed_receiver.lock().unwrap().recv(){
-                        data = 0.0; //-- mutating the data that we've just received
-                        cloned_sender.send(data).unwrap(); //-- sending the mutated data to the channel  
+                    while let Ok(data) = cloned_arced_mutexed_receiver.lock().unwrap().recv(){
+                        /* 
+                            -----------------------------------------------------------------------------------
+                                          --- the reason that MULT_OF_ALL_SUM must be static ---
+
+                            in this situation we shouldn't mutate any type inside here if the type is not
+                            static and doesn't have a valid lifetime across threads.
+
+                            one of the most popular cases of a T: 'static bound is std::thread::spawn
+                            the reason there is that the closure and its return value need to be sent between threads, 
+                            escaping their call-stack which is why they cannot contain any non-'static references 
+                            since these could become invalidated and no longer available in the other thread in the mean-time.
+
+                            if we don't want to send the data from a thread to another one we have to make static to have 
+                            valid lifetime across threads also mutating the static types directly is unsafe!
+
+                            due to the single consumer rule only on thread can mutate the received job or the task or the data
+                            at a time in order to prevent data racing we've put the Arced (since it's not clonable due to the single consumer rule) 
+                            receiver inside the Mutex to lock on it and change the content of what it has received cause we want 
+                            to mutate the data of the receiver inside other threads.
+                            -----------------------------------------------------------------------------------
+    
+                        */
+                        
+                        // *mult_of_all_sum *= data; // ERROR - can't deref the mult_of_all_sum since its deref doesn't live long enough since its reference or its borrowed type is static not its deref 
+                        unsafe {MULT_OF_ALL_SUM *= data;} //-- mutating the data that we've just received - mutating static types needs unsafe block
                     }
                });
             });
             /* ----------------------------------------------------------------------------------- */
         }
+        
+        unsafe{MULT_OF_ALL_SUM} //-- since MULT_OF_ALL_SUM has mutated thus we have to return it from an unsafe block
 
-
-        let ids: Vec<f64> = receiver.iter().take(NJOBS).collect();
-        println!("the order that all messages were sent => {:?}", ids);
-        ids.into_iter().map(|s_cols| mult_of_all_sum_cols *= s_cols).collect::<Vec<_>>();
-        mult_of_all_sum_cols
-    
     };
     
 
@@ -261,6 +291,11 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
     
 }
+
+
+
+
+
 
 
 
@@ -327,135 +362,6 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 
-
-
-
-
-
-
-// ------------------------------ testing ownership, borrowing rule and generics
-// -----------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------
-// https://github.com/wildonion/extrust/blob/4a3e72184ea5159d0ec6d4e8325e481019023b4f/_trash/_garbage.rs#L323
-// -----------------------------------------------------------------------------------------
-// NOTE - generic types in function signature can be bounded to lifetimes and traits so we can use the lifetime to avoid dangling pointer return in function body and traits to extend the type interface
-// -----------------------------------------------------------------------------------------
-
-impl<'a, Pack: Interface + 'a> Into<Vec<u8>> for Unpack<'a, Pack, SIZE>{ //-- based on orphan rule we have to import the trait inside where the struct is or bound the instance of the struct into the Into trait in function calls - we wanto to return the T inside the wrapper thus we can implement the Into trait for the wrapper struct which will return the T from the wrapper field
-    fn into(self) -> Vec<u8> {
-        self.arr.to_vec()
-    }
-}
-
-
-pub const SIZE: usize = 325;
-pub type Context<'a, Pack> = Unpack<'a, Pack, SIZE>; //-- Pack type will be bounded to Interface trait and 'l lifetime 
-pub struct Unpack<'l, T: Interface + 'l + Into<T>, const U: usize>{ //-- T is of type Pack struct which is bounded to 'l lifetime the Into and the Interface traits and U (constant generic) must be a constant usize type - Unpack takes a generic type of any kind which will be bounded to a trait and a lifetime but it must be referred to a field or be inside a PhantomData since T and the lifetime will be unused and reserved by no variables inside the ram
-    pub pack: &'l T, //-- pack is a pointer or a reference and is pointing to T which is a generic type and bounded to a trait and a valid lifetime as long as the lifetime of the struct instance
-    pub arr: &'l [u8; U],
-}
-
-pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime to initiate an instance from it using struct declaration and return a reference to that instance inside any function 
-pub trait Interface{}
-
-impl Interface for Pack{} //-- is required for return_box_trait() function
-
-fn return_none_trait<T>() -> () where T: Interface{ // NOTE - `T` type must be bound to Interface trait
-
-}
-
-fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from function means we're implementing the trait for the object that is returning from the function regardless of its type that we're returning from the function cause compiler will detect the correct type in compile time and implement or bound the trait for that type
-    Pack {}
-}
-
-fn return_box_trait() -> Box<dyn Interface + 'static> { // NOTE - returning Box<dyn Trait> from function means we're returning a struct inside the Box which the trait has implemented for and since traits have unknown size at compile time we must put them inside the Box with a valid lifetime like 'static
-    Box::new(Pack {})
-}
-
-impl Pack{ ////// RETURN BY POINTER EXAMPLE //////
-
-
-    fn new() -> Self{
-
-
-        let hello = "Здравствуйте";
-        let s = &hello[0..2];
-        // every index is the place of an element inside the ram which has 1 byte size which is taken by that element
-        // in our case the first element takes 2 bytes thus the index 0 won't return 3 
-        // cause place 0 and 1 inside the ram each takes 1 byte and the size of the
-        // first element is two bytes thus &hello[0..2] which is index 0 and 1 both returns 3 
-        // and we can't have string indices in rust due to this reason!
-
-
-        ///////////////////////////////////////////// ENUM MATCH TEST
-        #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
-        enum Chie{
-            Avali(u8),
-            Dovomi(String),
-            Sevomi,
-        }
-        
-        
-        let ine = Chie::Avali(12); //-- the Dovomi variant is never constructed cause we've used the first variant  
-        
-        match ine{
-            Chie::Avali(value) if value == 23 => { //-- matching on the Avali arm if the value was only 23
-                println!("u8 eeee");
-        
-            },
-            Chie::Dovomi(value) if value == "wildonion".to_string() => { //-- matching on the Dovomi arm if the value was only "wildonion" string
-                println!("stringeeee");
-            },
-            _ => {
-                println!("none of them");
-            }
-        }
-
-        // --------------- CODEC OPS ON ENUM ---------------
-        let encoded = serde_json::to_vec(&Chie::Sevomi); ////// it'll print a vector of utf8 encoded JSON
-        let decoded = serde_json::from_slice::<Chie>(&encoded.as_ref().unwrap()); //-- as_ref() returns a reference to the original type
-
-        let encoded_borsh = Chie::Sevomi.try_to_vec().unwrap(); ////// it'll print 2 cause this the third offset in memory
-        let decoded_borsh = Chie::try_from_slice(&encoded_borsh).unwrap();
-
-        /////////////////////////////////////////////
-        Pack{}
-    }
-  
-    fn ref_struct(num_thread: &u8) -> &Pack{ //-- returning ref from function to a pre allocated data type (not inside the function) Pack struct in our case, is ok
-        let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which is allocated on the stack and is owned by the function thus we can't return a reference to it or as a borrowed type
-        // &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
-        let instance = &Pack{}; //-- since we're allocating nothing on the stack inside this function thus by creating the instance directly using the the Pack struct and without calling the new() method which is already lives in memory with long enough lifetime we can return a reference to the location of the instance of the pack from the function
-        instance //-- it's ok to return a reference to `instance` since the instance does not allocate anything on the stack thus taking a reference to already allocated memory with long enough lifetime is ok since the allocated memory is happened in struct definition line
-    }
-    
-    // NOTE - argument can also be &mut u8
-    pub fn ref_str_other_pointer_lifetime(status: &u8) -> &str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
-        let name = "wildonion";
-        name //-- name has a lifetime as valid as the passed in status argument lifetime from the caller scope 
-    
-    }
-  
-    // NOTE - first param can also be &mut self; a mutable reference to the instance and its fields
-    pub fn ref_to_str_other_self_lifetime(&self) -> &str{ //-- in this case we're good to return the pointer from the function or send a copy to the caller's space since we can use the lifetime of the first param which is &self which is a borrowed type of the instance and its fields (since we don't want to lose the lifetime of the created instance from the contract struct after calling each method) and have a valid lifetime (as long as the instance of the type is valid) which is generated from the caller scope by the compiler to return the pointer from the function
-        let name = "wildonion";
-        name //-- name has a lifetime as valid as the first param lifetime which is a borrowed type of the instance itself and its fields and will borrow the instance when we want to call the instance methods
-    }
-  
-    // NOTE - 'a lifetime has generated from the caller scope by the compiler
-    pub fn ref_to_str_specific_lifetime<'a>(status: u8) -> &'a str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we've defined a valid lifetime for the pointer of the return type to return the pointer from the function which &'a str
-        let name = "wildonion";
-        name //-- name has a lifetime as valid as the generated lifetime from the caller scope by the compiler and will be valid as long as the caller scope is valid
-    }
-
-    // NOTE - 'static lifetime will be valid as long as the whole lifetime of the caller scope (it can be the main function which depends on the whole lifetime of the app)
-    pub fn ref_to_str_static() -> &'static str{
-        let name = "wildonion";
-        name //-- name has static lifetime valid as long as the whol lifetime of the caller scope which can be the main function which will be valid as long as the main or the app is valid
-    }
-
-
-}
 
 
 

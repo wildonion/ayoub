@@ -252,7 +252,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc calls like near protocol
-            // TODO - use Arc<Mutex<T>> (T can be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
+            // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
             // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
             // TODO - scheduling a promise of future object contains the method call (ActionReceipt) and get the resolved of the pending DataReceipt object from the executed future object inside a callback inside where we've scheduled the call
@@ -261,13 +261,13 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service 
             //        to be executed and triggered inside the second service and get the response inside a callback method using .then()
             // TODO - incoming scheduled event from a thread of the first service actor inside a free thread of the second service actor 
-            //        must be of type Arc<Mutex<T>> (T can be Receiver<T>) in order to avoid data races and dead locks 
+            //        must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
             // ....  
             // ....
-            // let message = Arc::new( //-- we can send this message asyncly between each services actors threads using mpsc channel since mpsc means multiple thread can access the Arc<Mutex<T>> (T can be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
+            // let message = Arc::new( //-- we can send this message asyncly between each services actors threads using mpsc channel since mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
             //     Mutex::new(
             //             utils::Storagekey::ByNFTContractIdInner{ 
             //                 account_id_hash: [23, 24] 

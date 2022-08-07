@@ -28,6 +28,9 @@ Coded by
     Return Pointer from Functions Explanation: https://stackoverflow.com/a/57894943/12132470
     Return Pointer to a Structure Explanation: https://stackoverflow.com/questions/37789925/how-to-return-a-newly-created-struct-as-a-reference
     Rust Rules Gathered by wildonion: https://github.com/wildonion/extrust/blob/master/_docs/rust.rules
+    Rust Generic Types and Lifetime Bounding: https://github.com/wildonion/extrust/blob/b780ae2bdb09c5857100cb7ec7e8166db7357f46/_trash/_garbage.rs#L332
+    Rust Some Trash Codes: https://github.com/wildonion/extrust/tree/master/_trash
+
 
 
 
@@ -57,6 +60,8 @@ Coded by
 
 
 
+    NOTE - shared ref is an immutabe reference to a type which can be shared across threads and can't be deref and exclusive ref is a mutable reference to a type which can be one of them inside avilable inside a scope
+    NOTE - lifetimes must be applied to those types that want to borrow another type like references and this fact makes self-contained types appear to satisfy any lifetime, but in fact they ignore all lifetimes
     NOTE - when we use & in struct methods we can use the lifetime of the self to return pointer to a type from the method body 
     NOTE - wehn we use & in struct methods means we can call other methods inside the scope where the instance is, right after calling a method on the instance
     NOTE - it's ok to setup app storage and api object inside each controller instead of setting them up in main.rs to have single instance of them in the whole lifetime of the app since rust doesn't have garbage collector thus based on borrowing and ownership rules each app storage and api object inside each controller function lifetime will be valid till the end of function scope or body   
