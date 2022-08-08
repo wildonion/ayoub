@@ -69,7 +69,7 @@ impl Api{
             name: String::from(""),
             req: request,
             res: response,
-            callback: None, // TODO - caching using closures: https://github.com/wildonion/extrust/blob/4a3e72184ea5159d0ec6d4e8325e481019023b4f/_trash/_garbage.rs#L11
+            callback: None, // TODO - caching using closures
             access_level: None, // TODO
         }
     } 

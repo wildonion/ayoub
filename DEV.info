@@ -79,8 +79,6 @@ https://doc.rust-lang.org/std/rc/struct.Weak.html
 https://doc.rust-lang.org/std/keyword.dyn.html
 https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
 https://github.com/wildonion/stomegranate/blob/master/helper_board
-https://github.com/wildonion/extrust/blob/master/_trash/_unsafer.rs
-https://github.com/wildonion/extrust/
 https://rust-lang-nursery.github.io/rust-cookbook/intro.html
 https://doc.rust-lang.org/nomicon/
 https://stackoverflow.com/questions/56445095/how-does-videojs-determine-when-to-use-hls-vs-mp4-video-when-both-sources-are-av#:~:text=MP4%20and%20HLS%20are%20actually,a%20server%20to%20a%20client.

@@ -354,7 +354,6 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 
-
 }
 
 
