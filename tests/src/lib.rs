@@ -24,6 +24,10 @@ use std::fmt;
 
 
 
+
+
+
+
 struct Cacher<U, T> where T: FnMut(U) -> U{
     closure: T,
     map: HashMap<U, U>,
@@ -475,9 +479,9 @@ pub fn trash(){
 
 
     // =============================================================================================================================
-    // https://github.com/pretzelhammer/rust-blog/blob/master/posts/common-rust-lifetime-misconceptions.md#the-misconceptions
     // -SUCCESS-
     //  type Boxed = Box<dyn Trait + 'lifetime>;
+    //  type Boxed = Box<&'a u64>;
     //  Generic : Trait + 'lifetime
     //  let var: &'lifetime Type;
     //  let var: &' Boxed = Box::new(||{});
@@ -485,17 +489,23 @@ pub fn trash(){
     //  Generic : Type + 'lifetime
     // >>> variable lifetime is how long the data it points to can be statically verified by the compiler to be valid at its current memory address
 
-    
 
-    trait Some{}
-    impl Some for Boxed{}
+    trait Some{
+        fn run(&self){}
+    }
+    impl Some for Boxed{
+        fn run(&self){} 
+    }
 
+    type Boxy8<'a> = Box<&'a String>; //-- we have to store a pointer to the String inside this Box with a valid lifetime of 'a 
     type Boxed = Box<dyn FnMut() + 'static>; //-- we must bound the type that wants to be a pointer or to be a referenced from a heap location like FnMut() closure to a valid lifetime like 'static
-    let var: Boxed = Box::new(||{});
+    let var: Boxed = Box::new(||{}); //-- since the Some trait is implemented for Boxed type we can call the run() method on the isntance of this type also the closure is bounded to a static lifetime
 
-    fn call<'a>(a: &'a Boxed) -> () where Boxed: Some + 'a{ //-- in order to bind the Boxed to Some trait the Some trait must be implemented for the Boxed - can't bound a lifetime to a self-contained type means we can't have a: u32 + 'static
-         // 'a lifetime might be shorter than static
-         //...    
+    fn call<'a>(a: &'a mut Boxed) -> Boxed where Boxed: Some + 'a { //-- in order to bind the Boxed to Some trait the Some trait must be implemented for the Boxed - can't bound a lifetime to a self-contained type means we can't have a: u32 + 'static
+        // 'a lifetime might be shorter than static and describes how long the data it points to can be valid
+        //...
+        a.run(); //-- a is a mutable pointer of type a Boxed with 'a lifetime - since we have &self in the first param of the run() method for the Some trait we can call the run() method using dot notation
+        Box::new(||{})
     }
 
     //// we can't remove the 'a lifetime from the passed in parameter since a pointer to name doesn't live long enough to return it from the function

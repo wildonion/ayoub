@@ -58,7 +58,7 @@ pub async fn process_payment(db: Option<&Client>, api: ctx::app::Api) -> Generic
             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
             status: 501,
         };
-        let response_body_json = serde_json::to_string(&response_body).unwrap();
+        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
         Ok(
             res
                 .status(StatusCode::NOT_IMPLEMENTED) //-- not found route or method not allowed

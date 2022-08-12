@@ -25,7 +25,7 @@ use crate::controllers::game::{
                                 deck::{add as add_deck, all as get_decks, disable as diable_deck},
                                 side::{add as add_side, all as get_sides, disable as diable_side}, 
                                 player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single}, 
-                                group::{create as create_group, update as update_group, all as get_groups},
+                                group::{create as create_group, update as update_group, all as get_groups, upload_img},
                                 _404::main as not_found,
                             };
 
@@ -118,6 +118,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/god/update/group/".to_string();
             update_group(app_storage, app).await
         },
+        (&Method::POST, "/game/god/update/group/image") => {
+            app.name = "/game/god/update/group/".to_string();
+            upload_img(app_storage, app).await
+        }
         _                                 => not_found().await,
     }
 

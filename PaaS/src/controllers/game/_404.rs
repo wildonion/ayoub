@@ -26,7 +26,7 @@ pub async fn main() -> GenericResult<hyper::Response<Body>, hyper::Error>{
         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
         status: 404,
     };
-    let response_body_json = serde_json::to_string(&response_body).unwrap();
+    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
     Ok(
         res
             .status(StatusCode::NOT_FOUND) //-- not found route or method not allowed

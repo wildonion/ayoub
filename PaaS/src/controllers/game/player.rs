@@ -86,7 +86,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     message: UPDATED,
                                                     status: 200,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::OK)
@@ -101,7 +101,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
                                                     status: 404,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
@@ -122,13 +122,13 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                         Ok(
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
                                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
+                                                .unwrap_or(hyper::Response::default()) 
                                         )
                                     },
                                 }
@@ -139,7 +139,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 400,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::BAD_REQUEST)
@@ -157,7 +157,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -172,7 +172,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -188,7 +188,7 @@ pub async fn update_role(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -266,7 +266,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     message: UPDATED,
                                                     status: 200,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::OK)
@@ -281,7 +281,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                                     message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
                                                     status: 404,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
@@ -301,13 +301,13 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                         Ok(
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
                                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
+                                                .unwrap_or(hyper::Response::default()) 
                                         )
                                     },
                                 }
@@ -318,7 +318,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 400,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::BAD_REQUEST)
@@ -336,7 +336,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -351,7 +351,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -367,7 +367,7 @@ pub async fn update_side(db: Option<&Client>, api: ctx::app::Api) -> GenericResu
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -442,7 +442,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                                     message: UPDATED,
                                                     status: 200,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::OK)
@@ -457,7 +457,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                                     message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
                                                     status: 404,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
@@ -477,13 +477,13 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                         Ok(
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
                                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
+                                                .unwrap_or(hyper::Response::default()) 
                                         )
                                     },
                                 }
@@ -494,7 +494,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 400,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::BAD_REQUEST)
@@ -512,7 +512,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -527,7 +527,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -543,7 +543,7 @@ pub async fn update_status(db: Option<&Client>, api: ctx::app::Api) -> GenericRe
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -611,7 +611,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                                     message: UPDATED,
                                                     status: 200,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::OK)
@@ -626,7 +626,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                                     message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
                                                     status: 404,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
@@ -646,13 +646,13 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                         Ok(
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
                                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
+                                                .unwrap_or(hyper::Response::default()) 
                                         )
                                     },
                                 }
@@ -663,7 +663,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 400,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::BAD_REQUEST)
@@ -680,7 +680,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -695,7 +695,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -711,7 +711,7 @@ pub async fn update_role_ability(db: Option<&Client>, api: ctx::app::Api) -> Gen
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -782,7 +782,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                                     message: INSERTED,
                                                     status: 201,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::OK)
@@ -797,7 +797,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                                     status: 406,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::NOT_ACCEPTABLE)
@@ -817,13 +817,13 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                         Ok(
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
                                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
+                                                .unwrap_or(hyper::Response::default()) 
                                         )
                                     },
                                 }
@@ -834,7 +834,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 400,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::BAD_REQUEST)
@@ -852,7 +852,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -867,7 +867,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -883,7 +883,7 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -957,7 +957,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                                     data: Some(player_info),
                                                     status: 200,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::OK)
@@ -972,7 +972,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                                     message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
                                                     status: 404,
                                                 };
-                                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
                                                         .status(StatusCode::NOT_FOUND)
@@ -992,13 +992,13 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                             status: 406,
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                         Ok(
                                             res
                                                 .status(StatusCode::NOT_ACCEPTABLE)
                                                 .header(header::CONTENT_TYPE, "application/json")
                                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
+                                                .unwrap_or(hyper::Response::default()) 
                                         )
                                     },
                                 }
@@ -1009,7 +1009,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 400,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::BAD_REQUEST)
@@ -1025,7 +1025,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -1040,7 +1040,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -1056,7 +1056,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)

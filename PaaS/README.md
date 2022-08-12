@@ -19,3 +19,5 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 * ayoub nft APIs for deployed contracts' methods
 
 * postman collection (status and access level constants + unix timestamps doc)
+
+* DB schemas doc

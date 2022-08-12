@@ -54,7 +54,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
                     data: Some(available_events),
                     status: 200,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::OK) //-- not found route or method not allowed
@@ -69,7 +69,7 @@ pub async fn all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -136,7 +136,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                                     data: Some(event_doc),
                                     status: 200,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::OK)
@@ -151,7 +151,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                                     message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
                                     status: 404,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::NOT_FOUND)
@@ -171,7 +171,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::NOT_ACCEPTABLE)
@@ -188,7 +188,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::BAD_REQUEST)

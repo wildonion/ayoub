@@ -74,7 +74,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                                     data: Some(available_users),
                                     status: 200,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::OK) //-- not found route or method not allowed
@@ -89,7 +89,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 500,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -110,7 +110,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                             message: ACCESS_DENIED,
                             status: 403,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::BAD_REQUEST)
@@ -125,7 +125,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                         message: DO_SIGNUP, //-- document not found in database and the user must do a signup
                         status: 404,
                     };
-                    let response_body_json = serde_json::to_string(&response_body).unwrap();
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                     Ok(
                         res
                             .status(StatusCode::NOT_FOUND)
@@ -141,7 +141,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                     message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 500,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::INTERNAL_SERVER_ERROR)

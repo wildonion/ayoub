@@ -145,7 +145,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
         //             data: Some(result),
         //             status: 200,
         //         };
-        //         let response_body_json = serde_json::to_string(&response_body).unwrap();
+        //         let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
         //         Ok(
         //             res
         //                 .status(StatusCode::OK)
@@ -161,7 +161,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
         //             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
         //             status: 406,
         //         };
-        //         let response_body_json = serde_json::to_string(&response_body).unwrap();
+        //         let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
         //         Ok(
         //             res
         //                 .status(StatusCode::NOT_ACCEPTABLE)
@@ -199,7 +199,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                                     data: Some(result),
                                     status: 200,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::OK)
@@ -215,7 +215,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                                     status: 406,
                                 };
-                                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                 Ok(
                                     res
                                         .status(StatusCode::NOT_ACCEPTABLE)
@@ -236,7 +236,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                             status: 406,
                         };
-                        let response_body_json = serde_json::to_string(&response_body).unwrap();
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
                                 .status(StatusCode::NOT_ACCEPTABLE)
@@ -253,7 +253,7 @@ pub async fn main(api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hy
                     message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
                     status: 400,
                 };
-                let response_body_json = serde_json::to_string(&response_body).unwrap();
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                 Ok(
                     res
                         .status(StatusCode::BAD_REQUEST)

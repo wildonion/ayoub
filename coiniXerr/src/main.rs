@@ -55,7 +55,7 @@ use uuid::Uuid;
 use std::{fmt::Write, num::ParseIntError};
 use std::sync::{Arc, Mutex, mpsc as std_mpsc}; //-- communication between threads is done using mpsc job queue channel and end of the channel can only be owned by one thread at the time to avoid dead lock, however the sender half can be cloned and through such cloning the conceptual sender part of a channel can be shared among threads which is how you do the multi-producer, single-consumer part
 use std::time::{Instant, Duration};
-use std::{env, slice, mem, thread};
+use std::{env, slice, mem, thread::{self, JoinHandle}};
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 use std::net::SocketAddr; //-- these structures are not async; to be async in reading and writing from and to socket we must use tokio::net 
@@ -69,7 +69,7 @@ use crate::utils::scheduler;
 use crate::schemas::{Transaction, RuntimeInfo, MetaData, Block, Slot, Chain, Staker};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
 use crate::utils::res::ResponseBody; 
-use futures::StreamExt; //-- a trait for streaming utf8 bytes data
+use futures::{Future, StreamExt}; //-- a trait for streaming utf8 bytes data
 use tokio::sync::mpsc::Sender;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
