@@ -24,7 +24,7 @@ use hyper::{Method, Body, Response};
 use std::sync::Arc;
 use crate::controllers::event::{
                                 add::main as add_event, 
-                                get::{all as get_all_events, single as get_single_events}, 
+                                get::{all as get_all_events, single as get_single_event}, 
                                 vote::main as cast_vote_event, 
                                 expire::main as expire_event, 
                                 _404::main as not_found, 
@@ -57,9 +57,9 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/get/availables".to_string();
             get_all_events(app_storage, app).await
         },
-        (&Method::GET, "/event/get/single") => {
+        (&Method::POST, "/event/get/single") => {
             app.name = "/event/get/single".to_string();
-            get_single_events(app_storage, app).await
+            get_single_event(app_storage, app).await
         },
         (&Method::POST, "/event/cast-vote")     => {
             app.name = "/event/cast-vote".to_string();

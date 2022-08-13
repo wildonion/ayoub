@@ -1,0 +1,1130 @@
+{
+	"info": {
+		"_postman_id": "5284c0e4-6931-4ab4-82f1-26cc4877da2f",
+		"name": "Ayoub Conse PaaS",
+		"description": "# ***AYOUB CONSE GAME FLOW***\n\n*   Every God must create a group first then define an event related to that group so the players can purchase the event to participate in.\n*   Every God must define the a deck first to create an event for players.\n*   Every God must define roles before creating a deck\n*   A deck contains all defined roles by the God.\n*   Every God can update the role, side, status, player and phases for a specific event.\n*   Every God can chain two players together.\n*   Every God can see a player info during the game.\n*   Every Player can participate in an event defined by a God\n*   Every Player must reserve his/her role by purchasing and event.\n*   Behalf of the user the server will assign the `role_id` and `side_id` for the user.\n    \n\n# ***NOTES***\n\n*   All passed in times are in form of UNIX timestamp.\n*   All access level must be constant values.\n*   All player status must be constant values.\n    \n\n# *CONSTANTS*\n\n### **ACCESS LEVELS**\n\n*   Admin Access is 1\n*   Dev Access is 0\n*   Default User Access is 2\n    \n\n### **PLAYER STATUS**\n\n*   Default Status is 0\n*   Kick Status is 1\n*   Dead Status is 2\n*   Three Phases Disability Status is 3\n*   Full Disability Status is 4\n*   Two Phases Silent Status is 5\n*   Six Phases Silent Status is 6\n*   Chained Status is 7\n*   Changed Role Status is 8\n*   Exit Status is 9\n*   Devote Status is 10\n*   Nine Phases Later Pro Killer Status is 11",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5226101"
+	},
+	"item": [
+		{
+			"name": "Auth Server",
+			"item": [
+				{
+					"name": "Welcome",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{auth}}/auth/home",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"home"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"phone\": \"09211686115\",\r\n    \"pwd\": \"wildonion@123\",\r\n    \"role\": \"dev\",\r\n    \"status\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/signup",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"pwd\": \"wildonion@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/login",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/check-token",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"check-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OTP Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone\": \"09211686115\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/otp-req",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"otp-req"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check OTP Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone\": \"09211686115\",\r\n    \"code\": \"3658\",\r\n    \"time\": 1648980469\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/check-otp",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"check-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{auth}}/auth/user/get/all",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"get",
+								"all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Server",
+			"item": [
+				{
+					"name": "Add Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"first event\",\r\n    \"content\": \"this is the content of the event\",\r\n    \"deck_id\": \"mongodb-object-id-of-the-deck\",\r\n    \"entry_price\": \"20000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/add",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Available Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{event}}/event/get/availables",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"get",
+								"availables"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/get/single",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"get",
+								"single"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cast Vote On Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongo-db-object-id\",\r\n    \"voter\": {\r\n        \"nft_owner_wallet_address\": \"\",\r\n        \"is_upvote\": true,\r\n        \"score\": 0\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/cast-vote",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"cast-vote"
+							]
+						},
+						"description": "⚠️ ***This API needs User or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Expire Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/set-expire",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"set-expire"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event Phase",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/update/phases/add",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"update",
+								"phases",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Game Server",
+			"item": [
+				{
+					"name": "Add Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"doctor\",\r\n    \"rate\": 2,\r\n    \"desc\": \"role description here\",\r\n    \"abilities\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/role/add",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"role",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{game}}/game/role/get/availables",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"role",
+								"get",
+								"availables"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disable Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/role/disable",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"role",
+								"disable"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Deck",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"deck_name\": \"name of the deck\",\r\n    \"roles\": [\r\n        {\r\n            \"name\": \"deck name\",\r\n            \"rate\": 2,\r\n            \"decs\": \"role description here\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"deck name\",\r\n            \"rate\": 3,\r\n            \"decs\": \"role description here\",\r\n            \"abilities\": 0\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/deck/add",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"deck",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Decks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{game}}/game/deck/get/availables",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"deck",
+								"get",
+								"availables"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Disable Deck",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/deck/disable",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"deck",
+								"disable"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Side",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"citizen\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/side/add",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"side",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sides",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{game}}/game/side/get/availables",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"side",
+								"get",
+								"availables"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disable Side",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/side/disable",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"side",
+								"disable"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"mongodb-object-id\",\r\n    \"role_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/update/role",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"update",
+								"role"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Side",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"mongodb-object-id\",\r\n    \"side_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/update/side",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"update",
+								"side"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"mongodb-object-id\",\r\n    \"status\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/update/side",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"update",
+								"side"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role Ability",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"mongodb-object-id\",\r\n    \"role_id\": \"mongodb-object-id\",\r\n    \"event_id\": \"mongodb-object-id\",\r\n    \"current_ability\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/update/role-ability",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"update",
+								"role-ability"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Chain To Another Player",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"from_id\": \"mongodb-object-id\",\r\n    \"to_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/chain",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"chain"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Player",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/get/single",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"get",
+								"single"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Group",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"komod mafia team\",\r\n    \"owner\": \"mamrez\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/god/create/group",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"god",
+								"create",
+								"group"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Groups",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{game}}/game/get/group/all",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"get",
+								"group",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Group",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\",\r\n    \"name\": \"komod mafia team updated\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/god/update/group/",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"god",
+								"update",
+								"group",
+								""
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Group Image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {}
+						},
+						"url": {
+							"raw": "{{game}}/game/god/update/group/image",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"god",
+								"update",
+								"group",
+								"image"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auth",
+			"value": "localhost:8335",
+			"type": "string"
+		},
+		{
+			"key": "event",
+			"value": "localhost:8336",
+			"type": "string"
+		},
+		{
+			"key": "game",
+			"value": "localhost:8337",
+			"type": "string"
+		}
+	]
+}

@@ -65,7 +65,7 @@ pub struct UserSideUpdateRequest{
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct UserStatusUpdateRequest{
     pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
-    pub status: u8, //-- one of the constant value defined in constants.rs
+    pub status: u8, //-- one of the status constant value defined in constants.rs
 }
 
 

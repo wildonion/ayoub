@@ -266,7 +266,6 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
                             receiver inside the Mutex to lock on it and change the content of what it has received cause we want 
                             to mutate the data of the receiver inside other threads.
                             -----------------------------------------------------------------------------------
-    
                         */
                         
                         // *mult_of_all_sum *= data; // ERROR - can't deref the mult_of_all_sum since its deref doesn't live long enough since its reference or its borrowed type is static not its deref 

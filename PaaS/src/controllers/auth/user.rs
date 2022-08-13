@@ -52,7 +52,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
 
 
                 if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
-                    if access_level == 1 || access_level == 0{ // NOTE - only dev and admin (God) can handle this route
+                    if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     
 
 

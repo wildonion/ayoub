@@ -18,7 +18,12 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
     
+    
     // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module for promises or futures
+    // TODO - a register contains the current buffer inside the ram related to the passed in id means we have to read the buffer from inside of it related to the passed in id
+    // TODO - we have to read the content of a specific register and save it inside a buffer 
+
+
 
 
 

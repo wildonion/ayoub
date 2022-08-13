@@ -11,6 +11,7 @@
 //          - update role_id and side_id with user_id inside the users collection
 //          - insert new player role ability into player_role_ability_info collection
 //          - insert the new user_id into the players field of the events collection
+//          - behalf of the user the server will assign the role_id and side_id for the user
 // ...
 
 

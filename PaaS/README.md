@@ -6,18 +6,12 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 # 📌 TODOs
 
-* OTP API token
+* third party APIs setup : payment APIs in `reserve.rs` needs zarinpal API token
 
-* reserve APIs + API token
-
-* make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`)
+* third party APIs setup : update OTP token in `.env` file with kavenegar API token  
 
 * upload group's picture in `create()` function controller
 
-* complete all TODOs
+* make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`) + complete all TODOs
 
 * ayoub nft APIs for deployed contracts' methods
-
-* postman collection (status and access level constants + unix timestamps doc)
-
-* DB schemas doc

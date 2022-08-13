@@ -21,9 +21,9 @@ use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
 use crate::controllers::game::{
-                                role::{add as add_role, all as get_roles, disable as diable_role}, 
-                                deck::{add as add_deck, all as get_decks, disable as diable_deck},
-                                side::{add as add_side, all as get_sides, disable as diable_side}, 
+                                role::{add as add_role, all as get_roles, disable as disable_role}, 
+                                deck::{add as add_deck, all as get_decks, disable as disable_deck},
+                                side::{add as add_side, all as get_sides, disable as disable_side}, 
                                 player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single}, 
                                 group::{create as create_group, update as update_group, all as get_groups, upload_img},
                                 _404::main as not_found,
@@ -50,25 +50,25 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/role/add".to_string();
             add_role(app_storage, app).await
         },
-        (&Method::POST, "/game/role/get/availables") => {
+        (&Method::GET, "/game/role/get/availables") => {
             app.name = "/game/role/get/availables".to_string();
             get_roles(app_storage, app).await
         },
-        (&Method::POST, "/game/role/diable") => {
-            app.name = "/game/role/diable".to_string();
-            diable_role(app_storage, app).await
+        (&Method::POST, "/game/role/disable") => {
+            app.name = "/game/role/disable".to_string();
+            disable_role(app_storage, app).await
         },
         (&Method::POST, "/game/deck/add") => {
             app.name = "/game/deck/add".to_string();
             add_deck(app_storage, app).await
         },
-        (&Method::POST, "/game/deck/get/availables") => {
+        (&Method::GET, "/game/deck/get/availables") => {
             app.name = "/game/deck/get/availables".to_string();
             get_decks(app_storage, app).await
         },
-        (&Method::POST, "/game/deck/diable") => {
-            app.name = "/game/deck/diable".to_string();
-            diable_deck(app_storage, app).await
+        (&Method::POST, "/game/deck/disable") => {
+            app.name = "/game/deck/disable".to_string();
+            disable_deck(app_storage, app).await
         },
         (&Method::GET, "/game/side/add") => {
             app.name = "/game/side/add".to_string();
@@ -78,9 +78,9 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/side/get/availables".to_string();
             get_sides(app_storage, app).await
         },
-        (&Method::POST, "/game/side/diable") => {
-            app.name = "/game/side/diable".to_string();
-            diable_side(app_storage, app).await
+        (&Method::POST, "/game/side/disable") => {
+            app.name = "/game/side/disable".to_string();
+            disable_side(app_storage, app).await
         },
         (&Method::POST, "/game/player/update/role") => {
             app.name = "/game/player/update/role".to_string();
@@ -110,7 +110,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/game/god/create/group".to_string();
             create_group(app_storage, app).await
         },
-        (&Method::POST, "/game/get/group/all") => {
+        (&Method::GET, "/game/get/group/all") => {
             app.name = "/game/get/group/all".to_string();
             get_groups(app_storage, app).await
         },
