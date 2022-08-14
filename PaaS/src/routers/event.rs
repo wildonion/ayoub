@@ -29,6 +29,7 @@ use crate::controllers::event::{
                                 expire::main as expire_event, 
                                 _404::main as not_found, 
                                 phase::insert as insert_phase,
+                                reserve::{process_payment_request, mock_payment},
                                 simd::main as simd_ops
                             };
 
@@ -69,14 +70,18 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/set-expire".to_string();
             expire_event(app_storage, app).await
         },
-        (&Method::POST, "/event/simd")      => {
-            app.name = "/event/simd".to_string();
-            simd_ops(app).await
-        },
         (&Method::POST, "/event/update/phases/add") => {
             app.name = "/event/update/phases/add".to_string();
             insert_phase(app_storage, app).await
         }
+        (&Method::POST, "/event/simd")      => {
+            app.name = "/event/simd".to_string();
+            simd_ops(app).await
+        },
+        (&Method::POST, "/event/reserve")      => {
+            app.name = "/event/reserve".to_string();
+            mock_payment(app_storage, app).await // TODO - use process_payment_request controller later
+        },
         _                                       => not_found().await,
     }
 

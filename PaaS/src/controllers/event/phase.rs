@@ -66,7 +66,7 @@ pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                                         let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- connecting to events collection to update the phases field - we want to deserialize all event bsons into the EventInfo struct
                                         match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
                                             Some(event_info) => {
-                                                let updated_phases = event_info.add_phase(phase_info.phase).await;
+                                                let updated_phases = event_info.add_phase(phase_info.phase).await; //-- add new phase vector into the existing phases vector of the passed in event_id
                                                 let serialized_updated_phases = bson::to_bson(&updated_phases).unwrap(); //-- we have to serialize the updated_phases to BSON Document object in order to update the phases field inside the collection
                                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                                 match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"phases": serialized_updated_phases, "updated_at": Some(now)}}, None).await.unwrap(){

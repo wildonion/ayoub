@@ -23,7 +23,7 @@ pub mod auth{
     
 
 
-    pub async fn pass(req: hyper::Request<Body>) -> Result<(TokenData<jwt::Claims>, hyper::Request<Body>), String>{
+    pub async fn pass(req: hyper::Request<Body>) -> Result<(TokenData<jwt::Claims>, hyper::Request<Body>), String>{ //-- the return type is a Result of type TokenData claims and hyper::Request body
         let mut authenticate_pass: bool = false;
         let mut user_data_inside_token: Option<TokenData<jwt::Claims>> = None;
         let mut jwt_error: Option<jsonwebtoken::errors::Error> = None;

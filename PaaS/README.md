@@ -15,3 +15,5 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 * make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`) + complete all TODOs
 
 * ayoub nft APIs for deployed contracts' methods
+
+* DB schema 

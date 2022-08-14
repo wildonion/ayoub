@@ -904,9 +904,9 @@ pub async fn chain_to_another_player(db: Option<&Client>, api: ctx::app::Api) ->
 
 
 
-// -------------------------------- get a single player info controller
+// -------------------------------- get a single player info (during the game) controller
 // ➝ Return : Hyper Response Body or Hyper Error
-// ----------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
@@ -928,7 +928,7 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                 
                 
                 if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
-                    if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
+                    if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev, admin (God) and player can handle this route
                         let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
                         match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                             Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
@@ -944,15 +944,19 @@ pub async fn get_single(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                         let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                                         match users.find_one(doc! { "_id": player_id }, None).await.unwrap(){
                                             Some(user_doc) => {
-                                                let player_info = schemas::game::PlayerInfo{
+                                                let player_info = schemas::game::PlayerInfoResponse{
                                                     _id: user_doc._id,
                                                     username: user_doc.username,
                                                     status: user_doc.status,
                                                     role_id: user_doc.role_id,
                                                     side_id: user_doc.side_id,
+                                                    ///////////// TODO
+                                                    // chain_history
+                                                    // role_ability_history
+                                                    /////////////
                                                 };
                                                 let res = Response::builder(); //-- creating a new response cause we didn't find any available route
-                                                let response_body = ctx::app::Response::<schemas::game::PlayerInfo>{
+                                                let response_body = ctx::app::Response::<schemas::game::PlayerInfoResponse>{
                                                     message: FETCHED,
                                                     data: Some(player_info),
                                                     status: 200,

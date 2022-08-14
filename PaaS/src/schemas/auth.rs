@@ -393,9 +393,9 @@ pub struct CheckTokenResponse{ // NOTE - those Option values can be None tho
     pub username: String,
     pub phone: String,
     pub access_level: u8, // NOTE - 0 means dev, 1 means admin, 2 means user
-    pub status: u8,
-    pub role_id: Option<ObjectId>,
-    pub side_id: Option<ObjectId>,
+    pub status: u8, //-- last status in an event game that this user has participated in
+    pub role_id: Option<ObjectId>, //-- last role in an event game that this user has participated in
+    pub side_id: Option<ObjectId>, //-- last side in an event game that this user has participated in
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
     pub last_login_time: Option<i64>,

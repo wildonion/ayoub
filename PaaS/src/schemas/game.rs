@@ -352,10 +352,46 @@ pub struct PlayerChainToInfo{
 |
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct PlayerInfo{
+pub struct PlayerInfoResponse{
   pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
   pub username: String,
   pub status: u8,
   pub role_id: Option<ObjectId>,
   pub side_id: Option<ObjectId>,
+  pub chain_history: Option<Vec<ChainInfo>>,
+  pub role_ability_history: Option<Vec<RoleAbilityInfo>>,
+}
+
+
+/*
+  -------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player info bson from the mongodb into this struct
+| -------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct InsertPlayerInfoRequest{
+  pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+  pub username: String,
+  pub status: u8,
+  pub role_id: ObjectId,
+  pub side_id: ObjectId,
+  pub chain_history: Vec<ChainInfo>,
+  pub role_ability_history: Vec<RoleAbilityInfo>,
+}
+
+
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct ChainInfo{
+  pub to_id: String,
+  pub chained_at: i64,
+}
+
+
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct RoleAbilityInfo{
+  pub role_id: String,
+  pub current_ability: u8,
+  pub updated_at: Option<i64>,
 }

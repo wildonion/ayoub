@@ -3,7 +3,7 @@
 
 
 
-
+use crate::schemas::game::InsertPlayerInfoRequest;
 use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use uuid::Uuid;
@@ -46,19 +46,11 @@ pub struct CastVoteRequest{
 }
 
 
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PlayerInfo{
-    pub _id: Option<ObjectId>, //-- this is the _id of the user from the users collection
-}
-
-
-
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct Phase{
-    pub day: Vec<PlayerInfo>, //-- vector of all users at the end of the day that their status has changed
-    pub mid_day: Vec<PlayerInfo>, //-- vector of all users at the end of the mid day that their status has changed
-    pub night: Vec<PlayerInfo>, //-- vector of all users at the end of the night that their status has changed
+    pub day: Vec<InsertPlayerInfoRequest>, //-- vector of all user infos at the end of the day that their status has changed
+    pub mid_day: Vec<InsertPlayerInfoRequest>, //-- vector of all user infos at the end of the mid day that their status has changed
+    pub night: Vec<InsertPlayerInfoRequest>, //-- vector of all user infos at the end of the night that their status has changed
 }
 
 
