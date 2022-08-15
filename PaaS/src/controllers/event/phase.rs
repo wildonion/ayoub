@@ -26,13 +26,18 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 
+// NOTE - following api must be called by the God during the game to update the game status of each player in each phase 
+
+
+
+
 
 
 // -------------------------------- update event phases (add new phase) controller
 // ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------------------
 
-pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- inserting a new passed event for the current event
+pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- inserting a new passed event for the current event during the game
 
     info!("calling {} - {}", api.name, chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
 
@@ -77,6 +82,8 @@ pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                                                             content: event_doc.content,
                                                             deck_id: event_doc.deck_id,
                                                             phases: event_doc.phases,
+                                                            max_players: event_doc.max_players,
+                                                            players: event_doc.players,
                                                             is_expired: event_doc.is_expired,
                                                             expire_at: event_doc.expire_at,
                                                             created_at: event_doc.created_at,
@@ -112,9 +119,6 @@ pub async fn insert(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                                                         )
                                                     },
                                                 }
-                                            
-                                            
-                                            
                                             },
                                             None => { //-- means we didn't find any document related to this title and we have to tell the user to create a new event
                                                 let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct

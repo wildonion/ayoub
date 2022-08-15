@@ -90,6 +90,8 @@ pub async fn main(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                                     downvotes: Some(0),
                                                     voters: Some(vec![]), //-- initializing empty voters
                                                     phases: Some(vec![]), //-- initializing empty vector of phases
+                                                    max_players: event_info.max_players, //-- this is the maximum players that an event can have
+                                                    players: Some(vec![]), //-- there are no participant yet for this event
                                                     is_expired: Some(false), //-- a event is not expired yet or at initialization
                                                     expire_at: Some(exp_time), //-- a event will be expired at
                                                     created_at: Some(now),

@@ -164,10 +164,10 @@ pub struct RegisterRequest{ // NOTE - those Option values can be None tho
     pub username: String,
     pub phone: String,
     pub pwd: String, //-- hashed password
-    pub status: u8,
+    pub status: u8, //-- this is the status of the player - this field is 0 initially and is the last status and info of the player during the game
     pub access_level: Option<u8>, // NOTE - 0 means dev, 1 means admin, 2 means user - we set this field to Option cause we don't want to pass the access_level inside the request body thus it should be None initially, we'll fill it inside the server
-    pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field is None initially
-    pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field is None initially
+    pub role_id: Option<ObjectId>, //-- this is the id from the roles collection - this field is None initially and is the last status and info of the player during the game
+    pub side_id: Option<ObjectId>, //-- this is the id from the sides collection - this field is None initially and is the last status and info of the player during the game
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
     pub last_login_time: Option<i64>, //-- we set this field to Option cause we don't want to pass the last login time inside the request body thus it should be None initially, we'll fill it inside the server

@@ -12,6 +12,8 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * upload group's picture in `create()` function controller
 
+* role reveal api in `reveal.rs` controller
+
 * make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`) + complete all TODOs
 
 * ayoub nft APIs for deployed contracts' methods

@@ -31,7 +31,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 |
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct GetPlayerRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+pub struct GetPlayerInfoRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
     pub _id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
@@ -345,21 +345,32 @@ pub struct PlayerChainToInfo{
 
 
 /*
-  ---------------------------------------------------------------------------------------
-| this struct will be used to serialize user info into the json to send back to the user
-| ---------------------------------------------------------------------------------------
+  -----------------------------------------------------------------------------------------------------------
+| this struct will be used to put all available chain infos in it and serialize as json to send back to user
+| -----------------------------------------------------------------------------------------------------------
 |
 |
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct PlayerInfoResponse{
+pub struct AvailableChainInfos{
+    pub chain_infos: Vec<PlayerChainToInfo>,
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------------------------
+| this struct will be used to serialize player info after reservation into the json to send back to the user
+| -----------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct ReservePlayerInfoResponse{
   pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
   pub username: String,
   pub status: u8,
-  pub role_id: Option<ObjectId>,
-  pub side_id: Option<ObjectId>,
-  pub chain_history: Option<Vec<ChainInfo>>,
-  pub role_ability_history: Option<Vec<RoleAbilityInfo>>,
+  pub role_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
+  pub side_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
 }
 
 

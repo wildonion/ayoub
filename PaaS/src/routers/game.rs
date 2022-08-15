@@ -24,7 +24,7 @@ use crate::controllers::game::{
                                 role::{add as add_role, all as get_roles, disable as disable_role}, 
                                 deck::{add as add_deck, all as get_decks, disable as disable_deck},
                                 side::{add as add_side, all as get_sides, disable as disable_side}, 
-                                player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single}, 
+                                player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single, get_player_role_ability, get_player_chain_infos}, 
                                 group::{create as create_group, update as update_group, all as get_groups, upload_img},
                                 _404::main as not_found,
                             };
@@ -105,6 +105,14 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/game/player/get/single") => {
             app.name = "/game/player/get/single".to_string();
             get_single(app_storage, app).await
+        },
+        (&Method::POST, "/game/player/get/role-ability") => {
+            app.name = "/game/player/get/role-ability".to_string();
+            get_player_role_ability(app_storage, app).await
+        },
+        (&Method::POST, "/game/player/get/chain-infos") => {
+            app.name = "/game/player/get/chain-infos".to_string();
+            get_player_chain_infos(app_storage, app).await
         },
         (&Method::POST, "/game/god/create/group") => {
             app.name = "/game/god/create/group".to_string();

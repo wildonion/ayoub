@@ -24,12 +24,13 @@ use hyper::{Method, Body, Response};
 use std::sync::Arc;
 use crate::controllers::event::{
                                 add::main as add_event, 
-                                get::{all as get_all_events, single as get_single_event}, 
+                                get::{all as get_all_events, player_all as get_all_player_events, single as get_single_event}, 
                                 vote::main as cast_vote_event, 
                                 expire::main as expire_event, 
                                 _404::main as not_found, 
                                 phase::insert as insert_phase,
-                                reserve::{process_payment_request, mock_payment},
+                                reserve::{process_payment_request, mock_reservation},
+                                reveal::{role},
                                 simd::main as simd_ops
                             };
 
@@ -58,6 +59,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/get/availables".to_string();
             get_all_events(app_storage, app).await
         },
+        (&Method::GET, "/event/get/all/player") => {
+            app.name = "/event/get/all/player".to_string();
+            get_all_player_events(app_storage, app).await
+        },
         (&Method::POST, "/event/get/single") => {
             app.name = "/event/get/single".to_string();
             get_single_event(app_storage, app).await
@@ -80,7 +85,11 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         },
         (&Method::POST, "/event/reserve")      => {
             app.name = "/event/reserve".to_string();
-            mock_payment(app_storage, app).await // TODO - use process_payment_request controller later
+            mock_reservation(app_storage, app).await
+        },
+        (&Method::POST, "/event/reveal/roles")      => {
+            app.name = "/event/reveal/roles".to_string();
+            role(app_storage, app).await
         },
         _                                       => not_found().await,
     }

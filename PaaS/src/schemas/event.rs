@@ -3,7 +3,7 @@
 
 
 
-use crate::schemas::game::InsertPlayerInfoRequest;
+use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponse};
 use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use uuid::Uuid;
@@ -68,6 +68,19 @@ pub struct GetEventRequest{ //-- we don't need _id field in this struct cause it
 
 
 /*
+  ------------------------------------------------------------------------------------
+| this struct will be used to deserialize even info json from client into this struct
+| ------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GetPlayerEventsRequest{
+    pub _id: String, //-- this is the id of the event took from the mongodb events collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
   ---------------------------------------------------------------------------------------
 | this struct will be used to deserialize payment info json from client into this struct
 | ---------------------------------------------------------------------------------------
@@ -95,11 +108,37 @@ pub struct InsertPhaseResponse{
     pub content: String,
     pub deck_id: String,
     pub phases: Option<Vec<Phase>>,
+    pub max_players: Option<u8>,
+    pub players: Option<Vec<ReservePlayerInfoResponse>>,
     pub is_expired: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
 }
+
+
+/*
+  -----------------------------------------------------------------------------------------------
+| this struct will be used to put an event info in it and serialize as json to send back to user
+| -----------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct ReserveEventResponse{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub deck_id: String,
+    pub phases: Option<Vec<Phase>>,
+    pub max_players: Option<u8>,
+    pub players: Option<Vec<ReservePlayerInfoResponse>>,
+    pub is_expired: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
 
 
 /*
@@ -124,9 +163,20 @@ pub struct AddPaymentRequest{
     pub fee: Option<String>, //-- it might be None by canceling the payment process
     pub requested_at: i64,
     pub paid_at: Option<i64>, //-- it might be None by canceling the payment process
+}
 
 
-
+/*
+  --------------------------------------------------------------------------------------------
+| this struct will be used to deserialize mock payment info json from client into this struct
+| --------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct MockReservationRequest{
+    pub event_id: String, //-- this is the id of the event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub requested_at: i64, //-- this the tiem of the request coming from the client in unix timestamp foramt
 }
 
 
@@ -175,6 +225,8 @@ pub struct EventInfo{
     pub downvotes: Option<u16>,
     pub voters: Option<Vec<Voter>>,
     pub phases: Option<Vec<Phase>>,
+    pub max_players: Option<u8>,
+    pub players: Option<Vec<ReservePlayerInfoResponse>>,
     pub is_expired: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
@@ -200,6 +252,8 @@ pub struct AddEventRequest{
     pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server
     pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on
     pub phases: Option<Vec<Phase>>, // NOTE - we set this field to Option cause we don't want to pass the phases inside the request body, we'll update it later on
+    pub max_players: Option<u8>, // NOTE - number of maximum players for this event
+    pub players: Option<Vec<ReservePlayerInfoResponse>>, // NOTE - vector of all players which has participated for this event
     pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object
     pub created_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the created time inside the request body, we'll fill it inside the server
@@ -216,6 +270,19 @@ pub struct AddEventRequest{
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableEvents{
+    pub events: Vec<EventInfo>,
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------------------------
+| this struct will be used to put all player expired events in it and serialize as json to send back to user
+| -----------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct PlayerExpiredEvents{
     pub events: Vec<EventInfo>,
 }
 
@@ -262,10 +329,24 @@ impl EventInfo{
 
 impl EventInfo{ //-- we have to define the following method for the EventInfo struct cause we want to call this method on a document of fetched from the events collection which is an instance of the EventInfo struct 
 
-    pub async fn add_phase(self, new_phase: Phase) -> Vec<Phase>{ //-- new phase is of type Phase struct which contains list of all user_id in which their status has changed during the game for day, mid-day and night
+    pub async fn add_phase(self, new_phase: Phase) -> Vec<Phase>{ //-- new phase is of type Phase struct which contains list of all player infos in which their status has changed during the game for day, mid-day and night - //-- we don't take a reference to self cause we can't dereference a shared reference (&T) and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
         let mut current_phases = self.phases.unwrap();
         current_phases.push(new_phase);
         current_phases
     } 
+
+}
+
+
+impl EventInfo{
+
+    pub async fn add_player(self, player_info: ReservePlayerInfoResponse) -> Vec<ReservePlayerInfoResponse>{ //-- we don't take a reference to self cause we can't dereference a shared reference (&T) and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
+      let mut current_players = self.players.unwrap();
+      let index = current_players.iter().position(|p| p._id == player_info._id); //-- this user has already participated in this event
+      if index == None && current_players.len() < self.max_players.unwrap() as usize{
+        current_players.push(player_info)
+      }
+      current_players
+    }
 
 }

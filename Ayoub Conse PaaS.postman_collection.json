@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "5284c0e4-6931-4ab4-82f1-26cc4877da2f",
 		"name": "Ayoub Conse PaaS",
-		"description": "# ***AYOUB CONSE GAME FLOW***\n\n*   Every God must create a group first then define an event related to that group so the players can purchase the event to participate in.\n*   Every God must define the a deck first to create an event for players.\n*   Every God must define roles before creating a deck\n*   A deck contains all defined roles by the God.\n*   Every God can update the role, side, status, player ability and phases for a specific event.\n*   Every God can chain two players together.\n*   Every God can see a player info during the game.\n*   Every Player can participate in an event defined by a God\n*   Every Player must reserve his/her role by purchasing and event.\n*   Every God must define sides for the game.\n*   Behalf of the user the server will assign the `role_id` and `side_id` for the user.\n*   To get all active users of a current event we must iterate through the `phases` field fetched from calling the `Get Single Event` API.\n*   Every God must send the updated player info by calling the `Update Event Phase` API after updating the `side_id`, `role_id`, `status`, `player_role_ability` and `player_chain_to` of the user during the game phases.\n    \n\n# ***NOTES***\n\n*   All passed in times are in form of UNIX timestamp.\n*   All access level must be constant values as defined.\n*   All player status must be constant values as defined.\n    \n\n# *CONSTANTS*\n\n### **ACCESS LEVELS**\n\n*   Admin Access is 1\n*   Dev Access is 0\n*   Default User Access is 2\n    \n\n### **PLAYER STATUS**\n\n*   Default Status is 0\n*   Kick Status is 1\n*   Dead Status is 2\n*   Three Phases Disability Status is 3\n*   Full Disability Status is 4\n*   Two Phases Later Silent Status is 5\n*   Six Phases Later Silent Status is 6\n*   Chained Status is 7\n*   Changed Role Status is 8\n*   Changed Side Status is 9\n*   Exit Status is 10\n*   Devote Status is 11\n*   Nine Phases Later Pro Killer Status is 12",
+		"description": "# AYOUB CONSE PITCH DECK\n\n[Technical Pitch Deck](https://miro.com/app/board/uXjVOb2Cb9k=/?moveToWidget=3458764531220249895&cot=14)\n\n# ***AYOUB CONSE GAME FLOW***\n\n*   Every God must create a group first then define an event related to that group so the players can purchase the event to participate in.\n*   Every God must define the a deck first to create an event for players.\n*   Every God must define roles before creating a deck\n*   A deck contains all defined roles by the God.\n*   Every God can update the role, side, status, player ability and phases for a specific event.\n*   Every God can chain two players together.\n*   Every God can see a player info during the game.\n*   Every Player can participate in an event defined by a God\n*   Every Player must reserve his/her role by purchasing and event.\n*   Every God must define sides for the game.\n*   Behalf of the user the server will assign the `role_id` and `side_id` for the user.\n*   To get all active users of a current event we must iterate through the `phases` field fetched from calling the `Get Single Event` API.\n*   Every God must send the updated player info by calling the `Update Event Phase` API after updating the `side_id`, `role_id`, `status`, `player_role_ability` and `player_chain_to` of the user during the game phases.\n    \n\n# ***NOTES***\n\n*   All passed in times are in form of UNIX timestamp.\n*   All access level must be constant values as defined.\n*   All player status must be constant values as defined.\n    \n\n# *CONSTANTS*\n\n### **ACCESS LEVELS**\n\n*   Admin Access is 1\n*   Dev Access is 0\n*   Default User Access is 2\n    \n\n### **PLAYER STATUS**\n\n*   Default Status is 0\n*   Kick Status is 1\n*   Dead Status is 2\n*   Three Phases Disability Status is 3\n*   Full Disability Status is 4\n*   Two Phases Later Silent Status is 5\n*   Six Phases Later Silent Status is 6\n*   Chained Status is 7\n*   Changed Role Status is 8\n*   Changed Side Status is 9\n*   Exit Status is 10\n*   Devote Status is 11\n*   Nine Phases Later Pro Killer Status is 12",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "5226101"
 	},
@@ -230,6 +230,84 @@
 					"response": []
 				},
 				{
+					"name": "Reserve Event (Mock)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"event_id\": \"mongodb-object-id\",\r\n    \"requested_at\": 16662742424\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/reserve/mock",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"reserve",
+								"mock"
+							]
+						},
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Reveal Roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/reveal/roles",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"reveal",
+								"roles"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Available Events",
 					"request": {
 						"method": "GET",
@@ -245,6 +323,46 @@
 								"availables"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Player Events",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/get/all/player",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"get",
+								"all",
+								"player"
+							]
+						},
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***"
 					},
 					"response": []
 				},
@@ -944,7 +1062,87 @@
 								"single"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***\n\n⚠️ ***This API can be called during the game execution since it'll return the last status and info of the player.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Player Chain Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/get/chain-infos",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"get",
+								"chain-infos"
+							]
+						},
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***\n\n⚠️ ***This API can be called during the game execution since it'll return the last status and info of the player.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Player Role Ability Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/get/role-ability",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"get",
+								"role-ability"
+							]
+						},
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***\n\n⚠️ ***This API can be called during the game execution since it'll return the last status and info of the player.***"
 					},
 					"response": []
 				},
