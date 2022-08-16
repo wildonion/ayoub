@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"phone\": \"09211686115\",\r\n    \"pwd\": \"wildonion@123\",\r\n    \"role\": \"dev\",\r\n    \"status\": 1\r\n}",
+							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"phone\": \"09390877876\",\r\n    \"pwd\": \"blueash@123\",\r\n    \"access_level\": 0,\r\n    \"status\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -65,7 +65,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"pwd\": \"wildonion@123\"\r\n}",
+							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -88,11 +88,21 @@
 				{
 					"name": "Check Token",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw\"\r\n}",
+							"raw": "{\r\n    \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -169,7 +179,17 @@
 				{
 					"name": "Get All Users",
 					"request": {
-						"method": "GET",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJkY2ZmNWE0MmI3ZThhMzU0YzQ0MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbjIiLCJhY2Nlc3NfbGV2ZWwiOjIsImV4cCI6MTY5MjIwOTI5MiwiaWF0IjoxNjYwNjczMjkyfQ.v3b2-cS_Fnj-FsqOVRNeViISyvlF9YkmpKnLK3KVnLqbtV7uON8PJecNMr-0TT5cEHMJ2l-9kazJfb0TDjN8yw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
 						"header": [],
 						"url": {
 							"raw": "{{auth}}/auth/user/get/all",
@@ -182,7 +202,8 @@
 								"get",
 								"all"
 							]
-						}
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
 					},
 					"response": []
 				}
@@ -661,7 +682,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg",
 									"type": "string"
 								}
 							]
@@ -1154,7 +1175,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg",
 									"type": "string"
 								}
 							]
