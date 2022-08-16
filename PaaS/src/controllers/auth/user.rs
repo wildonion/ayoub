@@ -39,8 +39,6 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
 
     api.post("/auth/user/get/all", |req, res| async move{ // NOTE - api will be moved here since neither trait Copy nor Clone is not implemented for that and we can call it only once 
         
-
-
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 

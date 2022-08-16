@@ -44,6 +44,9 @@
 sudo cp target/release/ayoub auth.ayoub/ayoub
 sudo cp target/release/ayoub event.ayoub/ayoub
 sudo cp target/release/ayoub game.ayoub/ayoub
+sudo pm2 stop ayoub-auth
+sudo pm2 stop ayoub-event
+sudo pm2 stop ayoub-game
 sudo pm2 start auth.ayoub/ayoub --name ayoub-auth -- auth 8335
 sudo pm2 start event.ayoub/ayoub --name ayoub-event -- auth 8336
 sudo pm2 start game.ayoub/ayoub --name ayoub-game -- auth 8337
