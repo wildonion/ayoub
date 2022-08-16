@@ -41,9 +41,14 @@
 # ☢️ To run the `nft` server: `./ayoub nft 7438`
 
 
+
+sudo rm auth.ayoub/ayoub-auth
+sudo rm event.ayoub/ayoub-event
+sudo rm game.ayoub/ayoub-game
 sudo cp target/release/ayoub auth.ayoub/ayoub-auth
 sudo cp target/release/ayoub event.ayoub/ayoub-event
 sudo cp target/release/ayoub game.ayoub/ayoub-game
+
 sudo pm2 stop ayoub-auth
 sudo pm2 stop ayoub-event
 sudo pm2 stop ayoub-game
