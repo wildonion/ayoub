@@ -316,7 +316,7 @@ pub async fn single(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hy
                         ////////////////////////////////// DB Ops
 
                         let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the EventInfo struct
+                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                         match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
                             Some(event_doc) => {
                                 let response_body = ctx::app::Response::<schemas::event::EventInfo>{

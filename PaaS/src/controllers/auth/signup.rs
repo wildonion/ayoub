@@ -225,7 +225,7 @@ pub async fn register_god(db: Option<&Client>, api: ctx::app::Api) -> GenericRes
                                         let user_id = ObjectId::parse_str(user_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                         let users = db.unwrap().database("ayoub").collection::<schemas::auth::RegisterResponse>("users");
                                         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                        match users.find_one_and_update(doc! { "_id": user_id }, doc!{"$set": {"access_level": 1, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on username and phone
+                                        match users.find_one_and_update(doc! { "_id": user_id }, doc!{"$set": {"access_level": 1, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on _id
                                             Some(user_doc) => {
                                                 let user_info = schemas::auth::UserUpdateResponse{
                                                     username: user_doc.username,

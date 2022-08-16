@@ -76,7 +76,7 @@ pub async fn mock_reservation(db: Option<&Client>, api: ctx::app::Api) -> Generi
                                         ////////////////////////////////// DB ops
 
                                         let event_id = ObjectId::parse_str(mock_reservation_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string - mock_reservation_info.event_id is the mongodb object id of the event that the caller of this method is trying to reserve it
-                                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the EventInfo struct which contains the whole fields
+                                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct which contains the whole fields
                                         match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
                                             Some(event_doc) => {
                                                 let init_player_info = schemas::game::ReservePlayerInfoResponse{

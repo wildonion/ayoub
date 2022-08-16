@@ -65,18 +65,71 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                         
                                         ////////////////////////////////// DB Ops
 
+                                        let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                                         let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the EventInfo struct
-                                        match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
+                                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                                        match events.find_one(doc! { "_id": event_id, "is_expired": false }, None).await.unwrap(){ //-- getting a none expired event
                                             Some(event_doc) => {
 
+                                                for p in event_doc.players{
+                                                    let random_role_id = "mongodb-object-id"; // TODO
+                                                    let random_side_id = "mongodb-object-id"; // TODO
+                                                    let serialized_random_side_id = ObjectId::parse_str(random_side_id).unwrap(); //-- generating mongodb object id from the id string
+                                                    let serialized_random_role_id = ObjectId::parse_str(random_role_id).unwrap(); //-- generating mongodb object id from the id string
+                                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                                    match users.find_one_and_update(doc! { "_id": p._id }, doc!{"$set": {"role_id": serialized_random_role_id, "side_id": serialized_random_side_id, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on _id
+                                                        Some(user_doc) => { //-- we updated the users collection successfully now we have to update each player inside the current event 
+                                                            
+
+                                                            p.role_id = Some(serialized_random_role_id);
+                                                            p.side_id = Some(serialized_random_side_id);
+                                                            
+
+
+                                                            // TODO - update the players field inside the event_doc with updated_players
+                                                            // TODO - insert new player role ability for the reserved event into player_role_ability_info collection
+                                                            // ...
+
+
+                                                            let response_body = ctx::app::Response::<schemas::event::EventInfo>{
+                                                                message: FETCHED,
+                                                                data: Some(event_doc),
+                                                                status: 200,
+                                                            };
+                                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                            Ok(
+                                                                res
+                                                                    .status(StatusCode::OK)
+                                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                                    .unwrap()
+                                                            )
+                                                            
+
+
+                                                        },
+                                                        None => { //-- means we didn't find any document related to this user_id and simply we return the unmatched player info
+                                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                                message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
+                                                                status: 404,
+                                                            };
+                                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                            Ok(
+                                                                res
+                                                                    .status(StatusCode::NOT_FOUND)
+                                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                    .unwrap() 
+                                                            )
+                                                        }, 
+                                                }
+
+                                                
 
 
 
 
-                                                // TODO - assign role_id and side_id randomely on calling role_reveal api (can only be called by the God of the event game)
-                                                //        ... update the initialized status, role_id, side_id inside the players field in events collection and the users collection
-                                                // TODO - insert new player role ability for the reserved event into player_role_ability_info collection
 
 
 

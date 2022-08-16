@@ -296,17 +296,20 @@ pub struct UpdatePlayerRoleAbilityRequest{
 
 
 /*
-  --------------------------------------------------------------------------------------------
-| this struct will be used to deserialize player chain info json from client into this struct
-| --------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player role ability info json from client into this struct
+| ---------------------------------------------------------------------------------------------------
 |
 |
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct InsertPlayerChainToRequest{
-    pub from_id: String,
-    pub to_id: String,
-    pub chained_at: Option<i64>, //-- this must be filled inside the server
+pub struct InsertPlayerRoleAbilityRequest{
+    pub user_id: String,
+    pub role_id: String,
+    pub even_id: String,
+    pub current_ability: u8,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
 }
 
 
@@ -324,7 +327,23 @@ pub struct PlayerRoleAbilityInfo{
     pub role_id: String, //-- string type of ObjectId for role id
     pub event_id: String, //-- string type of ObjectId for event id
     pub current_ability: u8, //-- number of current abilities for this player
+    pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player chain info json from client into this struct
+| --------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct InsertPlayerChainToRequest{
+    pub from_id: String,
+    pub to_id: String,
+    pub chained_at: Option<i64>, //-- this must be filled inside the server
 }
 
 
