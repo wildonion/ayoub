@@ -41,36 +41,163 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
     
     api.post("/event/reveal/roles", |req, res| async move{
 
+        match middlewares::auth::pass(req).await{
+            Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
+                                
+                
+        
+                let _id = token_data.claims._id;
+                let username = token_data.claims.username;
+                let access_level = token_data.claims.access_level;
+        
+                
+                
+                if middlewares::auth::user::exists(db, _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
+                    if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
+                        let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
+                        match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
+                            Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
+                                let data: serde_json::Value = value;
+                                let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
+                                match serde_json::from_str::<schemas::event::GetEventRequest>(&json){ //-- the generic type of from_str() method is GetEventRequest struct - mapping (deserializing) the json string into the GetEventRequest struct
+                                    Ok(event_info) => {
+
+                                        
+                                        ////////////////////////////////// DB Ops
+
+                                        let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the EventInfo struct
+                                        match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
+                                            Some(event_doc) => {
 
 
 
-        // TODO - assign role_id and side_id randomely on calling role_reveal api (can only be called by the God of the event game)
-        //        ... update the initialized status, role_id, side_id inside the players field in events collection and the users collection
-        // TODO - insert new player role ability for the reserved event into player_role_ability_info collection
+
+
+                                                // TODO - assign role_id and side_id randomely on calling role_reveal api (can only be called by the God of the event game)
+                                                //        ... update the initialized status, role_id, side_id inside the players field in events collection and the users collection
+                                                // TODO - insert new player role ability for the reserved event into player_role_ability_info collection
 
 
 
 
 
-        let response_body = ctx::app::Response::<ctx::app::Nill>{
-            message: NOT_IMPLEMENTED,
-            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-            status: 501,
-        };
-        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-        Ok(
-            res
-                .status(StatusCode::NOT_IMPLEMENTED) //-- not found route or method not allowed
-                .header(header::CONTENT_TYPE, "application/json")
-                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                .unwrap()
-        )
+
+                                                let response_body = ctx::app::Response::<schemas::event::EventInfo>{
+                                                    message: FETCHED,
+                                                    data: Some(event_doc),
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                        .unwrap()
+                                                )
+                                            },
+                                            None => { //-- means we didn't find any document related to this user_id and we have to tell the user do a signup
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
+                                                    status: 404,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
+
+                                        //////////////////////////////////
 
 
-
-
+                                    },
+                                    Err(e) => {
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                            status: 406,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::NOT_ACCEPTABLE)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap_or(hyper::Response::default()) 
+                                        )
+                                    },
+                                }
+                            },
+                            Err(e) => {
+                                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                    status: 400,
+                                };
+                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                Ok(
+                                    res
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .header(header::CONTENT_TYPE, "application/json")
+                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                        .unwrap() 
+                                )
+                            },
+                        }
+                    } else{ //-- access denied for this user with none admin and dev access level
+                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                            message: ACCESS_DENIED,
+                            status: 403,
+                        };
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                        Ok(
+                            res
+                                .status(StatusCode::BAD_REQUEST)
+                                .header(header::CONTENT_TYPE, "application/json")
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                .unwrap() 
+                        )
+                    }
+                } else{ //-- user doesn't exist :(
+                    let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                        message: DO_SIGNUP, //-- document not found in database and the user must do a signup
+                        status: 404,
+                    };
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                    Ok(
+                        res
+                            .status(StatusCode::NOT_FOUND)
+                            .header(header::CONTENT_TYPE, "application/json")
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                            .unwrap() 
+                    )
+                }
+            },
+            Err(e) => {
+                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                    message: &e, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                    status: 500,
+                };
+                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                Ok(
+                    res
+                        .status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .header(header::CONTENT_TYPE, "application/json")
+                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                        .unwrap() 
+                )
+            },
+        }
     }).await
-
-
 
 }

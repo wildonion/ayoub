@@ -69,49 +69,31 @@ pub async fn player_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                         let mut all_expired_events = schemas::event::AvailableEvents{
                                             events: vec![],
                                         };
-                                        let mut all_player_events = schemas::event::PlayerExpiredEvents{
-                                            events: vec![],
-                                        };
                                         match events.find(filter, None).await{
                                             Ok(mut cursor) => {
                                                 while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
                                                     all_expired_events.events.push(event);
                                                 }
-                                                // let player_events = all_expired_events.events
-                                                //                     .iter()
-                                                //                     .map(|event| {
-                                                //                         for p in event.players.unwrap(){
-                                                //                             if p._id == _id{
-                                                //                                 event;
-                                                //                             }
-                                                //                         }
-                                                //                     }).collect::<&schemas::event::EventInfo>();
-
-
-                                                // let response_body = ctx::app::Response::<schemas::event::AvailableEvents>{
-                                                //     message: FETCHED,
-                                                //     data: Some(player_events),
-                                                //     status: 200,
-                                                // };
-                                                // let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                // Ok(
-                                                //     res
-                                                //         .status(StatusCode::OK) //-- not found route or method not allowed
-                                                //         .header(header::CONTENT_TYPE, "application/json")
-                                                //         .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                //         .unwrap()
-                                                // )
-
-                                                
-                                                let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                    message: NOT_IMPLEMENTED,
-                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                    status: 501,
+                                                let player_events = 
+                                                                all_expired_events.events
+                                                                        .into_iter()
+                                                                        .map(|event| {
+                                                                            for p in event.clone().players.unwrap(){
+                                                                                if p._id == _id{
+                                                                                    break //-- break here since we found our player 
+                                                                                }
+                                                                            }
+                                                                            event //-- this is the event which contains our player info
+                                                                        }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector of ReservePlayerInfoResponse struct
+                                                let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                                                    message: FETCHED,
+                                                    data: Some(player_events),
+                                                    status: 200,
                                                 };
                                                 let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
-                                                        .status(StatusCode::NOT_IMPLEMENTED) //-- not found route or method not allowed
+                                                        .status(StatusCode::OK) //-- not found route or method not allowed
                                                         .header(header::CONTENT_TYPE, "application/json")
                                                         .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
                                                         .unwrap()

@@ -18,4 +18,4 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * ayoub nft APIs for deployed contracts' methods
 
-* DB schema 
+* VPS config 
