@@ -24,13 +24,13 @@
 
 * 🎲 Run `game` service: ```./ayoub game 8337```
 
-## Run with pm2 
-
-> ```sudo pm2 start ayoub.sh --name ayoub```
-
 > coiniXerr: ```cargo build --bin coiniXerr --release```
 
 > tests: ```cargo build --bin tests --release```
+
+# 🗄️ Run All in Production
+
+> ```./ayoub.sh```
 
 # 💰 coiniXerr 
 

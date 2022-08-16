@@ -41,7 +41,11 @@
 # ☢️ To run the `nft` server: `./ayoub nft 7438`
 
 
-./ayoub auth 8335
-./ayoub event 8336
-./ayoub game 8337
+sudo mv target/release/ayoub /home/wildonion/ayoub/ayoub
+./ayoub auth 8335 && ./ayoub event 8336 && ./ayoub game 8337
 
+
+
+# -----------------------------------
+# a PaaS cli for coiniXerr framework
+# -----------------------------------
