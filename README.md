@@ -2,7 +2,7 @@
 
 # ☢️ Run in Dev Mode
 
-> ```sudo chown -R root:root /home/wildonion/ayoub && sudo chmod 777 -R /home/wildonion/ayoub```
+> ```sudo chown -R root:root /home/$USER/ayoub && sudo chmod 777 -R /home/$USER/ayoub```
 
 > ayoub PaaS: ```cargo run --bin ayoub``` or ```cargo run --bin ayoub -- <SERVICE_NAME> <SERVICE_PORT>``` like ```cargo run --bin ayoub -- auth 37465``` 
 
@@ -28,9 +28,9 @@
 
 > tests: ```cargo build --bin tests --release```
 
-# 🗄️ Run All in Production
+# 🗄️Run All in Production
 
-> ```./ayoub.sh```
+> ```./ayoub.sh --help``` to see all available commands
 
 # 💰 coiniXerr 
 

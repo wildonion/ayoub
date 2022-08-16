@@ -1312,17 +1312,17 @@
 	"variable": [
 		{
 			"key": "auth",
-			"value": "localhost:8335",
+			"value": "148.251.26.25:8335",
 			"type": "string"
 		},
 		{
 			"key": "event",
-			"value": "localhost:8336",
+			"value": "148.251.26.25:8336",
 			"type": "string"
 		},
 		{
 			"key": "game",
-			"value": "localhost:8337",
+			"value": "148.251.26.25:8337",
 			"type": "string"
 		}
 	]

@@ -16,8 +16,8 @@
 # ./ayoub.sh list --api --controller <CONTROLLER_NAME> -> list of all available apis related to a controller (game, auth, event and nft)
 
 
-# sudo chmod 777 -R /home/wildonion/ayoub
-# sudo chown -R root:root /home/wildonion/ayoub
+# sudo chmod 777 -R /home/$USER/ayoub
+# sudo chown -R root:root /home/$USER/ayoub
 # cargo build --bin ayoub --release
 
 
@@ -41,8 +41,13 @@
 # ☢️ To run the `nft` server: `./ayoub nft 7438`
 
 
-sudo mv target/release/ayoub /home/wildonion/ayoub/ayoub
-./ayoub auth 8335 && ./ayoub event 8336 && ./ayoub game 8337
+sudo cp target/release/ayoub /home/$USER/ayoub/auth.ayoub/ayoub-auth
+sudo cp target/release/ayoub /home/$USER/ayoub/event.ayoub/ayoub-event
+sudo cp target/release/ayoub /home/$USER/ayoub/game.ayoub/ayoub-game
+sudo pm2 auth.ayoub/ayoub --name ayoub-auth -- auth 8335
+sudo pm2 event.ayoub/ayoub --name ayoub-event -- auth 8336
+sudo pm2 game.ayoub/ayoub --name ayoub-game -- auth 8337
+
 
 
 
