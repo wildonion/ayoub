@@ -66,30 +66,52 @@ pub async fn player_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                         
                                         let filter = doc! { "is_expired": true }; //-- filtering all expired events
                                         let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-                                        let mut player_events = schemas::event::AvailableEvents{
+                                        let mut all_expired_events = schemas::event::AvailableEvents{
                                             events: vec![],
                                         };
-
+                                        let mut all_player_events = schemas::event::PlayerExpiredEvents{
+                                            events: vec![],
+                                        };
                                         match events.find(filter, None).await{
                                             Ok(mut cursor) => {
                                                 while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
-                                                    let cloned_event = event.clone();
-                                                    let players = cloned_event.players.unwrap();
-                                                    for p in players{
-                                                        if p._id == _id{
-                                                            player_events.events.push(cloned_event);
-                                                        }
-                                                    }
+                                                    all_expired_events.events.push(event);
                                                 }
-                                                let response_body = ctx::app::Response::<schemas::event::AvailableEvents>{
-                                                    message: FETCHED,
-                                                    data: Some(player_events),
-                                                    status: 200,
+                                                // let player_events = all_expired_events.events
+                                                //                     .iter()
+                                                //                     .map(|event| {
+                                                //                         for p in event.players.unwrap(){
+                                                //                             if p._id == _id{
+                                                //                                 event;
+                                                //                             }
+                                                //                         }
+                                                //                     }).collect::<&schemas::event::EventInfo>();
+
+
+                                                // let response_body = ctx::app::Response::<schemas::event::AvailableEvents>{
+                                                //     message: FETCHED,
+                                                //     data: Some(player_events),
+                                                //     status: 200,
+                                                // };
+                                                // let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                // Ok(
+                                                //     res
+                                                //         .status(StatusCode::OK) //-- not found route or method not allowed
+                                                //         .header(header::CONTENT_TYPE, "application/json")
+                                                //         .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                //         .unwrap()
+                                                // )
+
+                                                
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                    message: NOT_IMPLEMENTED,
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    status: 501,
                                                 };
                                                 let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                 Ok(
                                                     res
-                                                        .status(StatusCode::OK) //-- not found route or method not allowed
+                                                        .status(StatusCode::NOT_IMPLEMENTED) //-- not found route or method not allowed
                                                         .header(header::CONTENT_TYPE, "application/json")
                                                         .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
                                                         .unwrap()
