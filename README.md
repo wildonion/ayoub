@@ -18,6 +18,12 @@
 
 > ayoub PaaS: ```cargo build --bin ayoub --release```
 
+* 🆔 Run `auth` service: ```./ayoub auth 8335```
+
+* 🗓️ Run `event` service: ```./ayoub event 8336```
+
+* 🎲 Run `game` service: ```./ayoub game 8337```
+
 > coiniXerr: ```cargo build --bin coiniXerr --release```
 
 > tests: ```cargo build --bin tests --release```
