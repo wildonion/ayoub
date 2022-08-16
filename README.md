@@ -24,6 +24,8 @@
 
 * 🎲 Run `game` service: ```./ayoub game 8337```
 
+> To Run All ayoub PaaS services: ```sudo bash ayoub.sh```
+
 > coiniXerr: ```cargo build --bin coiniXerr --release```
 
 > tests: ```cargo build --bin tests --release```
