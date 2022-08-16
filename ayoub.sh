@@ -41,7 +41,7 @@
 # ☢️ To run the `nft` server: `./ayoub nft 7438`
 
 
-./conse auth 8335
-./conse event 8336
-./conse game 8337
+./ayoub auth 8335
+./ayoub event 8336
+./ayoub game 8337
 
