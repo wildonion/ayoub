@@ -30,7 +30,7 @@ use crate::controllers::event::{
                                 _404::main as not_found, 
                                 phase::insert as insert_phase,
                                 reserve::{process_payment_request, mock_reservation},
-                                reveal::{role},
+                                // reveal::{role},
                                 simd::main as simd_ops
                             };
 
@@ -87,10 +87,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/reserve".to_string();
             mock_reservation(app_storage, app).await
         },
-        (&Method::POST, "/event/reveal/roles")      => {
-            app.name = "/event/reveal/roles".to_string();
-            role(app_storage, app).await
-        },
+        // (&Method::POST, "/event/reveal/roles")      => {
+        //     app.name = "/event/reveal/roles".to_string();
+        //     role(app_storage, app).await
+        // },
         _                                       => not_found().await,
     }
 
