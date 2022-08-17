@@ -253,7 +253,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     // -------------------------------- set dev access level for passed in username in cli
     //
     // ---------------------------------------------------------------------------------------------
-    if username_cli != &"".to_string(){
+    if username_cli != &"".to_string() && access_level_cli != &"".to_string(){
         match utils::set_user_access(username_cli.to_owned(), access_level_cli.parse::<u8>().unwrap(), db.clone()).await{
             Ok(user_info) => {
                 info!("access level for user {} has been updated successfully", username_cli);
