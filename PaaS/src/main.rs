@@ -138,18 +138,18 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     // -------------------------------- cli args setup
     //
     // ------------------------------------------------------------------
-    let username_cli: &String;
-    let access_level_cli: &String;
+    let username_cli = &String::new();
+    let access_level_cli = &String::new();
     let args: Vec<String> = env::args().collect();
     let mut service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args to service_name we'll lose the ownership of args (cause its ownership will be belonged to service_name) and args lifetime will be dropped from the ram 
     let service_port = &args[2];
-    if &args[1] == &"".to_string() && &args[2] == &"".to_string(){
-        username_cli = &args[1]; //-- the username that we want to set his/her access level to dev
-        access_level_cli = &args[1]; //-- the access level that must be used to update the user access_level
-    } else{
-        username_cli = &args[3]; //-- the username that we want to set his/her access level to dev
-        access_level_cli = &args[4]; //-- the access level that must be used to update the user access_level   
-    }
+    // if &args[1] == &"".to_string() && &args[2] == &"".to_string(){
+    //     username_cli = &args[1]; //-- the username that we want to set his/her access level to dev
+    //     access_level_cli = &args[1]; //-- the access level that must be used to update the user access_level
+    // } else{
+    //     username_cli = &args[3]; //-- the username that we want to set his/her access level to dev
+    //     access_level_cli = &args[4]; //-- the access level that must be used to update the user access_level   
+    // }
     
     
     
