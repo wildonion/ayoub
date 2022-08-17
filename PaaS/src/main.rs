@@ -144,11 +144,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let mut service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args to service_name we'll lose the ownership of args (cause its ownership will be belonged to service_name) and args lifetime will be dropped from the ram 
     let service_port = &args[2];
     if &args[1] == &"".to_string() && &args[2] == &"".to_string(){
-        let username_cli = &args[1]; //-- the username that we want to set his/her access level to dev
-        let access_level_cli = &args[1]; //-- the access level that must be used to update the user access_level
+        username_cli = &args[1]; //-- the username that we want to set his/her access level to dev
+        access_level_cli = &args[1]; //-- the access level that must be used to update the user access_level
     } else{
-        let username_cli = &args[3]; //-- the username that we want to set his/her access level to dev
-        let access_level_cli = &args[4]; //-- the access level that must be used to update the user access_level   
+        username_cli = &args[3]; //-- the username that we want to set his/her access level to dev
+        access_level_cli = &args[4]; //-- the access level that must be used to update the user access_level   
     }
     
     
@@ -254,7 +254,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     //
     // ---------------------------------------------------------------------------------------------
     if username_cli != &"".to_string(){
-        match utils::set_user_access(username_cli.to_owned(), access_level_cli.to_owned(), db.clone()).await{
+        match utils::set_user_access(username_cli.to_owned(), access_level_cli.parse::<u8>().unwrap(), db.clone()).await{
             Ok(user_info) => {
                 info!("access level for user {} has been updated successfully", username_cli);
                 info!("updated user {:?}", user_info);
