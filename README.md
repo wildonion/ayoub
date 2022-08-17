@@ -18,6 +18,8 @@
 
 > ayoub PaaS: ```cargo build --bin ayoub --release```
 
+* To update a user access level to dev first signup the user using `/auth/signup` API then run the binary like so: `./ayoub wildonion 0`
+
 * 🆔 Run `auth` service: ```./ayoub auth 8335```
 
 * 🗓️ Run `event` service: ```./ayoub event 8336```

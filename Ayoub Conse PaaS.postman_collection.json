@@ -59,13 +59,52 @@
 					"response": []
 				},
 				{
+					"name": "Register New God",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/signup/new-god",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"signup",
+								"new-god"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
 					"name": "Login",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@123\"\r\n}",
+							"raw": "{\r\n    \"username\": \"wildonion2\",\r\n    \"pwd\": \"wildonion@123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

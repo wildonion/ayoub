@@ -11,6 +11,7 @@ use crate::schemas;
 use crate::contexts as ctx;
 use crate::constants::*;
 use chrono::Utc;
+use futures::StreamExt;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer and is used for manipulating coming network bytes from the socket
 use hyper::{header, StatusCode, Body, Response};
@@ -65,80 +66,90 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                         
                                         ////////////////////////////////// DB Ops
 
+                                        let player_roles_info = db.unwrap().database("ayoub").collection::<schemas::game::InsertPlayerRoleAbilityRequest>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to insert the current_ability field - we want to deserialize all player role ability infos into the InsertPlayerRoleAbilityRequest struct
+                                        let roles = db.unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
                                         let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                                         let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                         let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                         match events.find_one(doc! { "_id": event_id, "is_expired": false }, None).await.unwrap(){ //-- getting a none expired event
                                             Some(event_doc) => {
 
-                                                for p in event_doc.players{
-                                                    let random_role_id = "mongodb-object-id"; // TODO
-                                                    let random_side_id = "mongodb-object-id"; // TODO
-                                                    let serialized_random_side_id = ObjectId::parse_str(random_side_id).unwrap(); //-- generating mongodb object id from the id string
-                                                    let serialized_random_role_id = ObjectId::parse_str(random_role_id).unwrap(); //-- generating mongodb object id from the id string
-                                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                                    match users.find_one_and_update(doc! { "_id": p._id }, doc!{"$set": {"role_id": serialized_random_role_id, "side_id": serialized_random_side_id, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on _id
-                                                        Some(user_doc) => { //-- we updated the users collection successfully now we have to update each player inside the current event 
-                                                            
-
-                                                            p.role_id = Some(serialized_random_role_id);
-                                                            p.side_id = Some(serialized_random_side_id);
-                                                            
-
-
-                                                            // TODO - update the players field inside the event_doc with updated_players
-                                                            // TODO - insert new player role ability for the reserved event into player_role_ability_info collection
-                                                            // ...
-
-
-                                                            let response_body = ctx::app::Response::<schemas::event::EventInfo>{
-                                                                message: FETCHED,
-                                                                data: Some(event_doc),
-                                                                status: 200,
-                                                            };
-                                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                            Ok(
-                                                                res
-                                                                    .status(StatusCode::OK)
-                                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                                    .unwrap()
-                                                            )
-                                                            
-
-
+                                                // ------------------------------------------
+                                                for mut p in event_doc.clone().players.unwrap(){ //-- p must be mutable since we want to mutate role_id and side_id fields - we must clone the event_doc in each iteration in order not to lose its ownership during the iteration process
+                                                    
+                                                    let random_role_id: ObjectId;
+                                                    let random_side_id: ObjectId;
+                                                    let mut unique_random_roles: Vec<schemas::game::RoleInfo> = Vec::new();
+                                                    
+                                                    // ------------------------------ FETCHING RANDOM DOCUMENT FROM ROLES COLLECTION ------------------------------
+                                                    // 
+                                                    // ------------------------------------------------------------------------------------------------------------
+                                                    // TODO - select unique role_doc each time
+                                                    // ...
+                                                    let random_record_setup = doc!{"$sample": {"size": 1}};
+                                                    let pipeline = vec![random_record_setup];
+                                                    let random_role: Vec<schemas::game::RoleInfo> = match roles.aggregate(pipeline, None).await{
+                                                        Ok(mut cursor) => {
+                                                            while let Some(random_doc) = cursor.try_next().await.unwrap(){
+                                                                let random_role_info = bson::from_document::<schemas::game::RoleInfo>(random_doc).unwrap();
+                                                                if !unique_random_roles.contains(&random_role_info){
+                                                                    unique_random_roles.push(random_role_info)
+                                                                }
+                                                            }
+                                                            random_role_infos
                                                         },
-                                                        None => { //-- means we didn't find any document related to this user_id and simply we return the unmatched player info
-                                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                                message: NOT_FOUND_PLAYER, //-- document not found in database and the user must do a signup
-                                                                status: 404,
+                                                        Err(e) => vec![],
+                                                    };
+
+                                                    // ------------------------------ UPDATING PLAYER ROLE ID ------------------------------
+                                                    // 
+                                                    // -------------------------------------------------------------------------------------
+                                                    random_role_id = random_role.iter().take(1).next().unwrap()._id.unwrap();
+                                                    random_side_id = random_role.iter().take(1).next().unwrap().side_id.unwrap();
+                                                    p.role_id = Some(random_role_id); //-- updating the role_id field of a player inside the players field of an event 
+                                                    p.side_id = Some(random_side_id); //-- updating the side_id field of a player inside the players field of an event
+                                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                                    
+                                                    // ------------------------------ UPDATING USERS COLLECTION ------------------------------
+                                                    // 
+                                                    // ---------------------------------------------------------------------------------------
+                                                    match users.find_one_and_update(doc! { "_id": p._id }, doc!{"$set": {"role_id": random_role_id, "side_id": random_side_id, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on _id
+                                                        Some(user_doc) => { //-- we updated the users collection successfully now we have to update each player inside the current event  
+                                                            let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                                            let player_role_ability_info = schemas::game::InsertPlayerRoleAbilityRequest{
+                                                                user_id: user_doc._id.unwrap().to_string(), //-- converting the Option<ObjectId> to ObjectId then into String
+                                                                role_id: random_role_id.to_string(), //-- converting the ObjectId into String
+                                                                even_id: event_doc._id.unwrap().to_string(), //-- converting the Option<ObjectId> to ObjectId then into String
+                                                                current_ability: None, //-- initialized None on inserting new doc
+                                                                created_at: Some(now),
+                                                                updated_at: Some(now),
                                                             };
-                                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                            Ok(
-                                                                res
-                                                                    .status(StatusCode::NOT_FOUND)
-                                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                                    .unwrap() 
-                                                            )
-                                                        }, 
-                                                }
-
+        
+                                                            // ------------------------------ INSERT PLAYER ROLE ABILITY INFO ------------------------------
+                                                            // ---------------------------------------------------------------------------------------------
+                                                            match player_roles_info.insert_one(player_role_ability_info, None).await{
+                                                                Ok(insert_result) => {}, // TODO
+                                                                Err(e) => {}, // TODO
+                                                            }        
+                                                        },
+                                                        None => {}, //-- TODO - means we didn't find any document related to this user_id and simply we return the unmatched player info
+                                                    }                                                
+                                                } // ------------------------------------------ end of iterating over event players
+                                            
                                                 
-
-
-
-
-
-
-
-
-
-
-                                                let response_body = ctx::app::Response::<schemas::event::EventInfo>{
-                                                    message: FETCHED,
-                                                    data: Some(event_doc),
+                                                
+                                                // ------------------------------ UPDATING PLAYERS FIELD IN EVENTS COLLECTION ------------------------------
+                                                // 
+                                                // ---------------------------------------------------------------------------------------------------------
+                                                let updated_player_roles = event_doc.players; //-- getting the updated players
+                                                let serialized_updated_player_roles = bson::to_bson(&updated_player_roles).unwrap(); //-- serializing the players field into the BSON to insert into the events collection
+                                                let updated_event = match events.find_one_and_update(doc!{"_id": event_doc._id}, doc!{"$set": {"players": serialized_updated_player_roles}}, None).await.unwrap(){ //-- finding event based on event id
+                                                    Some(event_doc) => Some(event_doc), //-- deserializing BSON (the record type fetched from mongodb) into the EventInfo struct
+                                                    None => None, //-- means we didn't find any document related to this title and we have to tell the user to create a new event                                                        
+                                                };
+                                                let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
+                                                    data: Some(updated_event.unwrap()),
+                                                    message: UPDATED, //-- collection found in ayoub database
                                                     status: 200,
                                                 };
                                                 let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
@@ -146,8 +157,8 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
-                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                        .unwrap()
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
                                                 )
                                             },
                                             None => { //-- means we didn't find any document related to this user_id and we have to tell the user do a signup

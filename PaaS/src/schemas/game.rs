@@ -49,6 +49,7 @@ pub struct AddRoleRequest{ //-- we don't need _id field in this struct cause it'
     pub rate: u8, //-- role rate
     pub desc: String, //-- role description
     pub abilities: u8, //-- number of total abilities for a role, the default is 0
+    pub side_id: String, //-- this field can be None at initialization which is the moment that a participant reserve an event
     pub is_disabled: Option<bool>, //-- whether this role has disabled or not
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
@@ -69,6 +70,7 @@ pub struct RoleInfo{
     pub rate: u8,
     pub desc: String,
     pub abilities: u8,
+    pub side_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
     pub is_disabled: Option<bool>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -291,7 +293,7 @@ pub struct UpdatePlayerRoleAbilityRequest{
     pub user_id: String, 
     pub role_id: String,
     pub event_id: String,
-    pub current_ability: u8,
+    pub current_ability: Option<u8>,
 }
 
 
@@ -307,7 +309,7 @@ pub struct InsertPlayerRoleAbilityRequest{
     pub user_id: String,
     pub role_id: String,
     pub even_id: String,
-    pub current_ability: u8,
+    pub current_ability: Option<u8>, //-- on inserting a new record this field will be initialized empty and will be updated during the game by the God
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
 }
@@ -326,7 +328,7 @@ pub struct PlayerRoleAbilityInfo{
     pub user_id: String, //-- string type of ObjectId for user id 
     pub role_id: String, //-- string type of ObjectId for role id
     pub event_id: String, //-- string type of ObjectId for event id
-    pub current_ability: u8, //-- number of current abilities for this player
+    pub current_ability: Option<u8>, //-- number of current abilities for this player
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
 }
@@ -422,6 +424,6 @@ pub struct ChainInfo{
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct RoleAbilityInfo{
   pub role_id: String,
-  pub current_ability: u8,
+  pub current_ability: Option<u8>,
   pub updated_at: Option<i64>,
 }

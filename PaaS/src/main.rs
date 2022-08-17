@@ -137,10 +137,35 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
     // -------------------------------- cli args setup
     //
-    // ---------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    let username_cli: &String;
+    let access_level_cli: &String;
     let args: Vec<String> = env::args().collect();
     let mut service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args to service_name we'll lose the ownership of args (cause its ownership will be belonged to service_name) and args lifetime will be dropped from the ram 
     let service_port = &args[2];
+    if &args[1] == &"".to_string() && &args[2] == &"".to_string(){
+        let username_cli = &args[1]; //-- the username that we want to set his/her access level to dev
+        let access_level_cli = &args[1]; //-- the access level that must be used to update the user access_level
+    } else{
+        let username_cli = &args[3]; //-- the username that we want to set his/her access level to dev
+        let access_level_cli = &args[4]; //-- the access level that must be used to update the user access_level   
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // -------------------------------- service setup
+    //
+    // ------------------------------------------------------------
     let mut server_addr: Option<SocketAddr> = if service_name != &"".to_string() && service_port != &"".to_string(){ //-- if none of the argument was empty we set the server_addr to the one that we've got from the cli input otherwise we set it to None to fill it later using the current_service as the service_name 
         Some(format!("{}:{}", host, service_port).as_str().parse::<SocketAddr>().unwrap()) //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
     } else{
@@ -214,6 +239,36 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
     
+
+
+
+
+
+
+
+
+
+
+
+    // -------------------------------- set dev access level for passed in username in cli
+    //
+    // ---------------------------------------------------------------------------------------------
+    if username_cli != &"".to_string(){
+        match utils::set_user_access(username_cli.to_owned(), access_level_cli.to_owned(), db.clone()).await{
+            Ok(user_info) => {
+                info!("access level for user {} has been updated successfully", username_cli);
+                info!("updated user {:?}", user_info);
+            },
+            Err(empty_doc) => {
+                info!("no user found for updating access level");
+            },
+        }
+    } else{
+        info!("no username has passed in to the cli; pass updating access level process");
+    }
+
+
+
 
 
 

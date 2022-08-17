@@ -25,7 +25,7 @@ use crate::controllers::auth::{
                                home::main as home, 
                                check_token::main as check_token, 
                                login::main as login, 
-                               signup::main as signup, 
+                               signup::{main as signup, register_god}, 
                                _404::main as not_found, 
                                otp_request::main as otp_request, 
                                check_otp::main as check_otp,
@@ -60,6 +60,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/auth/signup")     => {
             app.name = "/auth/signup".to_string();
             signup(app_storage, app).await
+        },
+        (&Method::POST, "/auth/signup/new-god")     => {
+            app.name = "/auth/signup/new-god".to_string();
+            register_god(app_storage, app).await
         },
         (&Method::POST, "/auth/check-token")    => {
             app.name = "/auth/check-token".to_string();

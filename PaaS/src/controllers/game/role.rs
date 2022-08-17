@@ -62,12 +62,13 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
                                         let rate = role_info.rate;
                                         let desc = role_info.clone().desc; //-- cloning to prevent from moving
                                         let abilities = role_info.abilities;
+                                        let side_id = role_info.clone().side_id; //-- cloning to prevent the side_id which is a string from moving since by assigning the side_id into the side_id var the whole role_info instance will be removed 
 
 
 
                                         ////////////////////////////////// DB Ops
                                         
-                                        let roles = db.unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("sides");
+                                        let roles = db.unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
                                         match roles.find_one(doc!{"name": role_info.clone().name}, None).await.unwrap(){
                                             Some(role_doc) => { 
                                                 let response_body = ctx::app::Response::<schemas::game::RoleInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is RoleInfo struct
@@ -92,6 +93,7 @@ pub async fn add(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hyper
                                                     rate,
                                                     desc,
                                                     abilities,
+                                                    side_id, //-- side_id here is a string
                                                     is_disabled: Some(false),
                                                     created_at: Some(now),
                                                     updated_at: Some(now),
