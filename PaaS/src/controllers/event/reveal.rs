@@ -84,19 +84,17 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                                     // ------------------------------ FETCHING RANDOM DOCUMENT FROM ROLES COLLECTION ------------------------------
                                                     // 
                                                     // ------------------------------------------------------------------------------------------------------------
-                                                    // TODO - select unique role_doc each time
-                                                    // ...
                                                     let random_record_setup = doc!{"$sample": {"size": 1}};
                                                     let pipeline = vec![random_record_setup];
                                                     let random_role: Vec<schemas::game::RoleInfo> = match roles.aggregate(pipeline, None).await{
                                                         Ok(mut cursor) => {
                                                             while let Some(random_doc) = cursor.try_next().await.unwrap(){
                                                                 let random_role_info = bson::from_document::<schemas::game::RoleInfo>(random_doc).unwrap();
-                                                                if !unique_random_roles.contains(&random_role_info){
+                                                                if !unique_random_roles.contains(&random_role_info){ //-- the fethced role must be unique since every player must have a unique role :))
                                                                     unique_random_roles.push(random_role_info)
                                                                 }
                                                             }
-                                                            random_role_infos
+                                                            unique_random_roles
                                                         },
                                                         Err(e) => vec![],
                                                     };
@@ -128,8 +126,8 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                                             // ------------------------------ INSERT PLAYER ROLE ABILITY INFO ------------------------------
                                                             // ---------------------------------------------------------------------------------------------
                                                             match player_roles_info.insert_one(player_role_ability_info, None).await{
-                                                                Ok(insert_result) => {}, // TODO
-                                                                Err(e) => {}, // TODO
+                                                                Ok(insert_result) => { info!("new player role ability insert successfully at time {} with _id {:?}", chrono::Local::now().naive_local(), insert_result); },
+                                                                Err(e) => { info!("error in inserting new player role ability at time {} - {}", chrono::Local::now().naive_local(), e); },
                                                             }        
                                                         },
                                                         None => {}, //-- TODO - means we didn't find any document related to this user_id and simply we return the unmatched player info
@@ -157,6 +155,7 @@ pub async fn role(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<hype
                                                     res
                                                         .status(StatusCode::OK)
                                                         .header(header::CONTENT_TYPE, "application/json")
+                                                        .header("Access-Control-Allow-Origin", "*")
                                                         .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                         .unwrap() 
                                                 )

@@ -63,7 +63,7 @@ pub struct AddRoleRequest{ //-- we don't need _id field in this struct cause it'
 |
 |
 */
-#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub struct RoleInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub name: String,
