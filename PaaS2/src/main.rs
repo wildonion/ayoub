@@ -43,6 +43,7 @@ Coded by
 
 
 use constants::MainResult;
+use routerify::RouterService;
 use std::{net::SocketAddr, sync::Arc, env};
 use chrono::Local;
 use dotenv::dotenv;
@@ -64,7 +65,6 @@ mod contexts;
 mod schemas;
 mod controllers;
 mod routers;
-mod services;
 
 
 
@@ -274,7 +274,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
-
+    
 
        
     
@@ -287,26 +287,12 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     // --------------------------------------------------------------------------------------------------------
     if service_name.as_str() == "auth"{
         info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let auth_serivce = services::auth::AuthSvc::new(db.clone()).await; //-- making a new auth server by passing the generated storage
+        let auth_router = routers::auth::register().await;
+        let auth_serivce = RouterService::new(auth_router).unwrap(); //-- making a new auth server by passing the generated storage
         if server_addr == None{
             server_addr = Some(auth_server_addr);
         }
-        let mut auth_server = Server::bind(&server_addr.unwrap()).serve(auth_serivce.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the auth_server as mutable cause we want to take a mutable raw pointer ot it
-        // ------------------------------------------------
-        //     BUILDING RUNTIME OBJECT FROM AUTH SERVICE
-        // ------------------------------------------------
-        let mut raw_pointer_to_server = &mut auth_server as *mut Server<AddrIncoming, services::auth::AuthSvc>; //-- taking a mutable raw pointer to the auth_server to cast it to usize later
-        let runtime = Some(
-            ctx::rafael::env::Runtime::<services::auth::AuthSvc>{ //-- building runtime instance for the auth server 
-                current_service: Some(auth_serivce), //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
-                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
-                id: Uuid::new_v4(),
-                error: None,
-                node_addr: Some(auth_server.local_addr()), //-- local address of this server which has been bound to
-                last_crash: None,
-                first_init: Some(Local::now().timestamp()),
-            }
-        );
+        let mut auth_server = Server::bind(&server_addr.unwrap()).serve(auth_serivce);
         // ------------------------------------------------
         // ------------------------------------------------
         let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
@@ -318,13 +304,8 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
-        // -----------------------------------------------------
-        //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
-        // -----------------------------------------------------
-        let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); //-- run the runtime app in serverless mode  
-
-        // 
+        
+        //
         // ...
         //
 
@@ -332,26 +313,12 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
     } else if service_name.as_str() == "event"{
         info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let event_service = services::event::EventSvc::new(db.clone()).await;
+        let event_router = routers::event::register().await;
+        let event_serivce = RouterService::new(event_router).unwrap(); //-- making a new auth server by passing the generated storage
         if server_addr == None{
             server_addr = Some(auth_server_addr);
         }
-        let mut event_server = Server::bind(&server_addr.unwrap()).serve(event_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the event_server as mutable cause we want to take a mutable raw pointer ot it
-        // ------------------------------------------------
-        //    BUILDING RUNTIME OBJECT FROM EVENT SERVICE
-        // ------------------------------------------------
-        let mut raw_pointer_to_server = &mut event_server as *mut Server<AddrIncoming, services::event::EventSvc>; //-- taking a mutable raw pointer to the event_server to cast it to usize later
-        let runtime = Some( //-- since the first param of the run() method of the Serverless trait defined as mutable the runtime object must be defined as mutable also
-            ctx::rafael::env::Runtime::<services::event::EventSvc>{ //-- building runtime instance for the event server
-                current_service: Some(event_service), //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
-                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
-                id: Uuid::new_v4(),
-                error: None,
-                node_addr: Some(event_server.local_addr()), //-- local address of this server which has been bound to
-                last_crash: None,
-                first_init: Some(Local::now().timestamp()),
-            }
-        );
+        let mut event_server = Server::bind(&server_addr.unwrap()).serve(event_serivce);
         // ------------------------------------------------
         // ------------------------------------------------
         let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
@@ -362,12 +329,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         // TODO - call add_client() method to add an address into the clients vector
         // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
-        // sender.send(1); //-- freez feature
-        // -----------------------------------------------------
-        //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
-        // -----------------------------------------------------
-        let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); //-- run the runtime app in serverless mode  
+        // sender.send(1); //-- freez feature 
 
         // 
         // ...
@@ -376,26 +338,12 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         Ok(())
     } else if service_name.as_str() == "game"{
         info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let game_service = services::game::PlayerSvc::new(db.clone()).await;
+        let game_router = routers::game::register().await;
+        let game_serivce = RouterService::new(game_router).unwrap(); //-- making a new auth server by passing the generated storage
         if server_addr == None{
             server_addr = Some(auth_server_addr);
         }
-        let mut game_server = Server::bind(&server_addr.unwrap()).serve(game_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the game_server as mutable cause we want to take a mutable raw pointer ot it
-        // ------------------------------------------------
-        //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
-        // ------------------------------------------------
-        let mut raw_pointer_to_server = &mut game_server as *mut Server<AddrIncoming, services::game::PlayerSvc>; //-- taking a mutable raw pointer to the game_server to cast it to usize later
-        let runtime = Some( //-- since the first param of the run() method of the Serverless trait defined as mutable the runtime object must be defined as mutable also
-            ctx::rafael::env::Runtime::<services::game::PlayerSvc>{ //-- building runtime instance for the game server
-                current_service: Some(game_service), //-- later we can bind this service to a an address to run the its server - by this pattern service actors can communicate with each other before running their servers 
-                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
-                id: Uuid::new_v4(),
-                error: None,
-                node_addr: Some(game_server.local_addr()), //-- local address of this server which has been bound to
-                last_crash: None,
-                first_init: Some(Local::now().timestamp()),
-            }
-        );
+        let mut game_server = Server::bind(&server_addr.unwrap()).serve(game_serivce);
         // ------------------------------------------------
         // ------------------------------------------------
         let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
@@ -407,61 +355,10 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         // ...
         sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
         // sender.send(1); //-- freez feature
-        // -----------------------------------------------------
-        //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
-        // -----------------------------------------------------
-        let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); //-- run the runtime app in serverless mode  
 
         // 
         // ...
         //
-
-        Ok(())
-    } else if service_name.as_str() == "nft"{
-        info!("running nft server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let nft_service = services::nft::NftSvc::new(db.clone()).await;
-        if server_addr == None{
-            server_addr = Some(auth_server_addr);
-        }
-        let mut nft_server = Server::bind(&server_addr.unwrap()).serve(nft_service.clone()); //-- since Copy trait is not implemented we must clone the auth_service to prevent the type from moving - we have to define the nft_server as mutable cause we want to take a mutable raw pointer ot it
-        // ------------------------------------------------
-        //    BUILDING RUNTIME OBJECT FROM GAME SERVICE
-        // ------------------------------------------------
-        let mut raw_pointer_to_server = &mut nft_server as *mut Server<AddrIncoming, services::nft::NftSvc>; //-- taking a mutable raw pointer to the nft_server to cast it to usize later
-        let runtime = Some( //-- since the first param of the run() method of the Serverless trait defined as mutable the runtime object must be defined as mutable also
-            ctx::rafael::env::Runtime::<services::nft::NftSvc>{ //-- building runtime instance for the nft server
-                current_service: Some(nft_service), //-- building runtime instance for the nft server
-                link_to_server: Some(ctx::rafael::env::LinkToService(raw_pointer_to_server as usize)), //-- creating a link to the auth service by casting its mutable raw pointer to a usize which can be either 64 bits (8 bytes) or 32 bits (4 bytes) based on arch of the system
-                id: Uuid::new_v4(),
-                error: None,
-                node_addr: Some(nft_server.local_addr()), //-- local address of this server which has been bound to
-                last_crash: None,
-                first_init: Some(Local::now().timestamp()),
-            }
-        );
-        // ------------------------------------------------
-        // ------------------------------------------------
-        let game_graceful = nft_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
-        if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
-            error!("game server error {} - {}", e, chrono::Local::now().naive_local());
-        }
-        // TODO - if the number of clients reached too many requests shutdown the server
-        // TODO - call add_client() method to add an address into the clients vector
-        // ...
-        sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
-        // sender.send(1); //-- freez feature
-        // -----------------------------------------------------
-        //   RUNNING SERVERLESS ENGINE OF THE RUNTIME INSTANCE 
-        // -----------------------------------------------------
-        let mut app = runtime.unwrap(); //-- to borrow the instance of the runtime as mutable we must define the app as mutable since the first param of the run() method is &mut self which is a mutable reference or pointer to all runtime instance fields
-        app.run(); //-- run the runtime app in serverless mode  
-
-
-        // 
-        // ...
-        // 
-
 
         Ok(())
     } else{

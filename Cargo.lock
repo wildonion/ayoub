@@ -327,6 +327,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "ayoub2"
+version = "0.1.1"
+dependencies = [
+ "actix",
+ "borsh",
+ "bytes",
+ "chrono",
+ "dotenv",
+ "futures",
+ "futures-util",
+ "hex",
+ "hyper",
+ "jsonwebtoken",
+ "lazy_static",
+ "log",
+ "mongodb",
+ "pretty_env_logger",
+ "rand 0.8.5",
+ "rayon",
+ "routerify",
+ "routerify-cors",
+ "rust-argon2",
+ "serde",
+ "serde_json",
+ "tokio",
+ "uuid 1.1.2",
+]
+
+[[package]]
 name = "base64"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
