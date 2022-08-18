@@ -30,7 +30,7 @@ use crate::controllers::event::{
                                 _404::main as not_found, 
                                 phase::insert as insert_phase,
                                 reserve::{process_payment_request, mock_reservation},
-                                // reveal::{role},
+                                reveal::{role},
                                 simd::main as simd_ops
                             };
 
@@ -42,7 +42,7 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
 
 
 
-    let req = app.req.as_ref().unwrap(); //-- as_ref() method will make a copy by borrowing what's inside the wrapped type, here our wrapped type is Option which as_ref() will convert &Option<T> to Option<&T> 
+    let req = app.req.as_ref().unwrap(); //-- as_ref() method will make a copy by borrowing what's inside the wrapped type, here our wrapped type is Option which as_ref() will convert &Option<T> to Option<&T> so we can haved T on later scopes thus preventing it from moving 
     let app_storage = match storage.as_ref().unwrap().db.as_ref().unwrap().mode{
         ctx::app::Mode::On => storage.as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client>
         ctx::app::Mode::Off => None, //-- no db is available cause it's off
@@ -87,10 +87,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
             app.name = "/event/reserve".to_string();
             mock_reservation(app_storage, app).await
         },
-        // (&Method::POST, "/event/reveal/roles")      => {
-        //     app.name = "/event/reveal/roles".to_string();
-        //     role(app_storage, app).await
-        // },
+        (&Method::POST, "/event/reveal/roles")      => {
+            app.name = "/event/reveal/roles".to_string();
+            role(app_storage, app).await
+        },
         _                                       => not_found().await,
     }
 

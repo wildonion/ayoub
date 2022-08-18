@@ -50,7 +50,7 @@ impl Api{
     //        converts Option<T> to Option<&T> then we can unwrap them to get the borrowed objects.
     // NOTE - don't put & behind self or borrow Api fields cause sharing Api fields between other threads using a shared reference
     //        with & or borrowing the ownership is impossible cause by not implemented trait Clone (a super trait of Copy) 
-    //        for hyper Request and Response structs error.
+    //        for hyper Request and Response structs error (neither we can copy nor clone the api object).
     // NOTE - the body of the `cb` in post and get methods is an async move{} means it'll return a future object
     //        which we can solve it using .await later.
     // NOTE - since we can't put & behind the mut self thus we can't have the instance of the Api in later scopes
