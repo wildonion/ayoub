@@ -9,15 +9,79 @@
 
 
 
+
+pub mod cors{
+
+
+
+
+    use crate::constants::*;
+    use log::{info, error};
+    use hyper::{Method, Body};
+
+
+
+
+
+
+
+
+    pub async fn send_preflight_response(req: hyper::Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
+        let response = hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
+                                            .status(hyper::StatusCode::OK)
+                                            .header("Access-Control-Allow-Origin", "*")
+                                            .header("Access-Control-Allow-Headers", "*")
+                                            .header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+                                            .body(Body::default())
+                                            .unwrap();
+
+        Ok(response) //-- sending back an empty response to the browser to say that the preflight request was ok to get rid of the fucking CORS :)
+    }
+
+
+
+
+    pub async fn is_preflight_request(req: hyper::Request<Body>) -> Result<(bool, hyper::Request<Body>), (bool, hyper::Request<Body>)>{
+        if Method::OPTIONS == req.method(){ //-- append Access-Control-Allow-Origin headers to the request before parsing its body
+            Ok((true, req))
+        } else{
+            Err((false, req))
+        }
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 pub mod auth{
     
     
-    use crate::constants;
+    use crate::constants::*;
     use log::{info, error};
     use hyper::{Method, Body};
     use crate::utils::jwt;
     use jsonwebtoken::TokenData;
     
+
+
+
+
+
 
 
     
@@ -30,7 +94,7 @@ pub mod auth{
         if Method::OPTIONS == *req.method() {
             authenticate_pass = true;
         } else{
-            for ignore_route in constants::IGNORE_ROUTES.iter(){
+            for ignore_route in IGNORE_ROUTES.iter(){
                 if req.uri().path().starts_with(ignore_route){
                     authenticate_pass = true;
                     break;
@@ -53,7 +117,7 @@ pub mod auth{
                         }
                     }
                 } else{
-                    return Err(constants::NOT_FOUND_TOKEN.to_string());
+                    return Err(NOT_FOUND_TOKEN.to_string());
                 }
             }
         }
