@@ -17,7 +17,7 @@ pub mod cors{
 
     use crate::constants::*;
     use log::{info, error};
-    use hyper::{header, Method, Body};
+    use hyper::{header, Method, Body, Request};
 
 
 
