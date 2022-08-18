@@ -41,7 +41,7 @@
 # ☢️ To run the `nft` server: `./ayoub nft 7438`
 
 
-cargo build --bin ayoub --release
+cargo build --bin ayoub2 --release
 
 sudo rm auth.ayoub/ayoub-auth
 sudo rm event.ayoub/ayoub-event
