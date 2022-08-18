@@ -28,7 +28,8 @@ rust-argon2 = "1"
 lazy_static = "1"
 serde = {version = "1", features = ["derive"] }
 chrono = { version = "0.4", features = ["serde"] }
-
+routerify-cors = "3"
+routerify = "3"
 
 
 

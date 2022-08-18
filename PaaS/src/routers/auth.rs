@@ -18,6 +18,8 @@
 
 
 
+use routerify::{Router, RouterService};
+use routerify_cors::enable_cors_all;
 use crate::middlewares;
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
@@ -46,6 +48,26 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         ctx::app::Mode::On => storage.as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client>
         ctx::app::Mode::Off => None, //-- no db is available cause it's off
     };
+
+
+
+    // TODO
+    // -----------
+    // CORS SETUP 
+    // -----------
+    // Router::builder()
+    //     .middleware(enable_cors_all())
+    //     .get("/auth/home", home(app_storage, app))
+    //     .post("/auth/login", login(app_storage, app))
+    //     .post("/auth/signup",signup(app_storage, app))
+    //     .post("/auth/signup/new-god", register_god(app_storage, app))
+    //     .post("/auth/check-token", check_token(app_storage, app))
+    //     .post("/auth/otp-req", otp_request(app_storage, app))
+    //     .post("/auth/check-otp", check_otp(app_storage, app))
+    //     .post("/auth/user/get/all", get_all(app_storage, app))
+    //     .build()
+    //     .unwrap()
+
 
 
 
