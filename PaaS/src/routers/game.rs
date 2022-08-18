@@ -17,6 +17,7 @@
 
 
 
+use crate::middlewares;
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
@@ -129,7 +130,10 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/game/god/update/group/image") => {
             app.name = "/game/god/update/group/".to_string();
             upload_img(app_storage, app).await
-        }
+        },
+        (&Method::OPTIONS, "/")    => {
+            middlewares::cors::send_preflight_response().await
+        },
         _                                 => not_found().await,
     }
 

@@ -17,40 +17,24 @@ pub mod cors{
 
     use crate::constants::*;
     use log::{info, error};
-    use hyper::{Method, Body};
+    use hyper::{header, Method, Body};
 
 
 
 
 
-
-
-
-    pub async fn send_preflight_response(req: hyper::Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
-        let response = hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
-                                            .status(hyper::StatusCode::OK)
-                                            .header("Access-Control-Allow-Origin", "*")
-                                            .header("Access-Control-Allow-Headers", "*")
-                                            .header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-                                            .body(Body::default())
-                                            .unwrap();
-
-        Ok(response) //-- sending back an empty response to the browser to say that the preflight request was ok to get rid of the fucking CORS :)
+    pub async fn send_preflight_response() -> GenericResult<hyper::Response<Body>, hyper::Error>{
+        Ok(
+            hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
+                .status(hyper::StatusCode::OK)
+                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                .header(header::ACCESS_CONTROL_ALLOW_METHODS, "POST, GET, OPTIONS")
+                .body(Body::default())
+                .unwrap()
+        ) //-- sending back an empty response to the browser to say that the preflight request was ok to get rid of the fucking CORS :)
     }
 
-
-
-
-    pub async fn is_preflight_request(req: hyper::Request<Body>) -> Result<hyper::Request<Body>, bool>{
-        
-        
-        if Method::OPTIONS == req.method() || Method::POST == req.method() || Method::GET == req.method(){ //-- append Access-Control-Allow-Origin headers to the request before parsing its body
-            info!("→ preflight request detected from {}", req.uri().path());
-            Ok(req) //-- returning the request obejct if there was preflight request
-        } else{
-            Err(false)
-        }
-    }
 
 
 }

@@ -18,6 +18,7 @@
 
 
 
+use crate::middlewares;
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
 use std::sync::Arc;
@@ -80,6 +81,9 @@ pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app
         (&Method::POST, "/auth/user/get/all")    => {
             app.name = "/auth/user/get/all".to_string();
             get_all(app_storage, app).await
+        },
+        (&Method::OPTIONS, "/")    => {
+            middlewares::cors::send_preflight_response().await
         },
         _                                       => not_found().await,
     }
