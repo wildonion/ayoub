@@ -43,6 +43,7 @@ pub mod cors{
 
     pub async fn is_preflight_request(req: hyper::Request<Body>) -> Result<(bool, hyper::Request<Body>), (bool, hyper::Request<Body>)>{
         if Method::OPTIONS == req.method(){ //-- append Access-Control-Allow-Origin headers to the request before parsing its body
+            info!("→ preflight request detected from {}", req.uri().path());
             Ok((true, req))
         } else{
             Err((false, req))
