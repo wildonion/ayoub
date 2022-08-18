@@ -23,7 +23,7 @@ pub mod cors{
 
 
 
-    pub async fn send_preflight_response() -> GenericResult<hyper::Response<Body>, hyper::Error>{
+    pub async fn send_preflight_response(_: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
         Ok(
             hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
                 .status(hyper::StatusCode::OK)

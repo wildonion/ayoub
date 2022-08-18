@@ -54,6 +54,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/auth/otp-req", otp_request)
         .post("/auth/check-otp", check_otp)
         .post("/auth/user/get/all", get_all)
+        .options("/", middlewares::cors::send_preflight_response)
         .build()
         .unwrap()
 

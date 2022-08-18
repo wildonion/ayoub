@@ -62,6 +62,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/game/god/update/group/", update_group)
         .post("/game/god/update/group/image", get_groups)
         .get("/game/get/group/all", upload_img)
+        .options("/", middlewares::cors::send_preflight_response)
         .build()
         .unwrap()
 

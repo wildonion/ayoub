@@ -57,6 +57,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/event/simd", simd_ops)
         .post("/event/reserve", mock_reservation)
         .post("/event/reveal/roles", role)
+        .options("/", middlewares::cors::send_preflight_response)
         .build()
         .unwrap()
 
