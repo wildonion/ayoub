@@ -4,10 +4,11 @@
 use std::sync::Mutex;
 use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
 use std::thread; 
+use futures::TryStreamExt;
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
 use mongodb::Client;
-use mongodb::bson::doc;
+use mongodb::bson::{self, doc};
 use rand::prelude::*;
 use crate::{constants::*, schemas};
 use crate::contexts::{app, scheduler::ThreadPool};
@@ -179,6 +180,25 @@ pub async fn set_user_access(username: String, new_access_level: u8, storage: Op
 }
 
 
+
+
+pub async fn get_random_doc(storage: Option<&Client>) -> Option<schemas::game::RoleInfo>{
+    let mut all = vec![];
+    let roles = storage.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
+    let random_record_setup = doc!{"$sample": {"size": 1}};
+    let pipeline = vec![random_record_setup];
+    match roles.aggregate(pipeline, None).await{
+        Ok(mut cursor) => {
+            while let Some(random_doc) = cursor.try_next().await.unwrap(){
+                let random_role_info = bson::from_document::<schemas::game::RoleInfo>(random_doc).unwrap();
+                all.push(random_role_info)
+            }
+            let role = all[0].clone();
+            Some(role)
+        },
+        Err(e) => None,
+    }
+}
 
 
 

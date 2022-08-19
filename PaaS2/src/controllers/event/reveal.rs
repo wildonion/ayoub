@@ -86,6 +86,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             // ------------------------------------------
                                             for mut p in event_doc.clone().players.unwrap(){ //-- p must be mutable since we want to mutate role_id and side_id fields - we must clone the event_doc in each iteration in order not to lose its ownership during the iteration process
                                                 
+                                                let db_to_pass = db.as_ref().unwrap().clone();
                                                 let random_role_id: ObjectId;
                                                 let random_side_id: ObjectId;
                                                 let mut unique_random_roles: Vec<schemas::game::RoleInfo> = Vec::new();
@@ -93,20 +94,29 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 // ------------------------------ FETCHING RANDOM DOCUMENT FROM ROLES COLLECTION ------------------------------
                                                 // 
                                                 // ------------------------------------------------------------------------------------------------------------
-                                                let random_record_setup = doc!{"$sample": {"size": 1}};
-                                                let pipeline = vec![random_record_setup];
-                                                let random_role: Vec<schemas::game::RoleInfo> = match roles.aggregate(pipeline, None).await{
-                                                    Ok(mut cursor) => {
-                                                        while let Some(random_doc) = cursor.try_next().await.unwrap(){
-                                                            let random_role_info = bson::from_document::<schemas::game::RoleInfo>(random_doc).unwrap();
-                                                            if !unique_random_roles.contains(&random_role_info){ //-- the fethced role must be unique since every player must have a unique role :))
-                                                                unique_random_roles.push(random_role_info)
-                                                            }
-                                                        }
-                                                        unique_random_roles
-                                                    },
-                                                    Err(e) => vec![],
-                                                };
+
+                                                let mut random_doc_gen = utils::get_random_doc(Some(&db_to_pass)).await.unwrap();
+                                                while !unique_random_roles.contains(&random_doc_gen){
+                                                    unique_random_roles.push(random_doc_gen);
+                                                    random_doc_gen = utils::get_random_doc(Some(&db_to_pass)).await.unwrap();
+                                                }
+
+                                                let random_role = unique_random_roles;
+
+                                                // let random_record_setup = doc!{"$sample": {"size": 1}};
+                                                // let pipeline = vec![random_record_setup];
+                                                // let random_role: Vec<schemas::game::RoleInfo> = match roles.aggregate(pipeline, None).await{
+                                                //     Ok(mut cursor) => {
+                                                //         while let Some(random_doc) = cursor.try_next().await.unwrap(){
+                                                //             let random_role_info = bson::from_document::<schemas::game::RoleInfo>(random_doc).unwrap();
+                                                //             if !unique_random_roles.contains(&random_role_info){ //-- the fethced role must be unique since every player must have a unique role :))
+                                                //                 unique_random_roles.push(random_role_info)
+                                                //             }
+                                                //         }
+                                                //         unique_random_roles
+                                                //     },
+                                                //     Err(e) => vec![],
+                                                // };
 
                                                 // ------------------------------ UPDATING PLAYER ROLE ID ------------------------------
                                                 // 
