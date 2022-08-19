@@ -73,7 +73,8 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                                     
                                     ////////////////////////////////// DB Ops
-
+                                    
+                                    let mut updated_players = vec![]; //-- vector of all updated players
                                     let player_roles_info = db.clone().unwrap().database("ayoub").collection::<schemas::game::InsertPlayerRoleAbilityRequest>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to insert the current_ability field - we want to deserialize all player role ability infos into the InsertPlayerRoleAbilityRequest struct
                                     let roles = db.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
                                     let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
@@ -140,6 +141,9 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                     },
                                                     None => {}, //-- TODO - means we didn't find any document related to this user_id and simply we return the unmatched player info
                                                 }                                                
+                                                
+                                                updated_players.push(p);
+
                                             } // ------------------------------------------ end of iterating over event players
                                         
                                             
@@ -147,7 +151,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             // ------------------------------ UPDATING PLAYERS FIELD IN EVENTS COLLECTION ------------------------------
                                             // 
                                             // ---------------------------------------------------------------------------------------------------------
-                                            let updated_player_roles = event_doc.players; //-- getting the updated players
+                                            let updated_player_roles = updated_players; //-- getting the updated players
                                             let serialized_updated_player_roles = bson::to_bson(&updated_player_roles).unwrap(); //-- serializing the players field into the BSON to insert into the events collection
                                             let updated_event = match events.find_one_and_update(doc!{"_id": event_doc._id}, doc!{"$set": {"players": serialized_updated_player_roles}}, None).await.unwrap(){ //-- finding event based on event id
                                                 Some(event_doc) => Some(event_doc), //-- deserializing BSON (the record type fetched from mongodb) into the EventInfo struct
