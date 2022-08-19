@@ -252,7 +252,7 @@ pub struct AddEventRequest{
     pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server
     pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on
     pub phases: Option<Vec<Phase>>, // NOTE - we set this field to Option cause we don't want to pass the phases inside the request body, we'll update it later on
-    pub max_players: Option<u8>, // NOTE - number of maximum players for this event
+    pub max_players: u8, // NOTE - number of maximum players for this event
     pub players: Option<Vec<ReservePlayerInfoResponse>>, // NOTE - vector of all players which has participated for this event
     pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object
