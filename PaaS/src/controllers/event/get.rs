@@ -63,16 +63,16 @@ pub async fn player_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
                                         
                                         // let filter = doc! { "is_expired": true }; //-- filtering all expired events
                                         let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-                                        let mut all_expired_events = schemas::event::AvailableEvents{
+                                        let mut all_events = schemas::event::AvailableEvents{
                                             events: vec![],
                                         };
                                         match events.find(None, None).await{
                                             Ok(mut cursor) => {
                                                 while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
-                                                    all_expired_events.events.push(event);
+                                                    all_events.events.push(event);
                                                 }
                                                 let player_events = 
-                                                                all_expired_events.events
+                                                                all_events.events
                                                                         .into_iter()
                                                                         .map(|event| {
                                                                             for p in event.clone().players.unwrap(){
