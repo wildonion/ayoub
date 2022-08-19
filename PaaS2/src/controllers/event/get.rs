@@ -305,12 +305,6 @@ pub async fn single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
     let db = Client::with_uri_str(db_addr).await;
-
-
-    let uri = &req.uri().to_string().parse::<Uri>().unwrap();
-    let params = uri.query().unwrap(); //-- extracting all parameters inside the url
-
-
     
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously

@@ -49,7 +49,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .middleware(enable_cors_all())
         .get("/event/add", add_event)
         .get("/event/get/availables", get_all_events)
-        .get("/event/get/all/player",get_all_player_events)
+        .post("/event/get/all/player",get_all_player_events)
         .post("/event/get/single", get_single_event)
         .post("/event/cast-vote", cast_vote_event)
         .post("/event/set-expire", expire_event)
