@@ -69,7 +69,7 @@ pub async fn get_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResult<h
                                 let res = Response::builder(); //-- creating a new response cause we didn't find any available route
                                 let response_body = ctx::app::Response::<schemas::auth::AvailableUsers>{
                                     message: FETCHED,
-                                    data: Some(available_users),
+                                    data: Some(available_users.users),
                                     status: 200,
                                 };
                                 let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
