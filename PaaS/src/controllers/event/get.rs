@@ -42,10 +42,7 @@ pub async fn player_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
         match middlewares::auth::pass(req).await{
             Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                                 
-                
-                
-                let uri = &req.uri().to_string().parse::<Uri>().unwrap();
-                let params = uri.query().unwrap(); //-- extracting all parameters inside the url
+
                 let _id = token_data.claims._id;
                 let username = token_data.claims.username;
                 let access_level = token_data.claims.access_level;
@@ -64,12 +61,12 @@ pub async fn player_all(db: Option<&Client>, api: ctx::app::Api) -> GenericResul
 
                                         ////////////////////////////////// DB Ops
                                         
-                                        let filter = doc! { "is_expired": true }; //-- filtering all expired events
+                                        // let filter = doc! { "is_expired": true }; //-- filtering all expired events
                                         let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                         let mut all_expired_events = schemas::event::AvailableEvents{
                                             events: vec![],
                                         };
-                                        match events.find(filter, None).await{
+                                        match events.find(None, None).await{
                                             Ok(mut cursor) => {
                                                 while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
                                                     all_expired_events.events.push(event);
