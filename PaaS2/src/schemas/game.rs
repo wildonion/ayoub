@@ -396,6 +396,24 @@ pub struct ReservePlayerInfoResponse{
 
 
 /*
+  -----------------------------------------------------------------------------------------------------------
+| this struct will be used to serialize player info after reservation into the json to send back to the user
+| -----------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct ReservePlayerInfoResponseWithRoleName{
+  pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+  pub username: String,
+  pub status: u8,
+  pub role_name: Option<String>,
+  pub role_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
+  pub side_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
+}
+
+
+/*
   -------------------------------------------------------------------------------------------
 | this struct will be used to deserialize player info bson from the mongodb into this struct
 | -------------------------------------------------------------------------------------------

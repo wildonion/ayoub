@@ -81,7 +81,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     let roles = db.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
                                     let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                                     let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let events = db.clone().unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                                    let events = db.clone().unwrap().database("ayoub").collection::<schemas::event::RevealEventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                     match events.find_one(doc! { "_id": event_id, "is_expired": false }, None).await.unwrap(){ //-- getting a none expired event
                                         Some(event_doc) => {
 
@@ -111,6 +111,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 random_side_id = first_role_info.clone().side_id.unwrap();
                                                 p.role_id = Some(random_role_id.clone());
                                                 p.side_id = Some(random_side_id.clone());
+                                                p.role_name = Some(first_role_info.clone().name);
                                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                                 
                                                 // ------------------------------ UPDATING USERS COLLECTION ------------------------------
@@ -154,7 +155,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 Some(event_doc) => Some(event_doc), //-- deserializing BSON (the record type fetched from mongodb) into the EventInfo struct
                                                 None => None, //-- means we didn't find any document related to this title and we have to tell the user to create a new event                                                        
                                             };
-                                            let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
+                                            let response_body = ctx::app::Response::<schemas::event::RevealEventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
                                                 data: Some(updated_event.unwrap()),
                                                 message: UPDATED, //-- collection found in ayoub database
                                                 status: 200,

@@ -3,7 +3,7 @@
 
 
 
-use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponse};
+use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponse, ReservePlayerInfoResponseWithRoleName};
 use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use uuid::Uuid;
@@ -227,6 +227,34 @@ pub struct EventInfo{
     pub phases: Option<Vec<Phase>>,
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponse>>,
+    pub is_expired: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------
+| this struct will be used to deserialize event info bson from the mongodb into this struct
+| -----------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct RevealEventInfo{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub deck_id: String,
+    pub entry_price: String,
+    pub creator_wallet_address: Option<String>,
+    pub upvotes: Option<u16>,
+    pub downvotes: Option<u16>,
+    pub voters: Option<Vec<Voter>>,
+    pub phases: Option<Vec<Phase>>,
+    pub max_players: Option<u8>,
+    pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
