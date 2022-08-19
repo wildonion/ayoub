@@ -154,7 +154,9 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             println!(">>>>>>>>>>>>>>>> {:?}", updated_players);
                                             let updated_player_roles = updated_players; //-- getting the updated players
                                             let serialized_updated_player_roles = bson::to_bson(&updated_player_roles).unwrap(); //-- serializing the players field into the BSON to insert into the events collection
-                                            let updated_event = match events.find_one_and_update(doc!{"_id": event_doc._id}, doc!{"$set": {"players": serialized_updated_player_roles}}, None).await.unwrap(){ //-- finding event based on event id
+                                            println!(">>>>>>>>>>>>>>>> {:?}", serialized_updated_player_roles);
+                                            let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                            let updated_event = match events.find_one_and_update(doc!{"_id": event_doc._id}, doc!{"$set": {"players": serialized_updated_player_roles, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding event based on event id
                                                 Some(event_doc) => Some(event_doc), //-- deserializing BSON (the record type fetched from mongodb) into the EventInfo struct
                                                 None => None, //-- means we didn't find any document related to this title and we have to tell the user to create a new event                                                        
                                             };
