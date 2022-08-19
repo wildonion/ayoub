@@ -126,7 +126,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                         let player_role_ability_info = schemas::game::InsertPlayerRoleAbilityRequest{
                                                             user_id: user_doc._id.unwrap().to_string(), //-- converting the Option<ObjectId> to ObjectId then into String
                                                             role_id: random_role_id.to_string(), //-- converting the ObjectId into String
-                                                            even_id: event_doc._id.unwrap().to_string(), //-- converting the Option<ObjectId> to ObjectId then into String
+                                                            event_id: event_doc._id.unwrap().to_string(), //-- converting the Option<ObjectId> to ObjectId then into String
                                                             current_ability: None, //-- initialized None on inserting new doc
                                                             created_at: Some(now),
                                                             updated_at: Some(now),
@@ -151,10 +151,8 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             // ------------------------------ UPDATING PLAYERS FIELD IN EVENTS COLLECTION ------------------------------
                                             // 
                                             // ---------------------------------------------------------------------------------------------------------
-                                            println!(">>>>>>>>>>>>>>>> {:?}", updated_players);
                                             let updated_player_roles = updated_players; //-- getting the updated players
                                             let serialized_updated_player_roles = bson::to_bson(&updated_player_roles).unwrap(); //-- serializing the players field into the BSON to insert into the events collection
-                                            println!(">>>>>>>>>>>>>>>> {:?}", serialized_updated_player_roles);
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                             let updated_event = match events.find_one_and_update(doc!{"_id": event_doc._id}, doc!{"$set": {"players": serialized_updated_player_roles, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding event based on event id
                                                 Some(event_doc) => Some(event_doc), //-- deserializing BSON (the record type fetched from mongodb) into the EventInfo struct

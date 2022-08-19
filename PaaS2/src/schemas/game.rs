@@ -308,7 +308,7 @@ pub struct UpdatePlayerRoleAbilityRequest{
 pub struct InsertPlayerRoleAbilityRequest{
     pub user_id: String,
     pub role_id: String,
-    pub even_id: String,
+    pub event_id: String,
     pub current_ability: Option<u8>, //-- on inserting a new record this field will be initialized empty and will be updated during the game by the God
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
