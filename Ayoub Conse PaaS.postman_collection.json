@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"wildonion2\",\r\n    \"pwd\": \"wildonion@123\"\r\n}",
+							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -682,7 +682,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzMzc2NCwiaWF0IjoxNjYwODk3NzY0fQ.DrVPAFqnAqtREnhTcmERqATB7H4DqL1CFWtU76D3RlGfYjlGLkpaUP43EfmRBDmAdYNgCeGW9-e0D3nz5ufMCg",
 									"type": "string"
 								}
 							]
@@ -691,7 +691,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"deck_name\": \"name of the deck\",\r\n    \"roles\": [\r\n        {\r\n            \"name\": \"deck name\",\r\n            \"rate\": 2,\r\n            \"decs\": \"role description here\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"deck name\",\r\n            \"rate\": 3,\r\n            \"decs\": \"role description here\",\r\n            \"abilities\": 0\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n    \"deck_name\": \"name of the deck\",\r\n    \"roles\": [\r\n        {\r\n            \"name\": \"role1\",\r\n            \"rate\": 2,\r\n            \"desc\": \"role description here\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"role2\",\r\n            \"rate\": 3,\r\n            \"desc\": \"role description here\",\r\n            \"abilities\": 0\r\n        }\r\n    ],\r\n    \"desc\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
