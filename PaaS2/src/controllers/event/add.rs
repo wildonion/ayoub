@@ -83,7 +83,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                         None => { //-- means we didn't find any document related to this title and we have to create a new event
                                             let events = db.clone().unwrap().database("ayoub").collection::<schemas::event::AddEventRequest>("events");
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                            let exp_time = now + env::var("PROPOSAL_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
+                                            let exp_time = now + env::var("EVENT_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
                                             let new_event = schemas::event::AddEventRequest{
                                                 title: event_info.title,
                                                 content: event_info.content,
