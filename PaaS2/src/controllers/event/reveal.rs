@@ -135,8 +135,8 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                         // ------------------------------ INSERT PLAYER ROLE ABILITY INFO ------------------------------
                                                         // ---------------------------------------------------------------------------------------------
                                                         match player_roles_info.insert_one(player_role_ability_info, None).await{
-                                                            Ok(insert_result) => { info!("new player role ability insert successfully at time {} with _id {:?}", chrono::Local::now().naive_local(), insert_result); },
-                                                            Err(e) => { info!("error in inserting new player role ability at time {} - {}", chrono::Local::now().naive_local(), e); },
+                                                            Ok(insert_result) => { println!("new player role ability insert successfully at time {} with _id {:?}", chrono::Local::now().naive_local(), insert_result); },
+                                                            Err(e) => { println!("error in inserting new player role ability at time {} - {}", chrono::Local::now().naive_local(), e); },
                                                         }        
                                                     },
                                                     None => {}, //-- TODO - means we didn't find any document related to this user_id and simply we return the unmatched player info
@@ -151,6 +151,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             // ------------------------------ UPDATING PLAYERS FIELD IN EVENTS COLLECTION ------------------------------
                                             // 
                                             // ---------------------------------------------------------------------------------------------------------
+                                            println!(">>>>>>>>>>>>>>>> {:?}", updated_players);
                                             let updated_player_roles = updated_players; //-- getting the updated players
                                             let serialized_updated_player_roles = bson::to_bson(&updated_player_roles).unwrap(); //-- serializing the players field into the BSON to insert into the events collection
                                             let updated_event = match events.find_one_and_update(doc!{"_id": event_doc._id}, doc!{"$set": {"players": serialized_updated_player_roles}}, None).await.unwrap(){ //-- finding event based on event id

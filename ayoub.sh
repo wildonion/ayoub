@@ -46,9 +46,9 @@ cargo build --bin ayoub2 --release
 sudo rm auth.ayoub/ayoub-auth
 sudo rm event.ayoub/ayoub-event
 sudo rm game.ayoub/ayoub-game
-sudo cp target/release/ayoub auth.ayoub/ayoub-auth
-sudo cp target/release/ayoub event.ayoub/ayoub-event
-sudo cp target/release/ayoub game.ayoub/ayoub-game
+sudo cp target/release/ayoub2 auth.ayoub/ayoub-auth
+sudo cp target/release/ayoub2 event.ayoub/ayoub-event
+sudo cp target/release/ayoub2 game.ayoub/ayoub-game
 sudo cp .env auth.ayoub
 sudo cp .env event.ayoub
 sudo cp .env game.ayoub
