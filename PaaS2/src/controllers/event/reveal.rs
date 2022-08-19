@@ -10,6 +10,7 @@ use crate::utils;
 use crate::schemas;
 use crate::contexts as ctx;
 use crate::constants::*;
+use crate::utils::macros::even;
 use chrono::Utc;
 use futures::StreamExt;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
@@ -17,7 +18,8 @@ use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_bo
 use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
 use mongodb::Client;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc};
+use rand::seq::SliceRandom; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use std::env;
 
 
@@ -83,53 +85,32 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     match events.find_one(doc! { "_id": event_id, "is_expired": false }, None).await.unwrap(){ //-- getting a none expired event
                                         Some(event_doc) => {
 
+
+                                            let mut all_roles = vec![];
+                                            let mut all_roles_cursor = roles.find(None, None).await.unwrap();
+                                            while let Some(role_info) = all_roles_cursor.try_next().await.unwrap(){
+                                                all_roles.push(role_info)
+                                            }
+                                            all_roles.shuffle(&mut rand::thread_rng());
+
+
+
                                             // ------------------------------------------
                                             for mut p in event_doc.clone().players.unwrap(){ //-- p must be mutable since we want to mutate role_id and side_id fields - we must clone the event_doc in each iteration in order not to lose its ownership during the iteration process
                                                 
-                                                let db_to_pass = db.as_ref().unwrap().clone();
                                                 let random_role_id: ObjectId;
                                                 let random_side_id: ObjectId;
-                                                let mut unique_random_roles: Vec<schemas::game::RoleInfo> = Vec::new();
                                                 
-                                                // ------------------------------ FETCHING RANDOM DOCUMENT FROM ROLES COLLECTION ------------------------------
+                                                // ------------------------------ ASSIGNING RANDOM ROLE ------------------------------
                                                 // 
-                                                // ------------------------------------------------------------------------------------------------------------
-                                                
-                                                
-                                                // ----------------------------------
-                                                // TODO - better randomness algorithm
-                                                // ----------------------------------
-                                                // let mut random_doc_gen = utils::get_random_doc(Some(&db_to_pass)).await.unwrap();
-                                                // while !unique_random_roles.contains(&random_doc_gen){
-                                                //     unique_random_roles.push(random_doc_gen);
-                                                //     random_doc_gen = utils::get_random_doc(Some(&db_to_pass)).await.unwrap();
-                                                // }
-                                                // let random_role = unique_random_roles;
-
-
-                                                
-                                                let random_record_setup = doc!{"$sample": {"size": 1}};
-                                                let pipeline = vec![random_record_setup];
-                                                let random_role: Vec<schemas::game::RoleInfo> = match roles.aggregate(pipeline, None).await{
-                                                    Ok(mut cursor) => {
-                                                        while let Some(random_doc) = cursor.try_next().await.unwrap(){
-                                                            let random_role_info = bson::from_document::<schemas::game::RoleInfo>(random_doc).unwrap();
-                                                            if !unique_random_roles.contains(&random_role_info){ //-- the fethced role must be unique since every player must have a unique role :))
-                                                                unique_random_roles.push(random_role_info)
-                                                            }
-                                                        }
-                                                        unique_random_roles
-                                                    },
-                                                    Err(e) => vec![],
-                                                };
-
-                                                // ------------------------------ UPDATING PLAYER ROLE ID ------------------------------
-                                                // 
-                                                // -------------------------------------------------------------------------------------
-                                                random_role_id = random_role.iter().take(1).next().unwrap()._id.unwrap();
-                                                random_side_id = random_role.iter().take(1).next().unwrap().side_id.unwrap();
-                                                p.role_id = Some(random_role_id); //-- updating the role_id field of a player inside the players field of an event 
-                                                p.side_id = Some(random_side_id); //-- updating the side_id field of a player inside the players field of an event
+                                                // -----------------------------------------------------------------------------------
+                                                let first_role_info = all_roles[0].clone();
+                                                let selected_role_index = all_roles.iter().position(|role| *role == first_role_info).unwrap();
+                                                all_roles.remove(selected_role_index);
+                                                random_role_id = first_role_info.clone()._id.unwrap();
+                                                random_side_id = first_role_info.clone().side_id.unwrap();
+                                                p.role_id = Some(random_role_id.clone());
+                                                p.side_id = Some(random_side_id.clone());
                                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                                 
                                                 // ------------------------------ UPDATING USERS COLLECTION ------------------------------

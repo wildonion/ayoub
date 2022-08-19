@@ -1,0 +1,14 @@
+{"_id":{"$oid":"62ff5f2294474205d5992118"},"name":"doctor","rate":2,"desc":"role description here","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660903202,"updated_at":1660903202}
+{"_id":{"$oid":"62ff5fc894474205d599211d"},"name":"kargah","rate":3,"desc":"mitooneh estelam begire","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660903368,"updated_at":1660903368}
+{"_id":{"$oid":"62ff89830bd1f9c22ec75cc0"},"name":"god-fother","rate":1,"desc":"","abilities":0,"side_id":"62ff86360bd1f9c22ec75cbb","is_disabled":false,"created_at":1660914051,"updated_at":1660914051}
+{"_id":{"$oid":"62ff89ee0bd1f9c22ec75cc2"},"name":"shab khosb","rate":1,"desc":"","abilities":0,"side_id":"62ff86360bd1f9c22ec75cbb","is_disabled":false,"created_at":1660914158,"updated_at":1660914158}
+{"_id":{"$oid":"62ff8a5e0bd1f9c22ec75cc6"},"name":"jalab","rate":1,"desc":"","abilities":0,"side_id":"62ff86360bd1f9c22ec75cbb","is_disabled":false,"created_at":1660914270,"updated_at":1660914270}
+{"_id":{"$oid":"62ff8a680bd1f9c22ec75cc8"},"name":"jarah","rate":1,"desc":"","abilities":0,"side_id":"62ff86360bd1f9c22ec75cbb","is_disabled":false,"created_at":1660914280,"updated_at":1660914280}
+{"_id":{"$oid":"62ff8a7a0bd1f9c22ec75cca"},"name":"doctor star","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914298,"updated_at":1660914298}
+{"_id":{"$oid":"62ff8ad10bd1f9c22ec75ccc"},"name":"shahrdar","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914385,"updated_at":1660914385}
+{"_id":{"$oid":"62ff8adb0bd1f9c22ec75cce"},"name":"ghazi","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914395,"updated_at":1660914395}
+{"_id":{"$oid":"62ff8ae20bd1f9c22ec75cd0"},"name":"kalantar","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914402,"updated_at":1660914402}
+{"_id":{"$oid":"62ff8ae80bd1f9c22ec75cd2"},"name":"goorkan","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914408,"updated_at":1660914408}
+{"_id":{"$oid":"62ff8af30bd1f9c22ec75cd4"},"name":"goorkan star","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914419,"updated_at":1660914419}
+{"_id":{"$oid":"62ff8afc0bd1f9c22ec75cd6"},"name":"dast kaj","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914428,"updated_at":1660914428}
+{"_id":{"$oid":"62ff8b060bd1f9c22ec75cd8"},"name":"gardan koloft","rate":1,"desc":"","abilities":0,"side_id":"62ff5f1a94474205d5992116","is_disabled":false,"created_at":1660914438,"updated_at":1660914438}

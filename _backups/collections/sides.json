@@ -1,0 +1,2 @@
+{"_id":{"$oid":"62ff5f1a94474205d5992116"},"name":"citizen","is_disabled":false,"created_at":1660903194,"updated_at":1660903194}
+{"_id":{"$oid":"62ff86360bd1f9c22ec75cbb"},"name":"mafia","is_disabled":false,"created_at":1660913206,"updated_at":1660913206}
