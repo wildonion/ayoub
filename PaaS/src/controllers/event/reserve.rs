@@ -87,6 +87,7 @@ pub async fn mock_reservation(db: Option<&Client>, api: ctx::app::Api) -> Generi
                                                     side_id: None,
                                                 };
                                                 let updated_players = event_doc.add_player(init_player_info).await; //-- add new player info into the existing players vector of the passed in event_id
+                                                info!(">>>>>>>>>>>>>>>>>>>>> {:?}", updated_players);
                                                 let serialized_updated_players = bson::to_bson(&updated_players).unwrap(); //-- we have to serialize the updated_players to BSON Document object in order to update the players field inside the collection
                                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                                 match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"players": serialized_updated_players, "updated_at": Some(now)}}, None).await.unwrap(){
