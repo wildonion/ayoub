@@ -55,7 +55,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/event/set-expire", expire_event)
         .post("/event/update/phases/add", insert_phase)
         .post("/event/simd", simd_ops)
-        .post("/event/reserve", mock_reservation)
+        .post("/event/reserve/mock", mock_reservation)
         .post("/event/reveal/roles", role)
         .options("/", middlewares::cors::send_preflight_response)
         .build()
