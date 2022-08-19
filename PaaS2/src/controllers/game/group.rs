@@ -599,6 +599,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
     let db = Client::with_uri_str(db_addr).await;
+    
     ////////////////////////////////// DB Ops
                     
     let groups = db.clone().unwrap().database("ayoub").collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch and deserialize all groups infos or documents from BSON into the GroupInfo struct
