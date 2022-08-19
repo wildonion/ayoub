@@ -49,6 +49,10 @@ sudo rm game.ayoub/ayoub-game
 sudo cp target/release/ayoub auth.ayoub/ayoub-auth
 sudo cp target/release/ayoub event.ayoub/ayoub-event
 sudo cp target/release/ayoub game.ayoub/ayoub-game
+sudo cp .env auth.ayoub
+sudo cp .env event.ayoub
+sudo cp .env game.ayoub
+
 
 sudo pm2 stop ayoub-auth
 sudo pm2 stop ayoub-event
