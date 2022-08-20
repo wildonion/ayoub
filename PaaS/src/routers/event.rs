@@ -59,7 +59,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .get("/event/get/all/done", get_all_expired_events)
         .post("/event/get/all/player/in-going",get_all_player_none_expired_events)
         .post("/event/get/all/player/done",get_all_player_expired_events)
-        .get("/event/get/all/group", get_all_group_events)
+        .post("/event/get/all/group", get_all_group_events)
         .get("/event/get/all", all_events)
         .post("/event/get/single", get_single_event)
         .post("/event/cast-vote", cast_vote_event)
