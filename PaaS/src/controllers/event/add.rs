@@ -64,11 +64,31 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     ////////////////////////////////// DB Ops
                                     
                                     let events = db.clone().unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
-                                    match events.find_one(doc!{"title": event_info.clone().title}, None).await.unwrap(){ //-- finding event based on event title
+                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
+                                    match events.find_one_and_update(doc!{"title": event_info.clone().title}, doc!{
+                                        "$set": {
+                                            "title": bson::to_bson(&event_info.title).unwrap(),
+                                            "content": bson::to_bson(&event_info.content).unwrap(),
+                                            "deck_id": bson::to_bson(&event_info.deck_id).unwrap(), //-- it's ObjectId of the selected deck but string-ed!
+                                            "entry_price": bson::to_bson(&event_info.entry_price).unwrap(),
+                                            "group_info": bson::to_bson(&event_info.group_info).unwrap(),
+                                            "creator_wallet_address": Some(bson::to_bson(&event_info.creator_wallet_address).unwrap()),
+                                            "upvotes": Some(bson::to_bson(&event_info.upvotes).unwrap()),
+                                            "downvotes": Some(bson::to_bson(&event_info.downvotes).unwrap()),
+                                            "voters": Some(bson::to_bson(&event_info.voters).unwrap()), //-- initializing empty voters
+                                            "phases": Some(bson::to_bson(&event_info.phases).unwrap()), //-- initializing empty vector of phases
+                                            "max_players": bson::to_bson(&event_info.max_players).unwrap(), //-- this is the maximum players that an event can have
+                                            "players": Some(bson::to_bson(&event_info.players).unwrap()), //-- there are no participant yet for this event
+                                            "is_expired": Some(bson::to_bson(&event_info.is_expired).unwrap()), //-- a event is not expired yet or at initialization
+                                            "expire_at": Some(bson::to_bson(&event_info.expire_at).unwrap()), //-- a event will be expired at
+                                            "created_at": Some(bson::to_bson(&event_info.created_at).unwrap()),
+                                            "updated_at": Some(now),
+                                        }  
+                                    }, None).await.unwrap(){ //-- finding event based on event title
                                         Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
                                             let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
                                                 data: Some(event_doc), //-- data is an empty &[u8] array
-                                                message: FOUND_DOCUMENT, //-- collection found in ayoub database
+                                                message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database
                                                 status: 302,
                                             };
                                             let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body

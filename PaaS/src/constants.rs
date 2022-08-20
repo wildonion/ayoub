@@ -32,6 +32,7 @@ pub static DO_SIGNUP: &str = "Please Signup";
 pub static NOTFOUND_ROUTE: &str = "Not Found Route";
 pub static SIMD_RESULT: &str = "Simd Result";
 pub static FOUND_DOCUMENT: &str = "Found Document";
+pub static FOUND_DOCUMENT_UPDATE: &str = "Document Updated";
 pub static INSERTED: &str = "Inserted Successfully";
 pub static UPDATED: &str = "Updated Successfully";
 pub static FETCHED: &str = "Fetched Successfully";
