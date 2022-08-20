@@ -27,7 +27,7 @@ use hyper::{Method, Body, Response};
 use std::sync::Arc;
 use crate::controllers::event::{
                                 add::main as add_event, 
-                                get::{all as get_all_events, player_all as get_all_player_events, single as get_single_event}, 
+                                get::{all as get_all_events, player_all as get_all_player_events, single as get_single_event, group_all as get_all_group_events}, 
                                 vote::main as cast_vote_event, 
                                 expire::main as expire_event, 
                                 _404::main as not_found, 
@@ -49,6 +49,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .middleware(enable_cors_all())
         .post("/event/add", add_event)
         .get("/event/get/availables", get_all_events)
+        .get("/event/get/all/group", get_all_group_events)
         .post("/event/get/all/player",get_all_player_events)
         .post("/event/get/single", get_single_event)
         .post("/event/cast-vote", cast_vote_event)

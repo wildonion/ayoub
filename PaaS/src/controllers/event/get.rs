@@ -397,3 +397,117 @@ pub async fn single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
 
 
+
+
+
+
+
+// -------------------------------- get all events for a specific group controller
+// ➝ Return : Hyper Response Body or Hyper Error
+// ----------------------------------------------------------------------------------------------
+pub async fn group_all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
+    
+    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+
+    let res = Response::builder();
+    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
+    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
+    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
+    let db = Client::with_uri_str(db_addr).await;
+    
+
+    let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
+    match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
+        Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
+            let data: serde_json::Value = value;
+            let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
+            match serde_json::from_str::<schemas::game::GetGroupRequest>(&json){ //-- the generic type of from_str() method is GetEventRequest struct - mapping (deserializing) the json string into the GetEventRequest struct
+                Ok(group_info) => { //-- we got the username and password inside the login route
+
+
+                    ////////////////////////////////// DB Ops
+
+                    let mut all_group_events = vec![];
+                    let group_id = ObjectId::parse_str(group_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                    let mut events_cursor = events.find(doc!{"group_info._id": group_id}, None).await.unwrap(); //-- we must define the cursor as mutable since fetching all events is a mutable operation
+                    while let Some(event_info) = events_cursor.try_next().await.unwrap(){
+                        all_group_events.push(event_info)
+                    }
+                    if all_group_events.is_empty(){
+                        let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                            message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
+                            status: 404,
+                        };
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                        Ok(
+                            res
+                                .status(StatusCode::NOT_FOUND)
+                                .header(header::CONTENT_TYPE, "application/json")
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                .unwrap() 
+                        )
+                    } else{
+                        let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                            message: FETCHED,
+                            data: Some(all_group_events),
+                            status: 200,
+                        };
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                        Ok(
+                            res
+                                .status(StatusCode::OK)
+                                .header(header::CONTENT_TYPE, "application/json")
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                .unwrap()
+                        )
+                    }
+                
+
+                    //////////////////////////////////
+
+                },
+                Err(e) => {
+                    let response_body = ctx::app::Response::<ctx::app::Nill>{
+                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                        status: 406,
+                    };
+                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                    Ok(
+                        res
+                            .status(StatusCode::NOT_ACCEPTABLE)
+                            .header(header::CONTENT_TYPE, "application/json")
+                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                            .unwrap() 
+                    )
+                },
+            }
+        },
+        Err(e) => {
+            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                status: 400,
+            };
+            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+            Ok(
+                res
+                    .status(StatusCode::BAD_REQUEST)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                    .unwrap() 
+            )
+        },
+    }        
+}
+
+
+
+
+
+
+
+
