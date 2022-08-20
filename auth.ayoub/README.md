@@ -1,5 +1,0 @@
-
-
-
-
-### Ayoub Auth Binary

@@ -102,26 +102,19 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     env::set_var("RUST_LOG", "trace");
     pretty_env_logger::init();
     dotenv().expect("⚠️ .env file not found");
-    let io_buffer_size = env::var("IO_BUFFER_SIZE").expect("⚠️ no io buffer size variable set").parse::<u32>().unwrap() as usize; //-- usize is the minimum size in os which is 32 bits
-    let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
-    let current_service = env::var("CURRENT_SERVICE").expect("⚠️ no current service variable set");
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
     let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
-    let host = env::var("HOST").expect("⚠️ no host variable set");
-    let auth_port = env::var("AYOUB_AUTH_PORT").expect("⚠️ no port variable set for auth service");
-    let event_port = env::var("AYOUB_EVENT_PORT").expect("⚠️ no port variable set for event service");
-    let game_port = env::var("AYOUB_GAME_PORT").expect("⚠️ no port variable set for game service");
-    let nft_port = env::var("AYOUB_NFT_PORT").expect("⚠️ no port variable set for nft service");
-    let auth_server_addr = format!("{}:{}", host, auth_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    let event_server_addr = format!("{}:{}", host, event_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    let game_server_addr = format!("{}:{}", host, game_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    let nft_server_addr = format!("{}:{}", host, nft_port).as_str().parse::<SocketAddr>().unwrap(); //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
+    // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
+    let io_buffer_size = env::var("IO_BUFFER_SIZE").expect("⚠️ no io buffer size variable set").parse::<u32>().unwrap() as usize; //-- usize is the minimum size in os which is 32 bits
+    let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
+    let host = env::var("HOST").expect("⚠️ no host variable set");
+    let port = env::var("AYOUB_PORT").expect("⚠️ no port variable set");
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the oneshot channel
+    let server_addr = format!("{}:{}", host, port).as_str().parse::<SocketAddr>().unwrap();
 
 
 
@@ -135,59 +128,6 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
-
-    // -------------------------------- cli args setup
-    //
-    // ------------------------------------------------------------------
-    let username_cli = &String::new();
-    let access_level_cli = &String::new();
-    let args: Vec<String> = env::args().collect();
-    let mut service_name = &args[1]; //-- since args[1] is of type String we must clone it or borrow its ownership using & to prevent args from moving, by assigning the first elem of args to service_name we'll lose the ownership of args (cause its ownership will be belonged to service_name) and args lifetime will be dropped from the ram 
-    let service_port = &args[2];
-    // if &args[1] == &"".to_string() && &args[2] == &"".to_string(){
-    //     username_cli = &args[1]; //-- the username that we want to set his/her access level to dev
-    //     access_level_cli = &args[1]; //-- the access level that must be used to update the user access_level
-    // } else{
-    //     username_cli = &args[3]; //-- the username that we want to set his/her access level to dev
-    //     access_level_cli = &args[4]; //-- the access level that must be used to update the user access_level   
-    // }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // -------------------------------- service setup
-    //
-    // ------------------------------------------------------------
-    let mut server_addr: Option<SocketAddr> = if service_name != &"".to_string() && service_port != &"".to_string(){ //-- if none of the argument was empty we set the server_addr to the one that we've got from the cli input otherwise we set it to None to fill it later using the current_service as the service_name 
-        Some(format!("{}:{}", host, service_port).as_str().parse::<SocketAddr>().unwrap()) //-- converting the host and port String into the as_str() then parse it based on SocketAddr generic type
-    } else{
-        service_name = &current_service; //-- setting the serivce_name to the current_service read from the .env file cause it's empty read from the cli input
-        None
-    };
-
-    
-
-
-
-
-
-
-
-
-
-    
-
-    
-    
     // -------------------------------- app storage setup
     //
     // ---------------------------------------------------------------------
@@ -244,12 +184,22 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
+    
 
 
 
-    // -------------------------------- set dev access level for passed in username in cli
+
+
+
+
+
+
+    // -------------------------------- update to dev access level
     //
-    // ---------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    let args: Vec<String> = env::args().collect();
+    let username_cli = &args[1];
+    let access_level_cli = &args[2];
     if username_cli != &"".to_string() && access_level_cli != &"".to_string(){
         match utils::set_user_access(username_cli.to_owned(), access_level_cli.parse::<u8>().unwrap(), db.clone()).await{
             Ok(user_info) => {
@@ -278,7 +228,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     
     
 
-    // -------------------------------- building the ayoub service from the router
+    // -------------------------------- building the ayoub server from the router
     //
     // --------------------------------------------------------------------------------------------------------
     let api = Router::builder()
@@ -288,13 +238,9 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         .build()
         .unwrap();
 
-    info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
+    info!("running auth server on port {} - {}", port, chrono::Local::now().naive_local());
     let ayoub_service = RouterService::new(api).unwrap();
-    if server_addr == None{
-        server_addr = Some(auth_server_addr);
-    }
-
-    let ayoub_server = Server::bind(&server_addr.unwrap()).serve(ayoub_service);
+    let ayoub_server = Server::bind(&server_addr).serve(ayoub_service);
     let ayoub_graceful = ayoub_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
     if let Err(e) = ayoub_graceful.await{ //-- awaiting on the server to receive the shutdown signal
         error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
