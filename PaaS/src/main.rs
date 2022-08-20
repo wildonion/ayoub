@@ -44,7 +44,7 @@ Coded by
 
 use constants::MainResult;
 use mongodb::Client;
-use routerify::RouterService;
+use routerify::{RouterService, Router};
 use std::{net::SocketAddr, sync::Arc, env};
 use chrono::Local;
 use dotenv::dotenv;
@@ -110,7 +110,6 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
     let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let host = env::var("HOST").expect("⚠️ no host variable set");
     let auth_port = env::var("AYOUB_AUTH_PORT").expect("⚠️ no port variable set for auth service");
     let event_port = env::var("AYOUB_EVENT_PORT").expect("⚠️ no port variable set for event service");
@@ -213,9 +212,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
             Ok(mut init_db) => {
                 init_db.engine = Some(db_engine);
                 init_db.url = Some(db_addr);
-                // let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
-                let mongodb_conn = &Client::with_uri_str(init_db.url.as_ref().unwrap()).await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
-                let mongo_instance: Option<&Client> = Some(mongodb_conn.as_ref().unwrap()); 
+                let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
                 Some( //-- putting the Arc-ed db inside the Option
                     Arc::new( //-- cloning app_storage to move it between threads
                         ctx::app::Storage{ //-- defining db context 
@@ -223,7 +220,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
                             db: Some(
                                 ctx::app::Db{
                                     mode: init_db.mode,
-                                    instance: Some(mongo_instance.unwrap()),
+                                    instance: Some(mongodb_instance),
                                     engine: init_db.engine,
                                     url: init_db.url,
                                 }
@@ -239,10 +236,6 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         }
     } else{
         empty_app_storage
-    }; 
-    let app_storage: Option<&'static Client> = match db.as_ref().unwrap().db.as_ref().unwrap().mode{
-        ctx::app::Mode::On => db.as_ref().unwrap().db.as_ref().unwrap().instance, //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client>
-        ctx::app::Mode::Off => None, //-- no db is available cause it's off
     };
 
 
@@ -285,90 +278,46 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     
     
 
-    // -------------------------------- building services, signal channel handling and server setup
+    // -------------------------------- building the ayoub service from the router
     //
     // --------------------------------------------------------------------------------------------------------
-    if service_name.as_str() == "auth"{
-        info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let auth_router = routers::auth::register(app_storage.clone()).await;
-        let auth_serivce = RouterService::new(auth_router).unwrap(); //-- making a new auth server by passing the generated storage
-        if server_addr == None{
-            server_addr = Some(auth_server_addr);
-        }
-        let mut auth_server = Server::bind(&server_addr.unwrap()).serve(auth_serivce);
-        // ------------------------------------------------
-        // ------------------------------------------------
-        let auth_graceful = auth_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
-        if let Err(e) = auth_graceful.await{ //-- awaiting on the server to receive the shutdown signal
-            error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
-        }
-        // TODO - if the number of clients reached too many requests shutdown the server
-        // TODO - call add_client() method to add an address into the clients vector
-        // ...
-        sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
-        // sender.send(1); //-- freez feature
-        
-        //
-        // ...
-        //
+    let api = Router::builder()
+        .scope("/auth", routers::auth::register().await)
+        .scope("/event", routers::event::register().await)
+        .scope("/game", routers::game::register().await)
+        .build()
+        .unwrap();
 
-        Ok(())
-
-    } else if service_name.as_str() == "event"{
-        info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let event_router = routers::event::register(app_storage.clone()).await;
-        let event_serivce = RouterService::new(event_router).unwrap(); //-- making a new auth server by passing the generated storage
-        if server_addr == None{
-            server_addr = Some(auth_server_addr);
-        }
-        let mut event_server = Server::bind(&server_addr.unwrap()).serve(event_serivce);
-        // ------------------------------------------------
-        // ------------------------------------------------
-        let event_graceful = event_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
-        if let Err(e) = event_graceful.await{ //-- awaiting on the server to receive the shutdown signal
-            error!("event server error {} - {}", e, chrono::Local::now().naive_local());
-        }
-        // TODO - if the number of clients reached too many requests shutdown the server
-        // TODO - call add_client() method to add an address into the clients vector
-        // ...
-        sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
-        // sender.send(1); //-- freez feature 
-
-        // 
-        // ...
-        //
-
-        Ok(())
-    } else if service_name.as_str() == "game"{
-        info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let game_router = routers::game::register(app_storage.clone()).await;
-        let game_serivce = RouterService::new(game_router).unwrap(); //-- making a new auth server by passing the generated storage
-        if server_addr == None{
-            server_addr = Some(auth_server_addr);
-        }
-        let mut game_server = Server::bind(&server_addr.unwrap()).serve(game_serivce);
-        // ------------------------------------------------
-        // ------------------------------------------------
-        let game_graceful = game_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
-        if let Err(e) = game_graceful.await{ //-- awaiting on the server to receive the shutdown signal
-            error!("game server error {} - {}", e, chrono::Local::now().naive_local());
-        }
-        // TODO - if the number of clients reached too many requests shutdown the server
-        // TODO - call add_client() method to add an address into the clients vector
-        // ...
-        sender.send(0).unwrap(); //-- trigerring the shutdown signal on some bad event like DDOS or anything shitty 
-        // sender.send(1); //-- freez feature
-
-        // 
-        // ...
-        //
-
-        Ok(())
-    } else{
-        Ok(())
+    info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
+    let ayoub_service = RouterService::new(api).unwrap();
+    if server_addr == None{
+        server_addr = Some(auth_server_addr);
     }
+
+    let ayoub_server = Server::bind(&server_addr.unwrap()).serve(ayoub_service);
+    let ayoub_graceful = ayoub_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
+    if let Err(e) = ayoub_graceful.await{ //-- awaiting on the server to receive the shutdown signal
+        error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
+    }
+
+
+
+
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        Ok(())
     
-    
+
 
 
 

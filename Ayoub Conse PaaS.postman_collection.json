@@ -139,15 +139,6 @@
 						},
 						"method": "POST",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{auth}}/auth/check-token",
 							"host": [
@@ -242,7 +233,7 @@
 								"all"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs Dev Access Level.***"
 					},
 					"response": []
 				}

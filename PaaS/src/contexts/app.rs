@@ -30,7 +30,7 @@ pub struct Db{
     pub mode: Mode,
     pub engine: Option<String>,
     pub url: Option<String>,
-    pub instance: Option<&'static Client>,
+    pub instance: Option<Client>,
 }
 
 impl Default for Db{

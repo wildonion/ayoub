@@ -30,13 +30,10 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
         
     let whole_body_bytes = hyper::body::aggregate(req.into_body()).await.unwrap(); //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all futures stream or chunks which is utf8 bytes - since we don't know the end yet, we can't simply stream the chunks as they arrive (cause all futures stream or chunks which are called chunks are arrived asynchronously), so here we do `.await` on the future, waiting on concatenating the full body after all chunks arrived then afterwards the content can be reversed
     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -199,13 +196,10 @@ pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<B
 
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
         
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   

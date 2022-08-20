@@ -10,7 +10,7 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * third party APIs setup : update OTP token in `.env` file with kavenegar API token  
 
-* group's and player's picture profile
+* deck, group's and player's upload picture
 
 * make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`) + complete all TODOs
 

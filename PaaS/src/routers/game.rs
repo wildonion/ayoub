@@ -11,19 +11,26 @@
    |    return : a Router of type either hyper response body or error response
    |
    |
+   |
+   | we don't need to have one response object for each router and we can build
+   | a new one inside the body of each router since rust doesn't support garbage
+   | collection rule and each response object will be dropped once each router 
+   | router body scope gets ended.
+   |
 
 */
 
 
 
 
+use std::env;
 use mongodb::Client;
 use routerify::{Router, Middleware};
 use routerify_cors::enable_cors_all;
 use crate::middlewares;
+use crate::constants::*;
 use crate::contexts as ctx;
-use hyper::{Method, Body, Response};
-use std::sync::Arc;
+use hyper::{header, Body, Response, StatusCode};
 use crate::controllers::game::{
                                 role::{add as add_role, all as get_roles, disable as disable_role}, 
                                 deck::{add as add_deck, all as get_decks, disable as disable_deck},
@@ -37,34 +44,59 @@ use crate::controllers::game::{
 
 
 
-pub async fn register(storage: Option<&'static Client>) -> Router<Body, hyper::Error>{  
+pub async fn register() -> Router<Body, hyper::Error>{  
+
+
+
+    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
+    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
+    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
+    let app_storage = Client::with_uri_str(&db_addr).await.unwrap();
+
 
 
     Router::builder()
-        .data(storage)
+        .data(app_storage)
         .middleware(enable_cors_all()) //-- enable CORS middleware
         .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware
-        .post("/game/role/add", add_role)
-        .get("/game/role/get/availables", get_roles)
-        .post("/game/role/disable", disable_role)
-        .post("/game/deck/add", add_deck)
-        .get("/game/deck/get/availables", get_decks)
-        .post("/game/deck/disable", disable_deck)
-        .post("/game/side/add", add_side)
-        .get("/game/side/get/availables", get_sides)
-        .post("/game/side/disable", disable_side)
-        .post("/game/player/update/role", update_role)
-        .post("/game/player/update/side", update_side)
-        .post("/game/player/update/status", update_status)
-        .post("/game/player/update/role-ability", update_role_ability)
-        .post("/game/player/chain", chain_to_another_player)
-        .post("/game/player/get/single", get_single)
-        .post("/game/player/get/role-ability", get_player_role_ability)
-        .post("/game/player/get/chain-infos", get_player_chain_infos)
-        .post("/game/god/create/group", create_group)
-        .post("/game/god/update/group/", update_group)
-        .post("/game/god/update/group/image", upload_img)
-        .get("/game/get/group/all", get_groups)
+        .get("/page", |req| async move{
+            let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                message: WELCOME,
+                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                status: 200,
+            };
+            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+            Ok(
+                res
+                    .status(StatusCode::OK)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                    .unwrap()
+            )
+        })
+        .post("/role/add", add_role)
+        .get("/role/get/availables", get_roles)
+        .post("/role/disable", disable_role)
+        .post("/deck/add", add_deck)
+        .get("/deck/get/availables", get_decks)
+        .post("/deck/disable", disable_deck)
+        .post("/side/add", add_side)
+        .get("/side/get/availables", get_sides)
+        .post("/side/disable", disable_side)
+        .post("/player/update/role", update_role)
+        .post("/player/update/side", update_side)
+        .post("/player/update/status", update_status)
+        .post("/player/update/role-ability", update_role_ability)
+        .post("/player/chain", chain_to_another_player)
+        .post("/player/get/single", get_single)
+        .post("/player/get/role-ability", get_player_role_ability)
+        .post("/player/get/chain-infos", get_player_chain_infos)
+        .post("/god/create/group", create_group)
+        .post("/god/update/group/", update_group)
+        .post("/god/update/group/image", upload_img)
+        .get("/get/group/all", get_groups)
         .options("/", middlewares::cors::send_preflight_response)
         .any(not_found) //-- handling 404 request
         .build()

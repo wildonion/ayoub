@@ -4,7 +4,7 @@
 
 
 
-
+use routerify::prelude::*;
 use crate::middlewares;
 use crate::utils;
 use crate::contexts as ctx;
@@ -38,12 +38,8 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
      
 
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -238,13 +234,10 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     ////////////////////////////////// DB Ops
                     
@@ -310,13 +303,10 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
 
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   

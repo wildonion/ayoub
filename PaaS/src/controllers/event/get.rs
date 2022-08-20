@@ -38,13 +38,10 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -72,39 +69,51 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
                                     let mut all_expired_events = schemas::event::AvailableEvents{
                                         events: vec![],
                                     };
-                                    let find_options = FindOptions::builder().sort(doc!{"players": {"$elemMatch": {"_id": player_info._id}}}).build();
-                                    let mut events_cursor = events.find(filter, find_options).await.unwrap(); //-- we must define the cursor as mutable since fetching all events is a mutable operation
-                                    while let Some(event_info) = events_cursor.try_next().await.unwrap(){
-                                        all_expired_events.events.push(event_info)
-                                    }
-                                    if all_expired_events.events.is_empty(){
-                                        let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
-                                            status: 404,
-                                        };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                        Ok(
-                                            res
-                                                .status(StatusCode::NOT_FOUND)
-                                                .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
-                                        )
-                                    } else{
-                                        let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
-                                            message: FETCHED,
-                                            data: Some(all_expired_events.events),
-                                            status: 200,
-                                        };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                        Ok(
-                                            res
-                                                .status(StatusCode::OK)
-                                                .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                .unwrap()
-                                        )
+                                    match events.find(filter, None).await{
+                                        Ok(mut cursor) => {
+                                            while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
+                                                all_expired_events.events.push(event);
+                                            }
+                                            let player_events = 
+                                                            all_expired_events.events
+                                                                    .into_iter()
+                                                                    .map(|event| {
+                                                                        for p in event.clone().players.unwrap(){
+                                                                            if p._id == _id{
+                                                                                break //-- break here since we found our player 
+                                                                            }
+                                                                        }
+                                                                        event //-- this is the event which contains our player info
+                                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector of ReservePlayerInfoResponse struct
+                                            let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                                                message: FETCHED,
+                                                data: Some(player_events),
+                                                status: 200,
+                                            };
+                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                            Ok(
+                                                res
+                                                    .status(StatusCode::OK) //-- not found route or method not allowed
+                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                    .unwrap()
+                                            )
+                                        },
+                                        Err(e) => {
+                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                status: 500,
+                                            };
+                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                            Ok(
+                                                res
+                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                    .unwrap() 
+                                            )
+                                        },
                                     }
 
                                     //////////////////////////////////
@@ -211,13 +220,10 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -240,44 +246,56 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
 
                                     ////////////////////////////////// DB Ops
                                     
-                                    let filter = doc! { "is_expired": true }; //-- filtering all expired events
-                                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                                    let filter = doc! { "is_expired": false }; //-- filtering all expired events
+                                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                     let mut all_none_expired_events = schemas::event::AvailableEvents{
                                         events: vec![],
                                     };
-                                    let find_options = FindOptions::builder().sort(doc!{"players": {"$elemMatch": {"_id": player_info._id}}}).build();
-                                    let mut events_cursor = events.find(filter, find_options).await.unwrap(); //-- we must define the cursor as mutable since fetching all events is a mutable operation
-                                    while let Some(event_info) = events_cursor.try_next().await.unwrap(){
-                                        all_none_expired_events.events.push(event_info)
-                                    }
-                                    if all_none_expired_events.events.is_empty(){
-                                        let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
-                                            status: 404,
-                                        };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                        Ok(
-                                            res
-                                                .status(StatusCode::NOT_FOUND)
-                                                .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
-                                        )
-                                    } else{
-                                        let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
-                                            message: FETCHED,
-                                            data: Some(all_none_expired_events.events),
-                                            status: 200,
-                                        };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                        Ok(
-                                            res
-                                                .status(StatusCode::OK)
-                                                .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                .unwrap()
-                                        )
+                                    match events.find(filter, None).await{
+                                        Ok(mut cursor) => {
+                                            while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
+                                                all_none_expired_events.events.push(event);
+                                            }
+                                            let player_events = 
+                                                            all_none_expired_events.events
+                                                                    .into_iter()
+                                                                    .map(|event| {
+                                                                        for p in event.clone().players.unwrap(){
+                                                                            if p._id == _id{
+                                                                                break //-- break here since we found our player 
+                                                                            }
+                                                                        }
+                                                                        event //-- this is the event which contains our player info
+                                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector of ReservePlayerInfoResponse struct
+                                            let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                                                message: FETCHED,
+                                                data: Some(player_events),
+                                                status: 200,
+                                            };
+                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                            Ok(
+                                                res
+                                                    .status(StatusCode::OK) //-- not found route or method not allowed
+                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                    .unwrap()
+                                            )
+                                        },
+                                        Err(e) => {
+                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                status: 500,
+                                            };
+                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                            Ok(
+                                                res
+                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                    .unwrap() 
+                                            )
+                                        },
                                     }
 
                                     //////////////////////////////////
@@ -383,13 +401,10 @@ pub async fn all_none_expired(req: Request<Body>) -> GenericResult<hyper::Respon
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     ////////////////////////////////// DB Ops
                     
@@ -455,13 +470,10 @@ pub async fn all_expired(req: Request<Body>) -> GenericResult<hyper::Response<Bo
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     ////////////////////////////////// DB Ops
                     
@@ -528,13 +540,10 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
 
     ////////////////////////////////// DB Ops
                     
@@ -600,13 +609,10 @@ pub async fn single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
     
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -715,13 +721,10 @@ pub async fn group_all(req: Request<Body>) -> GenericResult<hyper::Response<Body
     
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = Client::with_uri_str(db_addr).await;
+    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
     
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
