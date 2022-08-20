@@ -17,6 +17,8 @@
 
 
 
+use routerify::Router;
+use routerify_cors::enable_cors_all;
 use crate::middlewares;
 use crate::contexts as ctx;
 use hyper::{Method, Body, Response};
@@ -34,108 +36,35 @@ use crate::controllers::game::{
 
 
 
-pub async fn register(storage: Option<Arc<ctx::app::Storage>>, mut app: ctx::app::Api) -> Result<Response<Body>, hyper::Error>{ // NOTE - we've defined the app as mutable cause we want to change the name field later
+pub async fn register() -> Router<Body, hyper::Error>{  
 
 
-
-    let req = app.req.as_ref().unwrap(); //-- as_ref() method will make a copy by borrowing what's inside the wrapped type, here our wrapped type is Option which as_ref() will convert &Option<T> to Option<&T> so we can haved T on later scopes thus preventing it from moving 
-    let app_storage = match storage.as_ref().unwrap().db.as_ref().unwrap().mode{
-        ctx::app::Mode::On => storage.as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client>
-        ctx::app::Mode::Off => None, //-- no db is available cause it's off
-    };
-
-
-
-    match (req.method(), req.uri().path()){
-        (&Method::POST, "/game/role/add") => {
-            app.name = "/game/role/add".to_string();
-            add_role(app_storage, app).await
-        },
-        (&Method::GET, "/game/role/get/availables") => {
-            app.name = "/game/role/get/availables".to_string();
-            get_roles(app_storage, app).await
-        },
-        (&Method::POST, "/game/role/disable") => {
-            app.name = "/game/role/disable".to_string();
-            disable_role(app_storage, app).await
-        },
-        (&Method::POST, "/game/deck/add") => {
-            app.name = "/game/deck/add".to_string();
-            add_deck(app_storage, app).await
-        },
-        (&Method::GET, "/game/deck/get/availables") => {
-            app.name = "/game/deck/get/availables".to_string();
-            get_decks(app_storage, app).await
-        },
-        (&Method::POST, "/game/deck/disable") => {
-            app.name = "/game/deck/disable".to_string();
-            disable_deck(app_storage, app).await
-        },
-        (&Method::GET, "/game/side/add") => {
-            app.name = "/game/side/add".to_string();
-            add_side(app_storage, app).await
-        },
-        (&Method::GET, "/game/side/get/availables") => {
-            app.name = "/game/side/get/availables".to_string();
-            get_sides(app_storage, app).await
-        },
-        (&Method::POST, "/game/side/disable") => {
-            app.name = "/game/side/disable".to_string();
-            disable_side(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/update/role") => {
-            app.name = "/game/player/update/role".to_string();
-            update_role(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/update/side") => {
-            app.name = "/game/player/update/side".to_string();
-            update_side(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/update/status") => {
-            app.name = "/game/player/update/status".to_string();
-            update_status(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/update/role-ability") => {
-            app.name = "/game/player/update/role-ability".to_string();
-            update_role_ability(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/chain") => {
-            app.name = "/game/player/chain".to_string();
-            chain_to_another_player(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/get/single") => {
-            app.name = "/game/player/get/single".to_string();
-            get_single(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/get/role-ability") => {
-            app.name = "/game/player/get/role-ability".to_string();
-            get_player_role_ability(app_storage, app).await
-        },
-        (&Method::POST, "/game/player/get/chain-infos") => {
-            app.name = "/game/player/get/chain-infos".to_string();
-            get_player_chain_infos(app_storage, app).await
-        },
-        (&Method::POST, "/game/god/create/group") => {
-            app.name = "/game/god/create/group".to_string();
-            create_group(app_storage, app).await
-        },
-        (&Method::GET, "/game/get/group/all") => {
-            app.name = "/game/get/group/all".to_string();
-            get_groups(app_storage, app).await
-        },
-        (&Method::POST, "/game/god/update/group/") => {
-            app.name = "/game/god/update/group/".to_string();
-            update_group(app_storage, app).await
-        },
-        (&Method::POST, "/game/god/update/group/image") => {
-            app.name = "/game/god/update/group/".to_string();
-            upload_img(app_storage, app).await
-        },
-        (&Method::OPTIONS, "/")    => {
-            middlewares::cors::send_preflight_response().await
-        },
-        _                                 => not_found().await,
-    }
+    Router::builder()
+        .middleware(enable_cors_all())
+        .post("/game/role/add", add_role)
+        .get("/game/role/get/availables", get_roles)
+        .post("/game/role/disable", disable_role)
+        .post("/game/deck/add", add_deck)
+        .get("/game/deck/get/availables", get_decks)
+        .post("/game/deck/disable", disable_deck)
+        .post("/game/side/add", add_side)
+        .get("/game/side/get/availables", get_sides)
+        .post("/game/side/disable", disable_side)
+        .post("/game/player/update/role", update_role)
+        .post("/game/player/update/side", update_side)
+        .post("/game/player/update/status", update_status)
+        .post("/game/player/update/role-ability", update_role_ability)
+        .post("/game/player/chain", chain_to_another_player)
+        .post("/game/player/get/single", get_single)
+        .post("/game/player/get/role-ability", get_player_role_ability)
+        .post("/game/player/get/chain-infos", get_player_chain_infos)
+        .post("/game/god/create/group", create_group)
+        .post("/game/god/update/group/", update_group)
+        .post("/game/god/update/group/image", upload_img)
+        .get("/game/get/group/all", get_groups)
+        .options("/", middlewares::cors::send_preflight_response)
+        .build()
+        .unwrap()
 
 
 }

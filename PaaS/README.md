@@ -10,9 +10,7 @@ $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 
 * third party APIs setup : update OTP token in `.env` file with kavenegar API token  
 
-* upload group's picture in `create()` function controller
-
-* role reveal api in `reveal.rs` controller
+* group's and player's picture profile
 
 * make a PaaS cli for ayoub a framework (_runtime_ object in `main.rs`) + complete all TODOs
 

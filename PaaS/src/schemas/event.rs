@@ -3,7 +3,7 @@
 
 
 
-use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponse};
+use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponse, ReservePlayerInfoResponseWithRoleName, AddGroupInfoToEvent};
 use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use uuid::Uuid;
@@ -220,6 +220,7 @@ pub struct EventInfo{
     pub content: String,
     pub deck_id: String,
     pub entry_price: String,
+    pub group_info: Option<AddGroupInfoToEvent>,
     pub creator_wallet_address: Option<String>,
     pub upvotes: Option<u16>,
     pub downvotes: Option<u16>,
@@ -227,6 +228,35 @@ pub struct EventInfo{
     pub phases: Option<Vec<Phase>>,
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponse>>,
+    pub is_expired: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------
+| this struct will be used to deserialize event info bson from the mongodb into this struct
+| -----------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct RevealEventInfo{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub deck_id: String,
+    pub entry_price: String,
+    pub group_info: Option<AddGroupInfoToEvent>,
+    pub creator_wallet_address: Option<String>,
+    pub upvotes: Option<u16>,
+    pub downvotes: Option<u16>,
+    pub voters: Option<Vec<Voter>>,
+    pub phases: Option<Vec<Phase>>,
+    pub max_players: Option<u8>,
+    pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
@@ -247,12 +277,13 @@ pub struct AddEventRequest{
     pub content: String,
     pub deck_id: String, //-- this is the id of the selected deck for this event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub entry_price: String,
+    pub group_info: Option<AddGroupInfoToEvent>,
     pub creator_wallet_address: Option<String>, //-- it might be None at initializing stage inside the add api
     pub upvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the upvotes inside the request body, we'll fill it inside the server
     pub downvotes: Option<u16>, // NOTE - we set this field to Option cause we don't want to pass the downvotes inside the request body, we'll fill it inside the server
     pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on
     pub phases: Option<Vec<Phase>>, // NOTE - we set this field to Option cause we don't want to pass the phases inside the request body, we'll update it later on
-    pub max_players: u8, // NOTE - number of maximum players for this event
+    pub max_players: Option<u8>, // NOTE - number of maximum players for this event
     pub players: Option<Vec<ReservePlayerInfoResponse>>, // NOTE - vector of all players which has participated for this event
     pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object

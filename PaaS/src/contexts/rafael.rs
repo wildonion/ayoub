@@ -29,9 +29,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
     const APP_NAME: &str = "Rafless";
     use std::{fmt, env, sync::{Arc, Mutex}};
-    use crate::services;
     use crate::utils;
-    use crate::contexts::app::Api;
     use futures::channel::mpsc as future_mpsc;
     use tokio::sync::mpsc as tokio_mpsc;
     use futures::join as futures_join;
@@ -226,7 +224,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     impl<S> Serverless for Runtime<S>{
 
         type Service = S;
-        type App     = self::Api; 
+        type App     = String; 
         type Cost    = u128; 
 
         fn run(&mut self) -> Self{ //-- the first param is a shared mutable pointer to the instance of the runtime 

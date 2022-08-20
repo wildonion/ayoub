@@ -146,6 +146,23 @@ pub struct GroupInfo{
 
 
 /*
+  ------------------------------------------------------------------------------------
+| this struct will be used to deserialize group info json from client into this struct
+| ------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct AddGroupInfoToEvent{
+    pub _id: String, //-- ObjectId is the bson type of _id inside the mongodb
+    pub name: String,
+    pub owner: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
   -------------------------------------------------------------------------------------
 | this struct will be used to deserialize group info json from client into this struct
 | -------------------------------------------------------------------------------------
@@ -308,7 +325,7 @@ pub struct UpdatePlayerRoleAbilityRequest{
 pub struct InsertPlayerRoleAbilityRequest{
     pub user_id: String,
     pub role_id: String,
-    pub even_id: String,
+    pub event_id: String,
     pub current_ability: Option<u8>, //-- on inserting a new record this field will be initialized empty and will be updated during the game by the God
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -390,6 +407,24 @@ pub struct ReservePlayerInfoResponse{
   pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
   pub username: String,
   pub status: u8,
+  pub role_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
+  pub side_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------------------------
+| this struct will be used to serialize player info after reservation into the json to send back to the user
+| -----------------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct ReservePlayerInfoResponseWithRoleName{
+  pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+  pub username: String,
+  pub status: u8,
+  pub role_name: Option<String>,
   pub role_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
   pub side_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
 }
