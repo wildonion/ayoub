@@ -26,10 +26,11 @@ use std::env;
 // -------------------------------------------------------------------------
 pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);

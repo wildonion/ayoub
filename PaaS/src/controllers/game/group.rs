@@ -39,10 +39,11 @@ use std::env;
 
 pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -206,10 +207,11 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
 
 pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -245,7 +247,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     ////////////////////////////////// DB Ops
 
-                                    let groups = db.clone().unwrap().database("ayoub").collection::<schemas::game::GroupInfo>("groups");
+                                    let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::GroupInfo>("groups");
                                     match groups.find_one(doc!{"group_name": group_info.clone().name}, None).await.unwrap(){
                                         Some(group_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::GroupInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is GroupInfo struct
@@ -264,7 +266,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let groups = db.clone().unwrap().database("ayoub").collection::<schemas::game::AddGroupRequest>("groups"); //-- using AddGroupRequest struct to insert a deck info into groups collection 
+                                            let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddGroupRequest>("groups"); //-- using AddGroupRequest struct to insert a deck info into groups collection 
                                             let group_doc = schemas::game::AddGroupRequest{
                                                 name: group_name,
                                                 owner: group_owner,
@@ -410,10 +412,11 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
 pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -445,7 +448,7 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     let group_id = ObjectId::parse_str(update_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let groups = db.clone().unwrap().database("ayoub").collection::<schemas::game::GroupInfo>("groups"); //-- connecting to groups collection to update the name field - we want to deserialize all user bsons into the GroupInfo struct
+                                    let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- connecting to groups collection to update the name field - we want to deserialize all user bsons into the GroupInfo struct
                                     match groups.find_one_and_update(doc!{"_id": group_id}, doc!{"$set": {"name": update_info.name, "updated_at": Some(now)}}, None).await.unwrap(){
                                         Some(group_doc) => {
                                             let group_info = schemas::game::GroupInfo{
@@ -591,10 +594,11 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 // -------------------------------------------------------------------------
 pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -602,7 +606,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     
     ////////////////////////////////// DB Ops
                     
-    let groups = db.clone().unwrap().database("ayoub").collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch and deserialize all groups infos or documents from BSON into the GroupInfo struct
+    let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch and deserialize all groups infos or documents from BSON into the GroupInfo struct
     let mut available_groups = schemas::game::AvailableGroups{
         groups: vec![],
     };

@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
-use std::thread; 
+use std::{env, thread}; 
 use futures::TryStreamExt;
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
@@ -168,8 +168,9 @@ pub async fn set_user_access(username: String, new_access_level: u8, storage: Op
     };
 
     ////////////////////////////////// DB Ops
-    
-    let users = app_storage.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
+
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
+    let users = app_storage.unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
     match users.find_one_and_update(doc!{"username": username}, doc!{"access_level": 0}, None).await.unwrap(){ //-- finding user based on username to update access_level field to dev access
         Some(user_doc) => Ok(user_doc), 
         None => Err(app::Nill(&[])),
@@ -183,8 +184,9 @@ pub async fn set_user_access(username: String, new_access_level: u8, storage: Op
 
 
 pub async fn get_random_doc(storage: Option<&Client>) -> Option<schemas::game::RoleInfo>{
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let mut all = vec![];
-    let roles = storage.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
+    let roles = storage.clone().unwrap().database(&db_name).collection::<schemas::game::RoleInfo>("roles");
     let random_record_setup = doc!{"$sample": {"size": 1}};
     let pipeline = vec![random_record_setup];
     match roles.aggregate(pipeline, None).await{

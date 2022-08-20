@@ -8,7 +8,7 @@
    |--------------------------------------------------------------------------
    |
    |    job    : the following registers a router requested by the client
-   |    return : a Result of type either successful or error response
+   |    return : a Router of type either hyper response body or error response
    |
    |
 
@@ -17,7 +17,8 @@
 
 
 
-use routerify::Router;
+use mongodb::Client;
+use routerify::{Router, Middleware};
 use routerify_cors::enable_cors_all;
 use crate::middlewares;
 use crate::contexts as ctx;
@@ -36,11 +37,13 @@ use crate::controllers::game::{
 
 
 
-pub async fn register() -> Router<Body, hyper::Error>{  
+pub async fn register(storage: Option<&'static Client>) -> Router<Body, hyper::Error>{  
 
 
     Router::builder()
-        .middleware(enable_cors_all())
+        .data(storage)
+        .middleware(enable_cors_all()) //-- enable CORS middleware
+        .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware
         .post("/game/role/add", add_role)
         .get("/game/role/get/availables", get_roles)
         .post("/game/role/disable", disable_role)
@@ -63,6 +66,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/game/god/update/group/image", upload_img)
         .get("/game/get/group/all", get_groups)
         .options("/", middlewares::cors::send_preflight_response)
+        .any(not_found) //-- handling 404 request
         .build()
         .unwrap()
 

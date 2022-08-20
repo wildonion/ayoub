@@ -32,10 +32,11 @@ use std::env;
 
 pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -73,7 +74,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
                                     
-                                    let roles = db.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles");
+                                    let roles = db.clone().unwrap().database(&db_name).collection::<schemas::game::RoleInfo>("roles");
                                     match roles.find_one(doc!{"name": role_info.clone().name}, None).await.unwrap(){
                                         Some(role_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::RoleInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is RoleInfo struct
@@ -92,7 +93,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let roles = db.clone().unwrap().database("ayoub").collection::<schemas::game::AddRoleRequest>("roles"); //-- using AddRoleRequest struct to insert a role info into roles collection 
+                                            let roles = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddRoleRequest>("roles"); //-- using AddRoleRequest struct to insert a role info into roles collection 
                                             let role_doc = schemas::game::AddRoleRequest{
                                                 name,
                                                 rate,
@@ -238,10 +239,11 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -250,7 +252,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     ////////////////////////////////// DB Ops
                     
     let filter = doc! { "is_disabled": false }; //-- filtering all none disabled roles
-    let roles = db.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles"); //-- selecting roles collection to fetch and deserialize all roles infos or documents from BSON into the RoleInfo struct
+    let roles = db.clone().unwrap().database(&db_name).collection::<schemas::game::RoleInfo>("roles"); //-- selecting roles collection to fetch and deserialize all roles infos or documents from BSON into the RoleInfo struct
     let mut available_roles = schemas::game::AvailableRoles{
         roles: vec![],
     };
@@ -308,10 +310,11 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -342,7 +345,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     ////////////////////////////////// DB Ops
                                     
                                     let role_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let roles = db.clone().unwrap().database("ayoub").collection::<schemas::game::RoleInfo>("roles"); //-- selecting roles collection to fetch all role infos into the RoleInfo struct
+                                    let roles = db.clone().unwrap().database(&db_name).collection::<schemas::game::RoleInfo>("roles"); //-- selecting roles collection to fetch all role infos into the RoleInfo struct
                                     match roles.find_one_and_update(doc!{"_id": role_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding role based on role id
                                         Some(role_doc) => { //-- deserializing BSON into the RoleInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::RoleInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is RoleInfo struct

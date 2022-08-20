@@ -43,6 +43,7 @@ Coded by
 
 
 use constants::MainResult;
+use mongodb::Client;
 use routerify::RouterService;
 use std::{net::SocketAddr, sync::Arc, env};
 use chrono::Local;
@@ -212,7 +213,9 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
             Ok(mut init_db) => {
                 init_db.engine = Some(db_engine);
                 init_db.url = Some(db_addr);
-                let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
+                // let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
+                let mongodb_conn = &Client::with_uri_str(init_db.url.as_ref().unwrap()).await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
+                let mongo_instance: Option<&Client> = Some(mongodb_conn.as_ref().unwrap()); 
                 Some( //-- putting the Arc-ed db inside the Option
                     Arc::new( //-- cloning app_storage to move it between threads
                         ctx::app::Storage{ //-- defining db context 
@@ -220,7 +223,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
                             db: Some(
                                 ctx::app::Db{
                                     mode: init_db.mode,
-                                    instance: Some(mongodb_instance),
+                                    instance: Some(mongo_instance.unwrap()),
                                     engine: init_db.engine,
                                     url: init_db.url,
                                 }
@@ -236,11 +239,11 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         }
     } else{
         empty_app_storage
+    }; 
+    let app_storage: Option<&'static Client> = match db.as_ref().unwrap().db.as_ref().unwrap().mode{
+        ctx::app::Mode::On => db.as_ref().unwrap().db.as_ref().unwrap().instance, //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client>
+        ctx::app::Mode::Off => None, //-- no db is available cause it's off
     };
-
-
-    
-
 
 
 
@@ -287,7 +290,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     // --------------------------------------------------------------------------------------------------------
     if service_name.as_str() == "auth"{
         info!("running auth server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let auth_router = routers::auth::register().await;
+        let auth_router = routers::auth::register(app_storage.clone()).await;
         let auth_serivce = RouterService::new(auth_router).unwrap(); //-- making a new auth server by passing the generated storage
         if server_addr == None{
             server_addr = Some(auth_server_addr);
@@ -313,7 +316,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
     } else if service_name.as_str() == "event"{
         info!("running event server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let event_router = routers::event::register().await;
+        let event_router = routers::event::register(app_storage.clone()).await;
         let event_serivce = RouterService::new(event_router).unwrap(); //-- making a new auth server by passing the generated storage
         if server_addr == None{
             server_addr = Some(auth_server_addr);
@@ -338,7 +341,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         Ok(())
     } else if service_name.as_str() == "game"{
         info!("running game server on port {} - {}", service_port, chrono::Local::now().naive_local());
-        let game_router = routers::game::register().await;
+        let game_router = routers::game::register(app_storage.clone()).await;
         let game_serivce = RouterService::new(game_router).unwrap(); //-- making a new auth server by passing the generated storage
         if server_addr == None{
             server_addr = Some(auth_server_addr);

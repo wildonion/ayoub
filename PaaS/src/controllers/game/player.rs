@@ -36,10 +36,11 @@ use std::env;
 
 pub async fn update_role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -73,7 +74,7 @@ pub async fn update_role(req: Request<Body>) -> GenericResult<hyper::Response<Bo
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the role_id field - we want to deserialize all user bsons into the UserInfo struct
+                                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the role_id field - we want to deserialize all user bsons into the UserInfo struct
                                     match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"role_id": role_id, "updated_at": Some(now)}}, None).await.unwrap(){
                                         Some(user_doc) => {
                                             let user_info = schemas::auth::UserUpdateResponse{
@@ -221,10 +222,11 @@ pub async fn update_role(req: Request<Body>) -> GenericResult<hyper::Response<Bo
 
 pub async fn update_side(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -257,7 +259,7 @@ pub async fn update_side(req: Request<Body>) -> GenericResult<hyper::Response<Bo
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let side_id = ObjectId::parse_str(update_info.side_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the side_id field - we want to deserialize all user bsons into the UserInfo struct
+                                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the side_id field - we want to deserialize all user bsons into the UserInfo struct
                                     match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"side_id": side_id, "updated_at": Some(now)}}, None).await.unwrap(){
                                         Some(user_doc) => {
                                             let user_info = schemas::auth::UserUpdateResponse{
@@ -402,10 +404,11 @@ pub async fn update_side(req: Request<Body>) -> GenericResult<hyper::Response<Bo
 
 pub async fn update_status(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -438,7 +441,7 @@ pub async fn update_status(req: Request<Body>) -> GenericResult<hyper::Response<
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let status = bson::to_bson(&update_info.status).unwrap(); //-- we have to serialize the status to BSON Document object in order to update the mentioned field inside the collection
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the status field - we want to deserialize all user bsons into the UserInfo struct
+                                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the status field - we want to deserialize all user bsons into the UserInfo struct
                                     match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"status": status, "updated_at": Some(now)}}, None).await.unwrap(){
                                         Some(user_doc) => {
                                             let user_info = schemas::auth::UserUpdateResponse{
@@ -585,10 +588,11 @@ pub async fn update_status(req: Request<Body>) -> GenericResult<hyper::Response<
 
 pub async fn update_role_ability(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -623,7 +627,7 @@ pub async fn update_role_ability(req: Request<Body>) -> GenericResult<hyper::Res
                                     let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     let current_ability = bson::to_bson(&update_info.current_ability).unwrap(); //-- we have to serialize the current_ability to BSON Document object in order to update the mentioned field inside the collection
-                                    let player_roles_info = db.clone().unwrap().database("ayoub").collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
+                                    let player_roles_info = db.clone().unwrap().database(&db_name).collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
                                     match player_roles_info.find_one_and_update(doc!{"user_id": user_id, "event_id": event_id, "role_id": role_id}, doc!{"$set": {"current_ability": Some(current_ability), "updated_at": Some(now)}}, None).await.unwrap(){
                                         Some(user_doc) => {
                                             let response_body = ctx::app::Response::<schemas::game::PlayerRoleAbilityInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is PlayerRoleAbilityInfo struct
@@ -761,10 +765,11 @@ pub async fn update_role_ability(req: Request<Body>) -> GenericResult<hyper::Res
 pub async fn chain_to_another_player(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -795,7 +800,7 @@ pub async fn chain_to_another_player(req: Request<Body>) -> GenericResult<hyper:
                                     ////////////////////////////////// DB Ops
 
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let player_chain_info = db.clone().unwrap().database("ayoub").collection::<schemas::game::InsertPlayerChainToRequest>("player_chain_info"); //-- connecting to player_chain_info collection to insert a new document - we want to deserialize player chain info into the InsertPlayerChainToRequest struct
+                                    let player_chain_info = db.clone().unwrap().database(&db_name).collection::<schemas::game::InsertPlayerChainToRequest>("player_chain_info"); //-- connecting to player_chain_info collection to insert a new document - we want to deserialize player chain info into the InsertPlayerChainToRequest struct
                                     let player_chain_doc = schemas::game::InsertPlayerChainToRequest{
                                         from_id: update_info.from_id,
                                         to_id: update_info.to_id,
@@ -935,10 +940,11 @@ pub async fn chain_to_another_player(req: Request<Body>) -> GenericResult<hyper:
 
 pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- this api will return the current status and infos of a player during the game and can be called by the God and the player
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -969,7 +975,7 @@ pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                                     ////////////////////////////////// DB Ops
 
                                     let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
+                                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                                     match users.find_one(doc! { "_id": player_id }, None).await.unwrap(){
                                         Some(user_doc) => {
                                             let player_info = schemas::game::ReservePlayerInfoResponse{
@@ -1117,10 +1123,11 @@ pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
 
 pub async fn get_player_role_ability(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- this api will return the current role ability of a specific player during the game and can be called by the God and the player
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -1151,7 +1158,7 @@ pub async fn get_player_role_ability(req: Request<Body>) -> GenericResult<hyper:
                                     ////////////////////////////////// DB Ops
 
                                     let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let player_roles_info = db.clone().unwrap().database("ayoub").collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
+                                    let player_roles_info = db.clone().unwrap().database(&db_name).collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
                                     match player_roles_info.find_one(doc! { "user_id": player_id }, None).await.unwrap(){
                                         Some(player_role_ability_doc) => {
                                             let response_body = ctx::app::Response::<schemas::game::PlayerRoleAbilityInfo>{
@@ -1286,10 +1293,11 @@ pub async fn get_player_role_ability(req: Request<Body>) -> GenericResult<hyper:
 
 pub async fn get_player_chain_infos(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- this api will return the current chain infos of a specific player during the game and can be called by the God and the player
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -1321,7 +1329,7 @@ pub async fn get_player_chain_infos(req: Request<Body>) -> GenericResult<hyper::
 
                                     let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let filter = doc! { "from_id": player_id }; //-- filtering all none expired events
-                                    let player_chain_info = db.clone().unwrap().database("ayoub").collection::<schemas::game::PlayerChainToInfo>("player_chain_info"); //-- connecting to player_chain_info collection to get a document - we want to deserialize player chain info into the PlayerChainToInfo struct                        
+                                    let player_chain_info = db.clone().unwrap().database(&db_name).collection::<schemas::game::PlayerChainToInfo>("player_chain_info"); //-- connecting to player_chain_info collection to get a document - we want to deserialize player chain info into the PlayerChainToInfo struct                        
                                     let mut available_chain_infos = schemas::game::AvailableChainInfos{
                                         chain_infos: vec![],
                                     };

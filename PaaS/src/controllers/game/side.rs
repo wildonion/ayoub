@@ -35,10 +35,11 @@ use std::env;
 
 pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -72,7 +73,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
                                     
-                                    let sides = db.clone().unwrap().database("ayoub").collection::<schemas::game::SideInfo>("sides");
+                                    let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::SideInfo>("sides");
                                     match sides.find_one(doc!{"name": side_info.clone().name}, None).await.unwrap(){
                                         Some(side_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::SideInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is SideInfo struct
@@ -91,7 +92,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let sides = db.clone().unwrap().database("ayoub").collection::<schemas::game::AddSideRequest>("sides"); //-- using AddSideRequest struct to insert a side info into sides collection 
+                                            let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddSideRequest>("sides"); //-- using AddSideRequest struct to insert a side info into sides collection 
                                             let side_doc = schemas::game::AddSideRequest{
                                                 name,
                                                 is_disabled: Some(false),
@@ -235,10 +236,11 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -247,7 +249,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     ////////////////////////////////// DB Ops
                     
     let filter = doc! { "is_disabled": false }; //-- filtering all none disabled sides
-    let sides = db.clone().unwrap().database("ayoub").collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch and deserialize all sides infos or documents from BSON into the SideInfo struct
+    let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch and deserialize all sides infos or documents from BSON into the SideInfo struct
     let mut available_sides = schemas::game::AvailableSides{
         sides: vec![],
     };
@@ -306,10 +308,11 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -340,7 +343,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     ////////////////////////////////// DB Ops
                                     
                                     let side_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let sides = db.clone().unwrap().database("ayoub").collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch all side infos into the SideInfo struct
+                                    let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch all side infos into the SideInfo struct
                                     match sides.find_one_and_update(doc!{"_id": side_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding side based on side id
                                         Some(side_doc) => { //-- deserializing BSON into the SideInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::SideInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is SideInfo struct

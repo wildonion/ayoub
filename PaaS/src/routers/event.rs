@@ -9,7 +9,7 @@
    |--------------------------------------------------------------------------
    |
    |    job    : the following registers a router requested by the client
-   |    return : a Result of type either successful or error response
+   |    return : a Router of type either hyper response body or error response
    |
    |
 
@@ -19,7 +19,8 @@
 
 
 
-use routerify::Router;
+use mongodb::Client;
+use routerify::{Router, Middleware};
 use routerify_cors::enable_cors_all;
 use crate::middlewares;
 use crate::contexts as ctx;
@@ -40,7 +41,7 @@ use crate::controllers::event::{
                                 _404::main as not_found, 
                                 phase::insert as insert_phase,
                                 reserve::{process_payment_request, mock_reservation},
-                                reveal::{role},
+                                reveal::role,
                                 simd::main as simd_ops
                             };
 
@@ -48,12 +49,14 @@ use crate::controllers::event::{
 
 
 
-pub async fn register() -> Router<Body, hyper::Error>{  
+pub async fn register(storage: Option<&'static Client>) -> Router<Body, hyper::Error>{  
 
 
 
     Router::builder()
-        .middleware(enable_cors_all())
+        .data(storage)
+        .middleware(enable_cors_all()) //-- enable CORS middleware
+        .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware
         .post("/event/add", add_event)
         .get("/event/get/all/in-going", get_all_none_expired_events)
         .get("/event/get/all/done", get_all_expired_events)
@@ -69,6 +72,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/event/reserve/mock", mock_reservation)
         .post("/event/reveal/roles", role)
         .options("/", middlewares::cors::send_preflight_response)
+        .any(not_found) //-- handling 404 request
         .build()
         .unwrap()
 

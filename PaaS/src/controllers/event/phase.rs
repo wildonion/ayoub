@@ -39,10 +39,11 @@ use std::env;
 
 pub async fn insert(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{ //-- inserting a new passed event for the current event during the game
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -73,7 +74,7 @@ pub async fn insert(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                     ////////////////////////////////// DB Ops
 
                                     let event_id = ObjectId::parse_str(phase_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- connecting to events collection to update the phases field - we want to deserialize all event bsons into the EventInfo struct
+                                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- connecting to events collection to update the phases field - we want to deserialize all event bsons into the EventInfo struct
                                     match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
                                         Some(event_info) => {
                                             let updated_phases = event_info.add_phase(phase_info.phase).await; //-- add new phase vector into the existing phases vector of the passed in event_id

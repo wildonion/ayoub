@@ -32,10 +32,11 @@ use std::env;
 
 pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -72,7 +73,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
 
-                                    let decks = db.clone().unwrap().database("ayoub").collection::<schemas::game::DeckInfo>("sides");
+                                    let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::DeckInfo>("sides");
                                     match decks.find_one(doc!{"deck_name": deck_info.clone().deck_name}, None).await.unwrap(){
                                         Some(deck_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
@@ -91,7 +92,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let decks = db.clone().unwrap().database("ayoub").collection::<schemas::game::AddDeckRequest>("decks"); //-- using AddDeckRequest struct to insert a deck info into decks collection 
+                                            let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddDeckRequest>("decks"); //-- using AddDeckRequest struct to insert a deck info into decks collection 
                                             let deck_doc = schemas::game::AddDeckRequest{
                                                 deck_name,
                                                 roles,
@@ -233,10 +234,11 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -260,7 +262,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                     ////////////////////////////////// DB Ops
                     
                     let filter = doc! { "is_disabled": false }; //-- filtering all none disabled decks
-                    let decks = db.clone().unwrap().database("ayoub").collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch and deserialize all decks infos or documents from BSON into the DeckInfo struct
+                    let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch and deserialize all decks infos or documents from BSON into the DeckInfo struct
                     let mut available_decks = schemas::game::AvailableDecks{
                         decks: vec![],
                     };
@@ -364,10 +366,11 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -398,7 +401,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     ////////////////////////////////// DB Ops
                                     
                                     let deck_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let decks = db.clone().unwrap().database("ayoub").collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch all deck infos into the DeckInfo struct
+                                    let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch all deck infos into the DeckInfo struct
                                     match decks.find_one_and_update(doc!{"_id": deck_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding deck based on deck id
                                         Some(deck_doc) => { //-- deserializing BSON into the DeckInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct

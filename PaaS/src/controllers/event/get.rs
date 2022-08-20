@@ -36,10 +36,11 @@ use std::env;
 // --------------------------------------------------------------------------------------
 pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -67,7 +68,7 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
                                     ////////////////////////////////// DB Ops
                                     
                                     let filter = doc! { "is_expired": true }; //-- filtering all expired events
-                                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                     let mut all_expired_events = schemas::event::AvailableEvents{
                                         events: vec![],
                                     };
@@ -208,10 +209,11 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
 // --------------------------------------------------------------------------------------
 pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -239,7 +241,7 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
                                     ////////////////////////////////// DB Ops
                                     
                                     let filter = doc! { "is_expired": true }; //-- filtering all expired events
-                                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                     let mut all_none_expired_events = schemas::event::AvailableEvents{
                                         events: vec![],
                                     };
@@ -379,10 +381,11 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
 // -------------------------------------------------------------------------
 pub async fn all_none_expired(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -391,7 +394,7 @@ pub async fn all_none_expired(req: Request<Body>) -> GenericResult<hyper::Respon
     ////////////////////////////////// DB Ops
                     
     let filter = doc! { "is_expired": false }; //-- filtering all none expired events
-    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
     let mut available_events = schemas::event::AvailableEvents{
         events: vec![],
     };
@@ -450,10 +453,11 @@ pub async fn all_none_expired(req: Request<Body>) -> GenericResult<hyper::Respon
 // -------------------------------------------------------------------------
 pub async fn all_expired(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -462,7 +466,7 @@ pub async fn all_expired(req: Request<Body>) -> GenericResult<hyper::Response<Bo
     ////////////////////////////////// DB Ops
                     
     let filter = doc! { "is_expired": true }; //-- filtering all none expired events
-    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
     let mut available_events = schemas::event::AvailableEvents{
         events: vec![],
     };
@@ -522,10 +526,11 @@ pub async fn all_expired(req: Request<Body>) -> GenericResult<hyper::Response<Bo
 // -------------------------------------------------------------------------
 pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -533,7 +538,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
     ////////////////////////////////// DB Ops
                     
-    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
     let mut available_events = schemas::event::AvailableEvents{
         events: vec![],
     };
@@ -593,10 +598,11 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 // -------------------------------------------------------------------------
 pub async fn single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -615,7 +621,7 @@ pub async fn single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                     ////////////////////////////////// DB Ops
 
                     let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                     match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
                         Some(event_doc) => {
                             let response_body = ctx::app::Response::<schemas::event::EventInfo>{
@@ -707,10 +713,11 @@ pub async fn single(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 // ----------------------------------------------------------------------------------------------
 pub async fn group_all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -729,7 +736,7 @@ pub async fn group_all(req: Request<Body>) -> GenericResult<hyper::Response<Body
                     ////////////////////////////////// DB Ops
 
                     let mut all_group_events = vec![];
-                    let events = db.unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                     let mut events_cursor = events.find(doc!{"group_info._id": group_info._id}, None).await.unwrap(); //-- we must define the cursor as mutable since fetching all events is a mutable operation
                     while let Some(event_info) = events_cursor.try_next().await.unwrap(){
                         all_group_events.push(event_info)

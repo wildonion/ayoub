@@ -28,10 +28,11 @@ use std::env;
 pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -51,7 +52,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                     ////////////////////////////////// DB Ops
                     
-                    let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::RegisterResponse>("users");
+                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::RegisterResponse>("users");
                     match users.find_one(doc!{"username": user_info.clone().username, "phone": user_info.clone().phone}, None).await.unwrap(){ //-- finding user based on username and phone
                         Some(user_doc) => { //-- if we find a user with this username we have to tell the user do a login 
                             let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
@@ -70,7 +71,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                         }, 
                         None => { //-- no document found with this username thus we must insert a new one into the databse
                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                            let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::RegisterRequest>("users");
+                            let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::RegisterRequest>("users");
                             match schemas::auth::RegisterRequest::hash_pwd(user_info.pwd).await{
                                 Ok(hash) => {
                                     let user_doc = schemas::auth::RegisterRequest{
@@ -196,10 +197,11 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -230,7 +232,7 @@ pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<B
                                     ////////////////////////////////// DB Ops
                     
                                     let user_id = ObjectId::parse_str(user_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let users = db.clone().unwrap().database("ayoub").collection::<schemas::auth::RegisterResponse>("users");
+                                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::RegisterResponse>("users");
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     match users.find_one_and_update(doc! { "_id": user_id }, doc!{"$set": {"access_level": 1, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on _id
                                         Some(user_doc) => {

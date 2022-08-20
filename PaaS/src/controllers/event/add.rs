@@ -30,10 +30,11 @@ use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to th
 // -------------------------------------------------------------------------
 pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
     
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
@@ -63,7 +64,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                                     ////////////////////////////////// DB Ops
                                     
-                                    let events = db.clone().unwrap().database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
+                                    let events = db.clone().unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                     match events.find_one_and_update(doc!{"title": event_info.clone().title}, doc!{
                                         "$set": {
@@ -101,7 +102,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             )
                                         }, 
                                         None => { //-- means we didn't find any document related to this title and we have to create a new event
-                                            let events = db.clone().unwrap().database("ayoub").collection::<schemas::event::AddEventRequest>("events");
+                                            let events = db.clone().unwrap().database(&db_name).collection::<schemas::event::AddEventRequest>("events");
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                             let exp_time = now + env::var("EVENT_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
                                             let new_event = schemas::event::AddEventRequest{

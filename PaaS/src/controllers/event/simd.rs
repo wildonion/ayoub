@@ -103,7 +103,7 @@ use std::time::Instant;
 // -------------------------------------------------------------------------
 pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
 
-    info!("calling {} - {}", req.uri().path(), chrono::Local::now().naive_local()); //-- info!() macro will borrow the api and add & behind the scene
+     
 
     let res = Response::builder();
 
