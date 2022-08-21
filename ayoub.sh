@@ -42,10 +42,24 @@
 
 
 cargo build --bin ayoub --release
-sudo rm /home/ayoub/ayoub
-sudo cp target/release/ayoub /home/ayoub/ayoub
-sudo pm2 delete ayoub
-sudo pm2 start ayoub --name ayoub
+
+sudo rm auth.ayoub/ayoub-auth
+sudo rm event.ayoub/ayoub-event
+sudo rm game.ayoub/ayoub-game
+sudo cp target/release/ayoub auth.ayoub/ayoub-auth
+sudo cp target/release/ayoub event.ayoub/ayoub-event
+sudo cp target/release/ayoub game.ayoub/ayoub-game
+sudo cp .env auth.ayoub
+sudo cp .env event.ayoub
+sudo cp .env game.ayoub
+
+
+sudo pm2 stop ayoub-auth
+sudo pm2 stop ayoub-event
+sudo pm2 stop ayoub-game
+sudo pm2 start auth.ayoub/ayoub-auth --name ayoub-auth -- auth 8335
+sudo pm2 start event.ayoub/ayoub-event --name ayoub-event -- event 8336
+sudo pm2 start game.ayoub/ayoub-game --name ayoub-game -- game 8337
 
 
 
