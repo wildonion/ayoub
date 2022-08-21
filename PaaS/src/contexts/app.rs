@@ -25,6 +25,121 @@ use log::{info, error};
 
 
 
+type Callback = Box<dyn 'static + FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T - the closure inside the Box is valid as long as the Callback is valid due to the 'static lifetime and will never become invalid until the variable that has the Callback type drop
+type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
+
+unsafe impl Send for Api{}
+unsafe impl Sync for Api {}
+
+
+
+pub struct Api{
+    pub name: String,
+    pub req: Option<hyper::Request<Body>>,
+    pub res: Option<hyper::http::response::Builder>,
+    pub callback: Option<Callback>, //-- the generic type of the callback field is the Callback type which is FnMut and a Future object for its return type inside the Box
+    pub access_level: Option<u8>, //-- it might be None and the api doesn't require an access level
+}
+
+
+
+impl Api{
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+    // NOTE - we can borrow the req and res cause Request and Response structs are not bounded to Copy and Clone traits 
+    //        thus cb closure (callback) arguments must be references to Request and Response objects.
+    // NOTE - we can use as_ref() method to borrow the self.req and self.res cause as_ref() 
+    //        converts Option<T> to Option<&T> then we can unwrap them to get the borrowed objects.
+    // NOTE - don't put & behind self or borrow Api fields cause sharing Api fields between other threads using a shared reference
+    //        with & or borrowing the ownership is impossible cause by not implemented trait Clone (a super trait of Copy) 
+    //        for hyper Request and Response structs error (neither we can copy nor clone the api object).
+    // NOTE - the body of the `cb` in post and get methods is an async move{} means it'll return a future object
+    //        which we can solve it using .await later
+    // NOTE - every api router method must be bounded to Send + Syn + 'static traits to be sharable, safe to send 
+    //        and have valid lifetime across threads and .awaits.
+    // NOTE - since we can't put & behind the mut self thus we can't have the instance of the Api in later scopes
+    //        after calling its post or get methods and due to this fact we've built controllers which implements
+    //        only one Api instance per writing api pattern, means since we can have only one Api instance inside
+    //        a crate therefore we must have one controller per each Api instance to handle the incoming request
+    //        inside that controller which is related to a specific route (MVC like design pattern).
+    // NOTE - we can't have api.post().await and api.get().await inside the same scope from one instance since with the first 
+    //        use the api instance will be moved and its lifetime will be dropped due to the above third NOTE.
+    // NOTE - since both api.post() and api.get() methods are async thus we have to await on them to run their callback closures
+    //        which contain the logic of the whole controller. 
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+    /*
+        //// Example to create Api object:
+    
+            let api = Api::new(Some(req), Some(Response::builder()));
+            api.post("/home", |req, res| async move{
+                
+            }).await
+    */
+
+    pub fn new(request: Option<hyper::Request<Body>>, response: Option<hyper::http::response::Builder>) -> Self{
+        Api{
+            name: String::from(""),
+            req: request,
+            res: response,
+            callback: None, // TODO - caching using closures
+            access_level: None, // TODO
+        }
+    } 
+    
+    pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api; since we didn't borrow the self (the instance itself) using & we can't call this method for the second call cause the ownership of the instance will be moved in first call  
+                        where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C + Send + Sync + 'static, //-- capturing by mut T - generic type C can be bounded to Send + Sync + 'static traits and lifetime to be shreable, safe to send and valid across threads and .awaits
+                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
+    {
+        self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
+        let req = self.req.unwrap();
+        let res = self.res.unwrap();
+        let cb_res = cb(req, res).await.unwrap(); //-- calling the passed in closure to the post method by passing the request and response objects since this closure callback contains the body of the controller method - this would be of type either hyper::Response<Body> or hyper::Error
+        Ok(cb_res)
+    }
+
+
+    pub async fn get<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api; since we didn't borrow the self (the instance itself) using & we can't call this method for the second call cause the ownership of the instance will be moved in first call  
+                        where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C + Send + Sync + 'static, //-- capturing by mut T - generic type C can be bounded to Send + Sync + 'static traits and lifetime to be shreable, safe to send and valid across threads and .awaits
+                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
+    {
+        self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
+        let req = self.req.unwrap();
+        let res = self.res.unwrap();
+        let cb_res = cb(req, res).await.unwrap(); //-- calling the passed in closure to the post method by passing the request and response objects since this closure callback contains the body of the controller method - this would be of type either hyper::Response<Body> or hyper::Error
+        Ok(cb_res)
+    }
+
+    pub async fn set_name(&mut self, endpoint: &str){ //-- we must define self as mutable cause we want to change the name field
+        let endpoint_name = endpoint.to_string();
+        self.name = endpoint_name;
+    }
+
+    pub async fn get_name(&self) -> String{
+        let endpoint_name = self.name.to_string(); //-- self.name is the dereferenced value of the &self.name and will be done automatically by the compiler 
+        endpoint_name 
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #[derive(Clone, Debug)] //-- can't bound Copy trait cause engine and url are String which are heap data structure 
 pub struct Db{
     pub mode: Mode,

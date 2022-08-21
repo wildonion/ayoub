@@ -239,6 +239,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
 
 
+        --  Send is the access of sharing between threads, Sync is safe to transfer and static means the type must have static lifetime across threads and .awaits
         -- share reference or share access means multiple threads can read and access a resource or a type but only on of them can mutate it and the channel for this task is the mpsc
         -- the type that wants to be sent between threads must be Send but not Sync necessarily like sender which is not Sync but it's Send and receiver is not Sync and Send
         -- it's better not to pass the receiver between threads due to the rule of mpsc since we can't mutate a data simply inside a thread while others are reading it we have to block that thread that wants to mutate the type using Mutex
@@ -251,6 +252,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
         -- Clone trait is not implemented for the mpsc receiver and we must put it inside Arc also is not Sync means it can't be referenced by multiple threads at the same time due to the fact that only one thread can mutate its content at a time (single consumer) thus we have to put it inside a Mutex
         -- in order to pass the receiver between threads safely and mutate its content by locking on it we must put the receiver inside Arc and Mutex like let shareable_receiver = Arc<Mutex<Receiver<T>>> then clone it using Arc::new(&shareable_receiver) or shareable_receiver.clone()
         -- recv() will block the current thread if there are no messages available
+
 
     */
     
