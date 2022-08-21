@@ -41,6 +41,8 @@
 # ☢️ To run the `nft` server: `./ayoub nft 7438`
 
 
+sudo chmod 777 -R /home/ayoub/ayoub
+sudo chown -R root:root /home/ayoub/ayoub
 cargo build --bin ayoub --release
 sudo rm /home/ayoub/ayoub
 sudo cp target/release/ayoub /home/ayoub/ayoub
