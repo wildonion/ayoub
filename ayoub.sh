@@ -18,13 +18,13 @@
 
 
 
-sudo chmod 777 -R /home/conse/cosne
-sudo chown -R root:root /home/conse/conse
+sudo chmod 777 -R /home/ayoub/ayoub
+sudo chown -R root:root /home/ayoub/ayoub
 cargo build --bin ayoub --release
-sudo rm /home/conse/conse
-sudo cp target/release/ayoub /home/conse/conse
-sudo pm2 delete conse
-sudo pm2 start conse --name conse
+sudo rm /home/ayoub/ayoub
+sudo cp target/release/ayoub /home/ayoub/ayoub
+sudo pm2 delete ayoub
+sudo pm2 start ayoub --name ayoub
 
 
 
