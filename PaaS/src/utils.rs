@@ -162,6 +162,7 @@ pub async fn upload_asset(path: &str, payload: &[u8]){ //-- mapping the incoming
 
 pub async fn set_user_access(username: String, new_access_level: u8, storage: Option<Arc<app::Storage>>) -> Result<schemas::auth::UserInfo, app::Nill<'static>>{ //-- Nill struct requires a lifetime since there is no lifetime has passed to the function we have to use 'static lifetime  
 
+    // NOTE - we can also use clone() method to clone the db instead of using the as_ref() method
     let app_storage = match storage.as_ref().unwrap().db.as_ref().unwrap().mode{
         app::Mode::On => storage.as_ref().unwrap().db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client>
         app::Mode::Off => None, //-- no db is available cause it's off
@@ -171,7 +172,7 @@ pub async fn set_user_access(username: String, new_access_level: u8, storage: Op
 
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let users = app_storage.unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
-    match users.find_one_and_update(doc!{"username": username}, doc!{"access_level": 0}, None).await.unwrap(){ //-- finding user based on username to update access_level field to dev access
+    match users.find_one_and_update(doc!{"username": username}, doc!{"$set": {"access_level": 0}}, None).await.unwrap(){ //-- finding user based on username to update access_level field to dev access
         Some(user_doc) => Ok(user_doc), 
         None => Err(app::Nill(&[])),
     }

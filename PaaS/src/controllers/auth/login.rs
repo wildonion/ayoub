@@ -33,7 +33,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -48,7 +48,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     
                     ////////////////////////////////// DB Ops
                     
-                    let users = db.unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
+                    let users = db.database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
                     match users.find_one(doc!{"username": user_info.clone().username}, None).await.unwrap(){ //-- finding user based on username
                         Some(user_doc) => { //-- deserializing BSON into the UserInfo struct
                             match schemas::auth::LoginRequest::verify_pwd(user_doc.clone().pwd, user_info.clone().pwd).await{

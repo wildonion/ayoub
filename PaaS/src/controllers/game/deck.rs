@@ -37,7 +37,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -50,7 +50,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     
             
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -70,7 +70,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
 
-                                    let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::DeckInfo>("sides");
+                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("sides");
                                     match decks.find_one(doc!{"deck_name": deck_info.clone().deck_name}, None).await.unwrap(){
                                         Some(deck_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
@@ -89,7 +89,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddDeckRequest>("decks"); //-- using AddDeckRequest struct to insert a deck info into decks collection 
+                                            let decks = db.clone().database(&db_name).collection::<schemas::game::AddDeckRequest>("decks"); //-- using AddDeckRequest struct to insert a deck info into decks collection 
                                             let deck_doc = schemas::game::AddDeckRequest{
                                                 deck_name,
                                                 roles,
@@ -236,7 +236,7 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
    
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -249,14 +249,14 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     
             
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                 
                     ////////////////////////////////// DB Ops
                     
                     let filter = doc! { "is_disabled": false }; //-- filtering all none disabled decks
-                    let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch and deserialize all decks infos or documents from BSON into the DeckInfo struct
+                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch and deserialize all decks infos or documents from BSON into the DeckInfo struct
                     let mut available_decks = schemas::game::AvailableDecks{
                         decks: vec![],
                     };
@@ -365,7 +365,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
                             
@@ -377,7 +377,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
     
             
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -392,7 +392,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     ////////////////////////////////// DB Ops
                                     
                                     let deck_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let decks = db.clone().unwrap().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch all deck infos into the DeckInfo struct
+                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch all deck infos into the DeckInfo struct
                                     match decks.find_one_and_update(doc!{"_id": deck_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding deck based on deck id
                                         Some(deck_doc) => { //-- deserializing BSON into the DeckInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct

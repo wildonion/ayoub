@@ -198,8 +198,12 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     //
     // ------------------------------------------------------------------
     let args: Vec<String> = env::args().collect();
-    let username_cli = &args[1];
-    let access_level_cli = &args[2];
+    let mut username_cli = &String::new(); //-- this is a mutable reference to the username_cli String location inside the heap since we want to mutate the content inside the heap using the pointer later
+    let mut access_level_cli = &String::new(); //-- this is a mutable reference to the access_level_cli String location inside the heap since we want to mutate the content inside the heap using the pointer later
+    if args.len() > 1{
+        username_cli = &args[1];
+        access_level_cli = &args[2];
+    }
     if username_cli != &"".to_string() && access_level_cli != &"".to_string(){
         match utils::set_user_access(username_cli.to_owned(), access_level_cli.parse::<u8>().unwrap(), db.clone()).await{
             Ok(user_info) => {

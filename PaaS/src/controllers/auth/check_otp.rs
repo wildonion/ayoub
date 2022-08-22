@@ -33,7 +33,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -53,8 +53,8 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     
                     ////////////////////////////////// DB Ops
 
-                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users");
-                    let otp_info = db.clone().unwrap().database(&db_name).collection::<schemas::auth::OTPInfo>("otp_info");
+                    let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users");
+                    let otp_info = db.clone().database(&db_name).collection::<schemas::auth::OTPInfo>("otp_info");
                     match otp_info.find_one(doc!{"phone": phone.clone(), "code": code}, None).await.unwrap(){ // NOTE - we've cloned the phone in order to prevent its ownership from moving
                         Some(otp_info_doc) => {
                             if time > otp_info_doc.exp_time{

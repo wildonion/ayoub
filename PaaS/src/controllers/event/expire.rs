@@ -32,7 +32,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -44,7 +44,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
             let access_level = token_data.claims.access_level;
     
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -59,7 +59,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     ////////////////////////////////// DB Ops
                                     
                                     let event_id = ObjectId::parse_str(exp_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let events = db.clone().unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
+                                    let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
                                     match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"is_expired": true}}, None).await.unwrap(){ //-- finding event based on event id
                                         Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
                                             let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct

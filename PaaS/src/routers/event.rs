@@ -18,6 +18,10 @@
    | collection rule and each response object will be dropped once each router 
    | router body scope gets ended.
    |
+   |
+   | instead of initializing the app_storage inside each router api we've 
+   | initialized it only once per router to move it between each router api.
+   | 
 
 */
 
@@ -65,11 +69,14 @@ pub async fn register() -> Router<Body, hyper::Error>{
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
     let app_storage = Client::with_uri_str(&db_addr).await.unwrap();
 
+    ////////
+    // NOTE - only the request object must be passed through each handler
+    ////////
 
     Router::builder()
-        .data(app_storage)
-        .middleware(enable_cors_all()) //-- enable CORS middleware
-        .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware
+        .data(app_storage) //-- sharing the initialized app_storage between routers' threads
+        .middleware(enable_cors_all()) //-- enable CORS middleware on the incoming request then pass it to the next middleware
+        .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware on the incoming request then pass it to the next middleware
         .get("/page", |req| async move{
             let res = Response::builder(); //-- creating a new response cause we didn't find any available route
             let response_body = ctx::app::Response::<ctx::app::Nill>{

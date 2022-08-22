@@ -42,13 +42,10 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
      
 
+    use routerify::prelude::*;
     let res = Response::builder();
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let db = MC::with_uri_str(db_addr).await;
+    let db = &req.data::<MC>().unwrap().to_owned();
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -159,7 +156,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     
                                     let updated_at = Some(now.timestamp());
                                     let serialized_updated_at = bson::to_bson(&updated_at).unwrap(); //-- we have to serialize the updated_at to BSON Document object in order to update the mentioned field inside the collection
-                                    let otp_info = db.clone().unwrap().database(&db_name).collection::<schemas::auth::OTPInfo>("otp_info"); //-- using OTPInfo struct to find and update an otp info inside the otp_info collection
+                                    let otp_info = db.clone().database(&db_name).collection::<schemas::auth::OTPInfo>("otp_info"); //-- using OTPInfo struct to find and update an otp info inside the otp_info collection
                                     match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, None).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
                                         Some(otp_info) => { //-- once we get here means that the user is already exists in the collection and we have to save the generated new otp code along with a new expiration time for him/her
 
@@ -186,7 +183,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             )
                                         },
                                         None => { //-- once we get here means that the user is trying to login for the first time in our app and we have to save a new otp info into our otp_info collection
-                                            let otp_info = db.clone().unwrap().database(&db_name).collection::<schemas::auth::SaveOTPInfo>("otp_info"); //-- using SaveOTPInfo struct to insert new otp info into the otp_info collection
+                                            let otp_info = db.clone().database(&db_name).collection::<schemas::auth::SaveOTPInfo>("otp_info"); //-- using SaveOTPInfo struct to insert new otp info into the otp_info collection
                                             let now = Local::now();
                                             let new_otp_info = schemas::auth::SaveOTPInfo{
                                                 exp_time: two_mins_later,

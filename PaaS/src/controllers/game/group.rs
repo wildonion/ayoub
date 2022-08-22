@@ -44,7 +44,7 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
     
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -57,7 +57,7 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
     
             
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -209,7 +209,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
     
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -221,7 +221,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
             let access_level = token_data.claims.access_level;
     
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -241,7 +241,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     ////////////////////////////////// DB Ops
 
-                                    let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::GroupInfo>("groups");
+                                    let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups");
                                     match groups.find_one(doc!{"group_name": group_info.clone().name}, None).await.unwrap(){
                                         Some(group_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::GroupInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is GroupInfo struct
@@ -260,7 +260,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddGroupRequest>("groups"); //-- using AddGroupRequest struct to insert a deck info into groups collection 
+                                            let groups = db.clone().database(&db_name).collection::<schemas::game::AddGroupRequest>("groups"); //-- using AddGroupRequest struct to insert a deck info into groups collection 
                                             let group_doc = schemas::game::AddGroupRequest{
                                                 name: group_name,
                                                 owner: group_owner,
@@ -411,7 +411,7 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
     
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -423,7 +423,7 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
             let access_level = token_data.claims.access_level;
     
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -439,7 +439,7 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     let group_id = ObjectId::parse_str(update_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- connecting to groups collection to update the name field - we want to deserialize all user bsons into the GroupInfo struct
+                                    let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- connecting to groups collection to update the name field - we want to deserialize all user bsons into the GroupInfo struct
                                     match groups.find_one_and_update(doc!{"_id": group_id}, doc!{"$set": {"name": update_info.name, "updated_at": Some(now)}}, None).await.unwrap(){
                                         Some(group_doc) => {
                                             let group_info = schemas::game::GroupInfo{
@@ -590,11 +590,11 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
     
     ////////////////////////////////// DB Ops
                     
-    let groups = db.clone().unwrap().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch and deserialize all groups infos or documents from BSON into the GroupInfo struct
+    let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch and deserialize all groups infos or documents from BSON into the GroupInfo struct
     let mut available_groups = schemas::game::AvailableGroups{
         groups: vec![],
     };

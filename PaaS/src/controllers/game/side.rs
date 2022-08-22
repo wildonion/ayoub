@@ -39,7 +39,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -51,7 +51,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
             let access_level = token_data.claims.access_level;
     
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -69,7 +69,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
                                     
-                                    let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::SideInfo>("sides");
+                                    let sides = db.clone().database(&db_name).collection::<schemas::game::SideInfo>("sides");
                                     match sides.find_one(doc!{"name": side_info.clone().name}, None).await.unwrap(){
                                         Some(side_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::SideInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is SideInfo struct
@@ -88,7 +88,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                         }, 
                                         None => { //-- no document found with this name thus we must insert a new one into the databse
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::AddSideRequest>("sides"); //-- using AddSideRequest struct to insert a side info into sides collection 
+                                            let sides = db.clone().database(&db_name).collection::<schemas::game::AddSideRequest>("sides"); //-- using AddSideRequest struct to insert a side info into sides collection 
                                             let side_doc = schemas::game::AddSideRequest{
                                                 name,
                                                 is_disabled: Some(false),
@@ -237,12 +237,12 @@ pub async fn all(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     ////////////////////////////////// DB Ops
                     
     let filter = doc! { "is_disabled": false }; //-- filtering all none disabled sides
-    let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch and deserialize all sides infos or documents from BSON into the SideInfo struct
+    let sides = db.clone().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch and deserialize all sides infos or documents from BSON into the SideInfo struct
     let mut available_sides = schemas::game::AvailableSides{
         sides: vec![],
     };
@@ -306,7 +306,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -318,7 +318,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
             let access_level = token_data.claims.access_level;
     
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -333,7 +333,7 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     ////////////////////////////////// DB Ops
                                     
                                     let side_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let sides = db.clone().unwrap().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch all side infos into the SideInfo struct
+                                    let sides = db.clone().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch all side infos into the SideInfo struct
                                     match sides.find_one_and_update(doc!{"_id": side_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding side based on side id
                                         Some(side_doc) => { //-- deserializing BSON into the SideInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::SideInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is SideInfo struct

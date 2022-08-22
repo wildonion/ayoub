@@ -55,7 +55,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
 
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -68,7 +68,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
     
             
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username.clone(), access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev and player can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -82,7 +82,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
                                     ////////////////////////////////// DB ops
 
                                     let event_id = ObjectId::parse_str(mock_reservation_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string - mock_reservation_info.event_id is the mongodb object id of the event that the caller of this method is trying to reserve it
-                                    let events = db.unwrap().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct which contains the whole fields
+                                    let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct which contains the whole fields
                                     match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
                                         Some(event_doc) => {
                                             let init_player_info = schemas::game::ReservePlayerInfoResponse{
@@ -268,7 +268,7 @@ pub async fn process_payment_request(req: Request<Body>) -> GenericResult<hyper:
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     // TODO
     // https://github.com/hyperium/hyper/blob/master/examples/params.rs

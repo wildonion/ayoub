@@ -33,7 +33,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
         
     let whole_body_bytes = hyper::body::aggregate(req.into_body()).await.unwrap(); //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all futures stream or chunks which is utf8 bytes - since we don't know the end yet, we can't simply stream the chunks as they arrive (cause all futures stream or chunks which are called chunks are arrived asynchronously), so here we do `.await` on the future, waiting on concatenating the full body after all chunks arrived then afterwards the content can be reversed
     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -49,7 +49,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                     ////////////////////////////////// DB Ops
                     
-                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::RegisterResponse>("users");
+                    let users = db.clone().database(&db_name).collection::<schemas::auth::RegisterResponse>("users");
                     match users.find_one(doc!{"username": user_info.clone().username, "phone": user_info.clone().phone}, None).await.unwrap(){ //-- finding user based on username and phone
                         Some(user_doc) => { //-- if we find a user with this username we have to tell the user do a login 
                             let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
@@ -68,7 +68,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                         }, 
                         None => { //-- no document found with this username thus we must insert a new one into the databse
                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                            let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::RegisterRequest>("users");
+                            let users = db.clone().database(&db_name).collection::<schemas::auth::RegisterRequest>("users");
                             match schemas::auth::RegisterRequest::hash_pwd(user_info.pwd).await{
                                 Ok(hash) => {
                                     let user_doc = schemas::auth::RegisterRequest{
@@ -199,7 +199,7 @@ pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<B
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
         
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -211,7 +211,7 @@ pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<B
             let access_level = token_data.claims.access_level;
     
             
-            let db_to_pass = db.as_ref().unwrap().clone();
+            let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == DEV_ACCESS{ // NOTE - only dev can handle this route
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
@@ -226,7 +226,7 @@ pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<B
                                     ////////////////////////////////// DB Ops
                     
                                     let user_id = ObjectId::parse_str(user_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let users = db.clone().unwrap().database(&db_name).collection::<schemas::auth::RegisterResponse>("users");
+                                    let users = db.clone().database(&db_name).collection::<schemas::auth::RegisterResponse>("users");
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     match users.find_one_and_update(doc! { "_id": user_id }, doc!{"$set": {"access_level": 1, "updated_at": Some(now)}}, None).await.unwrap(){ //-- finding user based on _id
                                         Some(user_doc) => {

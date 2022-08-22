@@ -31,7 +31,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
     use routerify::prelude::*;
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Option<&Client>>().unwrap().to_owned();
+    let db = &req.data::<Client>().unwrap().to_owned();
 
     match middlewares::auth::pass(req).await{
         Ok((token_data, req)) => { //-- the decoded token and the request object will be returned from the function call since the Copy and Clone trait is not implemented for the hyper Request and Response object thus we can't have borrow the req object by passing it into the pass() function therefore it'll be moved and we have to return it from the pass() function   
@@ -43,7 +43,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
             ////////////////////////////////// DB Ops
                     
-            let users = db.unwrap().database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
+            let users = db.database("ayoub").collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
             match users.find_one(doc!{"username": username.clone(), "_id": _id.unwrap()}, None).await.unwrap(){ //-- finding user based on username
                 Some(user_doc) => { //-- deserializing BSON into the UserInfo struct
                     let user_response = schemas::auth::CheckTokenResponse{
