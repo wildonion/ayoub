@@ -2,7 +2,5 @@
 
 members = [
     "PaaS",
-    "coiniXerr",
-    "tests",
     "PaaS/src/runtime/",
 ]
