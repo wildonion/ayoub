@@ -521,6 +521,15 @@ pub fn trash(){
     
 
 	
+    enum MyResult<R, E>{
+        Result(R),
+        Err(E),
+    }
+
+
+    fn run(id: u8) -> MyResult<u8, i32>{
+        MyResult::Result(1)
+    } 
 
 	
 	
