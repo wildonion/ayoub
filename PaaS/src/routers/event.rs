@@ -107,7 +107,6 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/reserve/mock", mock_reservation)
         .post("/reveal/roles", role)
         .post("/simd", simd_ops)
-        .options("/", middlewares::cors::send_preflight_response)
         .any(not_found) //-- handling 404 request
         .build()
         .unwrap()
