@@ -2,7 +2,7 @@
 
 # ☢️ Run in Dev Mode
 
-> ```sudo chown -R root:root /home/ayoub/ayoub && sudo chmod 777 -R /home/ayoub/ayoub```
+> ```sudo chown -R root:root . && sudo chmod -R 777 .```
 
 > ayoub PaaS: ```cargo run --bin ayoub``` 
 

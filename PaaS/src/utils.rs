@@ -240,12 +240,13 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
 
 
-        --  Send is the access of sharing between threads, Sync is safe to transfer and static means the type must have static lifetime across threads and .awaits
+        -- Send is the access of sharing between threads, Sync is safe to transfer and static means the type must have static lifetime across threads and .awaits
+        -- share data between routers and threads using .data() of routerify Router and to do that the passed in closure of the thread must be static + send and sync to send between threads safely we can't just simply borrow the data using & to pass them between threads (since the race condition might be happened) since the type must be send + sync and 'static to be shared between threads safely if it's not send and sync we can put it inside the Arc<Mutex<T>> to make it cloneable and borrow it mutably to mutate its content by locking on it inside a free thread, if other threads don't want to mutate it we can just put it inside Arc<T> to be just cloneable 
         -- share reference or share access means multiple threads can read and access a resource or a type but only on of them can mutate it and the channel for this task is the mpsc
         -- the type that wants to be sent between threads must be Send but not Sync necessarily like sender which is not Sync but it's Send and receiver is not Sync and Send
         -- it's better not to pass the receiver between threads due to the rule of mpsc since we can't mutate a data simply inside a thread while others are reading it we have to block that thread that wants to mutate the type using Mutex
         -- passing data between threads is done using mpsc channel which multiple threads can own a resource immutable referece but only on of them can mutate that resource at a time
-        -- to pass data between thread the type must clonable and sender must be cloned since inside a thread all env vars before that are moved to its scope.
+        -- to pass data between thread the type must cloneable and sender must be cloned since inside a thread all env vars before that are moved to its scope.
         -- in order to mutate a type inside a thread the type must be inside Mutex since the receiver can't be referenced by multiple threads at a time thus is a single consumer means that it can't be cloned and moved to other threads 
         -- Send means that a type is safe to move from one thread to another
         -- Sync makes the type safe (&T nmust be Send) to access shared reference across threads at the same time 
@@ -265,7 +266,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     let (sender, receiver) = heavy_mpsc::<f64>();
 
 
-    let mutexed_receiver = Mutex::new(receiver); //-- putting the &receiver in its borrowed form inside the Mutex to get its data by locking on it inside other threads since the Sync is not implemented for the receiver and in order to get its data inside other threads we have to make clonable using Arc and some kina syncable using Mutext
+    let mutexed_receiver = Mutex::new(receiver); //-- putting the &receiver in its borrowed form inside the Mutex to get its data by locking on it inside other threads since the Sync is not implemented for the receiver and in order to get its data inside other threads we have to make cloneable using Arc and some kina syncable using Mutext
     let arced_mutexed_receiver = Arc::new(mutexed_receiver); //-- putting the &mutexed_receiver in its borrowed form inside the Arc
     pub static mut MULT_OF_ALL_SUM: f64 = 1.0;
     let mut mult_of_all_sum: &'static f64 = &1.0;
@@ -310,7 +311,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
                             valid lifetime across threads also mutating the static types directly is unsafe!
 
                             due to the single consumer rule only on thread can mutate the received job or the task or the data
-                            at a time in order to prevent data racing we've put the Arced (since it's not clonable due to the single consumer rule) 
+                            at a time in order to prevent data racing we've put the Arced (since it's not cloneable due to the single consumer rule) 
                             receiver inside the Mutex to lock on it and change the content of what it has received cause we want 
                             to mutate the data of the receiver inside other threads.
                             -----------------------------------------------------------------------------------

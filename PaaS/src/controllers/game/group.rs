@@ -264,6 +264,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                             let group_doc = schemas::game::AddGroupRequest{
                                                 name: group_name,
                                                 owner: group_owner,
+                                                god_id: Some(_id.unwrap().to_string()),
                                                 created_at: Some(now),
                                                 updated_at: Some(now),
                                             };
@@ -446,6 +447,7 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                                 _id: group_doc._id,
                                                 name: group_doc.name,
                                                 owner: group_doc.owner,
+                                                god_id: group_doc.god_id,
                                                 created_at: group_doc.created_at,
                                                 updated_at: group_doc.updated_at
                                             };

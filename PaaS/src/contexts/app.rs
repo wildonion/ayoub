@@ -55,7 +55,7 @@ impl Api{
     //        for hyper Request and Response structs error (neither we can copy nor clone the api object).
     // NOTE - the body of the `cb` in post and get methods is an async move{} means it'll return a future object
     //        which we can solve it using .await later
-    // NOTE - every api router method must be bounded to Send + Syn + 'static traits to be sharable, safe to send 
+    // NOTE - every api router method must be bounded to Send + Syn + 'static traits to be shareable, safe to send 
     //        and have valid lifetime across threads and .awaits.
     // NOTE - since we can't put & behind the mut self thus we can't have the instance of the Api in later scopes
     //        after calling its post or get methods and due to this fact we've built controllers which implements

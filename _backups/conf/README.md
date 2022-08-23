@@ -6,22 +6,22 @@
 ### Install Nginx
 
 ```console
-sudo apt install nginx
+sudo apt install nginx && sudo apt install certbot python3-certbot-nginx
 ```
 
 ### Available Service Config File 
 
 ```console
-sudo cp api.auth.ayoub.com.conf /etc/nginx/sites-available/api.auth.ayoub.com.conf && sudo cp api.event.ayoub.com.conf /etc/nginx/sites-available/api.event.ayoub.com.conf && sudo cp api.game.ayoub.com.conf /etc/nginx/sites-available/api.game.ayoub.com.conf
+sudo cp api.ayoub.com.conf /etc/nginx/sites-available/api.ayoub.com.conf
 ```
 
 ### Enable Service Config File 
 
 ```console
-sudo ln -s /etc/nginx/sites-available/api.auth.ayoub.com.conf /etc/nginx/sites-enabled/api.auth.ayoub.com.conf && sudo ln -s /etc/nginx/sites-available/api.event.ayoub.com.conf /etc/nginx/sites-enabled/api.event.ayoub.com.conf && sudo ln -s /etc/nginx/sites-available/api.game.ayoub.com.conf /etc/nginx/sites-enabled/api.game.ayoub.com.conf
+sudo ln -s /etc/nginx/sites-available/api.ayoub.com.conf /etc/nginx/sites-enabled/api.ayoub.com.conf
 ```
 
-## Setup API SSL
+## Setup SSL for APIs
 
 ```console
 sudo systemctl restart nginx && sudo certbot --nginx

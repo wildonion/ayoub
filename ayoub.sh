@@ -18,8 +18,7 @@
 
 
 
-sudo chmod 777 -R /home/ayoub/ayoub
-sudo chown -R root:root /home/ayoub/ayoub
+sudo chown -R root:root . && sudo chmod -R 777 .
 cargo build --bin ayoub --release
 sudo rm /home/ayoub/ayoub
 sudo cp target/release/ayoub /home/ayoub/ayoub
