@@ -104,6 +104,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/god/update/group/", update_group)
         .post("/god/update/group/image", upload_img)
         .get("/get/group/all", get_groups)
+        .options("/", middlewares::cors::send_preflight_response)
         .any(not_found) //-- handling 404 request
         .build()
         .unwrap()
