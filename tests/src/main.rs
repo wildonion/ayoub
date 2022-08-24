@@ -63,12 +63,23 @@ fn main(){
     
 
     
-    // thread scope
+    // thread scope lifetimes ('scope and 'env)
     // const Mutex instead of lazy_static
     // fn foo<T>(value: T, f: impl Copy)
     // ...
     // 
 
+    let mut vec = vec![1,3535,46];
+    std::thread::scope(|s|{
+        s.spawn(||{
+            let passed_vec = &vec;
+        });
+
+        s.spawn(||{
+            vec.push(24);
+        });
+
+    });
 
 
 

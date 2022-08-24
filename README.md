@@ -18,7 +18,7 @@
 
 * To update a user access level to dev first signup the user using `/auth/signup` API then run the binary like so: `./ayoub wildonion 0`
 
-* To Run and Setup Ayoub PaaS: ```sudo bash ayoub.sh```
+* To Run and Setup Ayoub PaaS: ```./ayoub.sh```
 
 > coiniXerr: ```cargo build --bin coiniXerr --release```
 
