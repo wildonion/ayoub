@@ -57,7 +57,10 @@ fn main(){
         - instead of moving types into the thread we can borrow them using Arc to have them outside the threads
         - based on mpsc rust has defined the rule which says multiple immutable can be inside a scope but only one of them can be mutable
         - in order to share data (T must have shareable rules) between threads we have to use mpsc channel 
-    
+
+
+
+        Send + Sync + 'static + Unpin
     
     
     */

@@ -1287,7 +1287,7 @@
 								"single"
 							]
 						},
-						"description": "⚠️ ***This API needs God, Dev or User Access Level.***\n\n⚠️ ***This API can be called during the game execution since it'll return the last status and info of the player.***"
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***"
 					},
 					"response": []
 				},

@@ -17,25 +17,20 @@ pub mod cors{
 
     use crate::constants::*;
     use log::{info, error};
-    use hyper::{header, Method, Body, Request};
+    use hyper::{header, header::HeaderValue, Body, Response};
 
 
 
 
-
-    pub async fn send_preflight_response(_: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
-        Ok(
-            hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
-                .status(hyper::StatusCode::OK)
-                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-                .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
-                .header(header::ACCESS_CONTROL_ALLOW_METHODS, "*")
-                .header(header::ACCESS_CONTROL_EXPOSE_HEADERS, "*")
-                .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "*")
-                .body(Body::default())
-                .unwrap()
-        ) //-- sending back an empty response to the browser to say that the preflight request was ok to get rid of the fucking CORS :)
+    pub async fn access_all(mut res: Response<Body>) -> Result<Response<Body>, hyper::Error> {
+        let headers = res.headers_mut();
+        headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, HeaderValue::from_static("*"));
+        headers.insert(header::ACCESS_CONTROL_ALLOW_METHODS, HeaderValue::from_static("POST,GET"));
+        headers.insert(header::ACCESS_CONTROL_ALLOW_HEADERS, HeaderValue::from_static("Authorization,Accept"));
+        headers.insert(header::ACCESS_CONTROL_EXPOSE_HEADERS, HeaderValue::from_static("*"));
+        Ok(res)
     }
+
 
 
 
