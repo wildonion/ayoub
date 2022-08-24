@@ -186,7 +186,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"phone\": \"09211686115\",\r\n    \"code\": \"3276\",\r\n    \"time\": 1656670487\r\n}",
+							"raw": "{\r\n    \"phone\": \"09215165207\",\r\n    \"code\": \"6811\",\r\n    \"time\": 1656670487\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -857,7 +857,7 @@
 					"response": []
 				},
 				{
-					"name": "Add Deck",
+					"name": "Upsert Deck",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -873,7 +873,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"deck_name\": \"MJ first Deck\",\r\n    \"roles\": [\r\n        {\r\n            \"name\": \"god-fother\",\r\n            \"rate\": 1,\r\n            \"desc\": \"godfather exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"shab khosb\",\r\n            \"rate\": 1,\r\n            \"desc\": \"shab khosb exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"jalab\",\r\n            \"rate\": 1,\r\n            \"desc\": \"jalab exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"jarah\",\r\n            \"rate\": 1,\r\n            \"desc\": \"jarah exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"doctor\",\r\n            \"rate\": 1,\r\n            \"desc\": \"doctor exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"doctor star\",\r\n            \"rate\": 1,\r\n            \"desc\": \"doctor star exp\",\r\n            \"abilities\": 1\r\n        },\r\n        {\r\n            \"name\": \"shahrdar\",\r\n            \"rate\": 1,\r\n            \"desc\": \"shahrdar exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"ghazi\",\r\n            \"rate\": 1,\r\n            \"desc\": \"ghazi exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"kalantar\",\r\n            \"rate\": 1,\r\n            \"desc\": \"kalantar exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"goorkan\",\r\n            \"rate\": 1,\r\n            \"desc\": \"goorkan exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"goorkan star\",\r\n            \"rate\": 1,\r\n            \"desc\": \"goorkan exp\",\r\n            \"abilities\": 1\r\n        },\r\n        {\r\n            \"name\": \"dast kaj\",\r\n            \"rate\": 1,\r\n            \"desc\": \"dast kaj exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"name\": \"gardan koloft\",\r\n            \"rate\": 1,\r\n            \"desc\": \"gardan koloft exp\",\r\n            \"abilities\": 0\r\n        }\r\n    ],\r\n    \"desc\": \"\"\r\n}",
+							"raw": "{\r\n    \"deck_name\": \"MJ first Deck\",\r\n    \"roles\": [\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"god-fother\",\r\n            \"rate\": 1,\r\n            \"desc\": \"godfather exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"shab khosb\",\r\n            \"rate\": 1,\r\n            \"desc\": \"shab khosb exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {   \r\n            \"_id\": \"\",\r\n            \"name\": \"jalab\",\r\n            \"rate\": 1,\r\n            \"desc\": \"jalab exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {   \r\n            \"_id\": \"\",\r\n            \"name\": \"jarah\",\r\n            \"rate\": 1,\r\n            \"desc\": \"jarah exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"doctor\",\r\n            \"rate\": 1,\r\n            \"desc\": \"doctor exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"doctor star\",\r\n            \"rate\": 1,\r\n            \"desc\": \"doctor star exp\",\r\n            \"abilities\": 1\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"shahrdar\",\r\n            \"rate\": 1,\r\n            \"desc\": \"shahrdar exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"ghazi\",\r\n            \"rate\": 1,\r\n            \"desc\": \"ghazi exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"kalantar\",\r\n            \"rate\": 1,\r\n            \"desc\": \"kalantar exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"goorkan\",\r\n            \"rate\": 1,\r\n            \"desc\": \"goorkan exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"goorkan star\",\r\n            \"rate\": 1,\r\n            \"desc\": \"goorkan exp\",\r\n            \"abilities\": 1\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"dast kaj\",\r\n            \"rate\": 1,\r\n            \"desc\": \"dast kaj exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"gardan koloft\",\r\n            \"rate\": 1,\r\n            \"desc\": \"gardan koloft exp\",\r\n            \"abilities\": 0\r\n        }\r\n    ],\r\n    \"desc\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1243,6 +1243,46 @@
 							"path": [
 								"game",
 								"player",
+								"get",
+								"single"
+							]
+						},
+						"description": "⚠️ ***This API needs God, Dev or User Access Level.***\n\n⚠️ ***This API can be called during the game execution since it'll return the last status and info of the player.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Deck Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzOTQyNSwiaWF0IjoxNjYwOTAzNDI1fQ.Wo-Qo7IGHGHhgDzaXkNTNbQjkjv9yYK3BvRvWhz4q4K81rsr1rJWaerf5hH28KrNEU4OuSLOZsbR9ag7fcY8AA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"62ff51548bae1e1c343b5a79\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/deck/get/single",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"deck",
 								"get",
 								"single"
 							]
