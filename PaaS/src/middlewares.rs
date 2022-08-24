@@ -30,7 +30,7 @@ pub mod cors{
                 .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                 .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
                 .header(header::ACCESS_CONTROL_ALLOW_METHODS, "POST, GET, OPTIONS")
-                .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "*")
+                .header(header::ACCESS_CONTROL_EXPOSE_HEADERS, "*")
                 .body(Body::default())
                 .unwrap()
         ) //-- sending back an empty response to the browser to say that the preflight request was ok to get rid of the fucking CORS :)

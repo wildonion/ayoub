@@ -242,12 +242,12 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         .build()
         .unwrap();
 
-    info!("running auth server on port {} - {}", port, chrono::Local::now().naive_local());
+    info!("running ayoub server on port {} - {}", port, chrono::Local::now().naive_local());
     let ayoub_service = RouterService::new(api).unwrap();
     let ayoub_server = Server::bind(&server_addr).serve(ayoub_service);
     let ayoub_graceful = ayoub_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
     if let Err(e) = ayoub_graceful.await{ //-- awaiting on the server to receive the shutdown signal
-        error!("auth server error {} - {}", e, chrono::Local::now().naive_local());
+        error!("ayoub server error {} - {}", e, chrono::Local::now().naive_local());
     }
 
 
