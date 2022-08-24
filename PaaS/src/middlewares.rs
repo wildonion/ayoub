@@ -27,7 +27,6 @@ pub mod cors{
         headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, HeaderValue::from_static("*"));
         headers.insert(header::ACCESS_CONTROL_ALLOW_METHODS, HeaderValue::from_static("POST"));
         headers.insert(header::ACCESS_CONTROL_ALLOW_HEADERS, HeaderValue::from_name(AUTHORIZATION));
-        headers.insert(header::ACCESS_CONTROL_EXPOSE_HEADERS, HeaderValue::from_static("*"));
         Ok(res)
     }
 
