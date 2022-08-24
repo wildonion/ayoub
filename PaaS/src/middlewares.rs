@@ -29,7 +29,7 @@ pub mod cors{
                 .status(hyper::StatusCode::OK)
                 .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                 .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
-                .header(header::ACCESS_CONTROL_ALLOW_METHODS, "POST, GET, OPTIONS")
+                .header(header::ACCESS_CONTROL_ALLOW_METHODS, "*")
                 .header(header::ACCESS_CONTROL_EXPOSE_HEADERS, "*")
                 .body(Body::default())
                 .unwrap()
