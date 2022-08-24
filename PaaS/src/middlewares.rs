@@ -17,16 +17,16 @@ pub mod cors{
 
     use crate::constants::*;
     use log::{info, error};
-    use hyper::{header, header::HeaderValue, Body, Response};
+    use hyper::{header::{self, AUTHORIZATION}, header::HeaderValue, Body, Response};
 
 
 
 
-    pub async fn access_all(mut res: Response<Body>) -> Result<Response<Body>, hyper::Error> {
+    pub async fn allow(mut res: Response<Body>) -> Result<Response<Body>, hyper::Error> {
         let headers = res.headers_mut();
         headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, HeaderValue::from_static("*"));
-        headers.insert(header::ACCESS_CONTROL_ALLOW_METHODS, HeaderValue::from_static("POST,GET"));
-        headers.insert(header::ACCESS_CONTROL_ALLOW_HEADERS, HeaderValue::from_static("Authorization,Accept"));
+        headers.insert(header::ACCESS_CONTROL_ALLOW_METHODS, HeaderValue::from_static("POST"));
+        headers.insert(header::ACCESS_CONTROL_ALLOW_HEADERS, HeaderValue::from_name(AUTHORIZATION));
         headers.insert(header::ACCESS_CONTROL_EXPOSE_HEADERS, HeaderValue::from_static("*"));
         Ok(res)
     }
