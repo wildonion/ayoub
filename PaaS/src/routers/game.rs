@@ -37,7 +37,7 @@ use crate::contexts as ctx;
 use hyper::{header, Body, Response, StatusCode};
 use crate::controllers::game::{
                                 role::{add as add_role, all as get_roles, disable as disable_role}, 
-                                deck::{add as add_deck, all as get_decks, disable as disable_deck},
+                                deck::{add as add_deck, all as get_decks, disable as disable_deck, single as get_single_deck},
                                 side::{add as add_side, all as get_sides, disable as disable_side}, 
                                 player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single, get_player_role_ability, get_player_chain_infos}, 
                                 group::{create as create_group, update as update_group, all as get_groups, upload_img},
@@ -88,6 +88,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/role/disable", disable_role)
         .post("/deck/add", add_deck)
         .get("/deck/get/availables", get_decks)
+        .post("/deck/get/single", get_single_deck)
         .post("/deck/disable", disable_deck)
         .post("/side/add", add_side)
         .get("/side/get/availables", get_sides)
