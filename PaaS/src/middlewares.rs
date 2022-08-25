@@ -24,6 +24,7 @@ pub mod cors{
 
     pub async fn allow(mut res: Response<Body>) -> Result<Response<Body>, hyper::Error> {
         let headers = res.headers_mut();
+        println!("alooooooooooooooooooo >>>>>>>>>>>");
         headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, HeaderValue::from_static("*"));
         headers.insert(header::ACCESS_CONTROL_ALLOW_METHODS, HeaderValue::from_static("POST"));
         headers.insert(header::ACCESS_CONTROL_ALLOW_HEADERS, HeaderValue::from_name(AUTHORIZATION));
