@@ -60,7 +60,7 @@ fn main(){
 
 
 
-        Send + Sync + 'static + Unpin
+        data which is utf8 encoded to share between threads using mpsc must be : Send + Sync + 'static + Unpin
     
     
     */

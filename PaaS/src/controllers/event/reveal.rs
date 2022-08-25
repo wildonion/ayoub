@@ -83,8 +83,9 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                         Some(event_doc) => {
 
 
+                                            let role_filter = doc! { "is_disabled": false }; //-- filtering all none disabled roles
                                             let mut all_roles = vec![];
-                                            let mut all_roles_cursor = roles.find(None, None).await.unwrap(); //-- getting all defined roles
+                                            let mut all_roles_cursor = roles.find(role_filter, None).await.unwrap(); //-- getting all defined and none disabled roles since a role might be disabled by the god
                                             while let Some(role_info) = all_roles_cursor.try_next().await.unwrap(){
                                                 all_roles.push(role_info)
                                             }
