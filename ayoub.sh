@@ -20,8 +20,8 @@
 
 sudo chown -R root:root . && sudo chmod -R 777 .
 cargo build --bin ayoub --release
-sudo rm /home/$USER/ayoub
-sudo cp target/release/ayoub /home/$USER/ayoub
+sudo rm /home/ayoub/ayoub
+sudo cp target/release/ayoub /home/ayoub/ayoub
 sudo pm2 delete ayoub
 sudo pm2 start ayoub --name ayoub
 

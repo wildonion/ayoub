@@ -17,7 +17,21 @@ pub mod cors{
     use crate::constants::*;
     use hyper::{header, Body, Response, Request};
 
-    
+
+
+
+    pub async fn check_preflight(_: Request<Body>) -> GenericResult<Response<Body>, hyper::Error> {
+        Ok(
+            hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
+                .status(hyper::StatusCode::OK)
+                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                .header(header::ACCESS_CONTROL_ALLOW_METHODS, "POST, GET, OPTIONS")
+                .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "*")
+                .body(Body::default())
+                .unwrap()
+        ) //-- sending back an empty response to the browser to say that the preflight request was ok to get rid of the fucking CORS :)
+    }
 
 
     pub async fn allow(_: Response<Body>) -> GenericResult<Response<Body>, hyper::Error> {
