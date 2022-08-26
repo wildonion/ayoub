@@ -85,7 +85,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                                             let role_filter = doc! { "is_disabled": false }; //-- filtering all none disabled roles
                                             let mut all_roles = vec![];
-                                            let mut all_roles_cursor = roles.find(role_filter, None).await.unwrap(); //-- getting all defined and none disabled roles since a role might be disabled by the god
+                                            let mut all_roles_cursor = roles.find(role_filter, None).await.unwrap(); //-- getting all defined and none disabled roles since a role might be disabled by the god; ex: a deck contains 15 roles and only 13 players came for the event :)) thus the god must disable 2 extra roles to reveal those 13 roles randomly for those 13 players 
                                             while let Some(role_info) = all_roles_cursor.try_next().await.unwrap(){
                                                 all_roles.push(role_info)
                                             }
