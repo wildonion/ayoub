@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"phone\": \"09390877876\",\r\n    \"pwd\": \"blueash@123\",\r\n    \"status\": 0\r\n}",
+							"raw": "{\r\n    \"username\": \"erfan arefi\",\r\n    \"phone\": \"09390877876\",\r\n    \"pwd\": \"blueash@123\",\r\n    \"status\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -606,7 +606,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQ1MTM4NiwiaWF0IjoxNjYwOTE1Mzg2fQ.CQ623Vr51SXuEK2daPLRTKD8yZRQxCL1SlgdygI1L5R1sHETSveMFb-vumpcMl7Lb_EbKeXSV4P-M1SNzLmH4w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzAzMDQ0MSwiaWF0IjoxNjYxNDk0NDQxfQ.7FM_zm1i452HuqIcUgL-MJOimrlKYh1FmNoe5tw6oo8sijL8SZsgr-VOei67lP1t8LyQ-YA3RSoXL7FfglocGQ",
 									"type": "string"
 								}
 							]
@@ -615,7 +615,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"63009f189004db1b11f267ed\"\r\n}",
+							"raw": "{\r\n    \"_id\": \"6300bc2b7f74c4e37349d579\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -803,10 +803,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{game}}/game/role/add",
+							"raw": "https://api.game.fishuman.com:2675/game/role/add",
+							"protocol": "https",
 							"host": [
-								"{{game}}"
+								"api",
+								"game",
+								"fishuman",
+								"com"
 							],
+							"port": "2675",
 							"path": [
 								"game",
 								"role",
@@ -881,10 +886,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{game}}/game/deck/add",
+							"raw": "https://api.game.fishuman.com:2675/game/deck/add",
+							"protocol": "https",
 							"host": [
-								"{{game}}"
+								"api",
+								"game",
+								"fishuman",
+								"com"
 							],
+							"port": "2675",
 							"path": [
 								"game",
 								"deck",

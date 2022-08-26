@@ -272,8 +272,8 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                                 Ok(insert_result) => {
                                                     let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
                                                         data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                        message: REGISTERED,
-                                                        status: 200,
+                                                        message: INSERTED,
+                                                        status: 201,
                                                     };
                                                     let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                     Ok(

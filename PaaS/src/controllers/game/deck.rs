@@ -68,7 +68,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
                                     
-                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("sides");
+                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks");
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                     match decks.find_one_and_update(doc!{"deck_name": deck_info.clone().deck_name}, doc!{
                                         "$set": {
@@ -108,13 +108,13 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                                 Ok(insert_result) => {
                                                     let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
                                                         data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                        message: REGISTERED,
-                                                        status: 200,
+                                                        message: INSERTED,
+                                                        status: 201,
                                                     };
                                                     let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                                                     Ok(
                                                         res
-                                                            .status(StatusCode::OK)
+                                                            .status(StatusCode::CREATED)
                                                             .header(header::CONTENT_TYPE, "application/json")
                                                             .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                                             .unwrap() 
