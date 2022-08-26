@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"erfan arefi\",\r\n    \"phone\": \"09390877876\",\r\n    \"pwd\": \"blueash@123\",\r\n    \"status\": 0\r\n}",
+							"raw": "{\r\n    \"username\": \"mj\",\r\n    \"phone\": \"09215165207\",\r\n    \"pwd\": \"mj@1234\",\r\n    \"status\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@123\"\r\n}",
+							"raw": "{\r\n    \"username\": \"mj\",\r\n    \"pwd\": \"mj@1234\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -250,7 +250,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
 									"type": "string"
 								}
 							]
@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"first event in wolf caffee on friday\",\r\n    \"content\":\"please let's gather together in this caffee for the first event! :)) - 1\",\r\n    \"deck_id\":\"62ff88aa0bd1f9c22ec75cbd\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"62ff61006aa185f2443a9970\",\r\n                \"name\": \"komod mafia team updated _\",\r\n                \"owner\": \"mamrez\",\r\n                \"god_id\": \"62fbea5d2676c23426ba29ab\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62fbea5d2676c23426ba29ab\"\r\n                },\r\n                \"username\": \"blueash\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8af30bd1f9c22ec75cd4\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff93acb936668c5bacd7f9\"\r\n                },\r\n                \"username\": \"hamidreza\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff5f2294474205d5992118\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff93bab936668c5bacd7fb\"\r\n                },\r\n                \"username\": \"saeed\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8ae20bd1f9c22ec75cd0\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff93c3b936668c5bacd7fd\"\r\n                },\r\n                \"username\": \"pooria\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8afc0bd1f9c22ec75cd6\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff93ceb936668c5bacd7ff\"\r\n                },\r\n                \"username\": \"mehdi\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8a5e0bd1f9c22ec75cc6\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff86360bd1f9c22ec75cbb\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff93e9b936668c5bacd801\"\r\n                },\r\n                \"username\": \"ali grg\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8adb0bd1f9c22ec75cce\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff93fab936668c5bacd803\"\r\n                },\r\n                \"username\": \"sina\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff5fc894474205d599211d\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff9402b936668c5bacd805\"\r\n                },\r\n                \"username\": \"iman\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8a680bd1f9c22ec75cc8\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff86360bd1f9c22ec75cbb\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff9406b936668c5bacd807\"\r\n                },\r\n                \"username\": \"amin\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8a7a0bd1f9c22ec75cca\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff941cb936668c5bacd809\"\r\n                },\r\n                \"username\": \"ali javadi\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8ad10bd1f9c22ec75ccc\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff9423b936668c5bacd80b\"\r\n                },\r\n                \"username\": \"ali monfared\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff89830bd1f9c22ec75cc0\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff86360bd1f9c22ec75cbb\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff942eb936668c5bacd80d\"\r\n                },\r\n                \"username\": \"omid\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8b060bd1f9c22ec75cd8\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff9438b936668c5bacd80f\"\r\n                },\r\n                \"username\": \"ali ravi\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8ae80bd1f9c22ec75cd2\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            },\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62ff9459b936668c5bacd811\"\r\n                },\r\n                \"username\": \"isana\",\r\n                \"status\": 0,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff89ee0bd1f9c22ec75cc2\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff86360bd1f9c22ec75cbb\"\r\n                }\r\n            }\r\n        ]\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"دومین ایونت کنسه\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"name\": \"گروه مافیای کسنه\",\r\n                \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n                \"god_id\": \"6308a94e25ae0bed76f74460\",\r\n                \"_id\": \"6308a9a8b013ad8289c28453\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -732,7 +732,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjIxMzA1NSwiaWF0IjoxNjYwNjc3MDU1fQ.Zs3JJJ6cHg7VAfctNKFsVFqquNxL9DVQ13RtlCPSM9hBXdiQrOx_SWg7JoRl8aSBniVRcRXjQQb6UV2Dq7tObg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
 									"type": "string"
 								}
 							]
@@ -803,22 +803,17 @@
 							}
 						},
 						"url": {
-							"raw": "https://api.game.fishuman.com:2675/game/role/add",
-							"protocol": "https",
+							"raw": "{{game}}/game/role/add",
 							"host": [
-								"api",
-								"game",
-								"fishuman",
-								"com"
+								"{{game}}"
 							],
-							"port": "2675",
 							"path": [
 								"game",
 								"role",
 								"add"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n## **Object Id of Defined Sides**\n\n6308abe5b013ad8289c28455 -> independent  \n6308ac03b013ad8289c28456 -> mafia  \n6308ac13b013ad8289c28457 -> citizen"
 					},
 					"response": []
 				},
@@ -869,7 +864,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
 									"type": "string"
 								}
 							]
@@ -878,7 +873,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"deck_name\": \"MJ first Deck\",\r\n    \"roles\": [\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"god-fother\",\r\n            \"rate\": 1,\r\n            \"desc\": \"godfather exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"shab khosb\",\r\n            \"rate\": 1,\r\n            \"desc\": \"shab khosb exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {   \r\n            \"_id\": \"\",\r\n            \"name\": \"jalab\",\r\n            \"rate\": 1,\r\n            \"desc\": \"jalab exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {   \r\n            \"_id\": \"\",\r\n            \"name\": \"jarah\",\r\n            \"rate\": 1,\r\n            \"desc\": \"jarah exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"doctor\",\r\n            \"rate\": 1,\r\n            \"desc\": \"doctor exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"doctor star\",\r\n            \"rate\": 1,\r\n            \"desc\": \"doctor star exp\",\r\n            \"abilities\": 1\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"shahrdar\",\r\n            \"rate\": 1,\r\n            \"desc\": \"shahrdar exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"ghazi\",\r\n            \"rate\": 1,\r\n            \"desc\": \"ghazi exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"kalantar\",\r\n            \"rate\": 1,\r\n            \"desc\": \"kalantar exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"goorkan\",\r\n            \"rate\": 1,\r\n            \"desc\": \"goorkan exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"goorkan star\",\r\n            \"rate\": 1,\r\n            \"desc\": \"goorkan exp\",\r\n            \"abilities\": 1\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"dast kaj\",\r\n            \"rate\": 1,\r\n            \"desc\": \"dast kaj exp\",\r\n            \"abilities\": 0\r\n        },\r\n        {\r\n            \"_id\": \"\",\r\n            \"name\": \"gardan koloft\",\r\n            \"rate\": 1,\r\n            \"desc\": \"gardan koloft exp\",\r\n            \"abilities\": 0\r\n        }\r\n    ],\r\n    \"desc\": \"\"\r\n}",
+							"raw": "{\r\n    \"deck_name\": \"رول بوک کنسه\",\r\n    \"roles\": [],\r\n    \"desc\": \"رول بوک کنسه\",\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -886,15 +881,10 @@
 							}
 						},
 						"url": {
-							"raw": "https://api.game.fishuman.com:2675/game/deck/add",
-							"protocol": "https",
+							"raw": "{{game}}/game/deck/add",
 							"host": [
-								"api",
-								"game",
-								"fishuman",
-								"com"
+								"{{game}}"
 							],
-							"port": "2675",
 							"path": [
 								"game",
 								"deck",
@@ -952,7 +942,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQ0OTE3NSwiaWF0IjoxNjYwOTEzMTc1fQ.PR7kPhMZ1PPxvD8mj_s-9wsoaenF5hhbzG3NpSjr8ooZfjrDbOqvaTMfPRGYRkP3D5V7R85iohcJyvn0IDJrdw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
 									"type": "string"
 								}
 							]
@@ -961,7 +951,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"mostaghel\"\r\n}",
+							"raw": "{\r\n    \"name\": \"شهروند\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1269,7 +1259,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDcxYjhhZjFmMWQwN2VkOTAxMzIwYSJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5Mjk0NjIyOSwiaWF0IjoxNjYxNDEwMjI5fQ.AL9_HRDPb6_AzQusuc33zn07am-It36Mdy7s0sB-bbYgr6cD6Viztm9MoWlLtu-ULELx57Fsq1hzkbxm1LBISg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNTA1ODIsImlhdCI6MTY2MTUxNDU4Mn0.Uh1HO6yiQBLzFmy1_KXcwUJekWvEpuUuqghmbxB6zCibeH3fF4bzlvRJk4PKpUvCGi0Vp_6opVxU00ViMlyLvQ",
 									"type": "string"
 								}
 							]
@@ -1278,7 +1268,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"62ff51548bae1e1c343b5a79\"\r\n}",
+							"raw": "{\r\n    \"_id\": \"6308b1242c90659836904860\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1389,7 +1379,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzOTQyNSwiaWF0IjoxNjYwOTAzNDI1fQ.Wo-Qo7IGHGHhgDzaXkNTNbQjkjv9yYK3BvRvWhz4q4K81rsr1rJWaerf5hH28KrNEU4OuSLOZsbR9ag7fcY8AA",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
 									"type": "string"
 								}
 							]
@@ -1398,7 +1388,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"komod mafia team\",\r\n    \"owner\": \"mamrez\"\r\n}",
+							"raw": "{\r\n    \"name\": \"گروه مافیای کسنه\",\r\n    \"owner\": \"محمد جواد صفایی مقدم طهرانی\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
