@@ -21,7 +21,6 @@ pub mod cors{
 
 
     pub async fn allow(_: Response<Body>) -> GenericResult<Response<Body>, hyper::Error> {
-        println!(">>>>>>>>>>>>>>>> allow");
         Ok(
             hyper::Response::builder() //-- building an empty response object with Access-Control-Allow-* enabled in its header
                 .status(hyper::StatusCode::OK)

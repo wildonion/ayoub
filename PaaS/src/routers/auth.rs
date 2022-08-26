@@ -66,8 +66,8 @@ pub async fn register() -> Router<Body, hyper::Error>{
 
     Router::builder()
         .data(app_storage) //-- sharing the initialized app_storage between routers' threads
-        .middleware(Middleware::post(middlewares::cors::allow))
-        // .middleware(enable_cors_all()) //-- enable CORS middleware on the incoming request then pass it to the next middleware
+        // .middleware(Middleware::post(middlewares::cors::allow))
+        .middleware(enable_cors_all()) //-- enable CORS middleware on the incoming request then pass it to the next middleware
         .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware on the incoming request then pass it to the next middleware
         .get("/page", |req| async move{
             let res = Response::builder(); //-- creating a new response cause we didn't find any available route
