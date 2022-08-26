@@ -93,7 +93,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/check-otp", check_otp)
         .post("/user/get/all", get_all)
         .any(not_found) //-- handling 404 request
-        .options("/", middlewares::cors::check_preflight)
+        .options("/*", middlewares::cors::check_preflight)
         .build()
         .unwrap()
 

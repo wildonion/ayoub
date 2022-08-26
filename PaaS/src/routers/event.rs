@@ -108,6 +108,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/reveal/roles", role)
         .post("/simd", simd_ops)
         .any(not_found) //-- handling 404 request
+        .options("/*", middlewares::cors::check_preflight)
         .build()
         .unwrap()
 
