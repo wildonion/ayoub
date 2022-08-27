@@ -111,6 +111,7 @@ pub struct InsertPhaseResponse{
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponse>>,
     pub is_expired: Option<bool>,
+    pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -134,6 +135,7 @@ pub struct ReserveEventResponse{
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponse>>,
     pub is_expired: Option<bool>,
+    pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -229,6 +231,7 @@ pub struct EventInfo{
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponse>>,
     pub is_expired: Option<bool>,
+    pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -258,6 +261,7 @@ pub struct RevealEventInfo{
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
+    pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -285,7 +289,8 @@ pub struct AddEventRequest{
     pub phases: Option<Vec<Phase>>, // NOTE - we set this field to Option cause we don't want to pass the phases inside the request body, we'll update it later on
     pub max_players: Option<u8>, // NOTE - number of maximum players for this event
     pub players: Option<Vec<ReservePlayerInfoResponse>>, // NOTE - vector of all players which has participated for this event
-    pub is_expired: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
+    pub is_expired: Option<bool>,
+    pub is_locked: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object
     pub created_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the created time inside the request body, we'll fill it inside the server
     pub updated_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the updated time inside the request body, we'll fill it inside the server
@@ -328,6 +333,33 @@ pub struct PlayerExpiredEvents{
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct ExpireEventRequest{
     pub _id: String, //-- this is the id of the event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
+  -------------------------------------------------------------------------------------
+| this struct will be used to deserialize lock info json from client into this struct
+| -------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct LockEventRequest{
+    pub _id: String, //-- this is the id of the event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
+  -------------------------------------------------------------------------------------
+| this struct will be used to deserialize cancel info json from client into this struct
+| -------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct PlayerCancelEventRequest{
+    pub event_id: String,
+    pub user_id: String,
 }
 
 

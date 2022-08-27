@@ -116,6 +116,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 max_players: event_info.max_players, //-- this is the maximum players that an event can have
                                                 players: Some(vec![]), //-- there are no participant yet for this event
                                                 is_expired: Some(false), //-- a event is not expired yet or at initialization
+                                                is_locked: Some(false), //-- a event is not locked yet or at initialization
                                                 expire_at: Some(exp_time), //-- a event will be expired at
                                                 created_at: Some(now),
                                                 updated_at: Some(now),

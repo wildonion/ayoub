@@ -176,7 +176,7 @@ pub fn trash(){
 
 	
 
-        // reading image pixels or bytes
+        // reading image pixels or bytes which is utf8 and each pixel is between 0 up to 255
         // ...
         if let Ok(bytes) = fs::read("/home/wildonion/Pictures/test.jpg"){
             println!("image bytes >>>> {:?}", bytes);
