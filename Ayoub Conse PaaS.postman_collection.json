@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "b78e093b-5489-4d16-8450-0e4d7e6cf68a",
 		"name": "Ayoub Conse PaaS",
-		"description": "# AYOUB CONSE PITCH DECK\n\n[Technical Pitch Deck](https://miro.com/app/board/uXjVOb2Cb9k=/?moveToWidget=3458764531220249895&cot=14)\n\n# ***AYOUB CONSE GAME FLOW***\n\n*   Every God must create a group first then define an event related to that group so the players can purchase the event to participate in.\n*   Every God must define the a deck first to create an event for players.\n*   Every God must define roles before creating a deck\n*   A deck contains all defined roles by the God.\n*   Every God can update the role, side, status, player ability and phases for a specific event.\n*   Every God can chain two players together.\n*   Every God can see a player info during the game.\n*   Every Player can participate in an event defined by a God\n*   Every Player must reserve his/her role by purchasing and event.\n*   Every God must define sides for the game.\n*   Behalf of the user the server will assign the `role_id` and `side_id` for the user.\n*   To get all active users of a current event we must iterate through the `phases` field fetched from calling the `Get Single Event` API.\n*   Every God must send the updated player info by calling the `Update Event Phase` API after updating the `side_id`, `role_id`, `status`, `player_role_ability` and `player_chain_to` of the user during the game phases.\n    \n\n# ***NOTES***\n\n*   All passed in times are in form of UNIX timestamp.\n*   All access level must be constant values as defined.\n*   All player status must be constant values as defined.\n    \n\n# *CONSTANTS*\n\n### **ACCESS LEVELS**\n\n*   Admin Access is 1\n*   Dev Access is 0\n*   Default User Access is 2\n    \n\n### **PLAYER STATUS**\n\n*   Default Status is 0\n*   Kick Status is 1\n*   Dead Status is 2\n*   Three Phases Disability Status is 3\n*   Full Disability Status is 4\n*   Two Phases Later Silent Status is 5\n*   Six Phases Later Silent Status is 6\n*   Chained Status is 7\n*   Changed Role Status is 8\n*   Changed Side Status is 9\n*   Exit Status is 10\n*   Devote Status is 11\n*   Nine Phases Later Pro Killer Status is 12",
+		"description": "# AYOUB CONSE PITCH DECK\n\n[Technical Pitch Deck](https://miro.com/app/board/uXjVOb2Cb9k=/?moveToWidget=3458764531220249895&cot=14)\n\n# ***AYOUB CONSE GAME FLOW***\n\n*   Every God must create a group first then define an event related to that group so the players can purchase the event to participate in.\n*   Every God must define the a deck roles from all none disabled roles (which are created by the Dev) first to create an event for players.\n*   Every Dev must define roles before creating a deck\n*   A deck contains all defined roles by the God.\n*   Every God can update the role, side, status, player ability and phases for a specific event.\n*   Every God can chain two players together.\n*   Every God can see a player info during the game.\n*   Every Player can participate in an event defined by a God\n*   Every Player must reserve his/her role by purchasing and event.\n*   Every Dev must define sides for the game.\n*   Behalf of the user the server will assign the `role_id` and `side_id` for the user.\n*   To get all active users of a current event we must iterate through the `phases` field fetched from calling the `Get Single Event` API.\n*   Every God must send the updated player info by calling the `Update Event Phase` API after updating the `side_id`, `role_id`, `status`, `player_role_ability` and `player_chain_to` of the user during the game phases.\n    \n\n# ***NOTES***\n\n*   All passed in times are in form of UNIX timestamp.\n*   All access level must be constant values as defined.\n*   All player status must be constant values as defined.\n    \n\n# *CONSTANTS*\n\n### **ACCESS LEVELS**\n\n*   Admin Access is 1\n*   Dev Access is 0\n*   Default User Access is 2\n    \n\n### **PLAYER STATUS**\n\n*   Default Status is 0\n*   Kick Status is 1\n*   Dead Status is 2\n*   Three Phases Disability Status is 3\n*   Full Disability Status is 4\n*   Two Phases Later Silent Status is 5\n*   Six Phases Later Silent Status is 6\n*   Chained Status is 7\n*   Changed Role Status is 8\n*   Changed Side Status is 9\n*   Exit Status is 10\n*   Devote Status is 11\n*   Nine Phases Later Pro Killer Status is 12",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "22927035"
 	},
@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"mj\",\r\n    \"phone\": \"09215165207\",\r\n    \"pwd\": \"mj@1234\",\r\n    \"status\": 0\r\n}",
+							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"phone\": \"09215165207\",\r\n    \"pwd\": \"blueash@1234\",\r\n    \"status\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"mj\",\r\n    \"pwd\": \"mj@1234\"\r\n}",
+							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@1234\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -214,7 +214,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5Mjk1NTk5MCwiaWF0IjoxNjYxNDE5OTkwfQ.TatB0bCWMDYqoFxJ4SsrnStrT5fP3TFKt5WSSbecCfi9MDCm4L_WgJN3XLH9VG677xYMdTax93CZb6RRp9_l_A",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNTE1MDgsImlhdCI6MTY2MTUxNTUwOH0.eYYkXO6c0UY7aMi87F11FIyPb4hEhMMz3f9wF2oShW1buMIpU8UQwmld2q7dD0djv7fS506z5qPT3GS8uuJGSw",
 									"type": "string"
 								}
 							]
@@ -250,7 +250,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhkYmNmMmM5MDY1OTgzNjkwNDg2MSJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzA2MTAwOCwiaWF0IjoxNjYxNTI1MDA4fQ.hK6YQa2Ba8gBOjKSzQSqDPMyEYCTcrGs4a0xf4pctZDCBIbIFwFg4m75GWfthYq8DzTsnTvYttMvigTjQOnbBg",
 									"type": "string"
 								}
 							]
@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"دومین ایونت کنسه\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"name\": \"گروه مافیای کسنه\",\r\n                \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n                \"god_id\": \"6308a94e25ae0bed76f74460\",\r\n                \"_id\": \"6308a9a8b013ad8289c28453\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"دومین ایونت کنسه\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"name\": \"گروه مافیای کسنه\",\r\n                \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n                \"god_id\": \"6308a94e25ae0bed76f74460\",\r\n                \"_id\": \"6308a9a8b013ad8289c28453\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62fbea5d2676c23426ba29ab\"\r\n                },\r\n                \"username\": \"blueash\",\r\n                \"status\": 0,\r\n                \"role_name\": null,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8afc0bd1f9c22ec75cd6\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -637,6 +637,82 @@
 					"response": []
 				},
 				{
+					"name": "Lock Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzAzMDQ0MSwiaWF0IjoxNjYxNDk0NDQxfQ.7FM_zm1i452HuqIcUgL-MJOimrlKYh1FmNoe5tw6oo8sijL8SZsgr-VOei67lP1t8LyQ-YA3RSoXL7FfglocGQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"6300bc2b7f74c4e37349d579\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/set-lock",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"set-lock"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzAzMDQ0MSwiaWF0IjoxNjYxNDk0NDQxfQ.7FM_zm1i452HuqIcUgL-MJOimrlKYh1FmNoe5tw6oo8sijL8SZsgr-VOei67lP1t8LyQ-YA3RSoXL7FfglocGQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"event_id\": \"6300bc2b7f74c4e37349d579\",\r\n    \"player_id\": \"6300bc2b7f74c4e37349d579\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/set-lock",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"set-lock"
+							]
+						},
+						"description": "⚠️ ***This API needs Player, God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
 					"name": "Update Event Phase",
 					"request": {
 						"auth": {
@@ -685,7 +761,14 @@
 					"name": "Get All Sides",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -700,13 +783,24 @@
 								"get",
 								"availables"
 							]
-						}
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
 					},
 					"response": []
 				},
 				{
 					"name": "Get All Roles",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -720,7 +814,8 @@
 								"get",
 								"availables"
 							]
-						}
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
 					},
 					"response": []
 				},
@@ -813,7 +908,7 @@
 								"add"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n## **Object Id of Defined Sides**\n\n6308abe5b013ad8289c28455 -> independent  \n6308ac03b013ad8289c28456 -> mafia  \n6308ac13b013ad8289c28457 -> citizen"
+						"description": "⚠️ ***This API needs Dev Access Level.***\n\n## **Object Id of Defined Sides**\n\n6308abe5b013ad8289c28455 -> independent  \n6308ac03b013ad8289c28456 -> mafia  \n6308ac13b013ad8289c28457 -> citizen"
 					},
 					"response": []
 				},
@@ -852,7 +947,7 @@
 								"disable"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n***⚠️ Use this API if you want to remove a role from a deck.***"
+						"description": "⚠️ ***This API needs Dev Access Level.***\n\n***⚠️ Use this API if you want to remove a role.***"
 					},
 					"response": []
 				},
@@ -969,7 +1064,7 @@
 								"add"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs Dev Access Level.***"
 					},
 					"response": []
 				},
@@ -1008,7 +1103,7 @@
 								"disable"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs Dev Access Level.***"
 					},
 					"response": []
 				},
@@ -1259,7 +1354,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNTA1ODIsImlhdCI6MTY2MTUxNDU4Mn0.Uh1HO6yiQBLzFmy1_KXcwUJekWvEpuUuqghmbxB6zCibeH3fF4bzlvRJk4PKpUvCGi0Vp_6opVxU00ViMlyLvQ",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhkYmNmMmM5MDY1OTgzNjkwNDg2MSJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzA2MTk4NiwiaWF0IjoxNjYxNTI1OTg2fQ.xVeUwJH3Skn2bes0zuLLRLr8VRC6b9esz63YEQzU4oQTmyd5RtWLULtF54mody8ArMe1hm43TPlSzNEkeqsM7w",
 									"type": "string"
 								}
 							]
@@ -1525,6 +1620,21 @@
 		{
 			"key": "game",
 			"value": "https://api.conse.app:7439",
+			"type": "string"
+		},
+		{
+			"key": "fish_auth",
+			"value": "https://api.conse.fishuman.com:7439",
+			"type": "string"
+		},
+		{
+			"key": "fish_event",
+			"value": "https://api.conse.fishuman.com:7439",
+			"type": "string"
+		},
+		{
+			"key": "fish_game",
+			"value": "https://api.conse.fishuman.com:7439",
 			"type": "string"
 		}
 	]

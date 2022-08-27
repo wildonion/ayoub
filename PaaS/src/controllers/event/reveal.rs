@@ -75,21 +75,22 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     
                                     let mut updated_players = vec![]; //-- vector of all updated players
                                     let player_roles_info = db.clone().database(&db_name).collection::<schemas::game::InsertPlayerRoleAbilityRequest>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to insert the current_ability field - we want to deserialize all player role ability infos into the InsertPlayerRoleAbilityRequest struct
-                                    let roles = db.clone().database(&db_name).collection::<schemas::game::RoleInfo>("roles");
+                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch and deserialize all decks infos or documents from BSON into the DeckInfo struct
                                     let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting events collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                                     let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let events = db.clone().database(&db_name).collection::<schemas::event::RevealEventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
                                     match events.find_one(doc! { "_id": event_id, "is_expired": false }, None).await.unwrap(){ //-- getting a none expired event
                                         Some(event_doc) => {
-
-
-                                            let role_filter = doc! { "is_disabled": false }; //-- filtering all none disabled roles
+                                            
+                                            
+                                            let deck_id = ObjectId::parse_str(event_doc.deck_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                            let deck_filter = doc! { "is_disabled": false, "_id": deck_id }; //-- filtering a none disabled deck info of this event
                                             let mut all_roles = vec![];
-                                            let mut all_roles_cursor = roles.find(role_filter, None).await.unwrap(); //-- getting all defined and none disabled roles since a role might be disabled by the god; ex: a deck contains 15 roles and only 13 players came for the event :)) thus the god must disable 2 extra roles to reveal those 13 roles randomly for those 13 players 
-                                            while let Some(role_info) = all_roles_cursor.try_next().await.unwrap(){
-                                                all_roles.push(role_info)
+                                            let mut deck_cursor = decks.find(deck_filter, None).await.unwrap();
+                                            while let Some(deck_info) = deck_cursor.try_next().await.unwrap(){
+                                                all_roles = deck_info.roles; //-- by assigning the deck_info.roles to all_roles variable; its ownership will be moved into the all_roles variable; its location from the ram (heap) will be popped up since it's moving into a new lifetime and variable inside the ram (heap)
                                             }
-                                            all_roles.shuffle(&mut rand::thread_rng()); //-- shuffling the fetched roles
+                                            all_roles.shuffle(&mut rand::thread_rng()); //-- shuffling the fetched roles - all roles inside this vector are none disabled ones since a deck must be created from all none disabled roles inside the god panel
 
 
 

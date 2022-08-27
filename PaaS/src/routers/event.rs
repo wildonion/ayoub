@@ -48,7 +48,9 @@ use crate::controllers::event::{
                                       group_all as get_all_group_events
                                     }, 
                                 vote::main as cast_vote_event, 
-                                expire::main as expire_event, 
+                                expire::main as expire_event,
+                                lock::main as lock_event,
+                                cancel::main as cancel_event,
                                 _404::main as not_found, 
                                 phase::insert as insert_phase,
                                 reserve::{process_payment_request, mock_reservation},
@@ -75,7 +77,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
 
     Router::builder()
         .data(app_storage) //-- sharing the initialized app_storage between routers' threads
-        .middleware(Middleware::post(middlewares::cors::allow))
+        .middleware(Middleware::post(middlewares::cors::allow)) //-- allow all CORS setup
         .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware on the incoming request then pass it to the next middleware
         .get("/page", |req| async move{
             let res = Response::builder(); //-- creating a new response cause we didn't find any available route
@@ -103,6 +105,8 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/get/single", get_single_event)
         .post("/cast-vote", cast_vote_event)
         .post("/set-expire", expire_event)
+        .post("/set-lock", lock_event)
+        .post("/cancel", cancel_event)
         .post("/update/phases/add", insert_phase)
         .post("/reserve/mock", mock_reservation)
         .post("/reveal/roles", role)
