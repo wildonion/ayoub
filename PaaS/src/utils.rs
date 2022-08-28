@@ -147,7 +147,7 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &String){ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
-    fs::create_dir_all(path); //-- creating the directory which must be contains the file
+    fs::create_dir_all(path).unwrap(); //-- creating the directory which must be contains the file
     let mut filename = "".to_string();
     while let Some(mut field) = payload.next_field().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- reading the next field which contains IO stream future object of utf8 bytes of the payload is a mutable process and due to this fact we've defined the payload as a mutable type; we've mapped each incoming utf8 bytes future into an error if there was any error on reading them 
         let field_name = field.name(); //-- getting the field's name if provided in "Content-Disposition" header from the client
@@ -165,7 +165,7 @@ pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &Strin
             //     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
             // }
         
-        }
+        } //-- this field will be dropped in here to get the next field
 
 
     }

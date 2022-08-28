@@ -1555,7 +1555,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzI0OTAzNiwiaWF0IjoxNjYxNzEzMDM2fQ.TFsltpZ2CQquX5_WKt4cMprDxwYaqDp35tZQHsHyC-wwEWv8bQd-aNqCtlcHY-4vrdo2JGs79V9epZWCVUzrqA",
 									"type": "string"
 								}
 							]
@@ -1563,8 +1563,14 @@
 						"method": "POST",
 						"header": [],
 						"body": {
-							"mode": "file",
-							"file": {}
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "group_image",
+									"type": "file",
+									"src": "/C:/Users/lenovo/Pictures/google-tasks.png"
+								}
+							]
 						},
 						"url": {
 							"raw": "{{game}}/game/god/update/group/image/6308a9a8b013ad8289c28453",
