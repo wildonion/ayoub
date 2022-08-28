@@ -4,6 +4,8 @@
 
 
 
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
 use routerify::prelude::*;
 use crate::contexts as ctx;
 use crate::schemas;
@@ -74,7 +76,8 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                             } else if time <= otp_info_doc.exp_time{ //-- no need to clone time cause time is of type i64 and it's saved inside the stack
                                 match users.find_one(doc!{"phone": phone.clone()}, None).await.unwrap(){ //-- we're finding the user based on the incoming phone from the clinet - we've cloned the phone in order to prevent its ownership from moving
                                     Some(user_info) => {
-                                            match otp_info.find_one_and_update(doc!{"_id": otp_info_doc._id}, doc!{"$set": {"updated_at": Some(Utc::now().timestamp())}}, None).await.unwrap(){ //-- updating the updated_at field for the current otp_info doc based on the current otp_info doc id 
+                                            let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                            match otp_info.find_one_and_update(doc!{"_id": otp_info_doc._id}, doc!{"$set": {"updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- updating the updated_at field for the current otp_info doc based on the current otp_info doc id 
                                                 Some(updated_otp_info) => {
                                                     let check_otp_response = schemas::auth::CheckOTPResponse{
                                                         user_id: user_info._id, //-- this is of tyoe mongodb bson ObjectId

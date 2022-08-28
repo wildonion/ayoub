@@ -14,7 +14,10 @@ use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_bo
 use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
 use mongodb::Client;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc};
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
+use routerify_multipart::RequestMultipartExt; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use std::env;
 
 
@@ -65,26 +68,45 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                         Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                             let data: serde_json::Value = value;
                             let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                            match serde_json::from_str::<schemas::game::AddGroupRequest>(&json){ //-- the generic type of from_str() method is AddGroupRequest struct - mapping (deserializing) the json string into the AddGroupRequest struct
+                            match serde_json::from_str::<schemas::game::GetGroupRequest>(&json){ //-- the generic type of from_str() method is GetGroupRequest struct - mapping (deserializing) the json string into the GetGroupRequest struct
                                 Ok(group_info) => {
 
 
+                                   
+                                    let group_id = group_info._id;
 
 
-
-
-                                    // https://crates.io/crates/routerify-multipart
-                                    // TODO - let filename = utils::upload_asset(path, payload).await; //-- passing the incoming utf8 bytes payload to build the image
-                                    // ...
-                                    // let res = UploadFile{
-                                    //     name: filename,
-                                    //     time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                                    // };
-                                    // let user = QueryableUser::update_prof_img(id.into_inner(), res).await?;
-                                    // Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
-
-                                    
-
+                                    match req.into_multipart(){ //-- converting the request object into multipart content type to get the inomcing IO streaming of bytes of the uploaded file - some where the RequestMultipartExt trait has implemented for the request object so we can call the into_multipart() method on the req object
+                                        Ok(payload) => {
+                
+                
+                                            let filename = utils::upload_asset(UPLOAD_PATH, payload).await; //-- passing the incoming utf8 bytes payload to build the image
+                
+                                            
+                                            // let res = UploadFile{
+                                            //     name: filename,
+                                            //     time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+                                            // };
+                                            // Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
+                                            // TODO - update the updated_at field {"updated_at": Some(Utc::now().timestamp())}
+                
+                                        },
+                                        Err(e) => {
+                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                status: 400,
+                                            };
+                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                            Ok(
+                                                res
+                                                    .status(StatusCode::BAD_REQUEST)
+                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                    .unwrap() 
+                                            )
+                                        },
+                                    }
 
 
 
@@ -438,10 +460,11 @@ pub async fn update(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     ////////////////////////////////// DB Ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let group_id = ObjectId::parse_str(update_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- connecting to groups collection to update the name field - we want to deserialize all user bsons into the GroupInfo struct
-                                    match groups.find_one_and_update(doc!{"_id": group_id}, doc!{"$set": {"name": update_info.name, "updated_at": Some(now)}}, None).await.unwrap(){
+                                    match groups.find_one_and_update(doc!{"_id": group_id}, doc!{"$set": {"name": update_info.name, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                         Some(group_doc) => {
                                             let group_info = schemas::game::GroupInfo{
                                                 _id: group_doc._id,

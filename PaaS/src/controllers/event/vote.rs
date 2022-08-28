@@ -3,6 +3,7 @@
 
 
 
+use chrono::Utc;
 use routerify::prelude::*;
 use crate::middlewares;
 use crate::utils;
@@ -74,7 +75,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             let serialized_voters = bson::to_bson(&updated_voters).unwrap(); //-- we have to serialize the updated_voters to BSON Document object in order to update voters field inside the collection
                                             let serialized_upvotes = bson::to_bson(&upvotes).unwrap(); //-- we have to serialize the upvotes to BSON Document object in order to update voters field inside the collection
                                             let serialized_downvotes = bson::to_bson(&downvotes).unwrap(); //-- we have to serialize the downvotes to BSON Document object in order to update voters field inside the collection
-                                            match events.update_one(doc!{"_id": event_id}, doc!{"$set": { "voters": serialized_voters, "upvotes": serialized_upvotes, "downvotes": serialized_downvotes }}, None).await{
+                                            match events.update_one(doc!{"_id": event_id}, doc!{"$set": { "voters": serialized_voters, "upvotes": serialized_upvotes, "downvotes": serialized_downvotes, "updated_at": Some(Utc::now().timestamp()) }}, None).await{
                                                 Ok(updated_result) => {
                                                     let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
                                                         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array

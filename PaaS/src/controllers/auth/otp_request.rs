@@ -19,6 +19,8 @@ use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use mongodb::Client as MC;
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
 use rand::prelude::*;
 use chrono::prelude::*;
 use hyper::http::Uri;
@@ -151,10 +153,11 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                                     ////////////////////////////////// DB Ops
                                     
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let updated_at = Some(now.timestamp());
                                     let serialized_updated_at = bson::to_bson(&updated_at).unwrap(); //-- we have to serialize the updated_at to BSON Document object in order to update the mentioned field inside the collection
                                     let otp_info = db.clone().database(&db_name).collection::<schemas::auth::OTPInfo>("otp_info"); //-- using OTPInfo struct to find and update an otp info inside the otp_info collection
-                                    match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, None).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
+                                    match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, Some(update_option)).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
                                         Some(otp_info) => { //-- once we get here means that the user is already exists in the collection and we have to save the generated new otp code along with a new expiration time for him/her
 
 

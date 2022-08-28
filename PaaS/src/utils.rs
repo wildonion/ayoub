@@ -4,16 +4,21 @@
 use std::sync::Mutex;
 use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
 use std::{env, thread}; 
+use chrono::Utc;
 use futures::TryStreamExt;
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
 use mongodb::Client;
 use mongodb::bson::{self, doc};
+use mongodb::options::{FindOneAndUpdateOptions, ReturnDocument};
 use rand::prelude::*;
 use crate::{constants::*, schemas};
 use crate::contexts::{app, scheduler::ThreadPool};
 use serde::{Serialize, Deserialize};
 use borsh::{BorshDeserialize, BorshSerialize};
+use routerify_multipart::Multipart;
+
+
 
 
 
@@ -137,10 +142,10 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str, payload: &[u8]){ //-- mapping the incoming utf8 bytes payload into a file
+pub async fn upload_asset(path: &str, payload: Multipart<'_>){ //-- mapping the incoming utf8 bytes payload into a file
     
-    // https://github.com/hyperium/hyper/blob/master/examples/send_file.rs
-    // TODO - writing utf8 bytes payload into the sepcified path to create the file
+ 
+    // writing utf8 bytes payload into the sepcified path to create the file
     // ...
     // fs::create_dir_all(constants::UPLOAD_PATH)?;
     // let mut filename = "".to_string();
@@ -160,7 +165,7 @@ pub async fn upload_asset(path: &str, payload: &[u8]){ //-- mapping the incoming
 
 
 
-pub async fn set_user_access(username: String, new_access_level: u8, storage: Option<Arc<app::Storage>>) -> Result<schemas::auth::UserInfo, app::Nill<'static>>{ //-- Nill struct requires a lifetime since there is no lifetime has passed to the function we have to use 'static lifetime  
+pub async fn set_user_access(username: String, new_access_level: i64, storage: Option<Arc<app::Storage>>) -> Result<schemas::auth::UserInfo, app::Nill<'static>>{ //-- Nill struct requires a lifetime since there is no lifetime has passed to the function we have to use 'static lifetime  
 
     // NOTE - we can also use clone() method to clone the db instead of using the as_ref() method
     let app_storage = match storage.as_ref().unwrap().db.as_ref().unwrap().mode{
@@ -170,9 +175,10 @@ pub async fn set_user_access(username: String, new_access_level: u8, storage: Op
 
     ////////////////////////////////// DB Ops
 
+    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let users = app_storage.unwrap().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch all user infos into the UserInfo struct
-    match users.find_one_and_update(doc!{"username": username}, doc!{"$set": {"access_level": 0}}, None).await.unwrap(){ //-- finding user based on username to update access_level field to dev access
+    match users.find_one_and_update(doc!{"username": username}, doc!{"$set": {"access_level": new_access_level, "updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- finding user based on username to update access_level field to dev access
         Some(user_doc) => Ok(user_doc), 
         None => Err(app::Nill(&[])),
     }
@@ -221,7 +227,19 @@ pub async fn get_random_doc(storage: Option<&Client>) -> Option<schemas::game::R
 pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would be an associated function not a method
     
 
-    /*
+    /*  
+
+
+        ➔ types bounded to Sync and Send:
+            Arc
+            Mutex
+            RwLock
+        ➔ types not bounded to Sync and Send:
+            Rc
+            RefCell
+            Cell
+
+
 
        ➔ in order to move the T between threads T must be bounded to Send and if it wasn't bound to Sync we have to clone it to move it between threads 
           and if it wasn't bound to Clone trait we must put it inside the Arc and to change it inside other thread we must put the Arc-ed type inside 
@@ -240,6 +258,17 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
 
 
+        -- shareable rules : data which are Send + Sync + 'static must be share and trasferred between threads using mpsc channel
+        -- in rust everything is all about having a type and size thus everything must be generic and we have to borrowing them using & to share them between other scopes like threads and functions a shareable data means we're sharing its references which it can be copied or cloned and safe to Send and mutate between threads
+        -- Arc will be used instead of Rc in multi threading to avoid data races and is Send means all its references can be shared between threads and is an atomic reference to a type
+        -- if &T is Send then T can be also Sync thus in order to share a data between threads safely the type must be bounded to Send + Sync + 'static means it must be cloneable or shareable between threads means we can simply borrow it to move it between threads and Sync with other threads to avoid mutating it by multiple threads at the same time
+        -- if there is no possibility of undefined behavior like data races when passing &T between threads means &T must be Send then T is alos Sync and &mut T is Sync if T is Sync
+        -- data which is utf8 encoded using borsh or serde to share a reference of it (by borrowing it) between threads using mpsc must be : Send + Sync + 'static + Unpin means it must be inside Arc<Mutex<Data>>
+        -- if a type is not Send + Sync it means we can't move its references between threads safely and we have to put it inside Arc since &Arc<T> is Send thus Arc<T> is also Sync
+        -- a type might be mutated by other threads thus we have to put it inside Mutex or RwLock to avoid data races means that only one thread can mutate the state of a type
+        -- instead of moving types into the thread we can borrow them using Arc to have them outside the threads
+        -- based on mpsc rust has defined the rule which says multiple immutable can be inside a scope but only one of them can be mutable
+        -- in order to share data (T must have shareable rules) between threads we have to use mpsc channel 
         -- Send is the access of sharing between threads, Sync is safe to transfer and static means the type must have static lifetime across threads and .awaits
         -- share data between routers and threads using .data() of routerify Router and to do that the passed in closure of the thread must be static + send and sync to send between threads safely we can't just simply borrow the data using & to pass them between threads (since the race condition might be happened) since the type must be send + sync and 'static to be shared between threads safely if it's not send and sync we can put it inside the Arc<Mutex<T>> to make it cloneable and borrow it mutably to mutate its content by locking on it inside a free thread, if other threads don't want to mutate it we can just put it inside Arc<T> to be just cloneable 
         -- share reference or share access means multiple threads can read and access a resource or a type but only on of them can mutate it and the channel for this task is the mpsc

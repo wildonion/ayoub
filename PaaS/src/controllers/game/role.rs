@@ -16,7 +16,9 @@ use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_bo
 use hyper::{header, StatusCode, Body, Response, Request};
 use mongodb::Client;
 use log::info;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc};
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use std::env;
 
 
@@ -403,9 +405,10 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     
                                     ////////////////////////////////// DB Ops
                                     
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let role_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let roles = db.clone().database(&db_name).collection::<schemas::game::RoleInfo>("roles"); //-- selecting roles collection to fetch all role infos into the RoleInfo struct
-                                    match roles.find_one_and_update(doc!{"_id": role_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding role based on role id
+                                    match roles.find_one_and_update(doc!{"_id": role_id}, doc!{"$set": {"is_disabled": true, "updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- finding role based on role id
                                         Some(role_doc) => { //-- deserializing BSON into the RoleInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::RoleInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is RoleInfo struct
                                                 data: Some(role_doc),

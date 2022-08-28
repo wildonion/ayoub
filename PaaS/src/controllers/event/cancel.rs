@@ -7,12 +7,15 @@ use crate::utils;
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use chrono::Utc;
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer and is used for manipulating coming network bytes from the socket
 use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
 use mongodb::Client;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc};
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use std::env;
 
 
@@ -58,13 +61,11 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     
                                     ////////////////////////////////// DB Ops
                                     
-
-                                    // db.events.update({ _id: ObjectId("63086269d28c021305f75e2a")}, { $pull: { players: {"username": "blueash"}}})
-                                    
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let event_id = ObjectId::parse_str(cancel_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let user_id = ObjectId::parse_str(cancel_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
-                                    match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$pull": {"players": {"_id": user_id}}}, None).await.unwrap(){ //-- finding event based on event id - popping the player out of the players vector
+                                    match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$pull": {"players": {"_id": user_id}, "$set": {"updated_at": Some(Utc::now().timestamp())}}}, Some(update_option)).await.unwrap(){ //-- finding event based on event id - popping the player out of the players vector
                                         Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
                                             let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
                                                 data: Some(event_doc),

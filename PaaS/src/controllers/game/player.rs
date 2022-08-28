@@ -18,6 +18,8 @@ use log::info;
 use mongodb::Client;
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use hyper::http::Uri;
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
 use std::env;
 
 
@@ -68,11 +70,12 @@ pub async fn update_role(req: Request<Body>) -> GenericResult<hyper::Response<Bo
 
                                     ////////////////////////////////// DB Ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the role_id field - we want to deserialize all user bsons into the UserInfo struct
-                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"role_id": role_id, "updated_at": Some(now)}}, None).await.unwrap(){
+                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"role_id": role_id, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                         Some(user_doc) => {
                                             let user_info = schemas::auth::UserUpdateResponse{
                                                 username: user_doc.username,
@@ -250,11 +253,12 @@ pub async fn update_side(req: Request<Body>) -> GenericResult<hyper::Response<Bo
 
                                     ////////////////////////////////// DB Ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let side_id = ObjectId::parse_str(update_info.side_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the side_id field - we want to deserialize all user bsons into the UserInfo struct
-                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"side_id": side_id, "updated_at": Some(now)}}, None).await.unwrap(){
+                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"side_id": side_id, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                         Some(user_doc) => {
                                             let user_info = schemas::auth::UserUpdateResponse{
                                                 username: user_doc.username,
@@ -429,11 +433,12 @@ pub async fn update_status(req: Request<Body>) -> GenericResult<hyper::Response<
                                     
                                     ////////////////////////////////// DB Ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let status = bson::to_bson(&update_info.status).unwrap(); //-- we have to serialize the status to BSON Document object in order to update the mentioned field inside the collection
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the status field - we want to deserialize all user bsons into the UserInfo struct
-                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"status": status, "updated_at": Some(now)}}, None).await.unwrap(){
+                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"status": status, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                         Some(user_doc) => {
                                             let user_info = schemas::auth::UserUpdateResponse{
                                                 username: user_doc.username,
@@ -609,14 +614,15 @@ pub async fn update_role_ability(req: Request<Body>) -> GenericResult<hyper::Res
                                 Ok(update_info) => { //-- we got the username and password inside the login route
                                     
                                     ////////////////////////////////// DB Ops
-                
+                                    
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let event_id = ObjectId::parse_str(update_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
                                     let current_ability = bson::to_bson(&update_info.current_ability).unwrap(); //-- we have to serialize the current_ability to BSON Document object in order to update the mentioned field inside the collection
                                     let player_roles_info = db.clone().database(&db_name).collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
-                                    match player_roles_info.find_one_and_update(doc!{"user_id": user_id, "event_id": event_id, "role_id": role_id}, doc!{"$set": {"current_ability": Some(current_ability), "updated_at": Some(now)}}, None).await.unwrap(){
+                                    match player_roles_info.find_one_and_update(doc!{"user_id": user_id, "event_id": event_id, "role_id": role_id}, doc!{"$set": {"current_ability": Some(current_ability), "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                         Some(user_doc) => {
                                             let response_body = ctx::app::Response::<schemas::game::PlayerRoleAbilityInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is PlayerRoleAbilityInfo struct
                                                 data: Some(user_doc),

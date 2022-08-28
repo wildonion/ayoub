@@ -30,7 +30,7 @@ serde = {version = "1", features = ["derive"] }
 chrono = { version = "0.4", features = ["serde"] }
 routerify-cors = "3"
 routerify = "3"
-
+routerify-multipart = "3.0.0"
 
 
 

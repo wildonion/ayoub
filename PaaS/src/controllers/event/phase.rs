@@ -16,7 +16,9 @@ use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_bo
 use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
 use mongodb::Client;
-use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
+use mongodb::bson::{self, oid::ObjectId, doc};
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use std::env;
 
 
@@ -70,6 +72,7 @@ pub async fn insert(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     ////////////////////////////////// DB Ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let event_id = ObjectId::parse_str(phase_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- connecting to events collection to update the phases field - we want to deserialize all event bsons into the EventInfo struct
                                     match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
@@ -77,7 +80,7 @@ pub async fn insert(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                             let updated_phases = event_info.add_phase(phase_info.phase).await; //-- add new phase vector into the existing phases vector of the passed in event_id
                                             let serialized_updated_phases = bson::to_bson(&updated_phases).unwrap(); //-- we have to serialize the updated_phases to BSON Document object in order to update the phases field inside the collection
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"phases": serialized_updated_phases, "updated_at": Some(now)}}, None).await.unwrap(){
+                                            match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"phases": serialized_updated_phases, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                                 Some(event_doc) => {
                                                     let event_info = schemas::event::InsertPhaseResponse{
                                                         _id: event_doc._id,

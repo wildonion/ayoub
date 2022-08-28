@@ -4,6 +4,8 @@
 
 
 
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
 use routerify::prelude::*;
 use crate::middlewares;
 use crate::utils;
@@ -405,9 +407,10 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     
                                     ////////////////////////////////// DB Ops
                                     
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let side_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let sides = db.clone().database(&db_name).collection::<schemas::game::SideInfo>("sides"); //-- selecting sides collection to fetch all side infos into the SideInfo struct
-                                    match sides.find_one_and_update(doc!{"_id": side_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding side based on side id
+                                    match sides.find_one_and_update(doc!{"_id": side_id}, doc!{"$set": {"is_disabled": true, "updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- finding side based on side id
                                         Some(side_doc) => { //-- deserializing BSON into the SideInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::SideInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is SideInfo struct
                                                 data: Some(side_doc),

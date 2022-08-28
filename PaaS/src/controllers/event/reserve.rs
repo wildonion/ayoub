@@ -6,6 +6,8 @@
 
 
 
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
 use routerify::prelude::*;
 use crate::middlewares;
 use crate::utils;
@@ -81,6 +83,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
 
                                     ////////////////////////////////// DB ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let event_id = ObjectId::parse_str(mock_reservation_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string - mock_reservation_info.event_id is the mongodb object id of the event that the caller of this method is trying to reserve it
                                     let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct which contains the whole fields
                                     match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
@@ -95,7 +98,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
                                             let updated_players = event_doc.add_player(init_player_info).await; //-- add new player info into the existing players vector of the passed in event_id
                                             let serialized_updated_players = bson::to_bson(&updated_players).unwrap(); //-- we have to serialize the updated_players to BSON Document object in order to update the players field inside the collection
                                             let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"players": serialized_updated_players, "updated_at": Some(now)}}, None).await.unwrap(){
+                                            match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"players": serialized_updated_players, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
                                                 Some(event_doc) => {
                                                     let event_doc = schemas::event::ReserveEventResponse{
                                                         _id: event_doc._id,
@@ -271,6 +274,8 @@ pub async fn process_payment_request(req: Request<Body>) -> GenericResult<hyper:
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let db = &req.data::<Client>().unwrap().to_owned();
 
+
+    
     // TODO
     // https://github.com/hyperium/hyper/blob/master/examples/params.rs
     // get all (un)successful payments for an event with admin or God access

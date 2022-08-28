@@ -15,6 +15,7 @@ use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is u
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer and is used for manipulating coming network bytes from the socket
 use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
+use mongodb::options::{ReturnDocument, FindOneAndUpdateOptions};
 use mongodb::{Client, bson::{self, doc, oid::ObjectId}}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 
 
@@ -61,6 +62,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
                                     ////////////////////////////////// DB Ops
                                     
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                     match events.find_one_and_update(doc!{"title": event_info.clone().title}, doc!{
@@ -82,10 +84,11 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             "created_at": Some(bson::to_bson(&event_info.created_at).unwrap()),
                                             "updated_at": Some(now),
                                         }  
-                                    }, None).await.unwrap(){ //-- finding event based on event title
+                                    }, Some(update_option)).await.unwrap(){ //-- finding event based on event title
                                         Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
+                                            println!("update event doc {:?}", event_doc);
                                             let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
-                                                data: Some(event_doc), //-- data is an empty &[u8] array
+                                                data: Some(event_doc),
                                                 message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database
                                                 status: 302,
                                             };

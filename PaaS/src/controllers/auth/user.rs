@@ -61,15 +61,15 @@ pub async fn get_all(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
 
                     ////////////////////////////////// DB Ops
 
-                    let users = db.database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all event infos or documents from BSON into the UserInfo struct
+                    let users = db.database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
                     let mut available_users = schemas::auth::AvailableUsers{
                         users: vec![],
                     };
 
                     match users.find(None, None).await{
                         Ok(mut cursor) => {
-                            while let Some(event) = cursor.try_next().await.unwrap(){ //-- a mongodb Cursor implements Stream from the futures crate so we can iterate over its future objects by calling try_next() method on cursor which require the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
-                                available_users.users.push(event);
+                            while let Some(user) = cursor.try_next().await.unwrap(){ //-- a mongodb Cursor implements Stream from the futures crate so we can iterate over its future objects by calling try_next() method on cursor which require the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
+                                available_users.users.push(user);
                             }
                             let res = Response::builder(); //-- creating a new response cause we didn't find any available route
                             let response_body = ctx::app::Response::<Vec<schemas::auth::UserInfo>>{

@@ -15,6 +15,8 @@ use hyper::{header, StatusCode, Body, Response, Request};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use mongodb::Client;
 use log::info;
+use mongodb::options::FindOneAndUpdateOptions;
+use mongodb::options::ReturnDocument;
 use std::env;
 
 
@@ -68,6 +70,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
 
                                     ////////////////////////////////// DB Ops
                                     
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks");
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                     match decks.find_one_and_update(doc!{"deck_name": deck_info.clone().deck_name}, doc!{
@@ -78,7 +81,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                             "created_at": Some(bson::to_bson(&deck_info.created_at).unwrap()),
                                             "updated_at": Some(now),
                                         }  
-                                    }, None).await.unwrap(){ //-- finding deck based on deck title
+                                    }, Some(update_option)).await.unwrap(){ //-- finding deck based on deck title
                                         Some(deck_doc) => { //-- deserializing BSON into the DeckInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
                                                 data: Some(deck_doc), //-- data is an empty &[u8] array
@@ -567,9 +570,10 @@ pub async fn disable(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
                                     
                                     ////////////////////////////////// DB Ops
                                     
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let deck_id = ObjectId::parse_str(dis_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks"); //-- selecting decks collection to fetch all deck infos into the DeckInfo struct
-                                    match decks.find_one_and_update(doc!{"_id": deck_id}, doc!{"$set": {"is_disabled": true}}, None).await.unwrap(){ //-- finding deck based on deck id
+                                    match decks.find_one_and_update(doc!{"_id": deck_id}, doc!{"$set": {"is_disabled": true, "updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- finding deck based on deck id
                                         Some(deck_doc) => { //-- deserializing BSON into the DeckInfo struct
                                             let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
                                                 data: Some(deck_doc),

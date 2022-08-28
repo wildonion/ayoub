@@ -53,7 +53,7 @@ pub mod logging{
     use routerify::prelude::RequestExt;
 
     pub async fn logger(req: Request<Body>) -> Result<Request<Body>, hyper::Error>{
-        info!("{} {} {}", req.remote_addr(), req.method(), req.uri().path());
+        info!("{} - {} {} {}", chrono::Local::now(), req.remote_addr(), req.method(), req.uri().path());
         Ok(req)
     }
 
