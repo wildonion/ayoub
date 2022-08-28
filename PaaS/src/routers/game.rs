@@ -103,7 +103,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/player/get/chain-infos", get_player_chain_infos)
         .post("/god/create/group", create_group)
         .post("/god/update/group/", update_group)
-        .post("/god/update/group/image", upload_img)
+        .post("/god/update/group/image/:groupId", upload_img)
         .get("/get/group/all", get_groups)
         .any(not_found) //-- handling 404 request
         .build()

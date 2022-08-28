@@ -58,7 +58,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                         let jwt_payload = utils::jwt::Claims{_id: user_doc.clone()._id, username: user_doc.clone().username, access_level: user_doc.access_level, iat: now, exp}; //-- building jwt if passwords are matched
                                         match utils::jwt::construct(jwt_payload).await{
                                             Ok(token) => {
-                                                users.update_one(doc!{"username": user_doc.clone().username}, doc!{"last_login_time": Some(Utc::now().timestamp())}, None).await.unwrap();
+                                                users.update_one(doc!{"username": user_doc.clone().username}, doc!{"$set": {"last_login_time": Some(Utc::now().timestamp())}}, None).await.unwrap();
                                                 let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                                 let user_response = schemas::auth::LoginResponse{
                                                     _id: user_doc._id,

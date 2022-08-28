@@ -19,6 +19,8 @@ use mongodb::options::FindOneAndUpdateOptions;
 use mongodb::options::ReturnDocument;
 use routerify_multipart::RequestMultipartExt; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use std::env;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 
 
@@ -63,84 +65,30 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
             let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
-                    let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
-                    match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
-                        Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
-                            let data: serde_json::Value = value;
-                            let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                            match serde_json::from_str::<schemas::game::GetGroupRequest>(&json){ //-- the generic type of from_str() method is GetGroupRequest struct - mapping (deserializing) the json string into the GetGroupRequest struct
-                                Ok(group_info) => {
+                    
+                    let group_id = format!("{}", req.param("groupId").unwrap()); //-- we must create the url param using format!() since this macro will borrow the req object and doesn't move it so we can access the req object later to handle incoming multipart data
 
-
-                                   
-                                    let group_id = group_info._id;
-
-
-                                    // match req.into_multipart(){ //-- converting the request object into multipart content type to get the inomcing IO streaming of bytes of the uploaded file - some where the RequestMultipartExt trait has implemented for the request object so we can call the into_multipart() method on the req object
-                                    //     Ok(payload) => {
-                
-                
-                                    //         let filepath = utils::upload_asset(UPLOAD_PATH, payload, group_id).await; //-- passing the incoming utf8 bytes payload to build the image
-                
-                                            
-                                    //         // let res = UploadFile{
-                                    //         //     name: filename,
-                                    //         //     time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                                    //         // };
-                                    //         // Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
-                                    //         // TODO - update the updated_at field {"updated_at": Some(Utc::now().timestamp())}
-                
-                                    //     },
-                                    //     Err(e) => {
-                                    //         let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                    //             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                    //             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                    //             status: 400,
-                                    //         };
-                                    //         let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                    //         Ok(
-                                    //             res
-                                    //                 .status(StatusCode::BAD_REQUEST)
-                                    //                 .header(header::CONTENT_TYPE, "application/json")
-                                    //                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                    //                 .unwrap() 
-                                    //         )
-                                    //     },
-                                    // }
-
-
-
-
-                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                        message: NOT_IMPLEMENTED,
-                                        status: 501,
-                                    };
-                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                    Ok(
-                                        res
-                                            .status(StatusCode::OK)
-                                            .header(header::CONTENT_TYPE, "application/json")
-                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                            .unwrap_or(hyper::Response::default()) 
-                                    )
-                                },
-                                Err(e) => {
-                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                        status: 406,
-                                    };
-                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                    Ok(
-                                        res
-                                            .status(StatusCode::NOT_ACCEPTABLE)
-                                            .header(header::CONTENT_TYPE, "application/json")
-                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                            .unwrap_or(hyper::Response::default()) 
-                                    )
-                                },
-                            }
+                    match req.into_multipart(){ //-- converting the request object into multipart content type to get the inomcing IO streaming of bytes of the uploaded file - some where the RequestMultipartExt trait has implemented for the request object so we can call the into_multipart() method on the req object
+                        Ok(payload) => {
+                            // let filepath = utils::upload_asset(UPLOAD_PATH, payload, &group_id).await; //-- passing the incoming utf8 bytes payload to build the image
+                            let filepath = "".to_string();
+                            let upload_instance = utils::UploadFile{
+                                name: filepath,
+                                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+                            };
+                            let response_body = ctx::app::Response::<utils::UploadFile>{
+                                data: Some(upload_instance),
+                                message: UPLOADED, //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                status: 201,
+                            };
+                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                            Ok(
+                                res
+                                    .status(StatusCode::CREATED)
+                                    .header(header::CONTENT_TYPE, "application/json")
+                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                    .unwrap() 
+                            )
                         },
                         Err(e) => {
                             let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -158,8 +106,6 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                             )
                         },
                     }
-                
-                
                 } else{ //-- access denied for this user with none admin and dev access level
                     let response_body = ctx::app::Response::<ctx::app::Nill>{
                         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array

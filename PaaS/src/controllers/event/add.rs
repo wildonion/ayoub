@@ -86,7 +86,6 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                         }  
                                     }, Some(update_option)).await.unwrap(){ //-- finding event based on event title
                                         Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
-                                            println!("update event doc {:?}", event_doc);
                                             let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
                                                 data: Some(event_doc),
                                                 message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database

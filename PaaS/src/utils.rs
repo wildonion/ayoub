@@ -78,8 +78,11 @@ pub mod jwt{
 
 
 
-
-
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UploadFile{
+    pub name: String,
+    pub time: u64,
+}
 
 
 
@@ -143,7 +146,7 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: String){ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
+pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &String){ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
     fs::create_dir_all(path); //-- creating the directory which must be contains the file
     let mut filename = "".to_string();
     while let Some(mut field) = payload.next_field().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- reading the next field which contains IO stream future object of utf8 bytes of the payload is a mutable process and due to this fact we've defined the payload as a mutable type; we've mapped each incoming utf8 bytes future into an error if there was any error on reading them 
@@ -154,29 +157,18 @@ pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: String
         let buffer = fs::File::create(filepath).unwrap();
         while let Some(chunk) = field.chunk().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- mapping the incoming IO stream of futre object which contains utf8 bytes into a file
             
-            // fill the buffer with incoming chunk and write itnto the server hard
+            // TODO - fill the buffer with incoming chunk and write itnto the server hard
             // ...
+            // let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
+            // while let Some(chunk) = field.next().await{
+            //     let data = chunk.unwrap();
+            //     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+            // }
         
         }
 
 
     }
-
-
-    // writing utf8 bytes payload into the sepcified path to create the file
-    // ...
-    // fs::create_dir_all(constants::UPLOAD_PATH)?;
-    // let mut filename = "".to_string();
-    // while let Ok(Some(mut field)) = prof_img.try_next().await{
-    //     let content_type = field.content_disposition().unwrap();
-    //     filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), content_type.get_filename().unwrap());
-    //     let filepath = format!("{}/{}", constants::UPLOAD_PATH, sanitize_filename::sanitize(&filename));
-    //     let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
-    //     while let Some(chunk) = field.next().await{
-    //         let data = chunk.unwrap();
-    //         f = web::block(move || f.write_all(&data).map(|_| f)).await?;
-    //     }
-    // }
 
 }
 
