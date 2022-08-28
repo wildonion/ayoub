@@ -76,37 +76,37 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                                     let group_id = group_info._id;
 
 
-                                    match req.into_multipart(){ //-- converting the request object into multipart content type to get the inomcing IO streaming of bytes of the uploaded file - some where the RequestMultipartExt trait has implemented for the request object so we can call the into_multipart() method on the req object
-                                        Ok(payload) => {
+                                    // match req.into_multipart(){ //-- converting the request object into multipart content type to get the inomcing IO streaming of bytes of the uploaded file - some where the RequestMultipartExt trait has implemented for the request object so we can call the into_multipart() method on the req object
+                                    //     Ok(payload) => {
                 
                 
-                                            let filename = utils::upload_asset(UPLOAD_PATH, payload).await; //-- passing the incoming utf8 bytes payload to build the image
+                                    //         let filepath = utils::upload_asset(UPLOAD_PATH, payload, group_id).await; //-- passing the incoming utf8 bytes payload to build the image
                 
                                             
-                                            // let res = UploadFile{
-                                            //     name: filename,
-                                            //     time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                                            // };
-                                            // Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
-                                            // TODO - update the updated_at field {"updated_at": Some(Utc::now().timestamp())}
+                                    //         // let res = UploadFile{
+                                    //         //     name: filename,
+                                    //         //     time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+                                    //         // };
+                                    //         // Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY)))
+                                    //         // TODO - update the updated_at field {"updated_at": Some(Utc::now().timestamp())}
                 
-                                        },
-                                        Err(e) => {
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                                status: 400,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::BAD_REQUEST)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                    }
+                                    //     },
+                                    //     Err(e) => {
+                                    //         let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                    //             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                    //             message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                    //             status: 400,
+                                    //         };
+                                    //         let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                    //         Ok(
+                                    //             res
+                                    //                 .status(StatusCode::BAD_REQUEST)
+                                    //                 .header(header::CONTENT_TYPE, "application/json")
+                                    //                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                    //                 .unwrap() 
+                                    //         )
+                                    //     },
+                                    // }
 
 
 

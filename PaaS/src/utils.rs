@@ -2,8 +2,8 @@
 
 
 use std::sync::Mutex;
-use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
-use std::{env, thread}; 
+use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; use std::time::{SystemTime, UNIX_EPOCH}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
+use std::{env, thread, fs}; 
 use chrono::Utc;
 use futures::TryStreamExt;
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
@@ -12,6 +12,7 @@ use mongodb::Client;
 use mongodb::bson::{self, doc};
 use mongodb::options::{FindOneAndUpdateOptions, ReturnDocument};
 use rand::prelude::*;
+use routerify::Error;
 use crate::{constants::*, schemas};
 use crate::contexts::{app, scheduler::ThreadPool};
 use serde::{Serialize, Deserialize};
@@ -142,9 +143,26 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str, payload: Multipart<'_>){ //-- mapping the incoming utf8 bytes payload into a file
-    
- 
+pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: String){ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
+    fs::create_dir_all(path); //-- creating the directory which must be contains the file
+    let mut filename = "".to_string();
+    while let Some(mut field) = payload.next_field().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- reading the next field which contains IO stream future object of utf8 bytes of the payload is a mutable process and due to this fact we've defined the payload as a mutable type; we've mapped each incoming utf8 bytes future into an error if there was any error on reading them 
+        let field_name = field.name(); //-- getting the field's name if provided in "Content-Disposition" header from the client
+        let field_file_name = field.file_name(); //-- getting the field's filename if provided in "Content-Disposition" header from the client
+        filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), field_file_name.unwrap()); //-- creating the new filename with the server time
+        let filepath = format!("{}/{}/{}", path, doc_id, sanitize_filename::sanitize(&filename)); //-- creating the new file path with the sanitized filename and the passed in document id
+        let buffer = fs::File::create(filepath).unwrap();
+        while let Some(chunk) = field.chunk().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- mapping the incoming IO stream of futre object which contains utf8 bytes into a file
+            
+            // fill the buffer with incoming chunk and write itnto the server hard
+            // ...
+        
+        }
+
+
+    }
+
+
     // writing utf8 bytes payload into the sepcified path to create the file
     // ...
     // fs::create_dir_all(constants::UPLOAD_PATH)?;
