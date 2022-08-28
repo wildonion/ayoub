@@ -214,7 +214,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNTE1MDgsImlhdCI6MTY2MTUxNTUwOH0.eYYkXO6c0UY7aMi87F11FIyPb4hEhMMz3f9wF2oShW1buMIpU8UQwmld2q7dD0djv7fS506z5qPT3GS8uuJGSw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGIyMGI2ZmE5OWYwOWNlZTk3YzUxYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzIxNDk4NCwiaWF0IjoxNjYxNjc4OTg0fQ.y3RY-iyTVNGWBXm9ariFZ_y-4Yslf6PXlmZ-zi_JpPk463DWkWJviRCXjtH9fU80gSvolqimLex-B1URgBpgqw",
 									"type": "string"
 								}
 							]
@@ -250,7 +250,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhkYmNmMmM5MDY1OTgzNjkwNDg2MSJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzA2MTAwOCwiaWF0IjoxNjYxNTI1MDA4fQ.hK6YQa2Ba8gBOjKSzQSqDPMyEYCTcrGs4a0xf4pctZDCBIbIFwFg4m75GWfthYq8DzTsnTvYttMvigTjQOnbBg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGIyMGI2ZmE5OWYwOWNlZTk3YzUxYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzIxNDk4NCwiaWF0IjoxNjYxNjc4OTg0fQ.y3RY-iyTVNGWBXm9ariFZ_y-4Yslf6PXlmZ-zi_JpPk463DWkWJviRCXjtH9fU80gSvolqimLex-B1URgBpgqw",
 									"type": "string"
 								}
 							]
@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"دومین ایونت کنسه\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"name\": \"گروه مافیای کسنه\",\r\n                \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n                \"god_id\": \"6308a94e25ae0bed76f74460\",\r\n                \"_id\": \"6308a9a8b013ad8289c28453\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62fbea5d2676c23426ba29ab\"\r\n                },\r\n                \"username\": \"blueash\",\r\n                \"status\": 0,\r\n                \"role_name\": null,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8afc0bd1f9c22ec75cd6\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            }\r\n    ]\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"name\": \"گروه مافیای کسنه\",\r\n                \"owner\": \"محمد qqqqqq صفایی مقدم طهرانی\",\r\n                \"god_id\": \"6308a94e25ae0bed76f74460\",\r\n                \"_id\": \"6308a9a8b013ad8289c28453\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62fbea5d2676c23426ba29ab\"\r\n                },\r\n                \"username\": \"saaed\",\r\n                \"status\": 0,\r\n                \"role_name\": null,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8afc0bd1f9c22ec75cd6\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -267,9 +267,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{event}}/event/add",
+							"raw": "{{local_event}}/event/add",
 							"host": [
-								"{{event}}"
+								"{{local_event}}"
 							],
 							"path": [
 								"event",
@@ -765,7 +765,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -908,7 +908,7 @@
 								"add"
 							]
 						},
-						"description": "⚠️ ***This API needs Dev Access Level.***\n\n## **Object Id of Defined Sides**\n\n6308abe5b013ad8289c28455 -> independent  \n6308ac03b013ad8289c28456 -> mafia  \n6308ac13b013ad8289c28457 -> citizen"
+						"description": "⚠️ ***This API needs Dev Access Level.***"
 					},
 					"response": []
 				},
@@ -959,7 +959,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzI0ODM4MywiaWF0IjoxNjYxNzEyMzgzfQ.-dgR4Tyy-qf7pfYEyXT7FXOeBWqnlvuxKad86TTsELlCl8ylp2PX9g3q5QoS9goZCr1BjXQrwIDmM7tW9iW2Pg",
 									"type": "string"
 								}
 							]
@@ -968,7 +968,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"deck_name\": \"رول بوک کنسه\",\r\n    \"roles\": [],\r\n    \"desc\": \"رول بوک کنسه\",\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
+							"raw": "{\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1037,7 +1037,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzE0OTkyNywiaWF0IjoxNjYxNjEzOTI3fQ.3buhl3eUX-jj5yaat9U-iGUZizxLgun-CrfVj3Bn9-owobUJEHzHXZDFI8nG4Jkd5Jq7PFb0fTma1Tdaw6jZtw",
 									"type": "string"
 								}
 							]
@@ -1046,7 +1046,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"شهروند\"\r\n}",
+							"raw": "{\r\n    \"name\": \"همزاد\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1567,7 +1567,7 @@
 							"file": {}
 						},
 						"url": {
-							"raw": "{{game}}/game/god/update/group/image",
+							"raw": "{{game}}/game/god/update/group/image/6308a9a8b013ad8289c28453",
 							"host": [
 								"{{game}}"
 							],
@@ -1576,7 +1576,8 @@
 								"god",
 								"update",
 								"group",
-								"image"
+								"image",
+								"6308a9a8b013ad8289c28453"
 							]
 						},
 						"description": "⚠️ ***This API needs God or Dev Access Level.***"
@@ -1623,18 +1624,18 @@
 			"type": "string"
 		},
 		{
-			"key": "fish_auth",
-			"value": "https://api.conse.fishuman.com:7439",
+			"key": "local_auth",
+			"value": "http://localhost:7438",
 			"type": "string"
 		},
 		{
-			"key": "fish_event",
-			"value": "https://api.conse.fishuman.com:7439",
+			"key": "local_event",
+			"value": "http://localhost:7438",
 			"type": "string"
 		},
 		{
-			"key": "fish_game",
-			"value": "https://api.conse.fishuman.com:7439",
+			"key": "local_game",
+			"value": "http://localhost:7438",
 			"type": "string"
 		}
 	]
