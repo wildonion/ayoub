@@ -679,7 +679,7 @@ pub async fn god_all_groups(req: Request<Body>) -> GenericResult<hyper::Response
                                         groups: vec![],
                                     };
                                     
-                                    let filter_doc = doc!{"god_id": _id};
+                                    let filter_doc = doc!{"god_id": _id.unwrap().to_string()};
                                     match groups.find(filter_doc, None).await{
                                         Ok(mut cursor) => {
                                             while let Some(group) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
