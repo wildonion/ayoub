@@ -881,7 +881,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzM3MjcyMywiaWF0IjoxNjYxODM2NzIzfQ.HeJ8msRrirPfZy6ilQ0w8URAtQ5vUyS_wTMbeRqU1ZzTxAYOm6ILA0qv7oK0h9mvpZ_vm7ifZmQcqBbDbPltCQ",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzUwOTU2MSwiaWF0IjoxNjYxOTczNTYxfQ.pz_IGV5ZGWVu9rZYmUEdxHtKLc9aRKJ01uC6PQy0UMVlrNy8WJYapNwUYPeVEkL32nFwpDGtwGNCejLr2LOIHA",
 									"type": "string"
 								}
 							]
@@ -890,7 +890,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"god_id\"\r\n}",
+							"raw": "{\r\n    \"_id\": \"630a36a78c198e0d655c8ae2\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
