@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"name\": \"گروه مافیای کسنه\",\r\n                \"owner\": \"محمد qqqqqq صفایی مقدم طهرانی\",\r\n                \"god_id\": \"6308a94e25ae0bed76f74460\",\r\n                \"_id\": \"6308a9a8b013ad8289c28453\",\r\n                \"created_at\": 1660903680,\r\n                \"updated_at\": 1660904003\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [\r\n            {\r\n                \"_id\": {\r\n                    \"$oid\": \"62fbea5d2676c23426ba29ab\"\r\n                },\r\n                \"username\": \"saaed\",\r\n                \"status\": 0,\r\n                \"role_name\": null,\r\n                \"role_id\": {\r\n                    \"$oid\": \"62ff8afc0bd1f9c22ec75cd6\"\r\n                },\r\n                \"side_id\": {\r\n                    \"$oid\": \"62ff5f1a94474205d5992116\"\r\n                }\r\n            }\r\n    ]\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {},\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -874,6 +874,46 @@
 					"response": []
 				},
 				{
+					"name": "Get All God Groups",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzM3MjcyMywiaWF0IjoxNjYxODM2NzIzfQ.HeJ8msRrirPfZy6ilQ0w8URAtQ5vUyS_wTMbeRqU1ZzTxAYOm6ILA0qv7oK0h9mvpZ_vm7ifZmQcqBbDbPltCQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"god_id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/god/get/group/all",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"god",
+								"get",
+								"group",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Add Role",
 					"request": {
 						"auth": {
@@ -968,7 +1008,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
+							"raw": "{\r\n    \"_id\": \"a deck id\",\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -986,7 +1026,7 @@
 								"add"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n⚠️ `_id` field can be empty and if this is the case then it'll create a new deck info."
 					},
 					"response": []
 				},
