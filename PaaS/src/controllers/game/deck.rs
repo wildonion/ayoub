@@ -60,86 +60,85 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                         Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
                             let data: serde_json::Value = value;
                             let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
-                            match serde_json::from_str::<schemas::game::AddDeckRequest>(&json){ //-- the generic type of from_str() method is AddDeckRequest struct - mapping (deserializing) the json string into the AddDeckRequest struct
+                            match serde_json::from_str::<schemas::game::UpsertDeckRequest>(&json){ //-- the generic type of from_str() method is AddDeckRequest struct - mapping (deserializing) the json string into the AddDeckRequest struct
                                 Ok(deck_info) => {
 
 
+                                    ////////////////////////////////// DB Ops
+
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks");
+                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                     let deck_name = deck_info.clone().deck_name; //-- cloning to prevent from moving
                                     let roles = deck_info.clone().roles; //-- roles of this deck - cloning to prevent from moving
 
 
-                                    ////////////////////////////////// DB Ops
-                                    
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks");
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                    match decks.find_one_and_update(doc!{"deck_name": deck_info.clone().deck_name}, doc!{
-                                        "$set": {
-                                            "deck_name": bson::to_bson(&deck_info.deck_name).unwrap(),
-                                            "roles": bson::to_bson(&deck_info.roles).unwrap(), 
-                                            "is_disabled": Some(bson::to_bson(&deck_info.is_disabled).unwrap()),
-                                            "created_at": Some(bson::to_bson(&deck_info.created_at).unwrap()),
-                                            "updated_at": Some(now),
-                                        }  
-                                    }, Some(update_option)).await.unwrap(){ //-- finding deck based on deck title
-                                        Some(deck_doc) => { //-- deserializing BSON into the DeckInfo struct
-                                            let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
-                                                data: Some(deck_doc), //-- data is an empty &[u8] array
-                                                message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database
-                                                status: 302,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        }, 
-                                        None => { //-- means we didn't find any document related to this title and we have to create a new deck
-                                            let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                            let decks = db.clone().database(&db_name).collection::<schemas::game::AddDeckRequest>("decks"); //-- using AddDeckRequest struct to insert a deck info into decks collection 
-                                            let deck_doc = schemas::game::AddDeckRequest{
-                                                deck_name,
-                                                roles,
-                                                is_disabled: Some(false),
-                                                created_at: Some(now),
-                                                updated_at: Some(now),
-                                            };
-                                            match decks.insert_one(deck_doc, None).await{
-                                                Ok(insert_result) => {
-                                                    let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
-                                                        data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                        message: INSERTED,
-                                                        status: 201,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::CREATED)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                            .unwrap() 
-                                                    )
-                                                },
-                                                Err(e) => {
-                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                                        status: 406,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::NOT_ACCEPTABLE)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                            .unwrap() 
-                                                    )
-                                                },
-                                            }
-                                        },
+                                    if let Some(deck_id) = deck_info.clone()._id{ //-- if a deck_id was passed in to the call we are sure that there is a deck info and it has a name
+                                        let deck_id = ObjectId::parse_str(deck_id).unwrap();
+                                        let updated_deck_doc = decks.find_one_and_update(doc!{"_id": deck_id, "deck_name": deck_info.clone().deck_name}, doc!{
+                                            "$set": {
+                                                "deck_name": bson::to_bson(&deck_info.deck_name).unwrap(),
+                                                "roles": bson::to_bson(&deck_info.roles).unwrap(), 
+                                                "is_disabled": Some(bson::to_bson(&deck_info.is_disabled).unwrap()),
+                                                "created_at": Some(bson::to_bson(&deck_info.created_at).unwrap()),
+                                                "updated_at": Some(now),
+                                            }  
+                                        }, Some(update_option)).await.unwrap().unwrap();
+                                        let response_body = ctx::app::Response::<schemas::game::DeckInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is DeckInfo struct
+                                            data: Some(updated_deck_doc), //-- data is an empty &[u8] array
+                                            message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database
+                                            status: 302,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::FOUND)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )                                        
+                                    } else{ //-- there is no deck with this id and name thus we must insert a new one into the collection
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                        let decks = db.clone().database(&db_name).collection::<schemas::game::AddDeckRequest>("decks"); //-- using AddDeckRequest struct to insert a deck info into decks collection 
+                                        let deck_doc = schemas::game::AddDeckRequest{
+                                            deck_name,
+                                            roles,
+                                            is_disabled: Some(false),
+                                            created_at: Some(now),
+                                            updated_at: Some(now),
+                                        };
+                                        match decks.insert_one(deck_doc, None).await{
+                                            Ok(insert_result) => {
+                                                let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                                    data: Some(insert_result.inserted_id.as_object_id().unwrap()),
+                                                    message: INSERTED,
+                                                    status: 201,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::CREATED)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                            Err(e) => {
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                    status: 406,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_ACCEPTABLE)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
                                     }
 
                                     //////////////////////////////////

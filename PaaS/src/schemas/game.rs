@@ -24,6 +24,19 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 
 
 /*
+  --------------------------------------------------------------------------------------------
+| this struct will be used to deserialize get god group info json from client into this struct
+| --------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GetPlayerInfoRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub _id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
   ------------------------------------------------------------------------------------------
 | this struct will be used to deserialize get player info json from client into this struct
 | ------------------------------------------------------------------------------------------
@@ -31,7 +44,7 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 |
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct GetPlayerInfoRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+pub struct GetGodGroupsRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
     pub _id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
@@ -107,6 +120,24 @@ pub struct DeckRoleInfo{
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct AddDeckRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub deck_name: String,
+    pub roles: Vec<DeckRoleInfo>,
+    pub is_disabled: Option<bool>, //-- whether this deck has disabled or not
+    pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
+}
+
+
+/*
+  ------------------------------------------------------------------------------------
+| this struct will be used to deserialize role info json from client into this struct
+| ------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct UpsertDeckRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub _id: Option<String>, //-- this is the stringify object id of the deck; it can be optional to insert a new deck doc
     pub deck_name: String,
     pub roles: Vec<DeckRoleInfo>,
     pub is_disabled: Option<bool>, //-- whether this deck has disabled or not
