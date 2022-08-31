@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@1234\"\r\n}",
+							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@1234\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -765,7 +765,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzM3MjcyMywiaWF0IjoxNjYxODM2NzIzfQ.HeJ8msRrirPfZy6ilQ0w8URAtQ5vUyS_wTMbeRqU1ZzTxAYOm6ILA0qv7oK0h9mvpZ_vm7ifZmQcqBbDbPltCQ",
 									"type": "string"
 								}
 							]
@@ -796,7 +796,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzQxODA4NiwiaWF0IjoxNjYxODgyMDg2fQ.Uo_OZB8zr9b6oPXD3MXerJYDyxiIx-QbZGhFu0qGdMj5vZvSrW-utXpsuNAq9NCazmB5JghX1zJZcDV2zaqCNw",
 									"type": "string"
 								}
 							]
@@ -827,7 +827,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzM3MjcyMywiaWF0IjoxNjYxODM2NzIzfQ.HeJ8msRrirPfZy6ilQ0w8URAtQ5vUyS_wTMbeRqU1ZzTxAYOm6ILA0qv7oK0h9mvpZ_vm7ifZmQcqBbDbPltCQ",
 									"type": "string"
 								}
 							]
@@ -968,7 +968,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
+							"raw": "{\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

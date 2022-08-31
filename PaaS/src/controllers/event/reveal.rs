@@ -108,8 +108,8 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 let first_role_info = all_roles[0].clone();
                                                 let selected_role_index = all_roles.iter().position(|role| *role == first_role_info).unwrap(); //-- finding the index position of the first role inside the shuffled all_roles vector 
                                                 all_roles.remove(selected_role_index); //-- removing the role since we've used it for this player
-                                                random_role_id = first_role_info.clone()._id.unwrap();
-                                                random_side_id = first_role_info.clone().side_id.unwrap();
+                                                random_role_id = ObjectId::parse_str(&first_role_info.clone()._id).unwrap(); //-- first_role_info.clone()._id is of type String and parse_str() method will create the ObjectId from &str which we can achive this by taking a reference to the location of the String inside the heap which is &str or string slices which is a pointer pointing to a part of a String inside either heap, binary or the stack 
+                                                random_side_id = ObjectId::parse_str(&first_role_info.clone().side_id).unwrap(); //-- first_role_info.clone().side_id is of type String and parse_str() method will create the ObjectId from &str which we can achive this by taking a reference to the location of the String inside the heap which is &str or string slices which is a pointer pointing to a part of a String inside either heap, binary or the stack
                                                 p.role_id = Some(random_role_id.clone()); //-- assigning the role_id to the player role_id in this event
                                                 p.side_id = Some(random_side_id.clone()); //-- assigning the side_id to the player side_id in this event
                                                 p.role_name = Some(first_role_info.clone().name); //-- assigning the role_name to the player role_name in this event

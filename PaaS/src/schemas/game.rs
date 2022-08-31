@@ -70,7 +70,28 @@ pub struct RoleInfo{
     pub rate: u8,
     pub desc: String,
     pub abilities: u8,
-    pub side_id: Option<ObjectId>, //-- this field can be None at initialization which is the moment that a participant reserve an event
+    pub side_id: Option<ObjectId>,
+    pub is_disabled: Option<bool>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
+  -----------------------------------------------------------------------------------------
+| this struct will be used to deserialize role info bson from the mongodb into this struct
+| -----------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct DeckRoleInfo{
+    pub _id: String, //-- the role id itself
+    pub name: String,
+    pub rate: u8,
+    pub desc: String,
+    pub abilities: u8,
+    pub side_id: String, //-- side id of the role
     pub is_disabled: Option<bool>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -87,7 +108,7 @@ pub struct RoleInfo{
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct AddDeckRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
     pub deck_name: String,
-    pub roles: Vec<RoleInfo>,
+    pub roles: Vec<DeckRoleInfo>,
     pub is_disabled: Option<bool>, //-- whether this deck has disabled or not
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
@@ -105,7 +126,7 @@ pub struct AddDeckRequest{ //-- we don't need _id field in this struct cause it'
 pub struct DeckInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub deck_name: String,
-    pub roles: Vec<RoleInfo>,
+    pub roles: Vec<DeckRoleInfo>,
     pub is_disabled: Option<bool>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
