@@ -84,7 +84,7 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
                                                                             }
                                                                         }
                                                                         event //-- this is the event which contains our player info
-                                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector of ReservePlayerInfoResponse struct
+                                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector
                                             let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
                                                 message: FETCHED,
                                                 data: Some(player_events),
@@ -266,7 +266,7 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
                                                                             }
                                                                         }
                                                                         event //-- this is the event which contains our player info
-                                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector of ReservePlayerInfoResponse struct
+                                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector
                                             let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
                                                 message: FETCHED,
                                                 data: Some(player_events),

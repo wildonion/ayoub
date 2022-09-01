@@ -109,7 +109,7 @@ pub struct InsertPhaseResponse{
     pub deck_id: String,
     pub phases: Option<Vec<Phase>>,
     pub max_players: Option<u8>,
-    pub players: Option<Vec<ReservePlayerInfoResponse>>,
+    pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
@@ -133,7 +133,7 @@ pub struct ReserveEventResponse{
     pub deck_id: String,
     pub phases: Option<Vec<Phase>>,
     pub max_players: Option<u8>,
-    pub players: Option<Vec<ReservePlayerInfoResponse>>,
+    pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
@@ -229,7 +229,7 @@ pub struct EventInfo{
     pub voters: Option<Vec<Voter>>,
     pub phases: Option<Vec<Phase>>,
     pub max_players: Option<u8>,
-    pub players: Option<Vec<ReservePlayerInfoResponse>>,
+    pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
     pub expire_at: Option<i64>,
@@ -288,7 +288,7 @@ pub struct AddEventRequest{
     pub voters: Option<Vec<Voter>>, // NOTE - we set this field to Option cause we don't want to pass the voters inside the request body, we'll update it later on
     pub phases: Option<Vec<Phase>>, // NOTE - we set this field to Option cause we don't want to pass the phases inside the request body, we'll update it later on
     pub max_players: Option<u8>, // NOTE - number of maximum players for this event
-    pub players: Option<Vec<ReservePlayerInfoResponse>>, // NOTE - vector of all players which has participated for this event
+    pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>, // NOTE - vector of all players which has participated for this event
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object
@@ -403,7 +403,7 @@ impl EventInfo{ //-- we have to define the following method for the EventInfo st
 
 impl EventInfo{
 
-    pub async fn add_player(self, player_info: ReservePlayerInfoResponse) -> Vec<ReservePlayerInfoResponse>{ //-- we don't take a reference to self cause we can't dereference a shared reference (&T) and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
+    pub async fn add_player(self, player_info: ReservePlayerInfoResponseWithRoleName) -> Vec<ReservePlayerInfoResponseWithRoleName>{ //-- we don't take a reference to self cause we can't dereference a shared reference (&T) and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
       let mut current_players = self.players.unwrap();
       let index = current_players.iter().position(|p| p._id == player_info._id); //-- this user has already participated in this event
       if index == None && current_players.len() < self.max_players.unwrap() as usize{

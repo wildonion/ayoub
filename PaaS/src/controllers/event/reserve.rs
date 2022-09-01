@@ -88,10 +88,11 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
                                     let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct which contains the whole fields
                                     match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
                                         Some(event_doc) => {
-                                            let init_player_info = schemas::game::ReservePlayerInfoResponse{
+                                            let init_player_info = schemas::game::ReservePlayerInfoResponseWithRoleName{
                                                 _id,
                                                 username,
                                                 status: DEFAULT_STATUS,
+                                                role_name: None,
                                                 role_id: None,
                                                 side_id: None,
                                             };

@@ -158,19 +158,18 @@ pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &Strin
         filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), field_file_name.unwrap()); //-- creating the new filename with the server time
         
         let filepath = format!("{}/{}/{}", path, doc_id, sanitize_filename::sanitize(&filename)); //-- creating the new file path with the sanitized filename and the passed in document id
-        let buffer = fs::File::create(filepath).unwrap();
+        let buffer_file = fs::File::create(filepath).unwrap();
         while let Some(chunk) = field.chunk().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- mapping the incoming IO stream of futre object which contains utf8 bytes into a file
             
 
 
-            
-            // TODO - fill the buffer with incoming chunk and write itnto the server hard
-            // ...
-            // let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
-            // while let Some(chunk) = field.next().await{
-            //     let data = chunk.unwrap();
-            //     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
-            // }
+        // TODO - fill the buffer with incoming chunk and write itnto the server hard
+        // ...
+        // let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
+        // while let Some(chunk) = field.next().await{
+        //     let data = chunk.unwrap();
+        //     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+        // }
         
 
 
