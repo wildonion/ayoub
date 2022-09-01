@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"phone\": \"09215165207\",\r\n    \"pwd\": \"blueash@1234\",\r\n    \"status\": 0\r\n}",
+							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"phone\": \"09211686115\",\r\n    \"pwd\": \"wildonion@1234\",\r\n    \"status\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"blueash\",\r\n    \"pwd\": \"blueash@1234\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"pwd\": \"wildonion@1234\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -457,7 +457,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmY1MTU0OGJhZTFlMWMzNDNiNWE3OSJ9LCJ1c2VybmFtZSI6ImFzc2EiLCJhY2Nlc3NfbGV2ZWwiOjIsImV4cCI6MTY5MjQzNTcxNSwiaWF0IjoxNjYwODk5NzE1fQ.ei-4Xsdnx2lfLAk9Y4FUEkrlfPtN82UkZbFFtNeqBboZsy9LbhJ21xFTcQ-8EdIbkq9-FiPc7OmRbldjXlpXZQ",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTBiZmMxOGMyNTM2ZGM5ODU3M2EwMCJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImFjY2Vzc19sZXZlbCI6MiwiZXhwIjoxNjkzNTgwMzYxLCJpYXQiOjE2NjIwNDQzNjF9.tH3O74lXcKzmb6lpf-rn3h8qnRB2086Ps05uYFv-qekXoSkr4uUBIFdeGnbqVbbNglRq-lVx_FOiadhXGQGWqQ",
 									"type": "string"
 								}
 							]
@@ -1507,7 +1507,7 @@
 					"response": []
 				},
 				{
-					"name": "Create Group",
+					"name": "Upsert Group",
 					"request": {
 						"auth": {
 							"type": "bearer",
