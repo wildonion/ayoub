@@ -173,7 +173,7 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
 
 
 
-// -------------------------------- create group controller
+// -------------------------------- upsert group controller
 // ➝ Return : Hyper Response Body or Hyper Error
 // -------------------------------------------------------------------------
 
@@ -216,8 +216,16 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
 
                                     ////////////////////////////////// DB Ops
 
+                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                    let groups = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("groups"); //-- selecting groups collection to fetch all event infos into the EventInfo struct
+                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
                                     let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups");
-                                    match groups.find_one(doc!{"group_name": group_info.clone().name}, None).await.unwrap(){
+                                    match groups.find_one_and_update(doc!{"group_name": group_info.clone().name}, doc!{
+                                        "$set": {
+                                            "name": group_name.clone(),
+                                            "owner": group_owner.clone(),
+                                            "updated_at": Some(now),
+                                        }}, Some(update_option)).await.unwrap(){
                                         Some(group_doc) => { 
                                             let response_body = ctx::app::Response::<schemas::game::GroupInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is GroupInfo struct
                                                 data: Some(group_doc),
