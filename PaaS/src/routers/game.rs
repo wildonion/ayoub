@@ -19,7 +19,7 @@
    |
    |
    | instead of initializing the app_storage inside each router api we've 
-   | initialized it only once per router to move it between each router api.
+   | initialized it only once per router service to move it between each router api.
    | 
 
 */
@@ -60,13 +60,14 @@ pub async fn register() -> Router<Body, hyper::Error>{
 
     ////////
     // NOTE - only the request object must be passed through each handler
+    // NOTE - shared state which will be available to every route handlers is the app_storage which must be Send + Syn + 'static to share between threads
     ////////
 
 
     Router::builder()
         .data(app_storage) //-- sharing the initialized app_storage between routers' threads
-        .middleware(Middleware::post(middlewares::cors::allow)) //-- allow all CORS setup
-        .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware on the incoming request then pass it to the next middleware
+        .middleware(Middleware::post(middlewares::cors::allow)) //-- allow all CORS setup - the post Middlewares will be executed after all the route handlers process the request and generates a response and it will access that response object and the request info(optional) and it can also do some changes to the response if required
+        .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware on the incoming request then pass it to the next middleware - pre Middlewares will be executed before any route handlers and it will access the req object and it can also do some changes to the request object if required
         .get("/page", |req| async move{
             let res = Response::builder(); //-- creating a new response cause we didn't find any available route
             let response_body = ctx::app::Response::<ctx::app::Nill>{

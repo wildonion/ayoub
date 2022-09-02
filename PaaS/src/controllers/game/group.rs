@@ -217,9 +217,8 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                     ////////////////////////////////// DB Ops
 
                                     let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let groups = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("groups"); //-- selecting groups collection to fetch all event infos into the EventInfo struct
+                                    let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch all event infos into the EventInfo struct
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                    let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups");
                                     match groups.find_one_and_update(doc!{"group_name": group_info.clone().name}, doc!{
                                         "$set": {
                                             "name": group_name.clone(),

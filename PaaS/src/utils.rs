@@ -163,7 +163,7 @@ pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &Strin
             
 
 
-        // TODO - fill the buffer with incoming chunk and write itnto the server hard
+        // TODO - fill the buffer_file with incoming chunks from each field and write itnto the server hard
         // ...
         // let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
         // while let Some(chunk) = field.next().await{
