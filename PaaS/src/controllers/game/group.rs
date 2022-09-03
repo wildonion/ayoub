@@ -73,12 +73,9 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
 
 
                             // TODO - also return the filepath in get single group api
-                            // TODO - get the filepath to send it through the response object
                             // ...
-                            // let filepath = utils::upload_asset(UPLOAD_PATH, payload, &group_id).await; //-- passing the incoming multipart payload to build the image from its IO stream utf8 bytes future object 
                             
-                            
-                            let filepath = "".to_string();
+                            let filepath = utils::upload_asset(UPLOAD_PATH, payload, &group_id).await; //-- passing the incoming multipart payload to build the image from its IO stream utf8 bytes future object 
                             let upload_instance = utils::UploadFile{
                                 name: filepath,
                                 time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),

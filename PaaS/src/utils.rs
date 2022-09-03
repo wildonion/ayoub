@@ -1,6 +1,7 @@
 
 
 
+use std::io::Write;
 use std::sync::Mutex;
 use std::sync::{Arc, mpsc::channel as heavy_mpsc, mpsc}; use std::time::{SystemTime, UNIX_EPOCH}; // NOTE - mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
 use std::{env, thread, fs}; 
@@ -80,7 +81,7 @@ pub mod jwt{
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct UploadFile{
-    pub name: String,
+    pub name: Option<String>, //-- we've used Option since it might be no path at all
     pub time: u64,
 }
 
@@ -146,38 +147,25 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
-pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &String){ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
+pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &String) -> Option<String>{ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
     
     fs::create_dir_all(path).unwrap(); //-- creating the directory which must be contains the file
     let mut filename = "".to_string();
-    
+    let mut filepath = "".to_string();
     while let Some(mut field) = payload.next_field().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- reading the next field which contains IO stream future object of utf8 bytes of the payload is a mutable process and due to this fact we've defined the payload as a mutable type; we've mapped each incoming utf8 bytes future into an error if there was any error on reading them 
         
         let field_name = field.name(); //-- getting the field's name if provided in "Content-Disposition" header from the client
         let field_file_name = field.file_name(); //-- getting the field's filename if provided in "Content-Disposition" header from the client
         filename = format!("{} - {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), field_file_name.unwrap()); //-- creating the new filename with the server time
         
-        let filepath = format!("{}/{}/{}", path, doc_id, sanitize_filename::sanitize(&filename)); //-- creating the new file path with the sanitized filename and the passed in document id
-        let buffer_file = fs::File::create(filepath).unwrap();
+        filepath = format!("{}/{}/{}", path, doc_id, sanitize_filename::sanitize(&filename)); //-- creating the new file path with the sanitized filename and the passed in document id
+        let mut buffer_file = fs::File::create(filepath.clone()).unwrap();
         while let Some(chunk) = field.chunk().await.map_err(|err| Error::wrap(err)).unwrap(){ //-- mapping the incoming IO stream of futre object which contains utf8 bytes into a file
-            
-
-
-        // TODO - fill the buffer_file with incoming chunks from each field and write itnto the server hard
-        // ...
-        // let mut f = web::block(|| std::fs::File::create(filepath)).await.unwrap();
-        // while let Some(chunk) = field.next().await{
-        //     let data = chunk.unwrap();
-        //     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
-        // }
-        
-
-
-
+            buffer_file.write_all(&chunk).unwrap(); //-- filling the buffer_file with incoming chunks from each field and write itnto the server hard
         } //-- this field will be dropped in here to get the next field
-
-
     }
+    
+    Some(filepath)
 
 }
 
