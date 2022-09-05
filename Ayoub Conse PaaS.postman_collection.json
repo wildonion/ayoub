@@ -38,7 +38,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"phone\": \"09211686115\",\r\n    \"pwd\": \"wildonion@1234\",\r\n    \"status\": 0\r\n}",
+							"raw": "{\r\n    \"username\": \"hasan\",\r\n    \"phone\": \"00000000000\",\r\n    \"pwd\": \"hasan@1234\",\r\n    \"status\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"pwd\": \"wildonion@1234\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"dev\",\r\n    \"pwd\": \"dev@1234\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1523,7 +1523,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"گروه مافیای کسنه\",\r\n    \"owner\": \"محمد جواد صفایی مقدم طهرانی\"\r\n}",
+							"raw": "{\r\n    \"name\": \"گروه مافیای کسنه\",\r\n    \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n    \"god_id\": \"id-of-god\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1540,47 +1540,6 @@
 								"god",
 								"create",
 								"group"
-							]
-						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Group",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzOTk2OSwiaWF0IjoxNjYwOTAzOTY5fQ.AjZkDckQBcHykL3igohjqJqPJcAEAAIO_SJSRlEtZ1dGmGjfAaZ7VvcIqAtQ35_qpOu-N8H3xwqSMzlhtmI-rg",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"62ff61006aa185f2443a9970\",\r\n    \"name\": \"komod mafia team updated _\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{game}}/game/god/update/group/",
-							"host": [
-								"{{game}}"
-							],
-							"path": [
-								"game",
-								"god",
-								"update",
-								"group",
-								""
 							]
 						},
 						"description": "⚠️ ***This API needs God or Dev Access Level.***"

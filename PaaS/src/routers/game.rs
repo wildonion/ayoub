@@ -40,7 +40,7 @@ use crate::controllers::game::{
                                 deck::{add as add_deck, all as get_decks, disable as disable_deck, single as get_single_deck},
                                 side::{add as add_side, all as get_sides, disable as disable_side}, 
                                 player::{update_role_ability, chain_to_another_player, update_role, update_side, update_status, get_single, get_player_role_ability, get_player_chain_infos}, 
-                                group::{create as create_group, update as update_group, all as get_groups, upload_img, god_all_groups as get_all_god_groups},
+                                group::{create as create_group, all as get_groups, upload_img, god_all_groups as get_all_god_groups},
                                 _404::main as not_found,
                             };
 
@@ -103,7 +103,6 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/player/get/role-ability", get_player_role_ability)
         .post("/player/get/chain-infos", get_player_chain_infos)
         .post("/god/create/group", create_group)
-        .post("/god/update/group/", update_group)
         .post("/god/update/group/image/:groupId", upload_img)
         .post("/god/get/group/all", get_all_god_groups)
         .get("/get/group/all", get_groups)

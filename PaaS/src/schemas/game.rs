@@ -175,6 +175,7 @@ pub struct DeckInfo{
 pub struct AddGroupRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
     pub name: String,
     pub owner: String,
+    pub image_path: Option<String>,
     pub god_id: Option<String>, //-- this is the owner id of this group which is the god id of the created group
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
@@ -193,6 +194,7 @@ pub struct GroupInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub name: String,
     pub owner: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub image_path: Option<String>, //-- since there might be no image at all set for the group
     pub god_id: Option<String>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
