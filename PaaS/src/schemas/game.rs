@@ -213,6 +213,7 @@ pub struct AddGroupInfoToEvent{
     pub _id: String, //-- ObjectId is the bson type of _id inside the mongodb
     pub name: String,
     pub owner: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub image_path: Option<String>,
     pub god_id: Option<String>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -431,6 +432,66 @@ pub struct PlayerRoleAbilityInfo{
     pub current_ability: Option<u8>, //-- number of current abilities for this player
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player scores info json from client into this struct
+| --------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct InsertGodVoteOnPlayerInfoRequest{
+    pub user_id: String,
+    pub event_id: String,
+    pub score: u8,
+    pub issued_at: Option<i64>, 
+}
+
+
+/*
+  -------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize player scores info bson from the mongodb into this struct
+| -------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GodVotesOnPlayerInfo{
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub user_id: String, //-- string type of ObjectId for user id 
+    pub event_id: String, //-- string type of ObjectId for role id
+    pub score: u8,
+    pub issued_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize get single god vote info json from client into this struct
+| --------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GetGodVotePlayerInfoRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub user_id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub event_id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
+  --------------------------------------------------------------------------------------------
+| this struct will be used to deserialize get god votes info json from client into this struct
+| --------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct GetGodVotesPlayerInfoRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub user_id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
 

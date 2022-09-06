@@ -59,108 +59,123 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                             match serde_json::from_str::<schemas::event::AddEventRequest>(&json){ //-- the generic type of from_str() method is AddEventRequest struct - mapping (deserializing) the json string into the AddEventRequest struct
                                 Ok(event_info) => { //-- we got the username and password inside the login route
 
+                                    if event_info.group_info.clone().unwrap().god_id.unwrap() == _id.unwrap().to_string(){
 
-                                    ////////////////////////////////// DB Ops
+                                        ////////////////////////////////// DB Ops
                                     
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                    match events.find_one_and_update(doc!{"title": event_info.clone().title}, doc!{
-                                        "$set": {
-                                            "title": bson::to_bson(&event_info.title).unwrap(),
-                                            "content": bson::to_bson(&event_info.content).unwrap(),
-                                            "deck_id": bson::to_bson(&event_info.deck_id).unwrap(), //-- it's ObjectId of the selected deck but string-ed!
-                                            "entry_price": bson::to_bson(&event_info.entry_price).unwrap(),
-                                            "group_info": bson::to_bson(&event_info.group_info).unwrap(),
-                                            "creator_wallet_address": Some(bson::to_bson(&event_info.creator_wallet_address).unwrap()),
-                                            "upvotes": Some(bson::to_bson(&event_info.upvotes).unwrap()),
-                                            "downvotes": Some(bson::to_bson(&event_info.downvotes).unwrap()),
-                                            "voters": Some(bson::to_bson(&event_info.voters).unwrap()), //-- initializing empty voters
-                                            "phases": Some(bson::to_bson(&event_info.phases).unwrap()), //-- initializing empty vector of phases
-                                            "max_players": bson::to_bson(&event_info.max_players).unwrap(), //-- this is the maximum players that an event can have
-                                            "players": Some(bson::to_bson(&event_info.players).unwrap()), //-- there are no participant yet for this event
-                                            "is_expired": Some(bson::to_bson(&event_info.is_expired).unwrap()), //-- a event is not expired yet or at initialization
-                                            "expire_at": Some(bson::to_bson(&event_info.expire_at).unwrap()), //-- a event will be expired at
-                                            "created_at": Some(bson::to_bson(&event_info.created_at).unwrap()),
-                                            "updated_at": Some(now),
-                                        }  
-                                    }, Some(update_option)).await.unwrap(){ //-- finding event based on event title
-                                        Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
-                                            let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
-                                                data: Some(event_doc),
-                                                message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database
-                                                status: 302,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        }, 
-                                        None => { //-- means we didn't find any document related to this title and we have to create a new event
-                                            let events = db.clone().database(&db_name).collection::<schemas::event::AddEventRequest>("events");
-                                            let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                            let exp_time = now + env::var("EVENT_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
-                                            let new_event = schemas::event::AddEventRequest{
-                                                title: event_info.title,
-                                                content: event_info.content,
-                                                deck_id: event_info.deck_id, //-- it's ObjectId of the selected deck but string-ed!
-                                                entry_price: event_info.entry_price,
-                                                group_info: event_info.group_info,
-                                                creator_wallet_address: Some("0x0000000000000000000000000000000000000000".to_string()),
-                                                upvotes: Some(0),
-                                                downvotes: Some(0),
-                                                voters: Some(vec![]), //-- initializing empty voters
-                                                phases: Some(vec![]), //-- initializing empty vector of phases
-                                                max_players: event_info.max_players, //-- this is the maximum players that an event can have
-                                                players: Some(vec![]), //-- there are no participant yet for this event
-                                                is_expired: Some(false), //-- a event is not expired yet or at initialization
-                                                is_locked: Some(false), //-- a event is not locked yet or at initialization
-                                                expire_at: Some(exp_time), //-- a event will be expired at
-                                                created_at: Some(now),
-                                                updated_at: Some(now),
-                                            };
-                                            match events.insert_one(new_event, None).await{
-                                                Ok(insert_result) => {
-                                                    let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
-                                                        data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                        message: INSERTED,
-                                                        status: 201,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::CREATED)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                            .unwrap() 
-                                                    )
-                                                },
-                                                Err(e) => {
-                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                                        status: 406,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::NOT_ACCEPTABLE)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                            .unwrap() 
-                                                    )
+                                        let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                        let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
+                                        match events.find_one_and_update(doc!{"title": event_info.clone().title}, doc!{
+                                            "$set": {
+                                                "title": bson::to_bson(&event_info.title).unwrap(),
+                                                "content": bson::to_bson(&event_info.content).unwrap(),
+                                                "deck_id": bson::to_bson(&event_info.deck_id).unwrap(), //-- it's ObjectId of the selected deck but string-ed!
+                                                "entry_price": bson::to_bson(&event_info.entry_price).unwrap(),
+                                                "group_info": bson::to_bson(&event_info.group_info).unwrap(),
+                                                "creator_wallet_address": Some(bson::to_bson(&event_info.creator_wallet_address).unwrap()),
+                                                "upvotes": Some(bson::to_bson(&event_info.upvotes).unwrap()),
+                                                "downvotes": Some(bson::to_bson(&event_info.downvotes).unwrap()),
+                                                "voters": Some(bson::to_bson(&event_info.voters).unwrap()), //-- initializing empty voters
+                                                "phases": Some(bson::to_bson(&event_info.phases).unwrap()), //-- initializing empty vector of phases
+                                                "max_players": bson::to_bson(&event_info.max_players).unwrap(), //-- this is the maximum players that an event can have
+                                                "players": Some(bson::to_bson(&event_info.players).unwrap()), //-- there are no participant yet for this event
+                                                "is_expired": Some(bson::to_bson(&event_info.is_expired).unwrap()), //-- a event is not expired yet or at initialization
+                                                "expire_at": Some(bson::to_bson(&event_info.expire_at).unwrap()), //-- a event will be expired at
+                                                "created_at": Some(bson::to_bson(&event_info.created_at).unwrap()),
+                                                "updated_at": Some(now),
+                                            }  
+                                        }, Some(update_option)).await.unwrap(){ //-- finding event based on event title
+                                            Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
+                                                let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
+                                                    data: Some(event_doc),
+                                                    message: FOUND_DOCUMENT_UPDATE, //-- collection found in ayoub database
+                                                    status: 302,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            }, 
+                                            None => { //-- means we didn't find any document related to this title and we have to create a new event
+                                                let events = db.clone().database(&db_name).collection::<schemas::event::AddEventRequest>("events");
+                                                let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
+                                                let exp_time = now + env::var("EVENT_EXPIRATION").expect("⚠️ found no event expiration time").parse::<i64>().unwrap();
+                                                let new_event = schemas::event::AddEventRequest{
+                                                    title: event_info.title,
+                                                    content: event_info.content,
+                                                    deck_id: event_info.deck_id, //-- it's ObjectId of the selected deck but string-ed!
+                                                    entry_price: event_info.entry_price,
+                                                    group_info: event_info.group_info,
+                                                    creator_wallet_address: Some("0x0000000000000000000000000000000000000000".to_string()),
+                                                    upvotes: Some(0),
+                                                    downvotes: Some(0),
+                                                    voters: Some(vec![]), //-- initializing empty voters
+                                                    phases: Some(vec![]), //-- initializing empty vector of phases
+                                                    max_players: event_info.max_players, //-- this is the maximum players that an event can have
+                                                    players: Some(vec![]), //-- there are no participant yet for this event
+                                                    is_expired: Some(false), //-- a event is not expired yet or at initialization
+                                                    is_locked: Some(false), //-- a event is not locked yet or at initialization
+                                                    expire_at: Some(exp_time), //-- a event will be expired at
+                                                    created_at: Some(now),
+                                                    updated_at: Some(now),
+                                                };
+                                                match events.insert_one(new_event, None).await{
+                                                    Ok(insert_result) => {
+                                                        let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                                            data: Some(insert_result.inserted_id.as_object_id().unwrap()),
+                                                            message: INSERTED,
+                                                            status: 201,
+                                                        };
+                                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                        Ok(
+                                                            res
+                                                                .status(StatusCode::CREATED)
+                                                                .header(header::CONTENT_TYPE, "application/json")
+                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                .unwrap() 
+                                                        )
+                                                    },
+                                                    Err(e) => {
+                                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                            message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                            status: 406,
+                                                        };
+                                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                        Ok(
+                                                            res
+                                                                .status(StatusCode::NOT_ACCEPTABLE)
+                                                                .header(header::CONTENT_TYPE, "application/json")
+                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                .unwrap() 
+                                                        )
+                                                    }
                                                 }
-                                            }
-                                        },
+                                            },
+                                        }
+
+                                        //////////////////////////////////
+
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
                                     }
-
-                                    //////////////////////////////////
-
-
                                 },
                                 Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{

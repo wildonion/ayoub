@@ -31,7 +31,6 @@
 use std::env;
 use mongodb::Client;
 use routerify::{Router, Middleware};
-use routerify_cors::enable_cors_all;
 use crate::middlewares;
 use crate::contexts as ctx;
 use crate::constants::*;

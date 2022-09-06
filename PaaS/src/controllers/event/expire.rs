@@ -58,47 +58,63 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                             match serde_json::from_str::<schemas::event::ExpireEventRequest>(&json){ //-- the generic type of from_str() method is ExpireEventRequest struct - mapping (deserializing) the json string into the ExpireEventRequest struct
                                 Ok(exp_info) => {
 
-                                    
-                                    ////////////////////////////////// DB Ops
-                                    
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let event_id = ObjectId::parse_str(exp_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
-                                    match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"is_expired": true, "updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- finding event based on event id
-                                        Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
-                                            let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
-                                                data: Some(event_doc),
-                                                message: UPDATED, //-- collection found in ayoub database
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        }, 
-                                        None => { //-- means we didn't find any document related to this title and we have to tell the user to create a new event
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
-                                                status: 404,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::NOT_FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
+                                        
+                                        ////////////////////////////////// DB Ops
+                                    
+                                        let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                        let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch all event infos into the EventInfo struct
+                                        match events.find_one_and_update(doc!{"_id": event_id}, doc!{"$set": {"is_expired": true, "updated_at": Some(Utc::now().timestamp())}}, Some(update_option)).await.unwrap(){ //-- finding event based on event id
+                                            Some(event_doc) => { //-- deserializing BSON into the EventInfo struct
+                                                let response_body = ctx::app::Response::<schemas::event::EventInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is EventInfo struct
+                                                    data: Some(event_doc),
+                                                    message: UPDATED, //-- collection found in ayoub database
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            }, 
+                                            None => { //-- means we didn't find any document related to this title and we have to tell the user to create a new event
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
+                                                    status: 404,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
+
+                                        //////////////////////////////////
+
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
                                     }
-
-                                    //////////////////////////////////
-
 
                                 },
                                 Err(e) => {

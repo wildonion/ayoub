@@ -73,53 +73,90 @@ pub async fn upload_img(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                     match req.into_multipart(){ //-- converting the request object into multipart content type to get the inomcing IO streaming of bytes of the uploaded file - some where the RequestMultipartExt trait has implemented for the request object so we can call the into_multipart() method on the req object
                         Ok(payload) => {
 
-                            let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+
+                            ////////////////////////////////// DB Ops
+                            
                             let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch all event infos into the EventInfo struct
-                            
-                            let filepath = utils::upload_asset(UPLOAD_PATH, payload, &group_id).await; //-- passing the incoming multipart payload to build the image from its IO stream utf8 bytes future object 
-                            let upload_instance = utils::UploadFile{
-                                name: filepath.clone(),
-                                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                            };
-                            info!("{} - uploaded instance {:?}", chrono::Local::now().naive_local(), upload_instance);
-                            
-                            let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                            match groups.find_one_and_update(doc!{"_id": group_object_id}, doc!{
-                                "$set": {
-                                    "image_path": filepath.unwrap(),
-                                    "updated_at": Some(now),
-                                }}, Some(update_option)).await.unwrap(){
-                                    Some(group_doc) => { 
-                                        let response_body = ctx::app::Response::<schemas::game::GroupInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is GroupInfo struct
-                                            data: Some(group_doc),
-                                            message: UPLOADED,
-                                            status: 200,
+                            let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                            match groups.find_one(doc!{"_id": group_object_id}, None).await.unwrap(){
+                                Some(group_doc) => {
+                                    if group_doc.clone().god_id.unwrap() == _id.unwrap().to_string(){
+                                        let filepath = utils::upload_asset(UPLOAD_PATH, payload, &group_id).await; //-- passing the incoming multipart payload to build the image from its IO stream utf8 bytes future object 
+                                        let upload_instance = utils::UploadFile{
+                                            name: filepath.clone(),
+                                            time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
                                         };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                        Ok(
-                                            res
-                                                .status(StatusCode::FOUND)
-                                                .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
-                                        )        
-                                    }, 
-                                    None => {
-                                        let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                            message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
-                                            status: 404,
-                                        };
-                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                        Ok(
-                                            res
-                                                .status(StatusCode::NOT_FOUND)
-                                                .header(header::CONTENT_TYPE, "application/json")
-                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                .unwrap() 
-                                        )
-                                    },
-                                }
+                                        info!("{} - uploaded instance {:?}", chrono::Local::now().naive_local(), upload_instance);
+                                        
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
+                                        match groups.find_one_and_update(doc!{"_id": group_object_id}, doc!{
+                                            "$set": {
+                                                "image_path": filepath.unwrap(),
+                                                "updated_at": Some(now),
+                                            }}, Some(update_option)).await.unwrap(){
+                                                Some(group_doc) => { 
+                                                    let response_body = ctx::app::Response::<schemas::game::GroupInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is GroupInfo struct
+                                                        data: Some(group_doc),
+                                                        message: UPLOADED,
+                                                        status: 200,
+                                                    };
+                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                    Ok(
+                                                        res
+                                                            .status(StatusCode::FOUND)
+                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                            .unwrap() 
+                                                    )        
+                                                }, 
+                                                None => { //-- if we found a group we'll never be in here; but for sure we must handle any sudden error :)
+                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                        message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
+                                                        status: 404,
+                                                    };
+                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                    Ok(
+                                                        res
+                                                            .status(StatusCode::NOT_FOUND)
+                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                            .unwrap() 
+                                                    )
+                                                },
+                                            }
+                                        } else{ //-- only the god of the group can update the group image
+                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                message: ACCESS_DENIED,
+                                                status: 403,
+                                            };
+                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                            Ok(
+                                                res
+                                                    .status(StatusCode::BAD_REQUEST)
+                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                    .unwrap() 
+                                            )   
+                                        }
+                                },
+                                None => { //-- no group found with the passed in id in url param
+                                    let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                        message: NOT_FOUND_DOCUMENT,
+                                        status: 404,
+                                    };
+                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                    Ok(
+                                        res
+                                            .status(StatusCode::NOT_FOUND)
+                                            .header(header::CONTENT_TYPE, "application/json")
+                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                            .unwrap() 
+                                    )
+                                },
+                            }
                         },
                         Err(e) => {
                             let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -267,7 +304,7 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                                                     .unwrap() 
                                                             )        
                                                         }, 
-                                                        None => { //-- if we found a group we'll never be in here; but for sure we must handle any error :)
+                                                        None => { //-- if we found a group we'll never be in here; but for sure we must handle any sudden error :)
                                                             let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
                                                                 data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
                                                                 message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup

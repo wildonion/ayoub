@@ -10,6 +10,7 @@ use futures::TryStreamExt;
 use futures::{executor::block_on, future::{BoxFuture, FutureExt}}; // NOTE - block_on() function will block the current thread to solve the task
 use log::info;
 use mongodb::Client;
+use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{self, doc};
 use mongodb::options::{FindOneAndUpdateOptions, ReturnDocument};
 use rand::prelude::*;
@@ -193,6 +194,32 @@ pub async fn set_user_access(username: String, new_access_level: i64, storage: O
     //////////////////////////////////
 
 }
+
+
+
+
+pub async fn event_belongs_to_god(god_id: ObjectId, event_id: ObjectId, app_storage: Client) -> bool{
+
+
+    ////////////////////////////////// DB Ops
+
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
+    let events = app_storage.database(&db_name).collection::<schemas::event::EventInfo>("events");
+    match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
+        Some(event_doc) => {
+            if event_doc.group_info.unwrap().god_id.unwrap() == god_id.to_string(){
+                return true;
+            } 
+            false
+        }, 
+        None => false,
+    }
+
+    //////////////////////////////////
+
+}
+
+
 
 
 
