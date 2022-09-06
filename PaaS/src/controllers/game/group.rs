@@ -243,10 +243,10 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                     let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                     let groups = db.clone().database(&db_name).collection::<schemas::game::GroupInfo>("groups"); //-- selecting groups collection to fetch all event infos into the EventInfo struct
                                     let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                    match groups.find_one(doc!{"group_name": group_info.clone().name}, None).await.unwrap(){
+                                    match groups.find_one(doc!{"name": group_info.clone().name}, None).await.unwrap(){
                                         Some(group_info) => {
                                             if group_info.clone().god_id.unwrap() == _id.unwrap().to_string(){
-                                                match groups.find_one_and_update(doc!{"group_name": group_info.clone().name}, doc!{
+                                                match groups.find_one_and_update(doc!{"name": group_info.clone().name}, doc!{
                                                     "$set": {
                                                         "name": group_name.clone(),
                                                         "owner": group_owner.clone(),
