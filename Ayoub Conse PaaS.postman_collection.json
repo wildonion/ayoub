@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {},\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"6315f99a8978d761e97a9b3a\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -267,9 +267,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{local_event}}/event/add",
+							"raw": "{{event}}/event/add",
 							"host": [
-								"{{local_event}}"
+								"{{event}}"
 							],
 							"path": [
 								"event",
@@ -874,14 +874,14 @@
 					"response": []
 				},
 				{
-					"name": "Get All God Groups",
+					"name": "God Cast Vote On Player",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzUwOTU2MSwiaWF0IjoxNjYxOTczNTYxfQ.pz_IGV5ZGWVu9rZYmUEdxHtKLc9aRKJ01uC6PQy0UMVlrNy8WJYapNwUYPeVEkL32nFwpDGtwGNCejLr2LOIHA",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjkzOTg0MTc5LCJpYXQiOjE2NjI0NDgxNzl9.sQ48Mr6TAHXMYoDmXXNU5iwDS9YPhK9TT5lfV-Eyj5KdbteZql-3ScTVEr0eJg18d5JwuQGqt0HYfyp6Uxqzog",
 									"type": "string"
 								}
 							]
@@ -890,7 +890,121 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"630a36a78c198e0d655c8ae2\"\r\n}",
+							"raw": "{\r\n    \"user_id\": \"631747b83edbc357a54ecf2a\",\r\n    \"event_id\": \"631749203edbc357a54ecf2c\",\r\n    \"score\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/god/cast-vote",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"god",
+								"cast-vote"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n⚠️ ***Only God of the passed in*** ***`event_id`*** ***can vote on player.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Player God Votes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTc0N2I4M2VkYmMzNTdhNTRlY2YyYSJ9LCJ1c2VybmFtZSI6ImZhdCIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjk0MDA2NTA4LCJpYXQiOjE2NjI0NzA1MDh9.DbhMyRDyhQ84JzvO8h6eY-gAxQOvPipvXUojgP7SaFzjwqTr2nkTA1gMNgn5HjM2cKiuqcVC5RUhzgoqrgQKIQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"631747b83edbc357a54ecf2a\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/get/god-vote/all",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"get",
+								"god-vote",
+								"all"
+							]
+						},
+						"description": "⚠️ ***This API needs God, User or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Player God Vote",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"631747b83edbc357a54ecf2a\",\r\n    \"event_id\": \"631749203edbc357a54ecf2c\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/player/get/god-vote/single",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"player",
+								"get",
+								"god-vote",
+								"single"
+							]
+						},
+						"description": "⚠️ ***This API needs God, User or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All God Groups",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjkzOTg0MTc5LCJpYXQiOjE2NjI0NDgxNzl9.sQ48Mr6TAHXMYoDmXXNU5iwDS9YPhK9TT5lfV-Eyj5KdbteZql-3ScTVEr0eJg18d5JwuQGqt0HYfyp6Uxqzog",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"6315f99a8978d761e97a9b3a\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1008,7 +1122,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"a deck id\",\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
+							"raw": "{\r\n    \"_id\": \"a deck id\", //-- remove this if you want to create new deck\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1514,7 +1628,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhhOTRlMjVhZTBiZWQ3NmY3NDQ2MCJ9LCJ1c2VybmFtZSI6Im1qIiwiYWNjZXNzX2xldmVsIjowLCJleHAiOjE2OTMwNDgwNDYsImlhdCI6MTY2MTUxMjA0Nn0.mEmuDzNXZ5qdkYsvaWILPXisfSKwq1Hrban0dZ3JeayrsG_khbePCz8C4Gx-HmEmZHM-ksAFYr_A4UP3OyAJ6w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjkzOTg0MTc5LCJpYXQiOjE2NjI0NDgxNzl9.sQ48Mr6TAHXMYoDmXXNU5iwDS9YPhK9TT5lfV-Eyj5KdbteZql-3ScTVEr0eJg18d5JwuQGqt0HYfyp6Uxqzog",
 									"type": "string"
 								}
 							]
@@ -1523,7 +1637,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"گروه مافیای کسنه\",\r\n    \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n    \"god_id\": \"id-of-god\"\r\n}",
+							"raw": "{\r\n    \"name\": \"گروه مافیای کسنه\",\r\n    \"owner\": \"محمد جواد صفایی مقدم طهرانی\",\r\n    \"god_id\": \"6315f99a8978d761e97a9b3a\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1554,7 +1668,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzI0OTAzNiwiaWF0IjoxNjYxNzEzMDM2fQ.TFsltpZ2CQquX5_WKt4cMprDxwYaqDp35tZQHsHyC-wwEWv8bQd-aNqCtlcHY-4vrdo2JGs79V9epZWCVUzrqA",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjk0MDAyNzAwLCJpYXQiOjE2NjI0NjY3MDB9.iHKLDg_HHuP6di-vPLS3OVlSOt7WaRhhNhYG9CqkoiqM41b1SBpnPDWI9FAFRCFcVuGpfqktSo87xaxVPWFJnQ",
 									"type": "string"
 								}
 							]
@@ -1585,7 +1699,7 @@
 								"6308a9a8b013ad8289c28453"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n*⚠️* ***Group id must be pass into the url param.***"
 					},
 					"response": []
 				}
