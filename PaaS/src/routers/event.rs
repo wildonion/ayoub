@@ -44,7 +44,8 @@ use crate::controllers::event::{
                                       player_all_expired as get_all_player_expired_events, 
                                       player_all_none_expired as get_all_player_none_expired_events, 
                                       single as get_single_event, 
-                                      group_all as get_all_group_events
+                                      group_all as get_all_group_events,
+                                      explore_none_expired_events,
                                     }, 
                                 vote::main as cast_vote_event, 
                                 expire::main as expire_event,
@@ -96,6 +97,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
             )
         })
         .post("/add", add_event)
+        .get("/explore/:query", explore_none_expired_events)
         .get("/get/all/in-going", get_all_none_expired_events)
         .get("/get/all/done", get_all_expired_events)
         .post("/get/all/player/in-going",get_all_player_none_expired_events)

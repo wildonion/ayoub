@@ -31,6 +31,83 @@ use std::env;
 
 
 
+// -------------------------------- search event controller
+// ➝ Return : Hyper Response Body or Hyper Error
+// --------------------------------------------------------------------------------------
+
+pub async fn explore_none_expired_events(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyper::Error>{
+
+
+    use routerify::prelude::*;
+    let res = Response::builder();
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
+    let db = &req.data::<Client>().unwrap().to_owned();
+
+                    
+    let query = format!("{}", req.param("query").unwrap()); //-- we must create the url param using format!() since this macro will borrow the req object and doesn't move it so we can access the req object later to handle other incoming data 
+
+    
+    ////////////////////////////////// DB Ops
+    
+    let filter = doc! { "is_expired": false, "title": {"$regex": "/^query/"} }; //-- filtering all none expired events based on the searched query from the client
+    let events = db.database(&db_name).collection::<schemas::event::ExploreEventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the ExploreEventInfo struct
+    let mut available_events = Vec::<schemas::event::ExploreEventInfo>::new();
+
+    match events.find(filter, None).await{
+        Ok(mut cursor) => {
+            while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
+                available_events.push(event);
+            }
+            let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+            let response_body = ctx::app::Response::<Vec<schemas::event::ExploreEventInfo>>{
+                message: FETCHED,
+                data: Some(available_events),
+                status: 200,
+            };
+            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+            Ok(
+                res
+                    .status(StatusCode::OK) //-- not found route or method not allowed
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                    .unwrap()
+            )
+        },
+        Err(e) => {
+            let response_body = ctx::app::Response::<ctx::app::Nill>{
+                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                status: 500,
+            };
+            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+            Ok(
+                res
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                    .unwrap() 
+            )
+        },
+    }
+    
+    //////////////////////////////////
+                
+
+                
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // -------------------------------- get all events for a specific palyer controller
 // ➝ Return : Hyper Response Body or Hyper Error
 // --------------------------------------------------------------------------------------

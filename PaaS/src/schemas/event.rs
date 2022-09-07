@@ -268,6 +268,33 @@ pub struct PlayerEventInfo{
 
 
 /*
+  -------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize explore event info bson from the mongodb into this struct
+| -------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct ExploreEventInfo{
+    pub _id: Option<ObjectId>,
+    pub title: String,
+    pub content: String,
+    pub entry_price: String,
+    pub group_info: Option<AddGroupInfoToEvent>,
+    pub creator_wallet_address: Option<String>,
+    pub upvotes: Option<u16>,
+    pub downvotes: Option<u16>,
+    pub voters: Option<Vec<Voter>>,
+    pub max_players: Option<u8>,
+    pub is_expired: Option<bool>,
+    pub is_locked: Option<bool>,
+    pub expire_at: Option<i64>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
   -----------------------------------------------------------------------------------------
 | this struct will be used to deserialize event info bson from the mongodb into this struct
 | -----------------------------------------------------------------------------------------
