@@ -21,6 +21,7 @@ use hyper::http::Uri;
 use mongodb::options::FindOneAndUpdateOptions;
 use mongodb::options::ReturnDocument;
 use std::env;
+use std::str::FromStr;
 
 
 
@@ -84,61 +85,77 @@ pub async fn update_role(req: Request<Body>) -> GenericResult<hyper::Response<Bo
                             match serde_json::from_str::<schemas::auth::UserRoleUpdateRequest>(&json){ //-- the generic type of from_str() method is UserRoleUpdateRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                 Ok(update_info) => { //-- we got the username and password inside the login route
                                     
-
-                                    ////////////////////////////////// DB Ops
-
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the role_id field - we want to deserialize all user bsons into the UserInfo struct
-                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"role_id": role_id, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
-                                        Some(user_doc) => {
-                                            let user_info = schemas::auth::UserUpdateResponse{
-                                                username: user_doc.username,
-                                                phone: user_doc.phone,
-                                                access_level: user_doc.access_level,
-                                                status: user_doc.status,
-                                                role_id: user_doc.role_id, // NOTE - updated
-                                                side_id: user_doc.side_id,
-                                                created_at: user_doc.created_at,
-                                                updated_at: Some(now), // NOTE - updated
-                                                last_login_time: user_doc.last_login_time,
-                                            };
-                                            let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
-                                                data: Some(user_info),
-                                                message: UPDATED,
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                        None => {
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: NOT_FOUND_PLAYER,
-                                                status: 404,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::NOT_FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                    }
+                                    let event_id = ObjectId::from_str(&update_info.event_id).unwrap();
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
                                     
-                                    //////////////////////////////////
+                                        ////////////////////////////////// DB Ops
 
-                                
+                                        let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                        let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                        let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the role_id field - we want to deserialize all user bsons into the UserInfo struct
+                                        match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"role_id": role_id, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
+                                            Some(user_doc) => {
+                                                let user_info = schemas::auth::UserUpdateResponse{
+                                                    username: user_doc.username,
+                                                    phone: user_doc.phone,
+                                                    access_level: user_doc.access_level,
+                                                    status: user_doc.status,
+                                                    role_id: user_doc.role_id, // NOTE - updated
+                                                    side_id: user_doc.side_id,
+                                                    created_at: user_doc.created_at,
+                                                    updated_at: Some(now), // NOTE - updated
+                                                    last_login_time: user_doc.last_login_time,
+                                                };
+                                                let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
+                                                    data: Some(user_info),
+                                                    message: UPDATED,
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                            None => {
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: NOT_FOUND_PLAYER,
+                                                    status: 404,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
+                                        
+                                        //////////////////////////////////
+                                        
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
+                                    }
                                 },
                                 Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -173,8 +190,7 @@ pub async fn update_role(req: Request<Body>) -> GenericResult<hyper::Response<Bo
                             )
                         },
                     }
-                
-                
+
                 } else{ //-- access denied for this user with none admin and dev access level
                     let response_body = ctx::app::Response::<ctx::app::Nill>{
                         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
@@ -268,59 +284,77 @@ pub async fn update_side(req: Request<Body>) -> GenericResult<hyper::Response<Bo
                             match serde_json::from_str::<schemas::auth::UserSideUpdateRequest>(&json){ //-- the generic type of from_str() method is UserSideUpdateRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                 Ok(update_info) => { //-- we got the username and password inside the login route
 
-                                    ////////////////////////////////// DB Ops
+                                    let event_id = ObjectId::from_str(&update_info.event_id).unwrap();
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
 
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let side_id = ObjectId::parse_str(update_info.side_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the side_id field - we want to deserialize all user bsons into the UserInfo struct
-                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"side_id": side_id, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
-                                        Some(user_doc) => {
-                                            let user_info = schemas::auth::UserUpdateResponse{
-                                                username: user_doc.username,
-                                                phone: user_doc.phone,
-                                                access_level: user_doc.access_level,
-                                                status: user_doc.status,
-                                                role_id: user_doc.role_id,
-                                                side_id: user_doc.side_id, // NOTE - updated
-                                                created_at: user_doc.created_at,
-                                                updated_at: Some(now), // NOTE - updated
-                                                last_login_time: user_doc.last_login_time,
-                                            };
-                                            let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
-                                                data: Some(user_info),
-                                                message: UPDATED,
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                        None => {
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: NOT_FOUND_PLAYER,
-                                                status: 404,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::NOT_FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
+                                        ////////////////////////////////// DB Ops
+
+                                        let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                        let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let side_id = ObjectId::parse_str(update_info.side_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                        let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the side_id field - we want to deserialize all user bsons into the UserInfo struct
+                                        match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"side_id": side_id, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
+                                            Some(user_doc) => {
+                                                let user_info = schemas::auth::UserUpdateResponse{
+                                                    username: user_doc.username,
+                                                    phone: user_doc.phone,
+                                                    access_level: user_doc.access_level,
+                                                    status: user_doc.status,
+                                                    role_id: user_doc.role_id,
+                                                    side_id: user_doc.side_id, // NOTE - updated
+                                                    created_at: user_doc.created_at,
+                                                    updated_at: Some(now), // NOTE - updated
+                                                    last_login_time: user_doc.last_login_time,
+                                                };
+                                                let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
+                                                    data: Some(user_info),
+                                                    message: UPDATED,
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                            None => {
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: NOT_FOUND_PLAYER,
+                                                    status: 404,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
+                                        
+                                        //////////////////////////////////
+
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
                                     }
-                                    
-                                    //////////////////////////////////
-
                                 },
                                 Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -447,60 +481,79 @@ pub async fn update_status(req: Request<Body>) -> GenericResult<hyper::Response<
                             let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
                             match serde_json::from_str::<schemas::auth::UserStatusUpdateRequest>(&json){ //-- the generic type of from_str() method is UserStatusUpdateRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                 Ok(update_info) => { //-- we got the username and password inside the login route
-                                    
-                                    ////////////////////////////////// DB Ops
 
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let status = bson::to_bson(&update_info.status).unwrap(); //-- we have to serialize the status to BSON Document object in order to update the mentioned field inside the collection
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the status field - we want to deserialize all user bsons into the UserInfo struct
-                                    match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"status": status, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
-                                        Some(user_doc) => {
-                                            let user_info = schemas::auth::UserUpdateResponse{
-                                                username: user_doc.username,
-                                                phone: user_doc.phone,
-                                                access_level: user_doc.access_level,
-                                                status: user_doc.status, // NOTE - updated
-                                                role_id: user_doc.role_id,
-                                                side_id: user_doc.side_id,
-                                                created_at: user_doc.created_at,
-                                                updated_at: Some(now), // NOTE - updated
-                                                last_login_time: user_doc.last_login_time,
-                                            };
-                                            let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
-                                                data: Some(user_info),
-                                                message: UPDATED,
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                        None => {
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: NOT_FOUND_PLAYER,
-                                                status: 404,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::NOT_FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
+
+                                    let event_id = ObjectId::from_str(&update_info.event_id).unwrap();
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
+
+                                        ////////////////////////////////// DB Ops
+
+                                        let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                        let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let status = bson::to_bson(&update_info.status).unwrap(); //-- we have to serialize the status to BSON Document object in order to update the mentioned field inside the collection
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                        let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- connecting to users collection to update the status field - we want to deserialize all user bsons into the UserInfo struct
+                                        match users.find_one_and_update(doc!{"_id": user_id}, doc!{"$set": {"status": status, "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
+                                            Some(user_doc) => {
+                                                let user_info = schemas::auth::UserUpdateResponse{
+                                                    username: user_doc.username,
+                                                    phone: user_doc.phone,
+                                                    access_level: user_doc.access_level,
+                                                    status: user_doc.status, // NOTE - updated
+                                                    role_id: user_doc.role_id,
+                                                    side_id: user_doc.side_id,
+                                                    created_at: user_doc.created_at,
+                                                    updated_at: Some(now), // NOTE - updated
+                                                    last_login_time: user_doc.last_login_time,
+                                                };
+                                                let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
+                                                    data: Some(user_info),
+                                                    message: UPDATED,
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                            None => {
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: NOT_FOUND_PLAYER,
+                                                    status: 404,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
+                                        
+                                        //////////////////////////////////
+
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
                                     }
-                                    
-                                    //////////////////////////////////
-
                                 },
                                 Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -629,51 +682,70 @@ pub async fn update_role_ability(req: Request<Body>) -> GenericResult<hyper::Res
                             let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
                             match serde_json::from_str::<schemas::game::UpdatePlayerRoleAbilityRequest>(&json){ //-- the generic type of from_str() method is UpdatePlayerRoleAbilityRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                 Ok(update_info) => { //-- we got the username and password inside the login route
+
+
+                                    let event_id = ObjectId::from_str(&update_info.event_id).unwrap();
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
+
+                                        ////////////////////////////////// DB Ops
+                                        
+                                        let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
+                                        let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let event_id = ObjectId::parse_str(update_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                        let current_ability = bson::to_bson(&update_info.current_ability).unwrap(); //-- we have to serialize the current_ability to BSON Document object in order to update the mentioned field inside the collection
+                                        let player_roles_info = db.clone().database(&db_name).collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
+                                        match player_roles_info.find_one_and_update(doc!{"user_id": user_id, "event_id": event_id, "role_id": role_id}, doc!{"$set": {"current_ability": Some(current_ability), "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
+                                            Some(user_doc) => {
+                                                let response_body = ctx::app::Response::<schemas::game::PlayerRoleAbilityInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is PlayerRoleAbilityInfo struct
+                                                    data: Some(user_doc),
+                                                    message: UPDATED,
+                                                    status: 200,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                            None => {
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: NOT_FOUND_PLAYER,
+                                                    status: 404,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_FOUND)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                        }
+                                        
+                                        //////////////////////////////////
                                     
-                                    ////////////////////////////////// DB Ops
-                                    
-                                    let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
-                                    let user_id = ObjectId::parse_str(update_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let event_id = ObjectId::parse_str(update_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let role_id = ObjectId::parse_str(update_info.role_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let current_ability = bson::to_bson(&update_info.current_ability).unwrap(); //-- we have to serialize the current_ability to BSON Document object in order to update the mentioned field inside the collection
-                                    let player_roles_info = db.clone().database(&db_name).collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
-                                    match player_roles_info.find_one_and_update(doc!{"user_id": user_id, "event_id": event_id, "role_id": role_id}, doc!{"$set": {"current_ability": Some(current_ability), "updated_at": Some(now)}}, Some(update_option)).await.unwrap(){
-                                        Some(user_doc) => {
-                                            let response_body = ctx::app::Response::<schemas::game::PlayerRoleAbilityInfo>{ //-- we have to specify a generic type for data field in Response struct which in our case is PlayerRoleAbilityInfo struct
-                                                data: Some(user_doc),
-                                                message: UPDATED,
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                        None => {
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: NOT_FOUND_PLAYER,
-                                                status: 404,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::NOT_FOUND)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
                                     }
-                                    
-                                    //////////////////////////////////
-            
                                 },
                                 Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -810,7 +882,7 @@ pub async fn cast_vote_on_player(req: Request<Body>) -> GenericResult<hyper::Res
                                 Ok(vote_info) => { //-- we got the username and password inside the login route
                                     
                                     ////////////////////////////////// DB Ops
-                                    /// 
+
                                     let user_id = ObjectId::parse_str(vote_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let event_id = ObjectId::parse_str(vote_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let god_id = _id.unwrap();
@@ -1076,50 +1148,70 @@ pub async fn chain_to_another_player(req: Request<Body>) -> GenericResult<hyper:
                             match serde_json::from_str::<schemas::game::InsertPlayerChainToRequest>(&json){ //-- the generic type of from_str() method is InsertPlayerChainToRequest struct - mapping (deserializing) the json string into the UserRoleUpdateRequest struct
                                 Ok(update_info) => { //-- we got the username and password inside the login route
                                     
-                                    ////////////////////////////////// DB Ops
 
-                                    let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                    let player_chain_info = db.clone().database(&db_name).collection::<schemas::game::InsertPlayerChainToRequest>("player_chain_info"); //-- connecting to player_chain_info collection to insert a new document - we want to deserialize player chain info into the InsertPlayerChainToRequest struct
-                                    let player_chain_doc = schemas::game::InsertPlayerChainToRequest{
-                                        from_id: update_info.from_id,
-                                        to_id: update_info.to_id,
-                                        chained_at: Some(now),
-                                    };
-                                    match player_chain_info.insert_one(player_chain_doc, None).await{
-                                        Ok(insert_result) => {
-                                            let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
-                                                data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                message: INSERTED,
-                                                status: 201,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
-                                        },
-                                        Err(e) => {
-                                            let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                                status: 406,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::NOT_ACCEPTABLE)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                    .unwrap() 
-                                            )
+                                    let event_id = ObjectId::from_str(&update_info.event_id).unwrap();
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
+
+                                        ////////////////////////////////// DB Ops
+
+                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                        let player_chain_info = db.clone().database(&db_name).collection::<schemas::game::InsertPlayerChainToRequest>("player_chain_info"); //-- connecting to player_chain_info collection to insert a new document - we want to deserialize player chain info into the InsertPlayerChainToRequest struct
+                                        let player_chain_doc = schemas::game::InsertPlayerChainToRequest{
+                                            from_id: update_info.from_id,
+                                            to_id: update_info.to_id,
+                                            event_id: update_info.event_id,
+                                            chained_at: Some(now),
+                                        };
+                                        match player_chain_info.insert_one(player_chain_doc, None).await{
+                                            Ok(insert_result) => {
+                                                let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                                    data: Some(insert_result.inserted_id.as_object_id().unwrap()),
+                                                    message: INSERTED,
+                                                    status: 201,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::OK)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            },
+                                            Err(e) => {
+                                                let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                    status: 406,
+                                                };
+                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                Ok(
+                                                    res
+                                                        .status(StatusCode::NOT_ACCEPTABLE)
+                                                        .header(header::CONTENT_TYPE, "application/json")
+                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                        .unwrap() 
+                                                )
+                                            }
                                         }
-                                    }
-                                    
-                                    //////////////////////////////////
+                                        
+                                        //////////////////////////////////
 
+                                    } else{
+                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                            message: ACCESS_DENIED,
+                                            status: 403,
+                                        };
+                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                        Ok(
+                                            res
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .header(header::CONTENT_TYPE, "application/json")
+                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                .unwrap() 
+                                        )
+                                    }
                                 },
                                 Err(e) => {
                                     let response_body = ctx::app::Response::<ctx::app::Nill>{
@@ -1250,31 +1342,61 @@ pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
 
                                     ////////////////////////////////// DB Ops
 
-                                    let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                    let player_id = ObjectId::parse_str(player_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                    let event_id = ObjectId::parse_str(player_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let users = db.clone().database(&db_name).collection::<schemas::auth::UserInfo>("users"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the UserInfo struct
+                                    let events = db.clone().database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting users collection to fetch and deserialize all user infos or documents from BSON into the EventInfo struct
                                     match users.find_one(doc! { "_id": player_id }, None).await.unwrap(){
                                         Some(user_doc) => {
-                                            let player_info = schemas::game::ReservePlayerInfoResponse{
-                                                _id: user_doc._id,
-                                                username: user_doc.username,
-                                                status: user_doc.status,
-                                                role_id: user_doc.role_id,
-                                                side_id: user_doc.side_id,
-                                            };
-                                            let res = Response::builder(); //-- creating a new response cause we didn't find any available route
-                                            let response_body = ctx::app::Response::<schemas::game::ReservePlayerInfoResponse>{
-                                                message: FETCHED,
-                                                data: Some(player_info),
-                                                status: 200,
-                                            };
-                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                            Ok(
-                                                res
-                                                    .status(StatusCode::OK)
-                                                    .header(header::CONTENT_TYPE, "application/json")
-                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                    .unwrap()
-                                            )
+                                            match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
+                                                Some(event_doc) => {
+                                                    let mut player_role_name: Option<String> = None;
+                                                    let event_players = event_doc.players.unwrap();
+                                                    for p in event_players{ //-- finding the role_name of the passed in player, we must make sure that the client has called upsert event after every role, side and status update to update the players vector inside the event
+                                                        if p._id.unwrap() == player_id{
+                                                            player_role_name = p.role_name;
+                                                            break;
+                                                        }
+                                                    }
+                                                    let player_info = schemas::game::ReservePlayerInfoResponseWithRoleName{
+                                                        _id: user_doc._id,
+                                                        username: user_doc.username,
+                                                        role_name: player_role_name,
+                                                        status: user_doc.status,
+                                                        role_id: user_doc.role_id,
+                                                        side_id: user_doc.side_id,
+                                                    };
+                                                    let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+                                                    let response_body = ctx::app::Response::<schemas::game::ReservePlayerInfoResponseWithRoleName>{
+                                                        message: FETCHED,
+                                                        data: Some(player_info),
+                                                        status: 200,
+                                                    };
+                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                    Ok(
+                                                        res
+                                                            .status(StatusCode::OK)
+                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                            .unwrap()
+                                                    )
+                                                },
+                                                None => {
+                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
+                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                        message: NOT_FOUND_DOCUMENT,
+                                                        status: 404,
+                                                    };
+                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                    Ok(
+                                                        res
+                                                            .status(StatusCode::NOT_FOUND)
+                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                            .unwrap() 
+                                                    )
+                                                },
+                                            }
                                         },
                                         None => {
                                             let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
@@ -1378,11 +1500,6 @@ pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
     }
     
 }
-
-
-
-
-
 
 
 
@@ -1786,7 +1903,7 @@ pub async fn get_player_role_ability(req: Request<Body>) -> GenericResult<hyper:
 
                                     ////////////////////////////////// DB Ops
 
-                                    let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                    let player_id = ObjectId::parse_str(player_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let player_roles_info = db.clone().database(&db_name).collection::<schemas::game::PlayerRoleAbilityInfo>("player_role_ability_info"); //-- connecting to player_role_ability_info collection to update the current_ability field - we want to deserialize all user bsons into the PlayerRoleAbilityInfo struct
                                     match player_roles_info.find_one(doc! { "user_id": player_id }, None).await.unwrap(){
                                         Some(player_role_ability_doc) => {
@@ -1953,7 +2070,7 @@ pub async fn get_player_chain_infos(req: Request<Body>) -> GenericResult<hyper::
 
                                     ////////////////////////////////// DB Ops
 
-                                    let player_id = ObjectId::parse_str(player_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                                    let player_id = ObjectId::parse_str(player_info.user_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                                     let filter = doc! { "from_id": player_id }; //-- filtering all none expired events
                                     let player_chain_info = db.clone().database(&db_name).collection::<schemas::game::PlayerChainToInfo>("player_chain_info"); //-- connecting to player_chain_info collection to get a document - we want to deserialize player chain info into the PlayerChainToInfo struct                        
                                     let mut available_chain_infos = schemas::game::AvailableChainInfos{

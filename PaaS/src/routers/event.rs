@@ -46,6 +46,8 @@ use crate::controllers::event::{
                                       single as get_single_event, 
                                       group_all as get_all_group_events,
                                       explore_none_expired_events,
+                                      god_single as get_god_single_event,
+                                      god_all as get_all_god_events
                                     }, 
                                 vote::main as cast_vote_event, 
                                 expire::main as expire_event,
@@ -100,10 +102,12 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .get("/explore/:query", explore_none_expired_events)
         .get("/get/all/in-going", get_all_none_expired_events)
         .get("/get/all/done", get_all_expired_events)
+        .get("/get/all/god", get_all_god_events)
         .post("/get/all/player/in-going",get_all_player_none_expired_events)
         .post("/get/all/player/done",get_all_player_expired_events)
         .post("/get/all/group", get_all_group_events)
         .get("/get/all", all_events)
+        .post("/get/single/god/:eventId", get_god_single_event)
         .post("/get/single", get_single_event)
         .post("/cast-vote", cast_vote_event)
         .post("/set-expire", expire_event)

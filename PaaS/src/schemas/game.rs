@@ -32,7 +32,8 @@ use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson str
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct GetPlayerInfoRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
-    pub _id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub user_id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub event_id: String,
 }
 
 
@@ -506,6 +507,7 @@ pub struct GetGodVotesPlayerInfoRequest{ //-- we don't need _id field in this st
 pub struct InsertPlayerChainToRequest{
     pub from_id: String,
     pub to_id: String,
+    pub event_id: String,
     pub chained_at: Option<i64>, //-- this must be filled inside the server
 }
 
@@ -521,7 +523,8 @@ pub struct InsertPlayerChainToRequest{
 pub struct PlayerChainToInfo{
     pub _id: Option<ObjectId>,
     pub from_id: String, //-- string type of ObjectId for from user id 
-    pub to_id: String, //-- string type of ObjectId for to user id 
+    pub to_id: String, //-- string type of ObjectId for to user id
+    pub event_id: String, 
     pub chained_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the chained time inside the request body thus it should be None initially, we'll fill it inside the server
 }
 

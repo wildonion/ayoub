@@ -59,7 +59,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                 Ok(exp_info) => {
 
                                     let event_id = ObjectId::parse_str(exp_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{ //-- checking that the passed in event id is belongs to the passed in god id or not 
                                         
                                         ////////////////////////////////// DB Ops
                                     

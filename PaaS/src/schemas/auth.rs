@@ -38,6 +38,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct UserRoleUpdateRequest{
     pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub role_id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub event_id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
 
@@ -52,6 +53,7 @@ pub struct UserRoleUpdateRequest{
 pub struct UserSideUpdateRequest{
     pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub side_id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub event_id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
 
@@ -66,6 +68,7 @@ pub struct UserSideUpdateRequest{
 pub struct UserStatusUpdateRequest{
     pub user_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
     pub status: u8, //-- one of the status constant value defined in constants.rs
+    pub event_id: String, //-- this is the id of the user took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
 

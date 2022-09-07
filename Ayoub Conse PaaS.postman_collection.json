@@ -450,6 +450,58 @@
 					"response": []
 				},
 				{
+					"name": "Get All God Events",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTYyOGZlNTk2MWRhNmI0MmM0MDA1OSJ9LCJ1c2VybmFtZSI6Imhhc24iLCJhY2Nlc3NfbGV2ZWwiOjIsImV4cCI6MTY5NDAzMDg0MSwiaWF0IjoxNjYyNDk0ODQxfQ.NAJ90r0EU9Evb4lgkzL3s5Iuwk-EYGifD0bh1CyqAC5iYxszKUsq0EIjg7iaYgclSSvpB0M5lVIKw5CqCupaVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{event}}/event/get/all/god",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"get",
+								"all",
+								"god"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Explore Events",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{event}}/event/explore/ایونت",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"explore",
+								"ایونت"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Player InGoing Events",
 					"request": {
 						"auth": {
@@ -536,6 +588,47 @@
 								"event",
 								"get",
 								"single"
+							]
+						},
+						"description": "This API contains the game history of the passed in `event_id` which is inside the `phases` filed."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single God Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTYyOGZlNTk2MWRhNmI0MmM0MDA1OSJ9LCJ1c2VybmFtZSI6Imhhc24iLCJhY2Nlc3NfbGV2ZWwiOjIsImV4cCI6MTY5NDAzMDg0MSwiaWF0IjoxNjYyNDk0ODQxfQ.NAJ90r0EU9Evb4lgkzL3s5Iuwk-EYGifD0bh1CyqAC5iYxszKUsq0EIjg7iaYgclSSvpB0M5lVIKw5CqCupaVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{event}}/event/get/single/god/62ff88f5fec10b6a3cf6f638",
+							"host": [
+								"{{event}}"
+							],
+							"path": [
+								"event",
+								"get",
+								"single",
+								"god",
+								"62ff88f5fec10b6a3cf6f638"
 							]
 						},
 						"description": "This API contains the game history of the passed in `event_id` which is inside the `phases` filed."
@@ -1443,7 +1536,7 @@
 					"response": []
 				},
 				{
-					"name": "Get Single Player Info",
+					"name": "** Get Single Player Info",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -1459,7 +1552,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"62ff51548bae1e1c343b5a79\"\r\n}",
+							"raw": "{\r\n    \"user_id\": \"62ff51548bae1e1c343b5a79\",\r\n    \"event_id\": \"631749d2162b2867592ee282\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
