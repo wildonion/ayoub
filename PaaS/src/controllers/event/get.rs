@@ -72,16 +72,35 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
                                             all_expired_events.events
                                                     .into_iter()
                                                     .map(|event| {
+                                                        let mut player_event: Option<schemas::event::PlayerEventInfo> = None;
                                                         for p in event.clone().players.unwrap(){
-                                                            if p._id == _id{
-                                                                break //-- break here since we found our player 
+                                                            if p._id == _id{ //-- we've found our player thus we must return the event info without other players' infos
+                                                                player_event = Some(schemas::event::PlayerEventInfo{
+                                                                    _id: event.clone()._id,
+                                                                    title: event.clone().title,
+                                                                    content: event.clone().content,
+                                                                    deck_id: event.clone().deck_id,
+                                                                    entry_price: event.clone().entry_price,
+                                                                    group_info: event.clone().group_info,
+                                                                    creator_wallet_address: event.clone().creator_wallet_address,
+                                                                    upvotes: event.clone().upvotes,
+                                                                    downvotes: event.clone().downvotes,
+                                                                    voters: event.clone().voters,
+                                                                    phases: event.clone().phases,
+                                                                    max_players: event.clone().max_players,
+                                                                    is_expired: event.clone().is_expired,
+                                                                    is_locked: event.clone().is_locked,
+                                                                    expire_at: event.clone().expire_at,
+                                                                    created_at: event.clone().created_at,
+                                                                    updated_at: event.clone().updated_at,
+                                                                });
                                                             }
                                                         }
-                                                        event //-- this is the event which contains our player info
+                                                        player_event.unwrap()
                                                     }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector
-                            let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                            let response_body = ctx::app::Response::<Vec<schemas::event::PlayerEventInfo>>{
                                 message: FETCHED,
-                                data: Some(player_events),
+                                data: Some(player_events), //-- returning all player events without exposing other player infos
                                 status: 200,
                             };
                             let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
@@ -214,16 +233,35 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
                                             all_none_expired_events.events
                                                     .into_iter()
                                                     .map(|event| {
+                                                        let mut player_event: Option<schemas::event::PlayerEventInfo> = None;
                                                         for p in event.clone().players.unwrap(){
-                                                            if p._id == _id{
-                                                                break //-- break here since we found our player 
+                                                            if p._id == _id{ //-- we've found our player thus we must return the event info without other players' infos
+                                                                player_event = Some(schemas::event::PlayerEventInfo{
+                                                                    _id: event.clone()._id,
+                                                                    title: event.clone().title,
+                                                                    content: event.clone().content,
+                                                                    deck_id: event.clone().deck_id,
+                                                                    entry_price: event.clone().entry_price,
+                                                                    group_info: event.clone().group_info,
+                                                                    creator_wallet_address: event.clone().creator_wallet_address,
+                                                                    upvotes: event.clone().upvotes,
+                                                                    downvotes: event.clone().downvotes,
+                                                                    voters: event.clone().voters,
+                                                                    phases: event.clone().phases,
+                                                                    max_players: event.clone().max_players,
+                                                                    is_expired: event.clone().is_expired,
+                                                                    is_locked: event.clone().is_locked,
+                                                                    expire_at: event.clone().expire_at,
+                                                                    created_at: event.clone().created_at,
+                                                                    updated_at: event.clone().updated_at,
+                                                                });
                                                             }
                                                         }
-                                                        event //-- this is the event which contains our player info
+                                                        player_event.unwrap()
                                                     }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector
-                            let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                            let response_body = ctx::app::Response::<Vec<schemas::event::PlayerEventInfo>>{
                                 message: FETCHED,
-                                data: Some(player_events),
+                                data: Some(player_events), //-- returning all player events without exposing other player infos
                                 status: 200,
                             };
                             let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
