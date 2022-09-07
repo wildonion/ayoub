@@ -43,6 +43,7 @@ pub static NOT_FOUND_ROUTE: &str = "Not Found Route";
 pub static IGNORE_ROUTES: &[&str] = &["login", "signup"];
 pub static NOT_FOUND_TOKEN: &str = "No Token Found";
 pub static NOT_FOUND_PLAYER: &str = "Player Not Found";
+pub static NOT_FOUND_PLAYER_IN_EVENT: &str = "Player Not Found In This Event";
 pub static NOT_IMPLEMENTED: &str = "Not Implemented";
 pub static OTP_CODE_HAS_BEEN_SENT: &str = "OTP Code Has Been Sent Successfully";
 pub static EXPIRED_OTP_CODE: &str = "OTP Code Has Been Expored";

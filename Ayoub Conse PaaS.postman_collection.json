@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"dev\",\r\n    \"pwd\": \"dev@1234\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"hasn\",\r\n    \"pwd\": \"hasn@1234\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -457,22 +457,13 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTBiZmMxOGMyNTM2ZGM5ODU3M2EwMCJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImFjY2Vzc19sZXZlbCI6MiwiZXhwIjoxNjkzNTgwMzYxLCJpYXQiOjE2NjIwNDQzNjF9.tH3O74lXcKzmb6lpf-rn3h8qnRB2086Ps05uYFv-qekXoSkr4uUBIFdeGnbqVbbNglRq-lVx_FOiadhXGQGWqQ",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTYyOGZlNTk2MWRhNmI0MmM0MDA1OSJ9LCJ1c2VybmFtZSI6Imhhc24iLCJhY2Nlc3NfbGV2ZWwiOjIsImV4cCI6MTY5NDAzMDg0MSwiaWF0IjoxNjYyNDk0ODQxfQ.NAJ90r0EU9Evb4lgkzL3s5Iuwk-EYGifD0bh1CyqAC5iYxszKUsq0EIjg7iaYgclSSvpB0M5lVIKw5CqCupaVw",
 									"type": "string"
 								}
 							]
 						},
 						"method": "POST",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"62ff51548bae1e1c343b5a79\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{event}}/event/get/all/player/in-going",
 							"host": [
@@ -505,15 +496,6 @@
 						},
 						"method": "POST",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"62ff51548bae1e1c343b5a79\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{event}}/event/get/all/player/done",
 							"host": [

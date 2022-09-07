@@ -819,64 +819,93 @@ pub async fn cast_vote_on_player(req: Request<Body>) -> GenericResult<hyper::Res
                                     match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
                                         Some(event_doc) => {
                                             if event_doc.group_info.unwrap().god_id.unwrap() == god_id.to_string(){ //-- the caller of this api must be the god of the passed in event_id to vote on a specific player
-                                                match god_votes_on_players.find_one(doc!{"user_id": vote_info.user_id, "event_id": vote_info.event_id}, None).await.unwrap(){
-                                                    Some(vote_doc) => {
-                                                        let response_body = ctx::app::Response::<schemas::game::GodVotesOnPlayerInfo>{
-                                                            data: Some(vote_doc),
-                                                            message: FOUND_DOCUMENT, //-- already voted
-                                                            status: 302,
-                                                        };
-                                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                        Ok(
-                                                            res
-                                                                .status(StatusCode::FOUND)
-                                                                .header(header::CONTENT_TYPE, "application/json")
-                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                                .unwrap() 
-                                                        )
-                                                    },
-                                                    None => { //-- inserting new vote info
-                                                        let god_votes_on_players = db.clone().database(&db_name).collection::<schemas::game::InsertGodVoteOnPlayerInfoRequest>("god_votes_on_players");
-                                                        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
-                                                        let vote_info = schemas::game::InsertGodVoteOnPlayerInfoRequest{
-                                                            user_id: user_id.to_string(), 
-                                                            event_id: event_id.to_string(),
-                                                            score: vote_info.score,
-                                                            issued_at: Some(now),
-                                                        };
-                                                        match god_votes_on_players.insert_one(vote_info, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
-                                                            Ok(insert_result) => {
-                                                                let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
-                                                                    data: Some(insert_result.inserted_id.as_object_id().unwrap()),
-                                                                    message: INSERTED,
-                                                                    status: 201,
-                                                                };
-                                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                                Ok(
-                                                                    res
-                                                                        .status(StatusCode::CREATED)
-                                                                        .header(header::CONTENT_TYPE, "application/json")
-                                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                                        .unwrap() 
-                                                                )
-                                                            },
-                                                            Err(e) => {
-                                                                let response_body = ctx::app::Response::<ctx::app::Nill>{
-                                                                    data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                                    message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
-                                                                    status: 406,
-                                                                };
-                                                                let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                                Ok(
-                                                                    res
-                                                                        .status(StatusCode::NOT_ACCEPTABLE)
-                                                                        .header(header::CONTENT_TYPE, "application/json")
-                                                                        .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                                                        .unwrap() 
-                                                                )
+                                                
+                                                // ---------------------------------------------------------------------
+                                                //            CHECK THAT PLAYER WAS INSIDE THIS EVENT OR NOT
+                                                // ---------------------------------------------------------------------
+                                                let mut player_inside_this_event = false;
+                                                let event_players = event_doc.players.unwrap();
+                                                for p in event_players{
+                                                    if p._id.unwrap().to_string() == user_id.to_string(){
+                                                        player_inside_this_event = true;
+                                                        break; //-- break the loop since we found our player
+                                                    }
+                                                } // -------------------------------------------------------------------
+                                                
+                                                if player_inside_this_event{
+                                                    match god_votes_on_players.find_one(doc!{"user_id": vote_info.user_id, "event_id": vote_info.event_id}, None).await.unwrap(){
+                                                        Some(vote_doc) => {
+                                                            let response_body = ctx::app::Response::<schemas::game::GodVotesOnPlayerInfo>{
+                                                                data: Some(vote_doc),
+                                                                message: FOUND_DOCUMENT, //-- already voted
+                                                                status: 302,
+                                                            };
+                                                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                            Ok(
+                                                                res
+                                                                    .status(StatusCode::FOUND)
+                                                                    .header(header::CONTENT_TYPE, "application/json")
+                                                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                    .unwrap() 
+                                                            )
+                                                        },
+                                                        None => { //-- inserting new vote info
+                                                            let god_votes_on_players = db.clone().database(&db_name).collection::<schemas::game::InsertGodVoteOnPlayerInfoRequest>("god_votes_on_players");
+                                                            let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec 
+                                                            let vote_info = schemas::game::InsertGodVoteOnPlayerInfoRequest{
+                                                                user_id: user_id.to_string(), 
+                                                                event_id: event_id.to_string(),
+                                                                score: vote_info.score,
+                                                                issued_at: Some(now),
+                                                            };
+                                                            match god_votes_on_players.insert_one(vote_info, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
+                                                                Ok(insert_result) => {
+                                                                    let response_body = ctx::app::Response::<ObjectId>{ //-- we have to specify a generic type for data field in Response struct which in our case is ObjectId struct
+                                                                        data: Some(insert_result.inserted_id.as_object_id().unwrap()),
+                                                                        message: INSERTED,
+                                                                        status: 201,
+                                                                    };
+                                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                                    Ok(
+                                                                        res
+                                                                            .status(StatusCode::CREATED)
+                                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                            .unwrap() 
+                                                                    )
+                                                                },
+                                                                Err(e) => {
+                                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                                        message: &e.to_string(), //-- e is of type String and message must be of type &str thus by taking a reference to the String we can convert or coerce it to &str
+                                                                        status: 406,
+                                                                    };
+                                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                                    Ok(
+                                                                        res
+                                                                            .status(StatusCode::NOT_ACCEPTABLE)
+                                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                            .unwrap() 
+                                                                    )
+                                                                }
                                                             }
-                                                        }
-                                                    },
+                                                        },
+                                                    }
+                                                } else{
+                                                    let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                        data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                        message: NOT_FOUND_PLAYER_IN_EVENT,
+                                                        status: 404,
+                                                    };
+                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                    Ok(
+                                                        res
+                                                            .status(StatusCode::NOT_FOUND)
+                                                            .header(header::CONTENT_TYPE, "application/json")
+                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                            .unwrap() 
+                                                    )
                                                 }
                                             } else{ //-- only the god of the event (must have a group inside the event) can cast vote on player
                                                 let response_body = ctx::app::Response::<ctx::app::Nill>{
