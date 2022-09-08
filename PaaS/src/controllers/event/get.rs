@@ -14,6 +14,7 @@ use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_bo
 use hyper::{header, StatusCode, Body, Response, Request};
 use log::info;
 use mongodb::Client;
+use mongodb::bson::Regex;
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use hyper::http::Uri;
 use mongodb::options::FindOptions;
@@ -46,11 +47,15 @@ pub async fn explore_none_expired_events(req: Request<Body>) -> GenericResult<hy
 
                     
     let query = format!("{}", req.param("query").unwrap()); //-- we must create the url param using format!() since this macro will borrow the req object and doesn't move it so we can access the req object later to handle other incoming data 
-
+    let search_query = format!("[{}.*$]", query); //// https://www.computerhope.com/jargon/r/regex.htm
+    let re = Regex{
+        pattern: search_query,
+        options: String::new(),
+    };
     
     ////////////////////////////////// DB Ops
     
-    let filter = doc! { "is_expired": false, "title": {"$regex": "/^query/"} }; //-- filtering all none expired events based on the searched query from the client
+    let filter = doc! { "is_expired": true, "title": {"$regex": re} }; //-- filtering all none expired events based on the searched query from the client
     let events = db.database(&db_name).collection::<schemas::event::ExploreEventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the ExploreExploreEventInfo struct
     let mut available_events = Vec::<schemas::event::ExploreEventInfo>::new();
 

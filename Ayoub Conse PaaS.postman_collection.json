@@ -480,7 +480,7 @@
 					"response": []
 				},
 				{
-					"name": "Explore Events",
+					"name": "Explore All InGoing Events",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -488,14 +488,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{event}}/event/explore/ایونت",
+							"raw": "{{event}}/event/explore/کنسه مثلا",
 							"host": [
 								"{{event}}"
 							],
 							"path": [
 								"event",
 								"explore",
-								"ایونت"
+								"کنسه مثلا"
 							]
 						}
 					},
