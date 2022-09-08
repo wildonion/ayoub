@@ -761,13 +761,13 @@ pub async fn god_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
             
             let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
-                if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev, admin (God) and player can handle this route
+                if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                 
                     let event_id = format!("{}", req.param("eventId").unwrap()); //-- we must create the url param using format!() since this macro will borrow the req object and doesn't move it so we can access the req object later to handle other incoming data 
 
                     let event_id = ObjectId::parse_str(event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
                     let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{ //-- checking that the passed in event id is belongs to the passed in god id or not 
+                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await || access_level == DEV_ACCESS{ //-- checking that the passed in event id is belongs to the passed in god id or not 
 
                         ////////////////////////////////// DB Ops
                         
@@ -908,7 +908,7 @@ pub async fn god_all(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
             
             let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
-                if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev, admin (God) and player can handle this route
+                if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS{ // NOTE - only dev and admin (God) can handle this route
                 
 
                     ////////////////////////////////// DB Ops

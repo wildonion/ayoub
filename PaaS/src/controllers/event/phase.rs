@@ -70,7 +70,7 @@ pub async fn insert(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                 Ok(phase_info) => {
 
                                     let event_id = ObjectId::parse_str(phase_info.event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{ //-- checking that the passed in event id is belongs to the passed in god id or not 
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await || access_level == DEV_ACCESS{ //-- checking that the passed in event id is belongs to the passed in god id or not 
 
                                         ////////////////////////////////// DB Ops
 

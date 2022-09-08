@@ -73,7 +73,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                 Ok(event_info) => {
 
                                     let event_id = ObjectId::parse_str(event_info._id.as_str()).unwrap(); //-- generating mongodb object id from the id string
-                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{ //-- checking that the passed in event id is belongs to the passed in god id or not 
+                                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await || access_level == DEV_ACCESS{ //-- checking that the passed in event id is belongs to the passed in god id or not 
 
                                         ////////////////////////////////// DB Ops
                                     
