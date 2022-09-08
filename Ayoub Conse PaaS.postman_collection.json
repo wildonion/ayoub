@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"hasn\",\r\n    \"pwd\": \"hasn@1234\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"hasan\",\r\n    \"pwd\": \"hasan@1234\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -475,7 +475,8 @@
 								"all",
 								"god"
 							]
-						}
+						},
+						"description": "⚠️ _**This API needs God or Dev Access Level.**_"
 					},
 					"response": []
 				},
@@ -631,7 +632,7 @@
 								"63199bd7c6ebea8c548eef8f"
 							]
 						},
-						"description": "This API contains the game history of the passed in `event_id` which is inside the `phases` filed."
+						"description": "⚠️ _**This API needs God or Dev Access Level.**_"
 					},
 					"response": []
 				},
@@ -1543,7 +1544,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzOTQyNSwiaWF0IjoxNjYwOTAzNDI1fQ.Wo-Qo7IGHGHhgDzaXkNTNbQjkjv9yYK3BvRvWhz4q4K81rsr1rJWaerf5hH28KrNEU4OuSLOZsbR9ag7fcY8AA",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMWExNjEyNTZhYzk5MjE5OWRmZjlhMSJ9LCJ1c2VybmFtZSI6Imhhc2FuIiwiYWNjZXNzX2xldmVsIjoyLCJleHAiOjE2OTQxODk5NzQsImlhdCI6MTY2MjY1Mzk3NH0.0UIEve6c1m-FFbMn5poFSSbeVKXrdi3W8K3d6gIqLkHa1hsX6v1g07kRo5n6CgMFMGZrVf2Tfz7kGsIl-0hQMw",
 									"type": "string"
 								}
 							]
@@ -1552,7 +1553,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"user_id\": \"62ff51548bae1e1c343b5a79\",\r\n    \"event_id\": \"631749d2162b2867592ee282\"\r\n}",
+							"raw": "{\r\n    \"user_id\": \"63198ecadd394d2cd3a71452\",\r\n    \"event_id\": \"63198d9fdd394d2cd3a71451\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

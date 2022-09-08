@@ -136,7 +136,7 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
             
             let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
-                if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev, admin (God) and player can handle this route
+                if access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev and player can handle this route
 
 
                     ////////////////////////////////// DB Ops
@@ -292,7 +292,7 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
             
             let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
-                if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev, admin (God) and player can handle this route
+                if access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev and player can handle this route
 
                     ////////////////////////////////// DB Ops
                     
