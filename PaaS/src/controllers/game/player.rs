@@ -1350,36 +1350,52 @@ pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                                         Some(user_doc) => {
                                             match events.find_one(doc!{"_id": event_id}, None).await.unwrap(){
                                                 Some(event_doc) => {
-                                                    let mut player_role_name: Option<String> = None;
-                                                    let event_players = event_doc.players.unwrap();
-                                                    for p in event_players{ //-- finding the role_name of the passed in player, we must make sure that the client has called upsert event after every role, side and status update to update the players vector inside the event
-                                                        if p._id == player_id{
-                                                            player_role_name = p.role_name;
-                                                            break;
+                                                    if utils::event_belongs_to_god(_id.unwrap(), event_doc._id.unwrap(), db_to_pass.clone()).await || user_doc._id.unwrap() == _id.unwrap(){
+                                                        let mut player_role_name: Option<String> = None;
+                                                        let event_players = event_doc.players.unwrap();
+                                                        for p in event_players{ //-- finding the role_name of the passed in player, we must make sure that the client has called upsert event after every role, side and status update to update the players vector inside the event
+                                                            if p._id == player_id{
+                                                                player_role_name = p.role_name;
+                                                                break;
+                                                            }
                                                         }
+                                                        let player_info = schemas::game::ReservePlayerInfoResponseWithRoleName{
+                                                            _id: user_doc._id.unwrap(),
+                                                            username: user_doc.username,
+                                                            role_name: player_role_name,
+                                                            status: user_doc.status,
+                                                            role_id: user_doc.role_id,
+                                                            side_id: user_doc.side_id,
+                                                        };
+                                                        let res = Response::builder(); //-- creating a new response cause we didn't find any available route
+                                                        let response_body = ctx::app::Response::<schemas::game::ReservePlayerInfoResponseWithRoleName>{
+                                                            message: FETCHED,
+                                                            data: Some(player_info),
+                                                            status: 200,
+                                                        };
+                                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                        Ok(
+                                                            res
+                                                                .status(StatusCode::OK)
+                                                                .header(header::CONTENT_TYPE, "application/json")
+                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                                                .unwrap()
+                                                        )
+                                                    } else{
+                                                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                                                            data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
+                                                            message: ACCESS_DENIED,
+                                                            status: 403,
+                                                        };
+                                                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                                                        Ok(
+                                                            res
+                                                                .status(StatusCode::BAD_REQUEST)
+                                                                .header(header::CONTENT_TYPE, "application/json")
+                                                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
+                                                                .unwrap() 
+                                                        )
                                                     }
-                                                    let player_info = schemas::game::ReservePlayerInfoResponseWithRoleName{
-                                                        _id: user_doc._id.unwrap(),
-                                                        username: user_doc.username,
-                                                        role_name: player_role_name,
-                                                        status: user_doc.status,
-                                                        role_id: user_doc.role_id,
-                                                        side_id: user_doc.side_id,
-                                                    };
-                                                    let res = Response::builder(); //-- creating a new response cause we didn't find any available route
-                                                    let response_body = ctx::app::Response::<schemas::game::ReservePlayerInfoResponseWithRoleName>{
-                                                        message: FETCHED,
-                                                        data: Some(player_info),
-                                                        status: 200,
-                                                    };
-                                                    let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                                                    Ok(
-                                                        res
-                                                            .status(StatusCode::OK)
-                                                            .header(header::CONTENT_TYPE, "application/json")
-                                                            .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                                            .unwrap()
-                                                    )
                                                 },
                                                 None => {
                                                     let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
