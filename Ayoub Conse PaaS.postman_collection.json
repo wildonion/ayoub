@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"ایونت کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"6315f99a8978d761e97a9b3a\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -619,7 +619,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{event}}/event/get/single/god/62ff88f5fec10b6a3cf6f638",
+							"raw": "{{event}}/event/get/single/god/63199bd7c6ebea8c548eef8f",
 							"host": [
 								"{{event}}"
 							],
@@ -628,7 +628,7 @@
 								"get",
 								"single",
 								"god",
-								"62ff88f5fec10b6a3cf6f638"
+								"63199bd7c6ebea8c548eef8f"
 							]
 						},
 						"description": "This API contains the game history of the passed in `event_id` which is inside the `phases` filed."

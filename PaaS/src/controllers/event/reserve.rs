@@ -89,7 +89,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
                                     match events.find_one(doc! { "_id": event_id }, None).await.unwrap(){
                                         Some(event_doc) => {
                                             let init_player_info = schemas::game::ReservePlayerInfoResponseWithRoleName{
-                                                _id,
+                                                _id: _id.unwrap(),
                                                 username,
                                                 status: DEFAULT_STATUS,
                                                 role_name: None,

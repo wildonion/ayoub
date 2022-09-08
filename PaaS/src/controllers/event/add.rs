@@ -74,15 +74,9 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 "entry_price": bson::to_bson(&event_info.entry_price).unwrap(),
                                                 "group_info": bson::to_bson(&event_info.group_info).unwrap(),
                                                 "creator_wallet_address": Some(bson::to_bson(&event_info.creator_wallet_address).unwrap()),
-                                                "upvotes": Some(bson::to_bson(&event_info.upvotes).unwrap()),
-                                                "downvotes": Some(bson::to_bson(&event_info.downvotes).unwrap()),
-                                                "voters": Some(bson::to_bson(&event_info.voters).unwrap()), //-- initializing empty voters
                                                 "phases": Some(bson::to_bson(&event_info.phases).unwrap()), //-- initializing empty vector of phases
                                                 "max_players": bson::to_bson(&event_info.max_players).unwrap(), //-- this is the maximum players that an event can have
                                                 "players": Some(bson::to_bson(&event_info.players).unwrap()), //-- there are no participant yet for this event
-                                                "is_expired": Some(bson::to_bson(&event_info.is_expired).unwrap()), //-- a event is not expired yet or at initialization
-                                                "expire_at": Some(bson::to_bson(&event_info.expire_at).unwrap()), //-- a event will be expired at
-                                                "created_at": Some(bson::to_bson(&event_info.created_at).unwrap()),
                                                 "updated_at": Some(now),
                                             }  
                                         }, Some(update_option)).await.unwrap(){ //-- finding event based on event title

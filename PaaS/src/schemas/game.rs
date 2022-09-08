@@ -568,7 +568,7 @@ pub struct ReservePlayerInfoResponse{
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct ReservePlayerInfoResponseWithRoleName{
-  pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+  pub _id: ObjectId, //-- ObjectId is the bson type of _id inside the mongodb
   pub username: String,
   pub status: u8,
   pub role_name: Option<String>,

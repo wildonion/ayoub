@@ -136,7 +136,7 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
 
                     ////////////////////////////////// DB Ops
                     
-                    let filter = doc! { "is_expired": true }; //-- filtering all expired events
+                    let filter = doc! { "is_expired": true, "players._id": _id.unwrap() }; //-- filtering all expired events
                     let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the ExploreEventInfo struct
                     let mut all_expired_events = schemas::event::AvailableEvents{
                         events: vec![],
@@ -146,37 +146,31 @@ pub async fn player_all_expired(req: Request<Body>) -> GenericResult<hyper::Resp
                             while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
                                 all_expired_events.events.push(event);
                             }
-                            let player_events = 
-                                            all_expired_events.events
+                            let player_events = all_expired_events.events
                                                     .into_iter()
                                                     .map(|event| {
-                                                        let mut player_event: Option<schemas::event::PlayerEventInfo> = None;
-                                                        for p in event.clone().players.unwrap(){
-                                                            if p._id == _id{ //-- we've found our player thus we must return the event info without other players' infos
-                                                                player_event = Some(schemas::event::PlayerEventInfo{
-                                                                    _id: event.clone()._id,
-                                                                    title: event.clone().title,
-                                                                    content: event.clone().content,
-                                                                    deck_id: event.clone().deck_id,
-                                                                    entry_price: event.clone().entry_price,
-                                                                    group_info: event.clone().group_info,
-                                                                    creator_wallet_address: event.clone().creator_wallet_address,
-                                                                    upvotes: event.clone().upvotes,
-                                                                    downvotes: event.clone().downvotes,
-                                                                    voters: event.clone().voters,
-                                                                    phases: event.clone().phases,
-                                                                    max_players: event.clone().max_players,
-                                                                    is_expired: event.clone().is_expired,
-                                                                    is_locked: event.clone().is_locked,
-                                                                    expire_at: event.clone().expire_at,
-                                                                    created_at: event.clone().created_at,
-                                                                    updated_at: event.clone().updated_at,
-                                                                });
-                                                            }
+                                                        schemas::event::PlayerEventInfo{
+                                                            _id: event._id,
+                                                            title: event.title,
+                                                            content: event.content,
+                                                            deck_id: event.deck_id,
+                                                            entry_price: event.entry_price,
+                                                            group_info: event.group_info,
+                                                            creator_wallet_address: event.creator_wallet_address,
+                                                            upvotes: event.upvotes,
+                                                            downvotes: event.downvotes,
+                                                            voters: event.voters,
+                                                            phases: event.phases,
+                                                            max_players: event.max_players,
+                                                            is_expired: event.is_expired,
+                                                            is_locked: event.is_locked,
+                                                            expire_at: event.expire_at,
+                                                            created_at: event.created_at,
+                                                            updated_at: event.updated_at,
                                                         }
-                                                        player_event
-                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector
-                            let response_body = ctx::app::Response::<Vec<Option<schemas::event::PlayerEventInfo>>>{
+                                                    })
+                                                    .collect::<Vec<_>>();
+                            let response_body = ctx::app::Response::<Vec<schemas::event::PlayerEventInfo>>{
                                 message: FETCHED,
                                 data: Some(player_events), //-- returning all player events without exposing other player infos
                                 status: 200,
@@ -297,7 +291,7 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
 
                     ////////////////////////////////// DB Ops
                     
-                    let filter = doc! { "is_expired": false }; //-- filtering all expired events
+                    let filter = doc! { "is_expired": false, "players._id": _id.unwrap() }; //-- filtering all expired events
                     let events = db.database("ayoub").collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the ExploreEventInfo struct
                     let mut all_none_expired_events = schemas::event::AvailableEvents{
                         events: vec![],
@@ -307,37 +301,31 @@ pub async fn player_all_none_expired(req: Request<Body>) -> GenericResult<hyper:
                             while let Some(event) = cursor.try_next().await.unwrap(){ //-- calling try_next() method on cursor needs the cursor to be mutable - reading while awaiting on try_next() method doesn't return None
                                 all_none_expired_events.events.push(event);
                             }
-                            let player_events = 
-                                            all_none_expired_events.events
+                            let player_events = all_none_expired_events.events
                                                     .into_iter()
                                                     .map(|event| {
-                                                        let mut player_event: Option<schemas::event::PlayerEventInfo> = None;
-                                                        for p in event.clone().players.unwrap(){
-                                                            if p._id == _id{ //-- we've found our player thus we must return the event info without other players' infos
-                                                                player_event = Some(schemas::event::PlayerEventInfo{
-                                                                    _id: event.clone()._id,
-                                                                    title: event.clone().title,
-                                                                    content: event.clone().content,
-                                                                    deck_id: event.clone().deck_id,
-                                                                    entry_price: event.clone().entry_price,
-                                                                    group_info: event.clone().group_info,
-                                                                    creator_wallet_address: event.clone().creator_wallet_address,
-                                                                    upvotes: event.clone().upvotes,
-                                                                    downvotes: event.clone().downvotes,
-                                                                    voters: event.clone().voters,
-                                                                    phases: event.clone().phases,
-                                                                    max_players: event.clone().max_players,
-                                                                    is_expired: event.clone().is_expired,
-                                                                    is_locked: event.clone().is_locked,
-                                                                    expire_at: event.clone().expire_at,
-                                                                    created_at: event.clone().created_at,
-                                                                    updated_at: event.clone().updated_at,
-                                                                });
-                                                            }
+                                                        schemas::event::PlayerEventInfo{
+                                                            _id: event._id,
+                                                            title: event.title,
+                                                            content: event.content,
+                                                            deck_id: event.deck_id,
+                                                            entry_price: event.entry_price,
+                                                            group_info: event.group_info,
+                                                            creator_wallet_address: event.creator_wallet_address,
+                                                            upvotes: event.upvotes,
+                                                            downvotes: event.downvotes,
+                                                            voters: event.voters,
+                                                            phases: event.phases,
+                                                            max_players: event.max_players,
+                                                            is_expired: event.is_expired,
+                                                            is_locked: event.is_locked,
+                                                            expire_at: event.expire_at,
+                                                            created_at: event.created_at,
+                                                            updated_at: event.updated_at,
                                                         }
-                                                        player_event
-                                                    }).collect::<Vec<_>>(); //-- collect all the events related to the player into a vector
-                            let response_body = ctx::app::Response::<Vec<Option<schemas::event::PlayerEventInfo>>>{
+                                                    })
+                                                    .collect::<Vec<_>>();
+                            let response_body = ctx::app::Response::<Vec<schemas::event::PlayerEventInfo>>{
                                 message: FETCHED,
                                 data: Some(player_events), //-- returning all player events without exposing other player infos
                                 status: 200,
@@ -917,68 +905,50 @@ pub async fn god_all(req: Request<Body>) -> GenericResult<hyper::Response<Body>,
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username, access_level).await{ //-- finding the user with these info extracted from jwt
                 if access_level == ADMIN_ACCESS || access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS{ // NOTE - only dev, admin (God) and player can handle this route
                 
-                    let event_id = format!("{}", req.param("eventId").unwrap()); //-- we must create the url param using format!() since this macro will borrow the req object and doesn't move it so we can access the req object later to handle other incoming data 
 
-                    let event_id = ObjectId::parse_str(event_id.as_str()).unwrap(); //-- generating mongodb object id from the id string
+                    ////////////////////////////////// DB Ops
+                    
+                    
                     let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-                    if utils::event_belongs_to_god(_id.unwrap(), event_id, db_to_pass.clone()).await{ //-- checking that the passed in event id is belongs to the passed in god id or not 
-
-                        ////////////////////////////////// DB Ops
-
-                        
-                        let mut all_god_events = vec![];
-                        let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
-                        let mut events_cursor = events.find(doc!{"group_info.god_id": _id.unwrap().to_string()}, None).await.unwrap(); //-- we must define the cursor as mutable since fetching all events is a mutable operation
-                        while let Some(event_info) = events_cursor.try_next().await.unwrap(){
-                            all_god_events.push(event_info)
-                        }
-                        if all_god_events.is_empty(){
-                            let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
-                                data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
-                                status: 404,
-                            };
-                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                            Ok(
-                                res
-                                    .status(StatusCode::NOT_FOUND)
-                                    .header(header::CONTENT_TYPE, "application/json")
-                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
-                                    .unwrap() 
-                            )
-                        } else{
-                            let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
-                                message: FETCHED,
-                                data: Some(all_god_events),
-                                status: 200,
-                            };
-                            let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
-                            Ok(
-                                res
-                                    .status(StatusCode::OK)
-                                    .header(header::CONTENT_TYPE, "application/json")
-                                    .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
-                                    .unwrap()
-                            )
-                        }
-    
-                        //////////////////////////////////
-
-                    } else{
-                        let response_body = ctx::app::Response::<ctx::app::Nill>{
+                    let mut all_god_events = vec![];
+                    let events = db.database(&db_name).collection::<schemas::event::EventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the EventInfo struct
+                    let mut events_cursor = events.find(doc!{"group_info.god_id": _id.unwrap().to_string()}, None).await.unwrap(); //-- we must define the cursor as mutable since fetching all events is a mutable operation
+                    while let Some(event_info) = events_cursor.try_next().await.unwrap(){
+                        all_god_events.push(event_info)
+                    }
+                    if all_god_events.is_empty(){
+                        let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
                             data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                            message: ACCESS_DENIED,
-                            status: 403,
+                            message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
+                            status: 404,
                         };
                         let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
                         Ok(
                             res
-                                .status(StatusCode::BAD_REQUEST)
+                                .status(StatusCode::NOT_FOUND)
                                 .header(header::CONTENT_TYPE, "application/json")
                                 .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket here is serialized from the json
                                 .unwrap() 
                         )
+                    } else{
+                        let response_body = ctx::app::Response::<Vec<schemas::event::EventInfo>>{
+                            message: FETCHED,
+                            data: Some(all_god_events),
+                            status: 200,
+                        };
+                        let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body
+                        Ok(
+                            res
+                                .status(StatusCode::OK)
+                                .header(header::CONTENT_TYPE, "application/json")
+                                .body(Body::from(response_body_json)) //-- the body of the response must be serialized into the utf8 bytes to pass through the socket
+                                .unwrap()
+                        )
                     }
+
+                    //////////////////////////////////
+
+                        
                 } else{ //-- access denied for this user with none admin and dev access level
                     let response_body = ctx::app::Response::<ctx::app::Nill>{
                         data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array

@@ -898,7 +898,7 @@ pub async fn cast_vote_on_player(req: Request<Body>) -> GenericResult<hyper::Res
                                                 let mut player_inside_this_event = false;
                                                 let event_players = event_doc.players.unwrap();
                                                 for p in event_players{
-                                                    if p._id.unwrap().to_string() == user_id.to_string(){
+                                                    if p._id.to_string() == user_id.to_string(){
                                                         player_inside_this_event = true;
                                                         break; //-- break the loop since we found our player
                                                     }
@@ -1353,13 +1353,13 @@ pub async fn get_single(req: Request<Body>) -> GenericResult<hyper::Response<Bod
                                                     let mut player_role_name: Option<String> = None;
                                                     let event_players = event_doc.players.unwrap();
                                                     for p in event_players{ //-- finding the role_name of the passed in player, we must make sure that the client has called upsert event after every role, side and status update to update the players vector inside the event
-                                                        if p._id.unwrap() == player_id{
+                                                        if p._id == player_id{
                                                             player_role_name = p.role_name;
                                                             break;
                                                         }
                                                     }
                                                     let player_info = schemas::game::ReservePlayerInfoResponseWithRoleName{
-                                                        _id: user_doc._id,
+                                                        _id: user_doc._id.unwrap(),
                                                         username: user_doc.username,
                                                         role_name: player_role_name,
                                                         status: user_doc.status,
