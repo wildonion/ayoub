@@ -55,7 +55,7 @@ pub async fn explore_none_expired_events(req: Request<Body>) -> GenericResult<hy
     
     ////////////////////////////////// DB Ops
     
-    let filter = doc! { "is_expired": true, "title": {"$regex": re} }; //-- filtering all none expired events based on the searched query from the client
+    let filter = doc! { "is_expired": false, "title": {"$regex": re} }; //-- filtering all none expired events based on the searched query from the client
     let events = db.database(&db_name).collection::<schemas::event::ExploreEventInfo>("events"); //-- selecting events collection to fetch and deserialize all event infos or documents from BSON into the ExploreExploreEventInfo struct
     let mut available_events = Vec::<schemas::event::ExploreEventInfo>::new();
 
