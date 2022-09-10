@@ -112,7 +112,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/player/get/god-vote/all", get_all_god_votes)
         .post("/god/create/group", create_group)
         .post("/god/cast-vote", cast_vote_on_player)
-        .post("/god/update/group/image/:groupId", upload_img)
+        .post("/god/update/group/:groupId/image", upload_img)
         .post("/god/get/group/all", get_all_god_groups)
         .get("/get/group/all", get_groups)
         .any(not_found) //-- handling 404 request
