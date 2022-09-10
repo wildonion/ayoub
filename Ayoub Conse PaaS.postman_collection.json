@@ -896,6 +896,37 @@
 					"response": []
 				},
 				{
+					"name": "Get All Last Move Cards",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzQxODA4NiwiaWF0IjoxNjYxODgyMDg2fQ.Uo_OZB8zr9b6oPXD3MXerJYDyxiIx-QbZGhFu0qGdMj5vZvSrW-utXpsuNAq9NCazmB5JghX1zJZcDV2zaqCNw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{game}}/game/last-move/get/availables",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"last-move",
+								"get",
+								"availables"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Decks",
 					"request": {
 						"auth": {
@@ -1178,6 +1209,84 @@
 							]
 						},
 						"description": "⚠️ ***This API needs Dev Access Level.***\n\n***⚠️ Use this API if you want to remove a role.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Last Move Card",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"gardan koloft\",\r\n    \"rate\": 1,\r\n    \"desc\": \"\",\r\n    \"side_id\": \"62ff5f1a94474205d5992116\",\r\n    \"abilities\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/last-move/add",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"last-move",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Disable Last Move Card",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyMDhmMGVlNTU5YTI4YTBhMzMyY2Y4MyJ9LCJ1c2VybmFtZSI6IndpbGRvbmlvbiIsImV4cCI6MTY3NjI4OTE3MywiaWF0IjoxNjQ0NzUzMTczfQ.VJYpEJ5631412-gIm5RAtMihdVlKJZqluiEJy0AS8kfoJfd8ME6IZD1oC8pBJBwyjsqRbddrOeiM8r4K5zIiZw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"mongodb-object-id\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/last-move/disable",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"last-move",
+								"disable"
+							]
+						},
+						"description": "⚠️ _**This API needs Dev Access Level.**_\n\n_**⚠️ Use this API if you want to remove a last move card.**_"
 					},
 					"response": []
 				},
@@ -1584,7 +1693,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMDhkYmNmMmM5MDY1OTgzNjkwNDg2MSJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzA2MTk4NiwiaWF0IjoxNjYxNTI1OTg2fQ.xVeUwJH3Skn2bes0zuLLRLr8VRC6b9esz63YEQzU4oQTmyd5RtWLULtF54mody8ArMe1hm43TPlSzNEkeqsM7w",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMWExNWZjY2U5MjhhNWY2MGYwMTEyOSJ9LCJ1c2VybmFtZSI6Imhhc2FuIiwiYWNjZXNzX2xldmVsIjoyLCJleHAiOjE2OTQxOTQxNTcsImlhdCI6MTY2MjY1ODE1N30.Pf9Qq0YFVYfohEYRsOdzqgu6YZwUNCD9MN_32WF9sHFQrllv1h5g3IWhnUhFV_aI50IoleM43m7UH5QVcKZbJQ",
 									"type": "string"
 								}
 							]
@@ -1733,6 +1842,14 @@
 							]
 						},
 						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+					},
+					"response": []
+				},
+				{
+					"name": "Upsert Group Copy",
+					"request": {
+						"method": "POST",
+						"header": []
 					},
 					"response": []
 				},

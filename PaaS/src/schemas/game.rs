@@ -71,6 +71,41 @@ pub struct AddRoleRequest{ //-- we don't need _id field in this struct cause it'
 
 
 /*
+  ---------------------------------------------------------------------------------------------
+| this struct will be used to deserialize last move card info json from client into this struct
+| ---------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct AddLastMoveRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
+    pub name: String, //-- role name
+    pub rate: u8, //-- role rate
+    pub desc: String, //-- role description
+    pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
+    pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
+}
+
+
+/*
+  ---------------------------------------------------------------------------------------------
+| this struct will be used to deserialize last move info bson from the mongodb into this struct
+| ---------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct LastMoveInfo{
+    pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
+    pub name: String,
+    pub rate: u8,
+    pub desc: String,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
   -----------------------------------------------------------------------------------------
 | this struct will be used to deserialize role info bson from the mongodb into this struct
 | -----------------------------------------------------------------------------------------
@@ -353,6 +388,19 @@ pub struct SideInfo{
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct DisableRoleRequest{
+    pub _id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+}
+
+
+/*
+  ------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize last move disable info json from client into this struct
+| ------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct DisableLastMoveRequest{
     pub _id: String, //-- this is the id of the role took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
