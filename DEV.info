@@ -149,7 +149,7 @@ TODO - paas cli like dockerizing, async file handling and ...
 TODO - download/upload manager like IDM/tus.io
 TODO - load balancer for coiniXerr for layer 1 and 2
 TODO - video codec ((de)compression or (de)serializing) like ffmepg or gstreamer
-TODO - add p2p based JSON-RPC over HTTP2 for coiniXerr network inside apis/rpc folder
+TODO - add p2p based JSON-RPC over HTTP2, ws and tcp for coiniXerr network inside apis/rpc folder
 TODO - coiniXerr hash for a transaction and transaction signature, block and merkle root and wallet address using Argon2
 TODO - an event streaming platform like VoD protocol like arvancloud based for streaming over video chunks using ffmpeg and gstreamer in rust based on hls which is an adaptive bitrate method 
         - convert uploaded videos to hls for multi bitrate conversion

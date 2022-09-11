@@ -35,6 +35,7 @@ use crate::constants::*;
 use crate::contexts as ctx;
 use hyper::{header, Body, Response, StatusCode};
 use crate::controllers::game::{
+                                last_move::{add as add_last_move, all as get_last_moves, disable as disable_last_move},
                                 role::{add as add_role, all as get_roles, disable as disable_role}, 
                                 deck::{add as add_deck, all as get_decks, disable as disable_deck, single as get_single_deck},
                                 side::{add as add_side, all as get_sides, disable as disable_side}, 
@@ -86,6 +87,9 @@ pub async fn register() -> Router<Body, hyper::Error>{
                     .unwrap()
             )
         })
+        .post("/last-move/add", add_last_move)
+        .get("/last-move/get/availables", get_last_moves)
+        .post("/last-move/disable", disable_last_move)
         .post("/role/add", add_role)
         .get("/role/get/availables", get_roles)
         .post("/role/disable", disable_role)
@@ -108,7 +112,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/player/get/god-vote/all", get_all_god_votes)
         .post("/god/create/group", create_group)
         .post("/god/cast-vote", cast_vote_on_player)
-        .post("/god/update/group/image/:groupId", upload_img)
+        .post("/god/update/group/:groupId/image", upload_img)
         .post("/god/get/group/all", get_all_god_groups)
         .get("/get/group/all", get_groups)
         .any(not_found) //-- handling 404 request

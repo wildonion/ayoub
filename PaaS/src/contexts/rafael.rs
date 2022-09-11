@@ -266,7 +266,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         fn schedule(&self) -> Self{
 
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
-            // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc calls like near protocol
+            // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc (over http2, ws and tcp) calls like near protocol
             // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
             // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
