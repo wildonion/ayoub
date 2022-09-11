@@ -847,18 +847,19 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "group_image",
+									"key": "event_image",
 									"type": "file",
-									"src": "/C:/Users/lenovo/Pictures/google-tasks.png"
+									"src": "/C:/Users/lenovo/Pictures/bitdad.jpg"
 								}
 							]
 						},
 						"url": {
-							"raw": "{{event}}/update/6308a9a8b013ad8289c28453/image",
+							"raw": "{{event}}/event/update/6308a9a8b013ad8289c28453/image",
 							"host": [
 								"{{event}}"
 							],
 							"path": [
+								"event",
 								"update",
 								"6308a9a8b013ad8289c28453",
 								"image"
