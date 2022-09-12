@@ -82,6 +82,7 @@ pub struct AddLastMoveRequest{ //-- we don't need _id field in this struct cause
     pub name: String, //-- role name
     pub rate: u8, //-- role rate
     pub desc: String, //-- role description
+    pub is_disabled: Option<bool>,
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
 }
@@ -100,6 +101,7 @@ pub struct LastMoveInfo{
     pub name: String,
     pub rate: u8,
     pub desc: String,
+    pub is_disabled: Option<bool>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
 }

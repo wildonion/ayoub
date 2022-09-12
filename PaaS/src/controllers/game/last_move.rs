@@ -102,6 +102,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                                 name,
                                                 rate,
                                                 desc,
+                                                is_disabled: Some(false),
                                                 created_at: Some(now),
                                                 updated_at: Some(now),
                                             };
