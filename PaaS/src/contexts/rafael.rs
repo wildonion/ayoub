@@ -7,9 +7,9 @@
 
 
 
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////////// extending the runtime interface to have serverless trait methods
-//////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+//////////////////// RAFEAL RUNTIME SERVERLESS METHODS ////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 
 
@@ -216,7 +216,8 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         fn deposit(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by adding some amount to an account
         fn storage_usage(&self) -> u64; //-- no need to add &mut self for the first param since we want to return the total used bytes 
         fn storage_byte_cost(&self) -> Self::Cost; //-- no need to add &mut self for the first param since we want to return the total cost of the total used bytes
-        
+        fn current_timestamp(&self) -> u64; //-- current runtime timestamp in nanoseconds
+        fn init(&self) -> Self::App; //-- initialize the whole app for the first time; this method will panic on second call      
     }
 
 
@@ -362,6 +363,21 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
         }
 
+        fn current_timestamp(&self) -> u64 {
+            
+            // TODO - get the current timestamp of the runtime in nanoseconds
+            // ...
+
+            todo!()
+        }
+
+        fn init(&self) -> Self::App {
+            
+            // TODO - initialize the whole app state for the first time and will panic on second call (need a flag to be set on one of the env register to check the state)
+            // ...
+
+            todo!()
+        }
 
     }
 

@@ -104,7 +104,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"hasan\",\r\n    \"pwd\": \"hasan@1234\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"dev\",\r\n    \"pwd\": \"dev@1234\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -963,7 +963,7 @@
 								"availables"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ _**This API needs God, Dev Access or Player Level.**_"
 					},
 					"response": []
 				},
