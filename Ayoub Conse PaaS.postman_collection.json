@@ -1270,7 +1270,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"gardan koloft\",\r\n    \"rate\": 1,\r\n    \"desc\": \"\",\r\n    \"side_id\": \"62ff5f1a94474205d5992116\",\r\n    \"abilities\": 0\r\n}",
+							"raw": "{\r\n    \"name\": \"gardan koloft\",\r\n    \"rate\": 1,\r\n    \"desc\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
