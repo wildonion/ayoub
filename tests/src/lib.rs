@@ -28,6 +28,13 @@ use std::fmt;
 
 
 
+
+
+
+
+
+
+
 struct Cacher<U, T> where T: FnMut(U) -> U{
     closure: T,
     map: HashMap<U, U>,
@@ -82,9 +89,38 @@ fn generate_workout(intensity: u32, random_number: u32) {
 }
 
 
+async fn cls_fn() {
+    fn return_cls() -> Box<dyn FnOnce(i32) -> i32>{ //-- instances of FnOnce can be called, but might not be callable multiple times. Because of this, if the only thing known about a type is that it implements FnOnce, it can only be called once - FnOnce is a supertrait of FnMut
+        Box::new(|x| x + 1)
+    }    
+    function_with_callback(return_cls()); // use .await to suspend the function execution for solving the future
+}
+
+async fn function_with_callback(cb: Box<dyn FnOnce(i32) -> i32>){
+    cb(32);
+    #[derive(Clone)]
+    struct Request{
+        pub user: u32,
+        pub access: u32,
+    }
+    
+    let res = run(move |req: Request|{
+        println!("user {} has access {}", req.user, req.access);
+    });
+    
+    
+    fn run<C>(cls: C) where C: FnOnce(Request) + Send + 'static {
+        let req = Request{user: 2893, access: 1};
+        cls(req);
+    }
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
 pub fn trash(){
 	
@@ -343,8 +379,14 @@ pub fn trash(){
 	
 
 
-	
+
 	// =============================================================================================================================
+    // =============================================================================================================================
+    // =============================================================================================================================
+    //                                                 GENERIC AND LIFETIMES
+	// =============================================================================================================================
+    // =============================================================================================================================
+    // =============================================================================================================================
 	// NOTE - generic types in function signature can be bounded to lifetimes and traits so we can use the lifetime to avoid having dangling pointer of the generic type in function body and traits to extend the type interface
 
 	impl<'a, Pack: Interface + 'a> Into<Vec<u8>> for Unpack<'a, Pack, SIZE>{ //-- based on orphan rule we have to import the trait inside where the struct is or bound the instance of the struct into the Into trait in function calls - we wanto to return the T inside the wrapper thus we can implement the Into trait for the wrapper struct which will return the T from the wrapper field
@@ -384,80 +426,95 @@ pub fn trash(){
 	    fn new() -> Self{
 
 
-		let hello = "Здравствуйте";
-		let s = &hello[0..2];
-		// every index is the place of an element inside the ram which has 1 byte size which is taken by that element
-		// in our case the first element takes 2 bytes thus the index 0 won't return 3 
-		// cause place 0 and 1 inside the ram each takes 1 byte and the size of the
-		// first element is two bytes thus &hello[0..2] which is index 0 and 1 both returns 3 
-		// and we can't have string indices in rust due to this reason!
+            let name = Some("wildonion".to_string());
+            struct User{
+                username: String,
+                age: u8,
+            }
+
+            let user = User{
+                username: match name{
+                    Some(name) => name,
+                    None => "".to_string(),
+                },
+                age: 26,
+            };
 
 
-		///////////////////////////////////////////// ENUM MATCH TEST
-		#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
-		enum Chie{
-		    Avali(u8),
-		    Dovomi(String),
-		    Sevomi,
-		}
+            let hello = "Здравствуйте";
+            let s = &hello[0..2];
+            // every index is the place of an element inside the ram which has 1 byte size which is taken by that element
+            // in our case the first element takes 2 bytes thus the index 0 won't return 3 
+            // cause place 0 and 1 inside the ram each takes 1 byte and the size of the
+            // first element is two bytes thus &hello[0..2] which is index 0 and 1 both returns 3 
+            // and we can't have string indices in rust due to this reason!
 
 
-		let ine = Chie::Avali(12); //-- the Dovomi variant is never constructed cause we've used the first variant  
+            ///////////////////////////////////////////// ENUM MATCH TEST
+            #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+            enum Chie{
+                Avali(u8),
+                Dovomi(String),
+                Sevomi,
+            }
 
-		match ine{
-		    Chie::Avali(value) if value == 23 => { //-- matching on the Avali arm if the value was only 23
-			println!("u8 eeee");
 
-		    },
-		    Chie::Dovomi(value) if value == "wildonion".to_string() => { //-- matching on the Dovomi arm if the value was only "wildonion" string
-			println!("stringeeee");
-		    },
-		    _ => {
-			println!("none of them");
-		    }
-		}
+            let ine = Chie::Avali(12); //-- the Dovomi variant is never constructed cause we've used the first variant  
 
-		// --------------- CODEC OPS ON ENUM ---------------
-		let encoded = serde_json::to_vec(&Chie::Sevomi); ////// it'll print a vector of utf8 encoded JSON
-		let decoded = serde_json::from_slice::<Chie>(&encoded.as_ref().unwrap()); //-- as_ref() returns a reference to the original type
+            match ine{
+                Chie::Avali(value) if value == 23 => { //-- matching on the Avali arm if the value was only 23
+                println!("u8 eeee");
 
-		let encoded_borsh = Chie::Sevomi.try_to_vec().unwrap(); ////// it'll print 2 cause this the third offset in memory
-		let decoded_borsh = Chie::try_from_slice(&encoded_borsh).unwrap();
+                },
+                Chie::Dovomi(value) if value == "wildonion".to_string() => { //-- matching on the Dovomi arm if the value was only "wildonion" string
+                println!("stringeeee");
+                },
+                _ => {
+                println!("none of them");
+                }
+            }
 
-		/////////////////////////////////////////////
-		Pack{}
+            // --------------- CODEC OPS ON ENUM ---------------
+            let encoded = serde_json::to_vec(&Chie::Sevomi); ////// it'll print a vector of utf8 encoded JSON
+            let decoded = serde_json::from_slice::<Chie>(&encoded.as_ref().unwrap()); //-- as_ref() returns a reference to the original type
+
+            let encoded_borsh = Chie::Sevomi.try_to_vec().unwrap(); ////// it'll print 2 cause this the third offset in memory
+            let decoded_borsh = Chie::try_from_slice(&encoded_borsh).unwrap();
+
+            /////////////////////////////////////////////
+            Pack{}
 	    }
 
 	    fn ref_struct(num_thread: &u8) -> &Pack{ //-- returning ref from function to a pre allocated data type (not inside the function) Pack struct in our case, is ok
-		let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which is allocated on the stack and is owned by the function thus we can't return a reference to it or as a borrowed type
-		// &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
-		let instance = &Pack{}; //-- since we're allocating nothing on the stack inside this function thus by creating the instance directly using the the Pack struct and without calling the new() method which is already lives in memory with long enough lifetime we can return a reference to the location of the instance of the pack from the function
-		instance //-- it's ok to return a reference to `instance` since the instance does not allocate anything on the stack thus taking a reference to already allocated memory with long enough lifetime is ok since the allocated memory is happened in struct definition line
+            let instance = Pack::new(); //-- since new() method of the Pack struct will return a new instance of the struct which is allocated on the stack and is owned by the function thus we can't return a reference to it or as a borrowed type
+            // &t //-- it's not ok to return a reference to `instance` since `instance` is a local variable which is owned by the current function and its lifetime is valid as long as the function is inside the stack and executing which means after executing the function its lifetime will be dropped
+            let instance = &Pack{}; //-- since we're allocating nothing on the stack inside this function thus by creating the instance directly using the the Pack struct and without calling the new() method which is already lives in memory with long enough lifetime we can return a reference to the location of the instance of the pack from the function
+            instance //-- it's ok to return a reference to `instance` since the instance does not allocate anything on the stack thus taking a reference to already allocated memory with long enough lifetime is ok since the allocated memory is happened in struct definition line
 	    }
 
 	    // NOTE - argument can also be &mut u8
 	    pub fn ref_str_other_pointer_lifetime(status: &u8) -> &str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we can use the lifetime of the passed in argument, the status in this case which has been passed in by reference from the caller and have a valid lifetime which is generated from the caller scope by the compiler to return the pointer from the function
-		let name = "wildonion";
-		name //-- name has a lifetime as valid as the passed in status argument lifetime from the caller scope 
+            let name = "wildonion";
+            name //-- name has a lifetime as valid as the passed in status argument lifetime from the caller scope 
 
 	    }
 
 	    // NOTE - first param can also be &mut self; a mutable reference to the instance and its fields
 	    pub fn ref_to_str_other_self_lifetime(&self) -> &str{ //-- in this case we're good to return the pointer from the function or send a copy to the caller's space since we can use the lifetime of the first param which is &self which is a borrowed type of the instance and its fields (since we don't want to lose the lifetime of the created instance from the contract struct after calling each method) and have a valid lifetime (as long as the instance of the type is valid) which is generated from the caller scope by the compiler to return the pointer from the function
-		let name = "wildonion";
-		name //-- name has a lifetime as valid as the first param lifetime which is a borrowed type of the instance itself and its fields and will borrow the instance when we want to call the instance methods
+            let name = "wildonion";
+            name //-- name has a lifetime as valid as the first param lifetime which is a borrowed type of the instance itself and its fields and will borrow the instance when we want to call the instance methods
 	    }
 
 	    // NOTE - 'a lifetime has generated from the caller scope by the compiler
 	    pub fn ref_to_str_specific_lifetime<'a>(status: u8) -> &'a str{ //-- in this case we're good to return the pointer from the function or copy to the caller's space since we've defined a valid lifetime for the pointer of the return type to return the pointer from the function which &'a str
-		let name = "wildonion";
-		name //-- name has a lifetime as valid as the generated lifetime from the caller scope by the compiler and will be valid as long as the caller scope is valid
+            let name = "wildonion";
+            name //-- name has a lifetime as valid as the generated lifetime from the caller scope by the compiler and will be valid as long as the caller scope is valid
 	    }
 
 	    // NOTE - 'static lifetime will be valid as long as the whole lifetime of the caller scope (it can be the main function which depends on the whole lifetime of the app)
 	    pub fn ref_to_str_static() -> &'static str{
-		let name = "wildonion";
-		name //-- name has static lifetime valid as long as the whol lifetime of the caller scope which can be the main function which will be valid as long as the main or the app is valid
+            let name = "wildonion";
+            name //-- name has static lifetime valid as long as the whol lifetime of the caller scope which can be the main function which will be valid as long as the main or the app is valid
 	    }
 		
 	    //// ERROR - can't return a reference to heap allocated data structure from function due to their unknown size at compile time and they are temprary value
@@ -467,9 +524,9 @@ pub fn trash(){
 	    // }
 
 	    pub fn ref_to_num<'n>() -> &'n i32{
-		let num = 23;
-		// &num //-- ERROR - we can't return this since the num is owned by the current function and returning the reference to the local variable which is owned by the function is denied
-		&23 //-- we can return &23 since we did allocate nothing on the stack inside the function (which this can be done by creating a local variable inside the function) and we're just returning a pointer to the location of a number directly   
+            let num = 23;
+            // &num //-- ERROR - we can't return this since the num is owned by the current function and returning the reference to the local variable which is owned by the function is denied
+            &23 //-- we can return &23 since we did allocate nothing on the stack inside the function (which this can be done by creating a local variable inside the function) and we're just returning a pointer to the location of a number directly   
 
 	    }
 
@@ -543,37 +600,9 @@ pub fn trash(){
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-
-//-------------------------------------------------
-async fn cls_fn() {
-    fn return_cls() -> Box<dyn FnOnce(i32) -> i32>{ //-- instances of FnOnce can be called, but might not be callable multiple times. Because of this, if the only thing known about a type is that it implements FnOnce, it can only be called once - FnOnce is a supertrait of FnMut
-        Box::new(|x| x + 1)
-    }    
-    function_with_callback(return_cls()); // use .await to suspend the function execution for solving the future
-}
-
-async fn function_with_callback(cb: Box<dyn FnOnce(i32) -> i32>){
-    cb(32);
-    #[derive(Clone)]
-    struct Request{
-        pub user: u32,
-        pub access: u32,
-    }
-    
-    let res = run(move |req: Request|{
-        println!("user {} has access {}", req.user, req.access);
-    });
-    
-    
-    fn run<C>(cls: C) where C: FnOnce(Request) + Send + 'static {
-        let req = Request{user: 2893, access: 1};
-        cls(req);
-    }
-}
-//-------------------------------------------------
-
-
-
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
 pub fn mactrait(){
 
@@ -685,8 +714,9 @@ pub fn mactrait(){
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-
-
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
 pub fn unsafer(){
 

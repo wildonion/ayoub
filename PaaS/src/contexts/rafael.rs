@@ -373,7 +373,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
         fn init(&self) -> Self::App {
             
-            // TODO - initialize the whole app state for the first time and will panic on second call (need a flag to be set on one of the env register to check the state)
+            // TODO - initialize the whole app state inside n threads for the first time and will panic on second call (need a flag to be set on one of the env register to check the state)
             // ...
 
             todo!()

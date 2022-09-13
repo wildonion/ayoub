@@ -3,7 +3,7 @@
 
 
 
-use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponse, ReservePlayerInfoResponseWithRoleName, AddGroupInfoToEvent};
+use crate::schemas::game::{InsertPlayerInfoRequest, ReservePlayerInfoResponseWithRoleName, AddGroupInfoToEvent, EventLastMoveInfo};
 use serde::{Serialize, Deserialize};
 use mongodb::bson::{self, oid::ObjectId, doc}; //-- self referes to the bson struct itself cause there is a struct called bson inside the bson.rs file
 use uuid::Uuid;
@@ -131,6 +131,7 @@ pub struct ReserveEventResponse{
     pub title: String,
     pub content: String,
     pub deck_id: String,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub phases: Option<Vec<Phase>>,
     pub max_players: Option<u8>,
     pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
@@ -221,6 +222,7 @@ pub struct EventInfo{
     pub title: String,
     pub content: String,
     pub deck_id: String,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub entry_price: String,
     pub group_info: Option<AddGroupInfoToEvent>,
     pub image_path: Option<String>,
@@ -252,6 +254,7 @@ pub struct PlayerEventInfo{
     pub title: String,
     pub content: String,
     pub deck_id: String,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub entry_price: String,
     pub group_info: Option<AddGroupInfoToEvent>,
     pub image_path: Option<String>,
@@ -310,6 +313,7 @@ pub struct RevealEventInfo{
     pub title: String,
     pub content: String,
     pub deck_id: String,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub entry_price: String,
     pub group_info: Option<AddGroupInfoToEvent>,
     pub image_path: Option<String>,
@@ -340,6 +344,7 @@ pub struct AddEventRequest{
     pub title: String,
     pub content: String,
     pub deck_id: String, //-- this is the id of the selected deck for this event took from the mongodb and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub entry_price: String,
     pub group_info: Option<AddGroupInfoToEvent>,
     pub image_path: Option<String>,

@@ -108,6 +108,25 @@ pub struct LastMoveInfo{
 
 
 /*
+  ---------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize event last move info bson from the mongodb into this struct
+| ---------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct EventLastMoveInfo{
+    pub _id: String,
+    pub name: String,
+    pub rate: u8,
+    pub desc: String,
+    pub is_disabled: Option<bool>,
+    pub created_at: Option<i64>,
+    pub updated_at: Option<i64>,
+}
+
+
+/*
   -----------------------------------------------------------------------------------------
 | this struct will be used to deserialize role info bson from the mongodb into this struct
 | -----------------------------------------------------------------------------------------
