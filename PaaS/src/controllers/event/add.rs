@@ -287,6 +287,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                 "phases": Some(bson::to_bson(&event_info.phases).unwrap()), //-- initializing empty vector of phases
                                                 "max_players": bson::to_bson(&event_info.max_players).unwrap(), //-- this is the maximum players that an event can have
                                                 "players": Some(bson::to_bson(&event_info.players).unwrap()), //-- there are no participant yet for this event
+                                                "started_at": Some(bson::to_bson(&event_info.started_at).unwrap()),
                                                 "updated_at": Some(now),
                                             }  
                                         }, Some(update_option)).await.unwrap(){ //-- finding event based on event title
@@ -326,6 +327,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                     players: Some(vec![]), //-- there are no participant yet for this event
                                                     is_expired: Some(false), //-- a event is not expired yet or at initialization
                                                     is_locked: Some(false), //-- a event is not locked yet or at initialization
+                                                    started_at: event_info.started_at,
                                                     expire_at: Some(exp_time), //-- a event will be expired at
                                                     created_at: Some(now),
                                                     updated_at: Some(now),

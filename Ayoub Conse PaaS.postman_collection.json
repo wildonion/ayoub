@@ -132,7 +132,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5Mjk1NTk5MCwiaWF0IjoxNjYxNDE5OTkwfQ.TatB0bCWMDYqoFxJ4SsrnStrT5fP3TFKt5WSSbecCfi9MDCm4L_WgJN3XLH9VG677xYMdTax93CZb6RRp9_l_A",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjk0NjE5NTc5LCJpYXQiOjE2NjMwODM1Nzl9.mcmbMJdhqvD8ycV0kOpJt6Q-1uNiimfW9giLv4dinJVssTagQQ4kLUFFgEQPU2yXMmQu-kg7Tso0yBW_MVTwNg",
 									"type": "string"
 								}
 							]
@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"last_move_cards\": [\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        }\r\n    ],\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"last_move_cards\": [\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        }\r\n    ],\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [],\r\n    \"started_at\": 1662470610\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -882,7 +882,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzM3MjcyMywiaWF0IjoxNjYxODM2NzIzfQ.HeJ8msRrirPfZy6ilQ0w8URAtQ5vUyS_wTMbeRqU1ZzTxAYOm6ILA0qv7oK0h9mvpZ_vm7ifZmQcqBbDbPltCQ",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjk0NjA5OTQ5LCJpYXQiOjE2NjMwNzM5NDl9.7LsCinZW8kzZt_Kimiv4ztHL1sF7QHmkWdWd1UIOgPaGiRKx1BXZadEtCPV9E3y5-CD8hVWttiMNyhL3BAzOgg",
 									"type": "string"
 								}
 							]
@@ -901,7 +901,7 @@
 								"availables"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ _**This API needs God, Dev Access or Player Level.**_"
 					},
 					"response": []
 				},
@@ -932,7 +932,7 @@
 								"availables"
 							]
 						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***"
+						"description": "⚠️ _**This API needs God, Dev Access or Player Level.**_"
 					},
 					"response": []
 				},

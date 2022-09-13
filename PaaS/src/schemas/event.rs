@@ -235,6 +235,7 @@ pub struct EventInfo{
     pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
+    pub started_at: Option<i64>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -266,6 +267,7 @@ pub struct PlayerEventInfo{
     pub max_players: Option<u8>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
+    pub started_at: Option<i64>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -294,6 +296,7 @@ pub struct ExploreEventInfo{
     pub max_players: Option<u8>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
+    pub started_at: Option<i64>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -326,6 +329,7 @@ pub struct RevealEventInfo{
     pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>,
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>,
+    pub started_at: Option<i64>,
     pub expire_at: Option<i64>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,
@@ -357,6 +361,7 @@ pub struct AddEventRequest{
     pub players: Option<Vec<ReservePlayerInfoResponseWithRoleName>>, // NOTE - vector of all players which has participated for this event
     pub is_expired: Option<bool>,
     pub is_locked: Option<bool>, // NOTE - we set this field to Option cause we don't want to pass the is_expired inside the request body, we'll update it once a event reached the deadline
+    pub started_at: Option<i64>,
     pub expire_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the expire_at inside the request body, we'll update it while we want to create a new event object
     pub created_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the created time inside the request body, we'll fill it inside the server
     pub updated_at: Option<i64>, // NOTE - we set this field to Option cause we don't want to pass the updated time inside the request body, we'll fill it inside the server
