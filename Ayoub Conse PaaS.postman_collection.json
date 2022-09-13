@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"last_move_cards\": [\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        }\r\n    ],\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -944,7 +944,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzQxODA4NiwiaWF0IjoxNjYxODgyMDg2fQ.Uo_OZB8zr9b6oPXD3MXerJYDyxiIx-QbZGhFu0qGdMj5vZvSrW-utXpsuNAq9NCazmB5JghX1zJZcDV2zaqCNw",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjk0NTU1MDc4LCJpYXQiOjE2NjMwMTkwNzh9.J2fNMO8SGxy3TPBs9Og19CC98Y-DKTm7eIHHm18TU26k4CwsTa_EGYJm3Boy_7L5s4kE0jJDcXoXf5XyAWIIXQ",
 									"type": "string"
 								}
 							]
@@ -1261,7 +1261,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYyZmJlYTVkMjY3NmMyMzQyNmJhMjlhYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MjQzNzQzOSwiaWF0IjoxNjYwOTAxNDM5fQ.C9oufsytGlMEOmM-j455lN_xjE5oBwjaKmRBuqebI5GuGX8pNluKUyxWykfkAEPpQXFmKRCHiLZu5UBrxa-sgg",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMTVmOTlhODk3OGQ3NjFlOTdhOWIzYSJ9LCJ1c2VybmFtZSI6ImRldiIsImFjY2Vzc19sZXZlbCI6MCwiZXhwIjoxNjk0NjAzNjY5LCJpYXQiOjE2NjMwNjc2Njl9.aERXnt5SMr_4r2R4zQCj7RQ3iaVXXEOpLRUEnnyUIP8WGTifAMVzHPABG-Ypmonf96TsydR9c4Y4BzyYsJZ-zw",
 									"type": "string"
 								}
 							]
