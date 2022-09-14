@@ -96,6 +96,8 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     
 
 
+
+
     // -------------------------------- environment variables setup
     //
     // ---------------------------------------------------------------------
@@ -146,7 +148,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
             }
         )
     );
-    let db = if db_engine.as_str() == "mongodb"{
+    let app_storage = if db_engine.as_str() == "mongodb"{
         info!("switching to mongodb - {}", chrono::Local::now().naive_local());
         match ctx::app::Db::new().await{
             Ok(mut init_db) => {
@@ -205,7 +207,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         access_level_cli = &args[2];
     }
     if username_cli != &"".to_string() && access_level_cli != &"".to_string(){
-        match utils::set_user_access(username_cli.to_owned(), access_level_cli.parse::<i64>().unwrap(), db.clone()).await{
+        match utils::set_user_access(username_cli.to_owned(), access_level_cli.parse::<i64>().unwrap(), app_storage.clone()).await{
             Ok(user_info) => {
                 info!("access level for user {} has been updated successfully", username_cli);
                 info!("updated user {:?}", user_info);
@@ -224,18 +226,26 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
-    
 
-       
-    
-    
-    
-    
 
+
+
+
+
+
+    
+    
+    
+    
+    
     // -------------------------------- building the ayoub server from the router
     //
+    //      we're sharing the db_instance state between routers' threads to get the data inside each api
     // --------------------------------------------------------------------------------------------------------
+    let unwrapped_storage = app_storage.unwrap(); //-- unwrapping the app storage
+    let db_instance = unwrapped_storage.get_db().await; //-- getting the db inside the app storage; it might be None
     let api = Router::builder()
+        .data(db_instance.unwrap().clone()) //-- shared state which will be available to every route handlers is the db_instance which must be Send + Syn + 'static to share between threads
         .scope("/auth", routers::auth::register().await)
         .scope("/event", routers::event::register().await)
         .scope("/game", routers::game::register().await)

@@ -189,6 +189,15 @@ pub struct Storage{
     pub db: Option<Db>, //-- we could have no db at all
 }
 
+impl Storage{
+    pub async fn get_db(&self) -> Option<&Client>{
+        match self.db.as_ref().unwrap().mode{
+            Mode::On => self.db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client> or Option<&T>
+            Mode::Off => None, //-- no db is available cause it's off
+        }
+    }
+}
+
 
 
 #[derive(Copy, Clone, Debug)]

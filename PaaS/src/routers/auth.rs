@@ -18,13 +18,11 @@
    | collection rule and each response object will be dropped once each router 
    | router body scope gets ended.
    |
-   |
    | instead of initializing the app_storage inside each router api we've 
    | initialized it only once per router service to move it between each router api.
    | 
 
 */
-
 
 
 
@@ -52,7 +50,6 @@ use crate::controllers::auth::{
 
 pub async fn register() -> Router<Body, hyper::Error>{  
 
-    
     let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
     let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
@@ -62,10 +59,11 @@ pub async fn register() -> Router<Body, hyper::Error>{
     ////////
     // NOTE - only the request object must be passed through each handler
     // NOTE - shared state which will be available to every route handlers is the app_storage which must be Send + Syn + 'static to share between threads
+    // NOTE - currently we're sharing the db instance between routers' threads from the main.rs instead of inside event router
     ////////`   
 
     Router::builder()
-        .data(app_storage) //-- sharing the initialized app_storage between routers' threads
+        // .data(app_storage) //-- sharing the initialized app_storage between routers' threads
         .middleware(Middleware::post(middlewares::cors::allow)) //-- allow all CORS setup - the post Middlewares will be executed after all the route handlers process the request and generates a response and it will access that response object and the request info(optional) and it can also do some changes to the response if required
         .middleware(Middleware::pre(middlewares::logging::logger)) //-- enable logging middleware on the incoming request then pass it to the next middleware - pre Middlewares will be executed before any route handlers and it will access the req object and it can also do some changes to the request object if required
         .get("/page", |req| async move{
