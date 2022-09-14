@@ -112,6 +112,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                             let deck_doc = schemas::game::AddDeckRequest{
                                                 deck_name,
                                                 roles,
+                                                last_move_cards: deck_info.last_move_cards,
                                                 is_disabled: Some(false),
                                                 created_at: Some(now),
                                                 updated_at: Some(now),

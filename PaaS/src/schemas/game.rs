@@ -179,6 +179,7 @@ pub struct DeckRoleInfo{
 pub struct AddDeckRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
     pub deck_name: String,
     pub roles: Vec<DeckRoleInfo>,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub is_disabled: Option<bool>, //-- whether this deck has disabled or not
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
@@ -197,6 +198,7 @@ pub struct UpsertDeckRequest{ //-- we don't need _id field in this struct cause 
     pub _id: Option<String>, //-- this is the stringify object id of the deck; it can be optional to insert a new deck doc
     pub deck_name: String,
     pub roles: Vec<DeckRoleInfo>,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub is_disabled: Option<bool>, //-- whether this deck has disabled or not
     pub created_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the created time inside the request body thus it should be None initially, we'll fill it inside the server
     pub updated_at: Option<i64>, //-- we set this field to Option cause we don't want to pass the updated time inside the request body thus it should be None initially, we'll fill it inside the server
@@ -215,6 +217,7 @@ pub struct DeckInfo{
     pub _id: Option<ObjectId>, //-- ObjectId is the bson type of _id inside the mongodb
     pub deck_name: String,
     pub roles: Vec<DeckRoleInfo>,
+    pub last_move_cards: Vec<EventLastMoveInfo>,
     pub is_disabled: Option<bool>,
     pub created_at: Option<i64>,
     pub updated_at: Option<i64>,

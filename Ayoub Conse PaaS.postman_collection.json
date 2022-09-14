@@ -259,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"last_move_cards\": [\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        }\r\n    ],\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [],\r\n    \"started_at\": 1662470610\r\n}",
+							"raw": "{\r\n\r\n    \"title\":\"اولین ایونت بزرگ کنسه\",\r\n    \"content\":\"اینو اپدیت کردم\",\r\n    \"deck_id\":\"6308b1242c90659836904860\",\r\n    \"entry_price\":\"10000\", \r\n    \"group_info\": {\r\n                \"_id\": \"631749d2162b2867592ee282\",\r\n                \"name\": \"گروه مافیایی کنسه\",\r\n                \"owner\": \"dev\",\r\n                \"image_path\": null,\r\n                \"god_id\": \"63198ab839c72c821ef97f64\",\r\n                \"created_at\": 1662470610,\r\n                \"updated_at\": 1662470610\r\n            },\r\n    \"creator_wallet_address\":\"0x0000000000000000000000000000000000000000\",\"upvotes\":0,\"downvotes\":0,\"voters\":[],\"phases\":[],\"max_players\":16,\r\n    \"players\": [],\r\n    \"started_at\": 1662470610\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -875,6 +875,45 @@
 			"name": "Game Service",
 			"item": [
 				{
+					"name": "Upsert Deck",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzI0ODM4MywiaWF0IjoxNjYxNzEyMzgzfQ.-dgR4Tyy-qf7pfYEyXT7FXOeBWqnlvuxKad86TTsELlCl8ylp2PX9g3q5QoS9goZCr1BjXQrwIDmM7tW9iW2Pg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"_id\": \"a deck id\", //-- remove this if you want to create new deck\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"last_move_cards\": [\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        },\r\n        {\r\n            \"_id\": \"6308b1242c90659836904860\",\r\n            \"name\": \"شب شد\",\r\n            \"rate\": 0,\r\n            \"desc\": \"شب که شد مافیا ها بمیرن\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1662470610,\r\n            \"updated_at\": 1662470610\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{game}}/game/deck/add",
+							"host": [
+								"{{game}}"
+							],
+							"path": [
+								"game",
+								"deck",
+								"add"
+							]
+						},
+						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n⚠️ `_id` field can be empty and if this is the case then it'll create a new deck info."
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Sides",
 					"request": {
 						"auth": {
@@ -1328,45 +1367,6 @@
 							]
 						},
 						"description": "⚠️ _**This API needs Dev Access Level.**_\n\n_**⚠️ Use this API if you want to remove a last move card.**_"
-					},
-					"response": []
-				},
-				{
-					"name": "Upsert Deck",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGEzNmE3OGMxOThlMGQ2NTVjOGFlMiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzI0ODM4MywiaWF0IjoxNjYxNzEyMzgzfQ.-dgR4Tyy-qf7pfYEyXT7FXOeBWqnlvuxKad86TTsELlCl8ylp2PX9g3q5QoS9goZCr1BjXQrwIDmM7tW9iW2Pg",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"_id\": \"a deck id\", //-- remove this if you want to create new deck\r\n    \"deck_name\": \"دک کنسه برای امشب\",\r\n    \"roles\": [\r\n        {  \r\n            \"_id\": \"630eb9f34d4aa7e3a05b2e2d\",\r\n            \"name\": \"افشاگر\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909491,\r\n            \"updated_at\": 1661909491\r\n        },\r\n        {\r\n            \r\n            \"_id\": \"630eba1a4d4aa7e3a05b2e2e\",\r\n            \"name\": \"اَفیون\",\r\n            \"rate\": 1,\r\n            \"desc\": \"\",\r\n            \"abilities\": 2,\r\n            \"side_id\": \"630a35978c198e0d655c8adf\",\r\n            \"is_disabled\": false,\r\n            \"created_at\": 1661909530,\r\n            \"updated_at\": 1661909530\r\n        }\r\n    ],\r\n    \"is_disabled\": false,\r\n    \"created_at\": 1661514388\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{game}}/game/deck/add",
-							"host": [
-								"{{game}}"
-							],
-							"path": [
-								"game",
-								"deck",
-								"add"
-							]
-						},
-						"description": "⚠️ ***This API needs God or Dev Access Level.***\n\n⚠️ `_id` field can be empty and if this is the case then it'll create a new deck info."
 					},
 					"response": []
 				},

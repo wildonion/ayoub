@@ -314,7 +314,6 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                     title: event_info.title,
                                                     content: event_info.content,
                                                     deck_id: event_info.deck_id, //-- it's ObjectId of the selected deck but string-ed!
-                                                    last_move_cards: event_info.last_move_cards,
                                                     entry_price: event_info.entry_price,
                                                     group_info: event_info.group_info,
                                                     image_path: Some("".to_string()),

@@ -106,7 +106,6 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
                                                         title: event_doc.title,
                                                         content: event_doc.content,
                                                         deck_id: event_doc.deck_id,
-                                                        last_move_cards: event_doc.last_move_cards,
                                                         phases: event_doc.phases,
                                                         max_players: event_doc.max_players,
                                                         players: event_doc.players,
