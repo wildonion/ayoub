@@ -50,11 +50,13 @@ use crate::controllers::auth::{
 
 pub async fn register() -> Router<Body, hyper::Error>{  
 
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
-    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    let app_storage = Client::with_uri_str(&db_addr).await.unwrap();
+    /////////////////////////////////////////////////////////////////////////////////////
+    // let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    // let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
+    // let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
+    // let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
+    // let app_storage = Client::with_uri_str(&db_addr).await.unwrap();
+    /////////////////////////////////////////////////////////////////////////////////////
 
     ////////
     // NOTE - only the request object must be passed through each handler

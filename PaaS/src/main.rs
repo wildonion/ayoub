@@ -110,13 +110,13 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
     let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
     let db_addr = format!("{}://{}:{}", db_engine, db_host, db_port);
-    // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
     let io_buffer_size = env::var("IO_BUFFER_SIZE").expect("⚠️ no io buffer size variable set").parse::<u32>().unwrap() as usize; //-- usize is the minimum size in os which is 32 bits
     let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
     let host = env::var("HOST").expect("⚠️ no host variable set");
     let port = env::var("AYOUB_PORT").expect("⚠️ no port variable set");
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the oneshot channel
     let server_addr = format!("{}:{}", host, port).as_str().parse::<SocketAddr>().unwrap();
+    // let db_addr = format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port); //------ UNCOMMENT THIS FOR PRODUCTION
 
 
 
