@@ -72,7 +72,7 @@ pub async fn mock_reservation(req: Request<Body>) -> GenericResult<hyper::Respon
             
             let db_to_pass = db.clone();
             if middlewares::auth::user::exists(Some(&db_to_pass), _id, username.clone(), access_level).await{ //-- finding the user with these info extracted from jwt
-                if access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS || access_level == ADMIN_ACCESS{ // NOTE - only dev and player can handle this route
+                if access_level == DEV_ACCESS || access_level == DEFAULT_USER_ACCESS || access_level == ADMIN_ACCESS{ // NOTE - only dev, God and player can handle this route since God can reserve another God's event
                     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
                     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
                         Ok(value) => { //-- making a serde value from the buffer which is a future IO stream coming from the client
