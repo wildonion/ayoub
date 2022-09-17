@@ -43,17 +43,15 @@ Coded by
 
 
 use constants::MainResult;
-use mongodb::Client;
 use routerify::{RouterService, Router};
 use std::{net::SocketAddr, sync::Arc, env};
-use chrono::Local;
 use dotenv::dotenv;
 use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;
 use hyper::server::{Server, conn::AddrIncoming};
 use self::contexts as ctx; // use crate::contexts as ctx;
-use ctx::rafael::env::Serverless; // NOTE - based on orphan rule Serverless trait is required to use the run() method on the runtime instance
+use ctx::rafael::env::Serverless; // NOTE - based on orphan rule Serverless trait is required to use the run() method on any runtime instance
 
 
 
@@ -275,7 +273,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         
         
         
-        Ok(())
+    Ok(())
     
 
 
