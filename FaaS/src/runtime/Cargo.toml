@@ -1,5 +1,5 @@
 [package]
-name = "rafael"
+name = "raft"
 version = "0.1.0"
 edition = "2021"
 
@@ -44,7 +44,7 @@ features = [
 # libraries don't have entry points, you can't run them,they're used for functionality sharing like binding a .wasm into js codes
 # we need lib.rs and crate type of cdylib for none binary like .wasm, .so, .dylib and .dll files
 crate-type = ["cdylib", "rlib"]
-name = "rafael"
+name = "raft"
 path = "lib.rs"
 
 

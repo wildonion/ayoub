@@ -7,9 +7,9 @@
 
 
 
-///////////////////////////////////////////////////////////////////////////
-//////////////////// RAFEAL RUNTIME SERVERLESS METHODS ////////////////////
-///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////// RAFEAL RUNTIME SERVERLESS METHODS (FaaS) ////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -29,17 +29,10 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
     const APP_NAME: &str = "Rafless";
     use std::{fmt, env, sync::{Arc, Mutex}};
-    use crate::utils;
-    use futures::channel::mpsc as future_mpsc;
-    use tokio::sync::mpsc as tokio_mpsc;
-    use futures::join as futures_join;
-    use futures_util::join as futures_util_join;
-    use tokio::join as tokio_join;
     use borsh::{BorshSerialize, BorshDeserialize};
     use uuid::Uuid;
     use std::net::SocketAddr;
     use serde::{Serialize, Deserialize};
-    use rayon::join as rayon_join;
 
 
 
@@ -130,7 +123,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
     
     #[derive(Clone, Debug)]
-    pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
+    pub struct LoadBalancer; // TODO - clients -request-> middleware server -spread request-> main servers
 
     
     

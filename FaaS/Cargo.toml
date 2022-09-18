@@ -1,0 +1,23 @@
+[package]
+name = "rafael"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+
+
+
+
+
+
+[lib]
+name = "rafael"
+path = "lib.rs"
+
+
+
+
+[[bin]]
+name = "rafael"
+path = "src/main.rs"

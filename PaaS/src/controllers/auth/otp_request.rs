@@ -96,13 +96,13 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                         // --------------------------------------------------------------------
                         //     COLLECTING ALL INCOMING CHUNKS FROM THE SMS CAREER RESPONSE
                         // --------------------------------------------------------------------
-                        let mut buffer = vec![]; //-- creating an empty buffer of u8 bytes with the size of the sms response which 286
+                        let mut buffer: Vec<u8> = Vec::new(); //-- creating an empty buffer of u8 bytes
                         while let Some(next) = sms_response_stream.body_mut().data().await{ //-- bodies in hyper are always streamed asynchronously and we have to await for each chunk as it comes in using a while let Some() syntax
                             let chunk = next?; //-- unwrapping the incoming bytes from the hyper response body inside this iteration  
-                            let bytes_as_utf8 = chunk.as_ref().to_owned(); //-- getting &[u8] which is in fact a slice of the Bytes (since we're pointing to its location using &) by converting or coercing the chunk of type Bytes to &[u8] using as_ref() method then convert it to Vec<u8> using to_owned() method since the owned type of &[u8] is Vec<u8> and &[u8] is an slice of the Vec<u8>
-                            buffer = bytes_as_utf8;
+                            let vec_bytes_as_utf8 = chunk.as_ref().to_owned(); //-- getting &[u8] which is in fact a slice of the Bytes (since we're pointing to its location using &) by converting or coercing the chunk of type Bytes to &[u8] using as_ref() method then convert it to Vec<u8> using to_owned() method since the owned type of &[u8] is Vec<u8> and &[u8] is an slice of the Vec<u8>
+                            buffer = vec_bytes_as_utf8;
                         }
-                        let arr_buffer = buffer.as_slice();
+                        let sms_response_arr_buffer = buffer.as_slice();
 
 
 
@@ -113,7 +113,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                         // --------------------------------------------------------------------
                         //      DESERIALIZING FROM ut8 BYTES INTO THE SMSResponse STRUCT
                         // --------------------------------------------------------------------
-                        match serde_json::from_slice::<schemas::auth::SMSResponse>(&arr_buffer){ //-- we can also use from_reader() method which is slower than from_slice() method and deserialize the bytes of json text directly into the SMSResponse struct - the generic type of from_slice() method is SMSResponse struct - mapping (deserializing) the bytes of json text into the SMSResponse struct
+                        match serde_json::from_slice::<schemas::auth::SMSResponse>(&sms_response_arr_buffer){ //-- we can also use from_reader() method which is slower than from_slice() method and deserialize the bytes of json text directly into the SMSResponse struct - the generic type of from_slice() method is SMSResponse struct - mapping (deserializing) the bytes of json text into the SMSResponse struct
                             Ok(sms_response) => {
                                 
 

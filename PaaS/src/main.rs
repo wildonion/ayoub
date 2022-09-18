@@ -51,7 +51,6 @@ use log::{info, error};
 use tokio::sync::oneshot;
 use hyper::server::{Server, conn::AddrIncoming};
 use self::contexts as ctx; // use crate::contexts as ctx;
-use ctx::rafael::env::Serverless; // NOTE - based on orphan rule Serverless trait is required to use the run() method on any runtime instance
 
 
 
@@ -119,6 +118,22 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
+
+
+
+
+
+
+    let _db_addr = if environment == "dev"{
+
+        // db addr without username/password
+        // ...
+
+    } else if environment == "prod"{
+
+        // db addr with username/password
+        // ...
+    };
 
 
 
@@ -240,7 +255,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     //
     //      we're sharing the db_instance state between routers' threads to get the data inside each api
     // --------------------------------------------------------------------------------------------------------
-    let unwrapped_storage = app_storage.unwrap(); //-- unwrapping the app storage
+    let unwrapped_storage = app_storage.unwrap(); //-- unwrapping the app storage to create a db instance
     let db_instance = unwrapped_storage.get_db().await; //-- getting the db inside the app storage; it might be None
     let api = Router::builder()
         .data(db_instance.unwrap().clone()) //-- shared state which will be available to every route handlers is the db_instance which must be Send + Syn + 'static to share between threads
