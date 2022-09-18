@@ -25,7 +25,7 @@
 curl https://wasmtime.dev/install.sh -sSf | bash
 rustup target add wasm32-wasi
 cargo build --bin rafael --target wasm32-wasi --release
-sudo cp target/wasm32-wasi/release/rafael.wasm ./rafael.awasm
+sudo cp target/wasm32-wasi/release/rafael.wasm ./rafael.wasm
 wasmtime rafael.wasm
 
 

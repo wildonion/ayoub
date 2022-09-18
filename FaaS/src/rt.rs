@@ -6,14 +6,6 @@
 
 
 
-
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////// RAFEAL RUNTIME SERVERLESS METHODS (FaaS) ////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-
-
-
-
 pub mod env{ //-- rafael env functions to mutate the state of the runtime object like near-sdk env
 
 
@@ -27,12 +19,12 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
 
-    const APP_NAME: &str = "Rafless";
-    use std::{fmt, env, sync::{Arc, Mutex}};
-    use borsh::{BorshSerialize, BorshDeserialize};
-    use uuid::Uuid;
-    use std::net::SocketAddr;
-    use serde::{Serialize, Deserialize};
+    pub const APP_NAME: &str = "Rafael";
+    pub use std::{fmt, env, sync::{Arc, Mutex}};
+    pub use borsh::{BorshSerialize, BorshDeserialize};
+    pub use uuid::Uuid;
+    pub use std::net::SocketAddr;
+    pub use serde::{Serialize, Deserialize};
 
 
 
@@ -88,6 +80,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
 
+
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
     pub struct RuntimeLog{ // TODO - initialize this inside the main() function
         pub id: u8,
@@ -109,8 +102,8 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
     }
     
-    #[derive(Serialize, Deserialize, Copy, Clone)]
-    pub struct LinkToService(pub usize); // NOTE - LinkToService contains a pointer to the current service address located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct LinkToService(pub String); // NOTE - LinkToService contains the address of the current service located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
     
 
 
@@ -121,6 +114,15 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     }
     
 
+
+    #[derive(Serialize, Deserialize, Copy, Clone)]
+    pub enum Service{
+        Auth,
+        Event,
+        Game,
+    }
+
+    
     
     #[derive(Clone, Debug)]
     pub struct LoadBalancer; // TODO - clients -request-> middleware server -spread request-> main servers
@@ -165,13 +167,13 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     }
 
 
-
+    
 
     #[derive(Serialize, Deserialize)]
     pub struct Runtime<S>{ 
         pub id: Uuid,
         pub current_service: Option<S>,
-        pub link_to_server: Option<LinkToService>, //-- we've just saved a 64 bits or 8 bytes pointer (on 64 bits target) to the location address of the service inside the memory 
+        pub link_to_server: Option<LinkToService>, //-- we've just saved the location address of the current service inside the memory
         pub error: Option<AppError>, //-- any runtime error caused either by the runtime itself or the storage crash
         pub node_addr: Option<SocketAddr>, //-- socket address of this node
         pub last_crash: Option<i64>, //-- last crash timestamp
@@ -273,6 +275,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             //        must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
+            // TODO - build a protocol based on binary address to transmit data between actors using mpsc tunnel
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
             // ....  
             // ....

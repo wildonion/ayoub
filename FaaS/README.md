@@ -2,4 +2,4 @@
 
 
 
-## Rafael Serverless Methods Runtime
+## Rafael Serverless Methods (FaaS) Runtime

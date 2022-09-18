@@ -1600,6 +1600,13 @@ dependencies = [
 [[package]]
 name = "rafael"
 version = "0.1.0"
+dependencies = [
+ "borsh",
+ "chrono",
+ "serde",
+ "serde_json",
+ "uuid 1.1.2",
+]
 
 [[package]]
 name = "raft"

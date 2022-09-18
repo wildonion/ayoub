@@ -2,7 +2,7 @@
 
 members = [
     "FaaS",
-    "FaaS/src/runtime/",
+    "FaaS/src/client/",
     "PaaS",
     "coiniXerr",
     "tests",
