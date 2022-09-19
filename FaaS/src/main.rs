@@ -6,8 +6,8 @@
 
 
 
-pub mod rt;
-use crate::rt::env;
+
+use rt::env;
 
 
 
@@ -16,7 +16,9 @@ use crate::rt::env;
 fn main(){
 
 
-    // NOTE - wasi doesn't support async based runtimes and methods like tokio
+
+
+    // NOTE - wasi doesn't support async methods based runtimes like tokio  
     // ... 
 
     let rt = env::Runtime::<env::Service>{
@@ -30,7 +32,8 @@ fn main(){
     };
 
 
-    println!("Welcome to {:?}", env::APP_NAME);
+
+    println!("Welcome to {:?} FaaS", env::APP_NAME);
 
 
 
