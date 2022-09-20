@@ -16,24 +16,6 @@
 # ./ayoub.sh list --api --controller <CONTROLLER_NAME> -> list of all available apis related to a controller
 
 
-
-
-
-# ---------------------------
-# compile rafael FaaS to wasm 
-# ---------------------------
-curl https://wasmtime.dev/install.sh -sSf | bash
-rustup target add wasm32-wasi
-cargo build --bin rafael --target wasm32-wasi --release
-sudo cp target/wasm32-wasi/release/rafael.wasm ./rafael.wasm
-wasmtime rafael.wasm
-
-
-
-
-# ----------------
-# build ayoub PaaS
-# ----------------
 sudo chown -R root:root . && sudo chmod -R 777 .
 cargo build --bin ayoub --release
 sudo rm app

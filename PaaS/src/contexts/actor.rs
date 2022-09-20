@@ -2,6 +2,31 @@
 
 
 
+/*
+    
+
+    -> shared data state between threads: always borrow in iterating and passing into new scope since rust doesn’t obey any 
+    garbage collection rule And In order to pass and share a reference of the encoded 
+    type (borsh/serde) between threads the type must be send sync and static across threads
+    -> async await | generic, box with traits and lifetime and borrowing and ownership (garbage collection no!)
+    
+    
+    
+
+    https://procmarco.netlify.app/blog/2021-05-04-a-story-about-async-rust-and-using-send-types/
+    https://ryhl.io/blog/actors-with-tokio/
+    https://ryhl.io/blog/async-what-is-blocking/
+    https://crates.io/crates/rayon
+
+
+
+    option 1 - use tokio::spawn() in actor.run()
+    option 2 - use scheduler threadpool in actor.run() 
+    option 3 - use actix actors
+    tools    - use oneshot and mpsc channels
+
+
+*/
 
 
 
@@ -9,7 +34,7 @@
 
 
 
-pub mod env{ //-- rafael env functions to mutate the state of the runtime object like near-sdk env
+pub mod env{ //-- rafael env which contains runtime functions and actors to mutate the state of the runtime object like near-sdk env
 
 
     
@@ -20,14 +45,20 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
 
 
-
-
-    pub const APP_NAME: &str = "Rafael";
+    pub use crate::utils::*;
     pub use std::{fmt, env, sync::{Arc, Mutex}};
     pub use borsh::{BorshSerialize, BorshDeserialize};
     pub use uuid::Uuid;
     pub use std::net::SocketAddr;
     pub use serde::{Serialize, Deserialize};
+    use actix::prelude::*;
+    use futures::channel::mpsc as future_mpsc;
+    use tokio::sync::mpsc as tokio_mpsc;
+    use std::{sync::mpsc as std_mpsc, time::Duration};
+    use futures::join as futures_join;
+    use futures_util::join as futures_util_join;
+    use tokio::join as tokio_join;
+    use rayon::join as rayon_join;
 
 
 
@@ -173,9 +204,10 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     
 
     #[derive(Serialize, Deserialize)]
-    pub struct Runtime<S>{ 
+    pub struct Runtime{ 
         pub id: Uuid,
-        pub current_service: Option<S>,
+        pub current_service: Option<Service>,
+        pub next_service: Option<Recipient<Communicate>>, //-- nexe service
         pub link_to_server: Option<LinkToService>, //-- we've just saved the location address of the current service inside the memory
         pub error: Option<AppError>, //-- any runtime error caused either by the runtime itself or the storage crash
         pub node_addr: Option<SocketAddr>, //-- socket address of this node
@@ -184,6 +216,37 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
     }
     
 
+
+
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    //                      RAFAEL ACTOR
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    #[derive(Message)]
+    #[rtype(result = "()")] //-- response type
+    pub struct Communicate{ //-- parathread sends this message to a parachain
+        pub id: Uuid,
+        pub cmd: String,
+    }
+
+    impl Actor for Runtime {
+        type Context = Context<Runtime>;
+        fn started(&mut self, ctx: &mut Self::Context){ //-- this function body will run once a parachain has been started
+            let addr = ctx.address(); //-- getting the address of the this parachain actor
+            println!("-> {} - runtime actor started", chrono::Local::now().naive_local());
+        }
+    }
+
+    impl Handler<Communicate> for Runtime { //-- implementing a Handler for Communicate event to send commands or messages to another parachain actor like issuing a smart contract event
+        type Result = ();
+        fn handle(&mut self, msg: Communicate, ctx: &mut Context<Self>) -> Self::Result{
+            println!("-> {} - message info received with id [{}] and content [{}]", chrono::Local::now().naive_local(), msg.id, msg.cmd);
+            ctx.run_later(Duration::new(0, 100), move |act, _| { //-- wait 100 nanoseconds                
+                let _ = act.next_service.as_ref().unwrap().send(Communicate { id: Uuid::new_v4(), cmd: "communicating with another parachain".to_string() }); //-- as_ref() converts &Option<T> to Option<&T> - sending a message to another service in the background (unless we await on it) is done through the service address and defined Message event or message
+            });
+        }
+    }
 
 
 
@@ -215,14 +278,16 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
         fn storage_usage(&self) -> u64; //-- no need to add &mut self for the first param since we want to return the total used bytes 
         fn storage_byte_cost(&self) -> Self::Cost; //-- no need to add &mut self for the first param since we want to return the total cost of the total used bytes
         fn current_timestamp(&self) -> u64; //-- current runtime timestamp in nanoseconds
-        fn init(&self) -> Self::App; //-- initialize the whole app for the first time; this method will panic on second call      
+        fn init(&self) -> Self::App; //-- initialize the whole app for the first time; this method will panic on second call
+        fn health(&self) -> Self;
+
     }
 
 
 
-    impl<S> Serverless for Runtime<S>{
+    impl Serverless for Runtime{
 
-        type Service = S; //-- S is the type of the passed in service for building the Runtime 
+        type Service = Service;  
         type App     = String; 
         type Cost    = u128; 
 
@@ -230,6 +295,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             Self{
                 id: Uuid::new_v4(),
                 current_service: None,
+                next_service: None,
                 link_to_server: None,
                 error: None,
                 node_addr: None,
@@ -254,6 +320,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             Self{
                 id: Uuid::new_v4(),
                 current_service: None,
+                next_service: None,
                 link_to_server: None,
                 error: None,
                 node_addr: None,
@@ -264,6 +331,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
         fn schedule(&self) -> Self{
 
+            // NOTE - actors are objects that contains busty threads inside to solve incoming tasks in multiple threads and send message between other actors
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc (over http2, ws and tcp) calls like near protocol
             // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
@@ -377,6 +445,15 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             // ...
 
             todo!()
+        }
+
+        fn health(&self) -> Self {
+            
+            // TODO - check the healthiness of the serverless runtime
+            // ...
+
+            todo!()
+
         }
 
     }
