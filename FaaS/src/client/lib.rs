@@ -87,7 +87,7 @@ pub struct RafaelRuntime{
 impl RafaelRuntime{
     
 
-
+    // NOTE - we can use following modules to compile rust code into wasm files to run the inside the browsers 
     // https://sycamore-rs.netlify.app/
     // https://github.com/seed-rs/seed
     // https://github.com/yewstack/yew

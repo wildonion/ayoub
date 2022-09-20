@@ -59,6 +59,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
     /////////////////////////////////////////////////////////////////////////////////////
 
     ////////
+    // NOTE - above operation is so expensive due to this fact : https://mongodb.github.io/mongo-rust-driver/manual/performance.html#lifetime
     // NOTE - only the request object must be passed through each handler
     // NOTE - shared state which will be available to every route handlers is the app_storage which must be Send + Syn + 'static to share between threads
     // NOTE - currently we're sharing the db instance between routers' threads from the main.rs instead of inside event router

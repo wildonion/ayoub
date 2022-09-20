@@ -16,12 +16,11 @@ use rt::env;
 fn main(){
 
 
-
-    // TODO - calling between two wasm files using actors 
-    //        every wasm file is an actor in which one of 
-    //        its method can be called by another wasm file or actor
     // NOTE - wasi doesn't support threads and async methods runtimes like tokio  
     // ... 
+
+    // every runtime contains an specific service which can be compiled to the wasm 
+    // every runtime has its own serverless methods which can be called by another wasm file or service
 
     let rt = env::Runtime::<env::Service>{
         id: env::Uuid::new_v4(),

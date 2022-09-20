@@ -222,7 +222,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
 
     impl<S> Serverless for Runtime<S>{
 
-        type Service = S;
+        type Service = S; //-- S is the type of the passed in service for building the Runtime 
         type App     = String; 
         type Cost    = u128; 
 
@@ -278,7 +278,7 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             //        must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
-            // TODO - build a protocol based on binary address to transmit data between actors using mpsc tunnel
+            // TODO - build a protocol based on binary address to transmit data between actors using mpsc tunnel like onionary://0001010101:2349
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
             // ....  
             // ....
@@ -298,7 +298,8 @@ pub mod env{ //-- rafael env functions to mutate the state of the runtime object
             //                  .transfer(3) //-- this is the amount that must gets transferred to the second service
             //                  .run_in_parallel()
             //                  .then(self.callback()); //-- wait to solve the future
-            // let resp = self.current_service.send(msg).to(another_serivce).await; //-- msg must be a json stringified in form "{ \"key\": \"value\" }" like "{ \"amount\": \"5\" }" which can be decoded in destination service 
+            // NOTE - calling between two wasm files (since every wasm file is a service) is done like the following since every wasm file is an actor which can send message through mpsc channel to another actor or wasm file or service based on their unique address
+            // let resp = self.current_service.send(msg).to(another_serivce).await; //-- msg must be a json stringified in form "{ \"key\": \"value\" }" like "{ \"storage_cost\": \"5\" }" which can be decoded in destination service 
 
             todo!()
 
