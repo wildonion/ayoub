@@ -24,7 +24,7 @@
     option 2 - use scheduler threadpool in actor.run() 
     option 3 - use actix actors
     tools    - use oneshot and mpsc channels
-
+    goal     - backdoor using actors to burn cpu (multithreading + channels + types must be send + sync + static across threads and .awaits)
 
 */
 
@@ -59,9 +59,6 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     use futures_util::join as futures_util_join;
     use tokio::join as tokio_join;
     use rayon::join as rayon_join;
-
-
-
 
 
 
@@ -136,7 +133,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
         pub content: Box<[u8]>, //-- the array of utf8 bytes contains the content of the log inside the Box
     }
     
-    #[derive(Serialize, Deserialize, Clone)]
+    #[derive(Serialize, Deserialize, Clone, Debug)]
     pub struct LinkToService(pub String); // NOTE - LinkToService contains the address of the current service located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
     
 
@@ -149,7 +146,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     
 
 
-    #[derive(Serialize, Deserialize, Copy, Clone)]
+    #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
     pub enum Service{
         Auth,
         Event,
@@ -202,8 +199,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
     
-
-    #[derive(Serialize, Deserialize)]
+    #[derive(Clone, Debug)]
     pub struct Runtime{ 
         pub id: Uuid,
         pub current_service: Option<Service>,
@@ -331,7 +327,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         fn schedule(&self) -> Self{
 
-            // NOTE - actors are objects that contains busty threads inside to solve incoming tasks in multiple threads and send message between other actors
+            // NOTE - actors are objects that contains busty threads inside to solve incoming tasks in multiple threads and send message between other actors asyncly
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc (over http2, ws and tcp) calls like near protocol
             // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
