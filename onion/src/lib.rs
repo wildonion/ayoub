@@ -530,6 +530,20 @@ pub fn trash(){
 
 	    }
 
+        pub fn run() -> impl std::future::Future<Output=u8>{ //-- implementing the Future trait for the return type of the function by doing this we have to return an async block from the function
+            async move{ //-- returning an async block from the function
+                26
+            }
+
+            // let res = run.await;
+        }
+
+        pub async fn _run() -> u8{ //-- above implementation is equivalent to this one 
+            26
+
+            // let res = run.await;
+        }
+
 	}
 	
 

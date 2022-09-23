@@ -59,11 +59,11 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 
     #[derive(Serialize, Deserialize, Debug)]
-    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...RuntimeLog_instance...}, {...ServerlessLog_instance...}]} or {"event": "serverless", "data": [{...ServerlessLog_instance...}, {...ServerlessLog_instance...}]}
+    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...RuntimeLog_instance...}, {...ServerlessActorLog_instance...}]} or {"event": "serverless", "data": [{...ServerlessActorLog_instance...}, {...ServerlessActorLog_instance...}]}
     #[serde(rename_all="snake_case")] //-- will convert all fields into snake_case
     pub enum EventVariant{
         Runime(Vec<RuntimeLog>),
-        Serverless(Vec<ServerlessLog>),
+        ServerlessActor(Vec<ServerlessActorLog>),
     }
 
 
@@ -72,12 +72,12 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     pub struct EventLog{ //-- an interface to capture the data about and event - this is the EVENT_JSON
         pub time: Option<i64>, //-- the time of the event data log
         #[serde(flatten)] //-- flatten to not have "event": {<EventVariant>} in the JSON, just have the contents of {<EventVariant>} which is the value of the data key itself - we can use #[serde(flatten)] attribute on a field of a struct or enum in those cases that we don't know about the number of exact fields inside the struct or enum or what's exactly inside the body of an api comming from the client to decode or map it into the struct or enum thus we can use this attribute to hold additional data that is not captured by any other fields of the struct or enum
-        pub event: EventVariant, //-- the data which is a vector of all either Serverless or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
+        pub event: EventVariant, //-- the data which is a vector of all either ServerlessActor or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessActorLog_instance...}]}
     }
 
 
 
-    impl fmt::Display for EventLog{ //-- implementing the Display trait for the EventLog struct to show its instances' fields like EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]} when we're calling logging functions like println!() which is a formatted stream of strings - any value or type that implements the Display trait can be passed to format_args!() macro, as can any Debug implementation be passed to a {:?} within the formatting string; Debug must be implemented for the type
+    impl fmt::Display for EventLog{ //-- implementing the Display trait for the EventLog struct to show its instances' fields like EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessActorLog_instance...}]} when we're calling logging functions like println!() which is a formatted stream of strings - any value or type that implements the Display trait can be passed to format_args!() macro, as can any Debug implementation be passed to a {:?} within the formatting string; Debug must be implemented for the type
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
             f.write_fmt( //-- writing some formatted information using format_args!() macro into the formatter instance which is `f`
                 format_args!( //-- format_args!(), unlike its derived macros, avoids heap allocations
@@ -103,7 +103,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
-    pub struct ServerlessLog{ // TODO - initialize this inside the main() function
+    pub struct ServerlessActorLog{ // TODO - initialize this inside the main() function
         pub id: u8,
         pub path: String, //-- the path of the log file in server with lifetime 'p
         pub method: String, //-- the method name that the log data is captured for
@@ -231,7 +231,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     //              RAFAEL SERVERLESS METHODS
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    pub trait Serverless{ /////// a functional Serverless trait for Runtimes - this trait is not object safe trait since we're returning the self and Self in method param and the returning signature 
+    pub trait ServerlessActor{ /////// a functional ServerlessActor trait for Runtimes - this trait is not object safe trait since we're returning the self and Self in method param and the returning signature 
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
@@ -260,7 +260,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
 
-    impl Serverless for Runtime{
+    impl ServerlessActor for Runtime{
 
         type Service = Service;  
         type App     = String; 
@@ -309,6 +309,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // NOTE - actors are objects that contains busty threads inside to solve incoming tasks in multiple threads and send message between other actors asyncly
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc (over http2, ws and tcp) calls like near protocol
+            // TODO - use multithreading, channels (oneshot and mpsc) and cryptography algos and also types must be send + sync + static across threads and .awaits
             // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
             // TODO - every receipt is a transaction with a specific id which will be created by scheduling an ActionReceipt 
