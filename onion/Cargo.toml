@@ -1,5 +1,5 @@
 [package]
-name = "tests"
+name = "onion"
 version = "0.1.0"
 edition = "2021"
 
@@ -17,7 +17,7 @@ uuid = { version = "1", features = ["serde", "v4"] }
 
 
 [[bin]]
-name = "tests"
+name = "onion"
 path = "src/main.rs"
 
 

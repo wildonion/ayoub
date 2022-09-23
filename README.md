@@ -8,7 +8,7 @@
 
 > coiniXerr: ```cargo run --bin coiniXerr```
 
-> tests: ```cargo run --bin tests```
+> onion: ```cargo run --bin onion```
 
 # ☣️ Build for Production
 
@@ -16,7 +16,7 @@
 
 > coiniXerr: ```cargo build --bin coiniXerr --release```
 
-> tests: ```cargo build --bin tests --release```
+> onion: ```cargo build --bin onion --release```
 
 # 🗒 Notes
 

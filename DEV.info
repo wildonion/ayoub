@@ -31,6 +31,7 @@ https://bparli.medium.com/adventures-in-rust-and-load-balancers-73a0bc61a192
 https://dzone.com/articles/rust-based-load-balancing-proxy-server-with-async
 https://truelayer.com/blog/grpc-load-balancing-in-rust
 https://medium.com/load-balancer-series/writing-a-http-load-balancer-in-python-using-tdd-theoretical-concepts-fb6dab3e879b
+https://kemptechnologies.com/load-balancer/load-balancing-algorithms-techniques
 https://doc.rust-lang.org/nightly/rust-by-example/unsafe/asm.html
 https://blog.cloudflare.com/pin-and-unpin-in-rust/
 https://fasterthanli.me/articles/pin-and-suffering
@@ -141,7 +142,7 @@ with divide and conquer algorithm to feed into the actix actors (processor will 
 NOTE - we'll divide the sequential data into tasks using divide and conquer algo which will be an async job or a task is a closure with async body which contains heavy computation on some mutable Arc<Mutex<Data>> like querying a db thus every job must get solved in separate thread by joining its scheduled thread containing the job in parallel to the executor and we can communicate between threads of objects using message passing channels like mpsc
 NOTE - threadpool app examples: sharding based app like blockchains, actix actors, rayon for simultaneous heavy computations and its wasm bindgen which is handled by the simd design pattern, image processing and 3d design apps
 NOTE - it seems that a thread can handle so many task at a time but it's a false fact; due to avoiding dealock and data race condition every single thread can handle a task of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) at a time but it'll done so fast which it seems that it can handle some many tasks at a time
-
+NOTE - a load balancer will spread the incoming requests from the clients to server nodes and istances based on network infrastructure and server loads
 
 
 
@@ -154,7 +155,7 @@ TECH BUILDER BASED ON multi threading (job queue), Arc<Mutex<T>> (use Arc::new(&
 TODO - object storage like MinIO and S3
 TODO - ayoub paas and faas cli like dockerizing, async file handling and ...
 TODO - download/upload manager like IDM/tus.io
-TODO - load balancer for coiniXerr for layer 1 and 2
+TODO - load balancer using cpu scheduling algos like round robin and weighted round robin for ayoub on layer 1 and 2 (every server instance can handle 144000 requests per second so with our load balance we must be able to spread the requests between each server node efficiently)
 TODO - video codec ((de)compression or (de)serializing) like ffmepg or gstreamer
 TODO - add p2p based JSON-RPC over HTTP2, ws and tcp for coiniXerr network inside apis/rpc folder
 TODO - p2p music player, voice and video streaming based on message brokers like rabbitmq and pub-sub (producer(s)-consumer(s)) and message passing channel protocols like mpsc pattern and k8s

@@ -2,31 +2,6 @@
 
 
 
-/*
-    
-
-    -> shared data state between threads: always borrow in iterating and passing into new scope since rust doesn’t obey any 
-    garbage collection rule And In order to pass and share a reference of the encoded 
-    type (borsh/serde) between threads the type must be send sync and static across threads
-    -> async await | generic, box with traits and lifetime and borrowing and ownership (garbage collection no!)
-    
-    
-    
-
-    https://procmarco.netlify.app/blog/2021-05-04-a-story-about-async-rust-and-using-send-types/
-    https://ryhl.io/blog/actors-with-tokio/
-    https://ryhl.io/blog/async-what-is-blocking/
-    https://crates.io/crates/rayon
-
-
-
-    option 1 - use tokio::spawn() in actor.run()
-    option 2 - use scheduler threadpool in actor.run() 
-    option 3 - use actix actors
-    tools    - use oneshot and mpsc channels
-    goal     - backdoor using actors to burn cpu (multithreading + channels + types must be send + sync + static across threads and .awaits)
-
-*/
 
 
 
@@ -39,6 +14,10 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     
     
+    // https://procmarco.netlify.app/blog/2021-05-04-a-story-about-async-rust-and-using-send-types/
+    // https://ryhl.io/blog/actors-with-tokio/
+    // https://ryhl.io/blog/async-what-is-blocking/
+    // https://crates.io/crates/rayon
     // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module for promises or futures
     // TODO - a register contains the current buffer inside the ram related to the passed in id means we have to read the buffer from inside of it related to the passed in id
     // TODO - we have to read the content of a specific register and save it inside a buffer 

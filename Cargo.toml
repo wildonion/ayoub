@@ -5,5 +5,5 @@ members = [
     "PaaS/src/wasi/src/client/",
     "PaaS",
     "coiniXerr",
-    "tests",
+    "onion",
 ]
