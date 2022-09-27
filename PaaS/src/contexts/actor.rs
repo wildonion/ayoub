@@ -30,7 +30,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     pub use uuid::Uuid;
     pub use std::net::SocketAddr;
     pub use serde::{Serialize, Deserialize};
-    use actix::prelude::*;
+    use actix::prelude::*; //-- for actor codes
     use futures::channel::mpsc as future_mpsc;
     use tokio::sync::mpsc as tokio_mpsc;
     use std::{sync::mpsc as std_mpsc, time::Duration};
@@ -54,7 +54,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    //          RAFAEL DATA STRUCTURES & FUNCTIONS
+    //                RAFAEL DATA STRUCTURES
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 
@@ -147,36 +147,6 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     }
 
 
-
-
-    pub fn future_result(idx: u64) -> FutureResult{
-        
-        // TODO - 
-        // ...
-        // match super::env::future_get_result_of(idx){ // TODO - future_get_result_of() function must return Result<FutureResult, FutureError>
-        //     Err(FutureResult::Pending) => FutureResult::Pending,
-        //     Err(FutureResult::Failed) => FutureResult::Failed,
-        //     Ok(()) => {
-        //         let data = super::env::expect_register(read_register(ATOMIC_OP_REGISTER));
-        //         FutureResult::Successful(data)
-        //     } 
-        // }
-        
-        todo!()
-    }
-
-
-
-
-    pub fn current_caller() -> SocketAddr{
-        
-        // TODO - return the socket address of the caller of a method for handling method call costs
-        // ...
-
-        todo!()
-    }
-
-
     
     #[derive(Clone, Debug)]
     pub struct Runtime{ 
@@ -200,7 +170,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     #[derive(Message)]
     #[rtype(result = "()")] //-- response type
-    pub struct Communicate{ //-- parathread sends this message to a parachain
+    pub struct Communicate{ //-- current service sends this message to the next service
         pub id: Uuid,
         pub cmd: String,
     }
@@ -218,7 +188,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
         fn handle(&mut self, msg: Communicate, ctx: &mut Context<Self>) -> Self::Result{
             println!("-> {} - message info received with id [{}] and content [{}]", chrono::Local::now().naive_local(), msg.id, msg.cmd);
             ctx.run_later(Duration::new(0, 100), move |act, _| { //-- wait 100 nanoseconds                
-                let _ = act.next_service.as_ref().unwrap().send(Communicate { id: Uuid::new_v4(), cmd: "communicating with another parachain".to_string() }); //-- as_ref() converts &Option<T> to Option<&T> - sending a message to another service in the background (unless we await on it) is done through the service address and defined Message event or message
+                let _ = act.next_service.as_ref().unwrap().send(Communicate { id: Uuid::new_v4(), cmd: "communicating with another runtime".to_string() }); //-- as_ref() converts &Option<T> to Option<&T> - sending a message to another service in the background (unless we await on it) is done through the service address and defined Message event or message
             });
         }
     }
@@ -255,6 +225,8 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
         fn current_timestamp(&self) -> u64; //-- current runtime timestamp in nanoseconds
         fn init(&self) -> Self::App; //-- initialize the whole app for the first time; this method will panic on second call
         fn health(&self) -> Self;
+        fn caller(&self) -> SocketAddr; //-- the current caller of one of the ServerlessActor trait methods
+        fn future_result(&self, idx: u64) -> FutureResult; //-- getting the result of the passed in future id
 
     }
 
@@ -306,6 +278,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         fn schedule(&self) -> Self{
 
+            // NOTE - shared data state between threads: always borrow in iterating and passing into new scope since rust doesn’t obey any garbage collection rule And In order to pass and share a reference of the encoded type (borsh/serde) between threads the type must be send sync and static across threads
             // NOTE - actors are objects that contains busty threads inside to solve incoming tasks in multiple threads and send message between other actors asyncly
             // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
             // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc (over http2, ws and tcp) calls like near protocol
@@ -360,10 +333,10 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // -------------
             // if let syntax
             // -------------
-            let fut_res = if let FutureResult::Successful(encoded_result) = super::env::future_result(0){ //-- getting the result of the future object only if it was successful
+            let fut_res = if let FutureResult::Successful(encoded_result) = self.future_result(0){ //-- getting the result of the future object only if it was successful
                 // TODO - deserialize the result of the executed future object into a pre defined structure
                 // ... 
-            } else if let FutureResult::Failed = super::env::future_result(0){
+            } else if let FutureResult::Failed = self.future_result(0){
                 
             } else{
 
@@ -373,7 +346,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // -------------
             // match pattern
             // -------------
-            match super::env::future_result(0){
+            match self.future_result(0){
                 FutureResult::Successful(data) => {
                     
                 },
@@ -430,6 +403,30 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
             todo!()
 
+        }
+        
+        fn caller(&self) -> SocketAddr{
+        
+            // TODO - return the socket address of the caller of a method for handling method call costs
+            // ...
+    
+            todo!()
+        }
+
+        fn future_result(&self, idx: u64) -> FutureResult{
+        
+            // TODO - 
+            // ...
+            // match super::env::future_get_result_of(idx){ // TODO - future_get_result_of() function must return Result<FutureResult, FutureError>
+            //     Err(FutureResult::Pending) => FutureResult::Pending,
+            //     Err(FutureResult::Failed) => FutureResult::Failed,
+            //     Ok(()) => {
+            //         let data = super::env::expect_register(read_register(ATOMIC_OP_REGISTER));
+            //         FutureResult::Successful(data)
+            //     } 
+            // }
+            
+            todo!()
         }
 
     }

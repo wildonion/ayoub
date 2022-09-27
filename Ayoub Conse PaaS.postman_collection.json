@@ -236,6 +236,44 @@
 						"description": "⚠️ ***This API needs Dev Access Level.***"
 					},
 					"response": []
+				},
+				{
+					"name": "Edit Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJfaWQiOnsiJG9pZCI6IjYzMGIyMGI2ZmE5OWYwOWNlZTk3YzUxYiJ9LCJ1c2VybmFtZSI6ImJsdWVhc2giLCJhY2Nlc3NfbGV2ZWwiOjAsImV4cCI6MTY5MzIxNDk4NCwiaWF0IjoxNjYxNjc4OTg0fQ.y3RY-iyTVNGWBXm9ariFZ_y-4Yslf6PXlmZ-zi_JpPk463DWkWJviRCXjtH9fU80gSvolqimLex-B1URgBpgqw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"wildonion\",\r\n    \"phone\": \"09211686115\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth}}/auth/edit-profile",
+							"host": [
+								"{{auth}}"
+							],
+							"path": [
+								"auth",
+								"edit-profile"
+							]
+						},
+						"description": "⚠️ _**This API needs God, Dev or Player Access Level.**_"
+					},
+					"response": []
 				}
 			]
 		},
@@ -1947,7 +1985,7 @@
 								{
 									"key": "group_image",
 									"type": "file",
-									"src": "/C:/Users/lenovo/Pictures/google-tasks.png"
+									"src": []
 								}
 							]
 						},

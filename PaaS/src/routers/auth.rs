@@ -41,7 +41,7 @@ use crate::controllers::auth::{
                                _404::main as not_found, 
                                otp_request::main as otp_request, 
                                check_otp::main as check_otp,
-                               user::get_all
+                               user::{get_all, edit_profile}
                             };
 
 
@@ -92,6 +92,7 @@ pub async fn register() -> Router<Body, hyper::Error>{
         .post("/check-token", check_token)
         .post("/otp-req", otp_request)
         .post("/check-otp", check_otp)
+        .post("/edit-profile", edit_profile)
         .post("/user/get/all", get_all)
         .any(not_found) //-- handling 404 request
         .build()

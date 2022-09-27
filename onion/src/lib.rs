@@ -569,7 +569,7 @@ pub fn trash(){
     }
 
     type Boxy8<'a> = Box<&'a String>; //-- we have to store a pointer to the String inside this Box with a valid lifetime of 'a 
-    type Boxed = Box<dyn FnMut() + 'static>; //-- we must bound the type that wants to be a pointer or to be a referenced from a heap location like FnMut() closure to a valid lifetime like 'static
+    type Boxed = Box<dyn FnMut() + 'static + Send + Sync>; //-- Boxed type can be shared between threads and .awaits safely - we must bound the type that wants to be a pointer or to be a referenced from a heap location like FnMut() closure to a valid lifetime like 'static
     let var: Boxed = Box::new(||{}); //-- since the Some trait is implemented for Boxed type we can call the run() method on the isntance of this type also the closure is bounded to a static lifetime
 
     fn call<'a>(a: &'a mut Boxed) -> Boxed where Boxed: Some + 'a { //-- in order to bind the Boxed to Some trait the Some trait must be implemented for the Boxed - can't bound a lifetime to a self-contained type means we can't have a: u32 + 'static

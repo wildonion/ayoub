@@ -160,7 +160,8 @@ TODO - video codec ((de)compression or (de)serializing) like ffmepg or gstreamer
 TODO - add p2p based JSON-RPC over HTTP2, ws and tcp for coiniXerr network inside apis/rpc folder
 TODO - p2p music player, voice and video streaming based on message brokers like rabbitmq and pub-sub (producer(s)-consumer(s)) and message passing channel protocols like mpsc pattern and k8s
 TODO - coiniXerr hash for a transaction and transaction signature, block and merkle root and wallet address using Argon2
-TODO - an event streaming platform like VoD protocol like arvancloud based for streaming over video chunks using ffmpeg and gstreamer in rust based on hls which is an adaptive bitrate method 
+TODO - an event streaming platform like VoD and FoD protocol like arvancloud based for streaming over video (Vod) chunks using ffmpeg and gstreamer in rust based on hls which is an adaptive bitrate method 
         - convert uploaded videos to hls for multi bitrate conversion
         - create an endpoint api to point where the hls is
         - call the api to load in html5 video tag
+        - a file on demand protocol to upload files and return their id

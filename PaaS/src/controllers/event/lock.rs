@@ -84,7 +84,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             None => { //-- means we didn't find any document related to this title and we have to tell the user to create a new event
                                                 let response_body = ctx::app::Response::<ctx::app::Nill>{ //-- we have to specify a generic type for data field in Response struct which in our case is Nill struct
                                                     data: Some(ctx::app::Nill(&[])), //-- data is an empty &[u8] array
-                                                    message: NOT_FOUND_DOCUMENT, //-- document not found in database and the user must do a signup
+                                                    message: NOT_FOUND_DOCUMENT,
                                                     status: 404,
                                                 };
                                                 let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body

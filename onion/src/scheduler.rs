@@ -57,7 +57,6 @@
 
 
 use uuid::Uuid;
-use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
 use std::thread;
 use std::sync::{mpsc as std_mpsc, Mutex, Arc};
 

@@ -372,6 +372,20 @@ pub struct UserInfo{ // NOTE - those Option values can be None tho
 
 
 /*
+  ------------------------------------------------------------------------------------------------
+| this struct will be used to deserialize user edit profile info json from client into this struct
+| ------------------------------------------------------------------------------------------------
+|
+|
+*/
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+pub struct EditProfile{ // NOTE - those Option values can be None tho
+    pub username: String,
+    pub phone: String,
+}
+
+
+/*
   ----------------------------------------------------------------------------------------------------
 | this struct will be used to put all available users in it and serialize as json to send back to user
 | ----------------------------------------------------------------------------------------------------
