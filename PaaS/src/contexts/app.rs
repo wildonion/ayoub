@@ -25,9 +25,10 @@ use log::{info, error};
 
 
 
-
+//// future objects must be Send and static and types that must be shared between threads must be send sync and static 
+//// Box<dyn Future<Output=Result<u8, 8u>> + Send + Sync + 'static> means this future can be sharead acorss threads and .awaits safely
 type Callback = Box<dyn 'static + FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T - the closure inside the Box is valid as long as the Callback is valid due to the 'static lifetime and will never become invalid until the variable that has the Callback type drop
-type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
+type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
 
 unsafe impl Send for Api{}
 unsafe impl Sync for Api {}

@@ -23,12 +23,6 @@ Coded by
                       ░                                                  
 
 
-                      
-    Server Design Pattern Idea: https://github.com/hyperium/hyper/tree/master/examples
-    Return Pointer from Functions Explanation: https://stackoverflow.com/a/57894943/12132470
-    Return Pointer to a Structure Explanation: https://stackoverflow.com/questions/37789925/how-to-return-a-newly-created-struct-as-a-reference
-    Rust Docs Gathered by wildonion: https://github.com/wildonion/extrust/tree/master/_docs
-
 
 
 */
@@ -49,13 +43,13 @@ use dotenv::dotenv;
 use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;
-use hyper::server::{Server, conn::AddrIncoming};
+use hyper::server::Server;
 use self::contexts as ctx; // use crate::contexts as ctx;
 
 
 
 
-
+mod protocols;
 mod middlewares;
 mod utils;
 mod constants;

@@ -391,7 +391,7 @@ pub fn trash(){
 
 	impl<'a, Pack: Interface + 'a> Into<Vec<u8>> for Unpack<'a, Pack, SIZE>{ //-- based on orphan rule we have to import the trait inside where the struct is or bound the instance of the struct into the Into trait in function calls - we wanto to return the T inside the wrapper thus we can implement the Into trait for the wrapper struct which will return the T from the wrapper field
 	    fn into(self) -> Vec<u8> {
-		self.arr.to_vec()
+            self.arr.to_vec()
 	    }
 	}
 
@@ -440,6 +440,8 @@ pub fn trash(){
                 age: 26,
             };
 
+
+            let User{username, age} = user; //-- unpacking struct
 
             let hello = "Здравствуйте";
             let s = &hello[0..2];

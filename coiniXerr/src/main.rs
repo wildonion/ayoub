@@ -48,9 +48,8 @@
 
 use log::info;
 use tokio::net::{TcpListener, TcpStream}; //-- async tcp listener and stream
-use tokio::io::{AsyncReadExt, AsyncWriteExt}; //-- read from the input and write to the output - AsyncReadExt and AsyncWriteExt are traits which are implemented for an object of type TcpStream and based on orphan rule we must use them here to use the read() and write() method implemented for the object of TcpStream
+use tokio::io::{AsyncReadExt, AsyncWriteExt}; //-- read from the input and write to the output - AsyncReadExt and AsyncWriteExt are traits which are implemented for an object of type TcpStream and based on orphan rule we must use them here to use the read() and write() method asyncly which has been implemented for the object of TcpStream (these trait have been implemented for TcpStream structure)
 use tokio::sync::mpsc; //-- to share values between multiple async tasks spawned by the tokio spawner which is based on green threads so shared state can be change only one at a time inside a thread 
-use listenfd::ListenFd;
 use uuid::Uuid;
 use std::{fmt::Write, num::ParseIntError};
 use std::sync::{Arc, Mutex, mpsc as std_mpsc}; //-- communication between threads is done using mpsc job queue channel and end of the channel can only be owned by one thread at the time to avoid dead lock, however the sender half can be cloned and through such cloning the conceptual sender part of a channel can be shared among threads which is how you do the multi-producer, single-consumer part
@@ -62,34 +61,25 @@ use std::net::SocketAddr; //-- these structures are not async; to be async in re
 use std::collections::{HashMap, HashSet};
 use dotenv::dotenv;
 use actix::{*, prelude::*}; //-- loading actix actors and handlers for validator actor's threads communication using their address and defined events 
-use actix_web::{http::StatusCode, App, HttpServer, HttpRequest, middleware, web, get, post, Error, HttpResponse};
-use apis::rest::wallet::routes as coin_routes;
 use crate::actors::{parathread::{Parachain, Communicate}, peer::{Validator, Contract}};
 use crate::utils::scheduler;
 use crate::schemas::{Transaction, RuntimeInfo, MetaData, Block, Slot, Chain, Staker};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
-use crate::utils::res::ResponseBody; 
 use futures::{Future, StreamExt}; //-- a trait for streaming utf8 bytes data
 use tokio::sync::mpsc::Sender;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
 use borsh::{BorshDeserialize, BorshSerialize};
-// use crate::constants;
 
 
 
 
 
-
-// ------------------------------------------------------
-// loading all modules to use their functions and structs
-// ------------------------------------------------------ 
 mod constants;
 mod schemas;
 mod actors;
 mod engine;
 mod utils;
-mod apis;
 
 
 
@@ -102,14 +92,12 @@ mod apis;
 
 
 
-// #[tokio::main]
-#[actix_web::main] //-- await is only allowd inside an async function due to this reason we're using the actix_web as an event loop based runtime under the hood on top of tokio to make the main() function as an async one
-async fn main() -> std::io::Result<()>{
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //// bounding the type that is caused to error to Error, Send and Sync traits to be shareable between threads and have static lifetime across threads and awaits
     
 
 
     
-
 
 
 
@@ -289,7 +277,7 @@ async fn main() -> std::io::Result<()>{
                     // ---------------------------------------------------------------------------------------
                     let deserialized_transaction_union = Transaction::new(&transaction_buffer_bytes[0..size]).unwrap(); //-- decoding process of incoming transaction - deserializing a new transaction bytes into the Transaction struct object using TransactionMem union
                     let deserialized_transaction_serde = &mut serde_json::from_slice::<Transaction>(&transaction_buffer_bytes[0..size]).unwrap(); //-- decoding process of incoming transaction - deserializing a new transaction bytes coming from the steamer into a mutable Transaction object using serde_json::from_slice to mutate the signed field 
-                    let deserialized_transaction_borsh = &mut Transaction::try_from_slice(&transaction_buffer_bytes[0..size]).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method
+                    let deserialized_transaction_borsh = &mut Transaction::try_from_slice(&transaction_buffer_bytes[0..size]).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method; since we want to sign the transaction thus we must define it as mutable
                     let mut transaction_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&deserialized_transaction_serde).unwrap(); //-- converting the deserialized_transaction_serde object into vector of utf8 bytes using serde
                     let mut transaction_serialized_into_vec_bytes_using_borsh = deserialized_transaction_borsh.try_to_vec().unwrap(); //-- converting the transaction object into vector of utf8 bytes using borsh
                     // TODO - only if the downside of the mpsc job queue channel was available the transaction will be signed and sent through the mempool channel to be pushed inside a block for mining process
@@ -300,11 +288,15 @@ async fn main() -> std::io::Result<()>{
                         //              SIGNING THE INCOMING TRANSACTION WITH SERVER TIME
                         // ----------------------------------------------------------------------
                         println!("-> {} - signing incoming transaction", chrono::Local::now().naive_local());
-                        deserialized_transaction_borsh.signed = Some(chrono::Local::now().naive_local().timestamp()); //-- signing the incoming transaction with server time
+                        deserialized_transaction_borsh.signed = Some(chrono::Local::now().naive_local().timestamp()); //-- signing the incoming transaction with the current server time
                         // ----------------------------------------------------------------------
                         //         CODING SIGNED TRANSACTION THEN SENDING BACK TO THE PEER
                         // ----------------------------------------------------------------------
-                        // TODO - >>>>>>>>>>> unsafe block for serializing doesn't work like serde <<<<<<<<<<<<
+                        //  ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ 
+                        // ⚈ unsafe block for serializing doesn't work like serde          ⚈
+                        // ⚈ due to the need of padding and memory mapping operations      ⚈
+                        // ⚈ which borsh and serde are handling                            ⚈
+                        //  ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈  
                         // NOTE - encoding or serializing process is converting struct object into utf8 bytes
                         // NOTE - decoding or deserializing process is converting utf8 bytes into the struct object
                         // NOTE - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
@@ -330,7 +322,7 @@ async fn main() -> std::io::Result<()>{
                         println!("-> {} - updating validator actor with the recent signed transaction", chrono::Local::now().naive_local());
                         for (id, md) in cloned_arc_mutex_runtime_info_object.lock().unwrap().0.iter_mut(){ //-- id and md are &mut Uuid and &mut MetaData respectively - we have to iterate over our info_dict mutably and borrowing the key and value in order to update the validator actor transaction of our matched meta_data id with the incoming uuid
                             if id == &generated_uuid{
-                                let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&signed_transaction_serialized_into_bytes).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
+                                let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&utf_bytes_dereference_from_box).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
                                 md.update_validator_transaction(Some(signed_transaction_deserialized_from_bytes)); //-- update the validator actor with a recent signed transaction
                             }
                         }
@@ -338,7 +330,7 @@ async fn main() -> std::io::Result<()>{
                         //      SENDING SIGNED TRANSACTION TO DOWN SIDE OF THE CHANNEL FOR CONSENSUS PROCESS
                         // ---------------------------------------------------------------------------------------
                         println!("-> {} - sending signed transaction to down side of the channel for consensus process", chrono::Local::now().naive_local());
-                        let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&signed_transaction_serialized_into_bytes).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
+                        let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&utf_bytes_dereference_from_box).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
                         let arc_mutex_transaction = Arc::new(Mutex::new(signed_transaction_deserialized_from_bytes)); //-- putting the signed_transaction_deserialized_from_bytes inside a Mutex to borrow it as mutable inside Arc by locking the current thread 
                         let cloned_arc_mutex_transaction = Arc::clone(&arc_mutex_transaction); //-- cloning the arc_mutex_transaction to send it through the mpsc job queue channel 
                         transaction_sender.send(cloned_arc_mutex_transaction).await.unwrap(); //-- sending signed transaction through the mpsc job queue channel asynchronously for mining process
@@ -357,7 +349,7 @@ async fn main() -> std::io::Result<()>{
                     stream.shutdown().await.unwrap(); //-- shuts down the output stream
                     false
                 }
-            } {} //-- it'll return true on its Ok() arm and false on its Err arm
+            } {} //-- the while match must be a block which will return true on its Ok() arm and false on its Err arm
         }); //-- awaiting on tokio::spawn() will block the current task which is running in the background
     }
     /////// ==========--------------==========--------------==========--------------==========--------------==========--------------
@@ -438,38 +430,7 @@ async fn main() -> std::io::Result<()>{
 
 
 
-
-
-    
-
-
-
-
-
-    
-    /////// ==========--------------==========--------------==========--------------==========--------------==========--------------
-    ///////                                                 actix HTTP web server
-    /////// ==========--------------==========--------------==========--------------==========--------------==========--------------
-    let mut listenfd = ListenFd::from_env();
-    let mut server = 
-        HttpServer::new(move || {
-            App::new() // NOTE - we can build the pg pool in here and pass its clone through the .data() actix method
-                .service(
-            web::scope("/coiniXerr")
-                        .app_data(transaction_sender.clone()) //-- clone the transaction_sender to movie it between actix routes and threads 
-                        .app_data(parachain.blockchain.clone().unwrap()) //-- clone the blockchain of the parachain to move it between actix routes and threads
-                        .configure(coin_routes)
-                    )
-                .wrap(middleware::Logger::default())
-        });
-    server = match listenfd.take_tcp_listener(0)?{
-        Some(listener) => server.listen(listener)?,
-        None => {
-            server.bind(format!("{}:{}", host, coiniXerr_http_port))?
-        }
-    };
-    server.run().await
-    /////// ==========--------------==========--------------==========--------------==========--------------==========--------------
+    Ok(())
 
 
 

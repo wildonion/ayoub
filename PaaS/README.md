@@ -1,10 +1,14 @@
-# Usage
+
+# 🏗 Ayoub PaaS
+
+
+### Usage
 
 ```console
 $ sudo chmod +x ayoub.sh && ./ayoub.sh --help
 ```
 
-# 📌 TODOs
+### 📌 TODOs
 
 * complete all TODOs inside the app
 
