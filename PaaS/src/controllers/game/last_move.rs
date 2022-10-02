@@ -70,9 +70,9 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                 Ok(last_move_info) => {
 
 
-                                    let name = last_move_info.clone().name; //-- cloning to prevent from moving
+                                    let name = last_move_info.clone().name; //-- cloning to prevent ownership moving
                                     let rate = last_move_info.rate;
-                                    let desc = last_move_info.clone().desc; //-- cloning to prevent from moving
+                                    let desc = last_move_info.clone().desc; //-- cloning to prevent ownership moving
 
 
 

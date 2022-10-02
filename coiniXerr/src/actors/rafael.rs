@@ -9,6 +9,11 @@
 
 
 
+
+
+
+
+
 pub mod env{ //-- rafael env which contains runtime functions and actors to mutate the state of the runtime object like near-sdk env
 
 
@@ -24,13 +29,12 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
 
-    pub use crate::utils::*;
+    pub use crate::*;
     pub use std::{fmt, env, sync::{Arc, Mutex}};
     pub use borsh::{BorshSerialize, BorshDeserialize};
     pub use uuid::Uuid;
     pub use std::net::SocketAddr;
     pub use serde::{Serialize, Deserialize};
-    use actix::prelude::*; //-- for actor codes
     use futures::channel::mpsc as future_mpsc;
     use tokio::sync::mpsc as tokio_mpsc;
     use std::{sync::mpsc as std_mpsc, time::Duration};
@@ -59,11 +63,11 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
 
     #[derive(Serialize, Deserialize, Debug)]
-    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...RuntimeLog_instance...}, {...ServerlessActorLog_instance...}]} or {"event": "serverless", "data": [{...ServerlessActorLog_instance...}, {...ServerlessActorLog_instance...}]}
+    #[serde(tag="event", content="data")] //-- the deserialized data of the following enum  will be : {"event": "runtime", "data": [{...RuntimeLog_instance...}, {...ServerlessLog_instance...}]} or {"event": "serverless", "data": [{...ServerlessLog_instance...}, {...ServerlessLog_instance...}]}
     #[serde(rename_all="snake_case")] //-- will convert all fields into snake_case
     pub enum EventVariant{
         Runime(Vec<RuntimeLog>),
-        ServerlessActor(Vec<ServerlessActorLog>),
+        Serverless(Vec<ServerlessLog>),
     }
 
 
@@ -72,12 +76,12 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     pub struct EventLog{ //-- an interface to capture the data about and event - this is the EVENT_JSON
         pub time: Option<i64>, //-- the time of the event data log
         #[serde(flatten)] //-- flatten to not have "event": {<EventVariant>} in the JSON, just have the contents of {<EventVariant>} which is the value of the data key itself - we can use #[serde(flatten)] attribute on a field of a struct or enum in those cases that we don't know about the number of exact fields inside the struct or enum or what's exactly inside the body of an api comming from the client to decode or map it into the struct or enum thus we can use this attribute to hold additional data that is not captured by any other fields of the struct or enum
-        pub event: EventVariant, //-- the data which is a vector of all either ServerlessActor or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessActorLog_instance...}]}
+        pub event: EventVariant, //-- the data which is a vector of all either Serverless or Runime variant events - we'll have {"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
     }
 
 
 
-    impl fmt::Display for EventLog{ //-- implementing the Display trait for the EventLog struct to show its instances' fields like EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessActorLog_instance...}]} when we're calling logging functions like println!() which is a formatted stream of strings - any value or type that implements the Display trait can be passed to format_args!() macro, as can any Debug implementation be passed to a {:?} within the formatting string; Debug must be implemented for the type
+    impl fmt::Display for EventLog{ //-- implementing the Display trait for the EventLog struct to show its instances' fields like EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]} when we're calling logging functions like println!() which is a formatted stream of strings - any value or type that implements the Display trait can be passed to format_args!() macro, as can any Debug implementation be passed to a {:?} within the formatting string; Debug must be implemented for the type
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
             f.write_fmt( //-- writing some formatted information using format_args!() macro into the formatter instance which is `f`
                 format_args!( //-- format_args!(), unlike its derived macros, avoids heap allocations
@@ -103,7 +107,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
-    pub struct ServerlessActorLog{ // TODO - initialize this inside the main() function
+    pub struct ServerlessLog{ // TODO - initialize this inside the main() function
         pub id: u8,
         pub path: String, //-- the path of the log file in server with lifetime 'p
         pub method: String, //-- the method name that the log data is captured for
@@ -127,9 +131,9 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
     pub enum Service{
-        Auth,
-        Event,
-        Game,
+        Stake,
+        Deposit,
+        Withdraw,
     }
 
     
@@ -149,17 +153,38 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     
     #[derive(Clone, Debug)]
-    pub struct Runtime{ 
+    pub struct MetaData{ 
         pub id: Uuid,
-        pub current_service: Option<Service>,
-        pub next_service: Option<Recipient<Communicate>>, //-- nexe service
+        pub actor: ActorRef<<actors::peer::Validator as Actor>::Msg>, //-- validator actor with the mailbox of type Msg; aslo Validator actor should implements the Debug and Clone trait also
         pub link_to_server: Option<LinkToService>, //-- we've just saved the location address of the current service inside the memory
         pub error: Option<AppError>, //-- any runtime error caused either by the runtime itself or the storage crash
         pub node_addr: Option<SocketAddr>, //-- socket address of this node
         pub last_crash: Option<i64>, //-- last crash timestamp
         pub first_init: Option<i64>, //-- first initialization timestamp 
     }
+
+    impl MetaData{
+        pub fn update_validator_transaction(&mut self, transaction: Option<Transaction>){ //-- updating the recent_transaction field of the validator actor is done using a mutable borrower (pointer) as the parameter of the update_validator_transaction() method 
+            self.actor.tell(actors::peer::UpdateTx{id: Uuid::new_v4(), tx: transaction}, None); //-- telling the validator actor that we want to update the last transaction of this validator
+        }
+    }
     
+    #[derive(Debug, Clone)]
+    pub struct Runtime(pub HashMap<Uuid, MetaData>); //-- MetaData struct should implements the Debug and Clone trait also
+
+    impl Runtime{
+
+        pub fn new() -> Self{
+            Runtime(HashMap::new())
+        }
+    
+        pub fn add(mut rti: Self, meta_data: self::MetaData) -> Uuid{ //-- &rti means borrowing the ownership of all Runtime fields - it must be mutable cause we want to insert into its hash map field
+            let generated_uuid = Uuid::new_v4();
+            rti.0.insert(generated_uuid, meta_data);
+            generated_uuid
+        }
+    }
+
 
 
 
@@ -168,29 +193,17 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     //                      RAFAEL ACTOR
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    #[derive(Message)]
-    #[rtype(result = "()")] //-- response type
-    pub struct Communicate{ //-- current service sends this message to the next service
-        pub id: Uuid,
-        pub cmd: String,
-    }
+    
+    impl Actor for Runtime{
+        
+        type Msg = Vec<u8>; 
 
-    impl Actor for Runtime {
-        type Context = Context<Runtime>;
-        fn started(&mut self, ctx: &mut Self::Context){ //-- this function body will run once a parachain has been started
-            let addr = ctx.address(); //-- getting the address of the this parachain actor
-            println!("-> {} - runtime actor started", chrono::Local::now().naive_local());
+        fn recv(&mut self, ctx: &Context<Self::Msg>, msg: Self::Msg, sender: Sender){ //// ctx is the actor system which we can build child actors with it also sender is another actor 
+        
+            todo!();        
+        
         }
-    }
-
-    impl Handler<Communicate> for Runtime { //-- implementing a Handler for Communicate event to send commands or messages to another parachain actor like issuing a smart contract event
-        type Result = ();
-        fn handle(&mut self, msg: Communicate, ctx: &mut Context<Self>) -> Self::Result{
-            println!("-> {} - message info received with id [{}] and content [{}]", chrono::Local::now().naive_local(), msg.id, msg.cmd);
-            ctx.run_later(Duration::new(0, 100), move |act, _| { //-- wait 100 nanoseconds                
-                let _ = act.next_service.as_ref().unwrap().send(Communicate { id: Uuid::new_v4(), cmd: "communicating with another runtime".to_string() }); //-- as_ref() converts &Option<T> to Option<&T> - sending a message to another service in the background (unless we await on it) is done through the service address and defined Message event or message
-            });
-        }
+    
     }
 
 
@@ -201,7 +214,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     //              RAFAEL SERVERLESS METHODS
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    pub trait ServerlessActor{ /////// a functional ServerlessActor trait for Runtimes - this trait is not object safe trait since we're returning the self and Self in method param and the returning signature 
+    pub trait Serverless{ /////// a functional Serverless trait for Runtimes - this trait is not object safe trait since we're returning the self and Self in method param and the returning signature 
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
@@ -215,7 +228,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
         fn run(&mut self) -> Self; // NOTE - the type that this trait which must be implemented for must be defined as mutable - the return type is the type that this trait will be implemented for
-        fn stop() -> Self; 
+        fn stop(&mut self) -> Self; 
         fn schedule(&self) -> Self; 
         fn callback(&self) -> Self;
         fn refund(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by refunding an account
@@ -225,30 +238,21 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
         fn current_timestamp(&self) -> u64; //-- current runtime timestamp in nanoseconds
         fn init(&self) -> Self::App; //-- initialize the whole app for the first time; this method will panic on second call
         fn health(&self) -> Self;
-        fn caller(&self) -> SocketAddr; //-- the current caller of one of the ServerlessActor trait methods
+        fn caller(&self) -> SocketAddr; //-- the current caller of one of the Serverless trait methods
         fn future_result(&self, idx: u64) -> FutureResult; //-- getting the result of the passed in future id
 
     }
 
 
 
-    impl ServerlessActor for Runtime{
+    impl Serverless for Runtime{
 
         type Service = Service;  
         type App     = String; 
         type Cost    = u128; 
 
         fn run(&mut self) -> Self{ //-- the first param is a shared mutable pointer to the instance of the runtime 
-            Self{
-                id: Uuid::new_v4(),
-                current_service: None,
-                next_service: None,
-                link_to_server: None,
-                error: None,
-                node_addr: None,
-                last_crash: None,
-                first_init: Some(chrono::Local::now().timestamp()),
-            }
+            Self::new()
         }
 
         fn refund(&mut self) -> Self{
@@ -263,17 +267,8 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         }
 
-        fn stop() -> Self{
-            Self{
-                id: Uuid::new_v4(),
-                current_service: None,
-                next_service: None,
-                link_to_server: None,
-                error: None,
-                node_addr: None,
-                last_crash: None,
-                first_init: Some(chrono::Local::now().timestamp()),
-            }
+        fn stop(&mut self) -> Self{
+            Runtime(HashMap::new()) //-- returning an empty runtime and cleanup everything
         }
 
         fn schedule(&self) -> Self{

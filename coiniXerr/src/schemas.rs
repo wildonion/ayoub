@@ -3,8 +3,6 @@
 
 
 
-// NOTE - we've put T inside the Option cause T might be None at initializing stage or a dangling pointer on later changes 
-
 use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
 
 
@@ -14,8 +12,9 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
-#[derive(Clone, Debug)]
-pub struct LoadBalancer; // TODO - clients -request-> middleware server -request-> main servers
+
+
+
 
 
 
@@ -36,45 +35,6 @@ pub mod manager{
 
 
 
-pub mod messanger{
-    
-    
-    use uuid::Uuid;
-
-    
-    // TODO - simd using actor based cross sharding 
-    // TODO - use actix actors for each server
-    // ....
-    
-    pub struct Server{
-        pub id: Uuid,
-        pub name: String,
-        pub channels: Vec<Channel>,
-        pub members: Vec<ServerMember>,
-    }
-    
-    pub struct Thread{
-        pub id: Uuid,
-        pub name: String,
-    }
-    
-    pub struct Channel{
-        pub name: String,
-        pub members: Vec<ChannelMember>,
-        pub threads: Vec<Thread>,
-    }
-    
-    pub struct ServerMember;
-    pub struct ChannelMember;
-        
-
-
-}
-
-
-
-
-
 pub type Wildonion = String;
 pub trait Void{
     type Input;
@@ -91,10 +51,6 @@ impl Void for Wildonion{
 pub fn BoundTypeToTrait(name: Wildonion) where Wildonion: Void + 'static{ //-- name param lifetime will be valid as long as the receiver which is the Done function is alive
 
 }
-
-
-
-
 
 
 
@@ -199,68 +155,6 @@ pub struct Slot{ //-- pool of validators for slot auctions
 
 
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-//                                                     RuntimeInfo Schema 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-#[derive(Debug, Clone)]
-pub struct RuntimeInfo(pub HashMap<Uuid, MetaData>); //-- MetaData struct should implements the Debug and Clone trait also
-
-impl RuntimeInfo{
-
-    pub fn new() -> Self{
-        RuntimeInfo(HashMap::new()) //-- tuple like struct
-    }
-
-    pub fn add(mut rti: Self, meta_data: self::MetaData) -> Uuid{ //-- &rti means borrowing the ownership of all RuntimeInfo fields - it must be mutable cause we want to insert into its hash map field
-        let generated_uuid = Uuid::new_v4();
-        rti.0.insert(generated_uuid, meta_data);
-        generated_uuid
-    }
-}
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-//                                                       MetaData Schema 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-#[derive(Debug, Clone)] 
-pub struct MetaData{
-    pub address: SocketAddr,
-    pub actor: Validator, //-- Validator actor should implements the Debug and Clone trait also
-}
-
-impl MetaData{
-    pub fn update_validator_transaction(&mut self, transaction: Option<Transaction>){ //-- updating the recent_transaction field of the validator actor is done using a mutable borrower (pointer) as the parameter of the update_validator_transaction() method 
-        self.actor.recent_transaction = transaction;
-    }
-}
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -302,8 +196,8 @@ impl Chain{
         }
     }
 
-    pub fn get_genesis(&self) -> &Block{
-        let genesis = &self.blocks[0];
+    pub fn get_genesis(&self) -> Block{
+        let genesis = self.blocks[0].clone(); //-- cloning the self.blocks[0] to prevent ownership moving since &self is an immutable reference to self which is a shared reference (means it has a valid lifetime and is being used by other methods) and can't be moved  
         genesis
     }
 

@@ -270,8 +270,8 @@ pub async fn create(req: Request<Body>) -> GenericResult<hyper::Response<Body>, 
                                     
 
 
-                                    let group_name = group_info.clone().name; //-- cloning to prevent from moving
-                                    let group_owner = group_info.clone().owner; //-- the owner id (user id from users collection) of this group - cloning to prevent from moving
+                                    let group_name = group_info.clone().name; //-- cloning to prevent ownership moving
+                                    let group_owner = group_info.clone().owner; //-- the owner id (user id from users collection) of this group - cloning to prevent ownership moving
 
 
 

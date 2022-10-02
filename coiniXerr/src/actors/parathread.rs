@@ -3,8 +3,6 @@
 
 
 
-// NOTE - we've put T inside the Option cause T might be None at initializing stage or a dangling pointer on later changes 
-
 
 
 
@@ -15,49 +13,202 @@ use super::peer; //-- super is the root of the current directory which is actors
 
 
 
-#[derive(Message)]
-#[rtype(result = "()")] //-- response type
+
+
+
+
+
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+//                  Messages and enums
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+#[derive(Clone, Debug)] //-- bounding to Clone and the Debug trait
 pub struct Communicate{ //-- parathread sends this message to a parachain
     pub id: Uuid,
-    pub cmd: String,
+    pub cmd: Cmd,
 }
 
-#[derive(Debug, Clone)] //-- trait Clone is required to prevent the object of this struct from moving
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, Default)]
+pub enum Cmd{
+    #[default] //// enum data types can only have one field as the default value
+    GetCurrentBlock, //// Mine field is the default value; utf8 encoded variant is 0
+    GetSlot, //// utf8 encoded variant is 1
+    GetBlockchain, //// utf8 encoded variant is 2
+    GetNextParachain, //// utf8 encoded variant is 3
+    GetGenesis, //// utf8 encoded variant is 4
+
+}
+
+
+
+
+
+
+
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+//                 Parachain type actor
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+#[actor(Communicate)] //-- Parachain actor will receive a message of type Contract
+#[derive(Debug, Clone, Default)] //-- trait Clone is required to prevent the object of this struct from moving
 pub struct Parachain {
     pub id: Uuid,
     pub slot: Option<Slot>,
     pub blockchain: Option<Chain>,
-    pub another_parachain: Option<Recipient<Communicate>>, //-- another parachain actor address
+    pub next_parachain: Option<ActorRef<<Parachain as Actor>::Msg>>, //-- next parachain actor which is of type Parachain
     pub current_block: Option<Block>,
 }
 
-impl Parachain{
-    fn health(){
+impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network which is an actor
+    
+    pub fn health(){
+
         // TODO - check the parachain health
         // ...
+    
+    }
+
+    pub fn get_current_block(&self) -> Option<Block>{
+        self.current_block.clone()
+    }
+
+    pub fn get_genesis(&self) -> Option<Block>{ //// the lifetime of the &Block is the lifetime of the &self
+        let genesis_block = self.blockchain.as_ref().unwrap().get_genesis();
+        Some(genesis_block) //// returning the genesis_block as an Option 
+    }
+
+    pub fn get_next_parachain(&self) -> Option<ActorRef<<Parachain as Actor>::Msg>>{
+        self.next_parachain.clone()
+    }
+
+    pub fn get_slot(&self) -> Option<Slot>{
+        self.slot.clone()
+    }
+
+    pub fn get_blockchain(&self) -> Option<Chain>{
+        self.blockchain.clone()
+    }
+
+}
+
+
+
+
+
+
+
+
+
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+//    implementing the Actors for the Parachain type
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+impl Actor for Parachain{
+
+    //// When using the #[actor()] attribute, the actor's Msg associated type should be set to '[DataType]Msg'. 
+    //// E.g. if an actor is a struct named MyActor, then the Actor::Msg associated type will be MyActorMsg.
+    type Msg = ParachainMsg; //// Msg associated type is the actor mailbox type and is of type ParachainMsg which is the Parachain type itself; actors can communicate with each other by sending message to each other
+
+    fn recv(&mut self, 
+            ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+            msg: Self::Msg, 
+            sender: Sender){
+        
+        self.receive(ctx, msg, sender);
+
     }
 }
 
-impl Actor for Parachain {
-    type Context = Context<Parachain>;
-    fn started(&mut self, ctx: &mut Self::Context){ //-- this function body will run once a parachain has been started
-        let addr = ctx.address(); //-- getting the address of the this parachain actor
-        let mut chain = Chain::default(); //-- start the network by building a genesis block and a default transaction with 100 coins from the coiniXerr network wallet to the wildonion wallet - we have to define it as mutable cause we'll cal its add() method in which a new created block will be added to the chain
-        self.blockchain = Some(chain); //-- we can update the blockchain field cause we passed &mut self (a mutable pointer to all fields) as first parameter to the started() method
-        print!("-> a new parachain has been built with slot id {}", self.slot.as_ref().unwrap().id); //-- as_ref() converts &Option<T> to Option<&T> - we can also use clone() method in order to make a deep copy of the slot field to prevent the field from moving and loosing ownership 
-        println!("-> {} - attaching genesis block to the default chain", chrono::Local::now().naive_local());
-        let genesis_block = self.blockchain.as_ref().unwrap().get_genesis(); //-- returns a borrow or immutable pointer to the genesis block
-        println!("-> {} - shaping a new block to add transactions", chrono::Local::now().naive_local());
-        self.current_block = Some(self.blockchain.as_ref().unwrap().build_raw_block(genesis_block)); //-- passing the genesis block by borrowing it - we have to define it as mutable cause we'll cal its push_transaction() method in which a new transaction will be added to the block
+
+impl ActorFactoryArgs<(Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parachain as Actor>::Msg>>, Option<Block>)> for Parachain{
+
+    fn create_args((id, slot, blockchain, next_parachain, current_block): (Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parachain as Actor>::Msg>>, Option<Block>)) -> Self{
+        
+        Self { id, slot, blockchain, next_parachain, current_block }
+    
     }
+
 }
 
-impl Handler<Communicate> for Parachain { //-- implementing a Handler for Communicate event to send commands or messages to another parachain actor like issuing a smart contract event
-    type Result = ();
-    fn handle(&mut self, msg: Communicate, ctx: &mut Context<Self>) -> Self::Result{
-        println!("-> {} - message info received with id [{}] and content [{}]", chrono::Local::now().naive_local(), msg.id, msg.cmd);
-        ctx.run_later(Duration::new(0, 100), move |act, _| { //-- wait 100 nanoseconds
-            let _ = act.another_parachain.as_ref().unwrap().send(Communicate { id: Uuid::new_v4(), cmd: "communicating with another parachain".to_string() }); //-- as_ref() converts &Option<T> to Option<&T> - sending a message to another parachain in the background (unless we await on it) is done through the parachain address and defined Message event or message 
-        });
+
+
+
+
+
+
+
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+//    implementing the Receive types for our actor
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for the Parachain actor to handle the incoming message of type Communicate
+    type Msg = ParachainMsg;
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: Communicate, //-- _msg is of type Communicate since we're implementing the Receive trait for the Communicate type
+                _sender: Sender){
+    
+        info!("-> {} - message info received with id [{}] and ttype [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.cmd);
+        match _msg.cmd{
+            Cmd::GetCurrentBlock => {
+                info!("-> {} - getting current block", chrono::Local::now().naive_local());
+                let current_block = self.get_current_block();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        current_block, //// sending the current_block as the response message 
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            Cmd::GetNextParachain => {
+                info!("-> {} - getting the next parachain of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let next_parachain = self.get_next_parachain();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        next_parachain, //// sending the next_parachain as the response message 
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            Cmd::GetBlockchain => {
+                info!("-> {} - getting the blockchain of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let blockchain = self.get_blockchain();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        blockchain, //// sending the blockchain as the response message 
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            Cmd::GetGenesis => {
+                info!("-> {} - getting the genesis block of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let genesis_block = self.get_genesis();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        genesis_block, //// sending the genesis_block as the response message 
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            _ => { //// GetSlot
+                info!("-> {} - getting the slot of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let current_slot = self.get_slot();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        current_slot, //// sending the current_slot as the response message 
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            }
+        }            
+
+
     }
+
 }

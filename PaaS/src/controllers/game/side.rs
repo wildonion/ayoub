@@ -65,7 +65,7 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                 Ok(side_info) => {
 
 
-                                    let name = side_info.clone().name; //-- cloning to prevent from moving
+                                    let name = side_info.clone().name; //-- cloning to prevent ownership moving
 
 
 

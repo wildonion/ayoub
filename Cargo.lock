@@ -3,51 +3,6 @@
 version = 3
 
 [[package]]
-name = "actix"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f728064aca1c318585bf4bb04ffcfac9e75e508ab4e8b1bd9ba5dfe04e2cbed5"
-dependencies = [
- "actix-rt",
- "actix_derive",
- "bitflags",
- "bytes",
- "crossbeam-channel",
- "futures-core",
- "futures-sink",
- "futures-task",
- "futures-util",
- "log",
- "once_cell",
- "parking_lot",
- "pin-project-lite",
- "smallvec",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "actix-rt"
-version = "2.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ea16c295198e958ef31930a6ef37d0fb64e9ca3b6116e6b93a8bdae96ee1000"
-dependencies = [
- "futures-core",
- "tokio",
-]
-
-[[package]]
-name = "actix_derive"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d44b8fee1ced9671ba043476deddef739dd0959bf77030b26b738cc591737a7"
-dependencies = [
- "proc-macro2 1.0.43",
- "quote 1.0.21",
- "syn 1.0.99",
-]
-
-[[package]]
 name = "ahash"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -141,7 +96,6 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 name = "ayoub"
 version = "0.1.1"
 dependencies = [
- "actix",
  "borsh",
  "bytes",
  "chrono",
@@ -345,18 +299,21 @@ dependencies = [
 name = "coiniXerr"
 version = "0.1.0"
 dependencies = [
- "actix",
  "bcrypt",
  "borsh",
  "chrono",
  "dotenv",
  "env_logger 0.9.0",
  "futures",
+ "futures-util",
  "hex",
  "listenfd",
  "log",
  "rand 0.8.5",
+ "rayon",
  "reqwest",
+ "riker",
+ "riker-patterns",
  "rust-argon2",
  "serde 1.0.144",
  "serde_json",
@@ -1290,20 +1247,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f7254b99e31cad77da24b08ebf628882739a608578bb1bcdfc1f9c21260d7c0"
 
 [[package]]
-name = "onion"
-version = "0.1.0"
-dependencies = [
- "borsh",
- "chrono",
- "dotenv",
- "riker",
- "serde 1.0.144",
- "serde_json",
- "tokio",
- "uuid 1.1.2",
-]
-
-[[package]]
 name = "os_info"
 version = "3.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1703,6 +1646,16 @@ dependencies = [
  "proc-macro2 0.4.30",
  "quote 0.6.13",
  "syn 0.15.44",
+]
+
+[[package]]
+name = "riker-patterns"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "258e641e0827bc750966e7bba7b63125bb5f3dc08592c26dcc71ad923601f5d9"
+dependencies = [
+ "futures",
+ "riker",
 ]
 
 [[package]]

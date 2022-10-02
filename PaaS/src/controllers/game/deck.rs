@@ -78,8 +78,8 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                         let update_option = FindOneAndUpdateOptions::builder().return_document(Some(ReturnDocument::After)).build();
                                         let decks = db.clone().database(&db_name).collection::<schemas::game::DeckInfo>("decks");
                                         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nano to sec
-                                        let deck_name = deck_info.clone().deck_name; //-- cloning to prevent from moving
-                                        let roles = deck_info.clone().roles; //-- roles of this deck - cloning to prevent from moving
+                                        let deck_name = deck_info.clone().deck_name; //-- cloning to prevent ownership moving
+                                        let roles = deck_info.clone().roles; //-- roles of this deck - cloning to prevent ownership moving
 
 
                                         if let Some(deck_id) = deck_info.clone()._id{ //-- if a deck_id was passed in to the call we are sure that there is a deck info and it has a name

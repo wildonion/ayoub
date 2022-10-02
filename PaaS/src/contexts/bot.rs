@@ -28,10 +28,7 @@ pub mod messanger{
     
     use uuid::Uuid;
 
-    
-    // TODO - simd using borsh and serde codec and actix actor based cross sharding
-    // TODO - use actix actors for each server
-    // ....
+
     
     pub struct Server<'a>{ //-- 'a is the lifetime of &[u8] which is the borrowed type of [u8] due to its unknown size at compile time  
         pub cluster_id: Uuid, //-- the id of the cluster which this server is inside

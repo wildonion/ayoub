@@ -63,9 +63,9 @@ pub async fn add(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hyp
                                 Ok(role_info) => {
 
 
-                                    let name = role_info.clone().name; //-- cloning to prevent from moving
+                                    let name = role_info.clone().name; //-- cloning to prevent ownership moving
                                     let rate = role_info.rate;
-                                    let desc = role_info.clone().desc; //-- cloning to prevent from moving
+                                    let desc = role_info.clone().desc; //-- cloning to prevent ownership moving
                                     let abilities = role_info.abilities;
                                     let side_id = role_info.clone().side_id; //-- cloning to prevent the side_id which is a string from moving since by assigning the side_id into the side_id var the whole role_info instance will be removed 
 
