@@ -101,7 +101,7 @@ NOTE - remote_handle() method turns this future into a future that yields () on 
 // #![allow(unused)] //-- will let the unused vars be there - we have to put this on top of everything to affect the whole crate
 #![macro_use] //-- apply the macro_use attribute to the root cause it's an inner attribute and will be effect on all things inside this crate
 
-use log::info;
+use log::{info, error};
 use tokio::net::{TcpListener, TcpStream}; //-- async tcp listener and stream
 use tokio::io::{AsyncReadExt, AsyncWriteExt}; //-- read from the input and write to the output - AsyncReadExt and AsyncWriteExt are traits which are implemented for an object of type TcpStream and based on orphan rule we must use them here to use the read() and write() method asyncly which has been implemented for the object of TcpStream (these trait have been implemented for TcpStream structure)
 use tokio::sync::mpsc; //-- to share values between multiple async tasks spawned by the tokio spawner which is based on green threads so shared state can be change only one at a time inside a thread 
@@ -118,10 +118,10 @@ use dotenv::dotenv;
 use riker::actors::*;
 use riker_patterns::ask::*;
 use crate::actors::{parathread::{Parachain, Communicate, Cmd}, peer::{Validator, Contract}, rafael::env::{Serverless, MetaData, Runtime as RafaelRt}}; //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
-use crate::schemas::{Transaction, Block, Slot, Chain, Staker};
+use crate::schemas::{Transaction, Block, Slot, Chain, Staker, Db, Storage, Mode};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
+use mongodb::{Client, bson::oid::ObjectId};
 use futures::{Future, StreamExt, executor::block_on, future::RemoteHandle}; //-- StreamExt is a trait for streaming utf8 bytes data - RemoteHandle is a handler for future objects which are returned by the remote_handle() method
-use tokio::sync::mpsc::Sender as TokioSender;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -154,6 +154,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     
 
+
+
     // old::trash();
     // old::mactrait();
     // old::unsafer();
@@ -165,12 +167,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
     
-    
-    
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+    ///////                  env vars setup
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈     
     
     env_logger::init();
     dotenv().expect("⚠️ .env file not found");
 
+    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
+    let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
+    let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
+    let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
+    let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let mut run_time_info = RafaelRt(HashMap::new());
     let runtime_instance = run_time_info.run(); //-- run() method is the method of the Rafael serverless trait
     let arc_mutex_runtime_info_object = Arc::new(Mutex::new(runtime_instance)); //-- we can clone the runtime_instance without using Arc cause Clone trait is implemented for RafaelRt -> MetaData -> Validator actor
@@ -180,7 +189,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let host = env::var("HOST").expect("⚠️ please set host in .env");
     let coiniXerr_http_port = env::var("COINIXERR_HTTP_PORT").expect("⚠️ please set coiniXerr http port in .env");
     let coiniXerr_tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
-    let listener = TcpListener::bind(format!("{}:{}", host, coiniXerr_tcp_port)).await.unwrap();
     let pool = utils::scheduler::ThreadPool::new(10); //-- spawning 10 threads in overall per incoming stream to handle all incoming transactions from every stream concurrently and simultaneously
     let (simd_sender, mut simd_receiver) = mpsc::channel::<u8>(buffer_size); //-- defining sender and receiver of the simd ops
     let (stream_sender, mut stream_receiver) = mpsc::channel::<(
@@ -206,16 +214,106 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
-    
+
 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-    ///////          building coiniXerr actors' system 
+    ///////                 app storage setup
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-    info!("-> {} - server is up", chrono::Local::now().naive_local());
+    
+    let db_addr = if environment == "dev"{
+        format!("{}://{}:{}", db_engine, db_host, db_port)
+    } else if environment == "prod"{
+        format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
+    } else{
+        "".to_string()
+    };
+    let empty_app_storage = Some( //-- putting the Arc-ed db inside the Option
+        Arc::new( //-- cloning app_storage to move it between threads
+            Storage{ //-- defining db context 
+                id: Uuid::new_v4(),
+                db: Some(
+                    Db{
+                        mode: Mode::Off,
+                        instance: None,
+                        engine: None,
+                        url: None,
+                    }
+                ),
+            }
+        )
+    );
+    let app_storage = if db_engine.as_str() == "mongodb"{
+        info!("switching to mongodb - {}", chrono::Local::now().naive_local());
+        match Db::new().await{
+            Ok(mut init_db) => {
+                init_db.engine = Some(db_engine);
+                init_db.url = Some(db_addr);
+                let mongodb_instance = init_db.GetMongoDbInstance().await; //-- the first argument of this method must be &self in order to have the init_db instance after calling this method, cause self as the first argument will move the instance after calling the related method and we don't have access to any field like init_db.url any more due to moved value error - we must always use & (like &self and &mut self) to borrotw the ownership instead of moving
+                Some( //-- putting the Arc-ed db inside the Option
+                    Arc::new( //-- cloning app_storage to move it between threads
+                        Storage{ //-- defining db context 
+                            id: Uuid::new_v4(),
+                            db: Some(
+                                Db{
+                                    mode: init_db.mode,
+                                    instance: Some(mongodb_instance),
+                                    engine: init_db.engine,
+                                    url: init_db.url,
+                                }
+                            ),
+                        }
+                    )
+                )
+            },
+            Err(e) => {
+                error!("init db error {} - {}", e, chrono::Local::now().naive_local());
+                empty_app_storage //-- whatever the error is we have to return and empty app storage instance 
+            }
+        }
+    } else{
+        empty_app_storage
+    };
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+    ///////             start coiniXerr system (actor, storage and server) 
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+    
+    let listener = TcpListener::bind(format!("{}:{}", host, coiniXerr_tcp_port)).await.unwrap();
+    let unwrapped_storage = app_storage.unwrap(); //-- unwrapping the app storage to create a db instance
+    let db_instance = unwrapped_storage.get_db().await.unwrap(); //-- getting the db inside the app storage; it might be None
     let coiniXerr_sys = SystemBuilder::new()
-                                                .name("coiniXerr")
-                                                .create()
-                                                .unwrap(); //// unwrapping the last functional method
+                                                    .name("coiniXerr")
+                                                    .create()
+                                                    .unwrap(); //// unwrapping the last functional method
+    let app_name = coiniXerr_sys.config()
+                                        .get_str("app.name")
+                                        .unwrap();
+    info!("-> {} - [{}] actor system, server and storage are set up", chrono::Local::now().naive_local(), app_name);
+
+
+
+
+
 
 
 
@@ -275,12 +373,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let current_block_remote_handle: RemoteHandle<Block> = ask(&coiniXerr_sys, &parachain_0, Communicate{id: Uuid::new_v4(), cmd: Cmd::GetCurrentBlock}); //// asking the coiniXerr system to return the current block of the passed in parachain actor as a future object
     let mut current_block = current_block_remote_handle.await;
     // ----------------------------------------------------------------------
-    //           GETTING THE BLOCKCHAIN OF THE DEFAULT PARACHAIN
+    //            GETTING THE BLOCKCHAIN OF THE DEFAULT PARACHAIN
     // ----------------------------------------------------------------------
     info!("-> {} - getting blockchain from the default parachain", chrono::Local::now().naive_local());
     //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the current blockchain cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let blockchain_remote_handle: RemoteHandle<Chain> = ask(&coiniXerr_sys, &parachain_0, Communicate{id: Uuid::new_v4(), cmd: Cmd::GetBlockchain}); //// asking the coiniXerr system to return the current block of the passed in parachain actor as a future object
+    let blockchain_remote_handle: RemoteHandle<Chain> = ask(&coiniXerr_sys, &parachain_0, Communicate{id: Uuid::new_v4(), cmd: Cmd::GetBlockchain}); //// asking the coiniXerr system to return the blockchain of the passed in parachain actor as a future object
     let blockchain = blockchain_remote_handle.await;
     // ----------------------------------------------------------------------
     //           GETTING THE CURRENT SLOT OF THE DEFAULT PARACHAIN
@@ -288,8 +386,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     info!("-> {} - getting current slot from the default parachain", chrono::Local::now().naive_local());
     //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the current slot cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let current_slot_remote_handle: RemoteHandle<Slot> = ask(&coiniXerr_sys, &parachain_0, Communicate{id: Uuid::new_v4(), cmd: Cmd::GetSlot}); //// asking the coiniXerr system to return the current block of the passed in parachain actor as a future object
+    let current_slot_remote_handle: RemoteHandle<Slot> = ask(&coiniXerr_sys, &parachain_0, Communicate{id: Uuid::new_v4(), cmd: Cmd::GetSlot}); //// asking the coiniXerr system to return the current slot of the passed in parachain actor as a future object
     let current_slot = current_slot_remote_handle.await;
+    // ----------------------------------------------------------------------
+    //                  GETTING THE UUID OF THE PARACHAIN
+    // ----------------------------------------------------------------------
+    info!("-> {} - getting uuid of the default parachain", chrono::Local::now().naive_local());
+    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the current slot cause the parachain is guarded by the ActorRef
+    //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
+    let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_0, Communicate{id: Uuid::new_v4(), cmd: Cmd::GetSlot}); //// asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
+    let default_parachain_uuid = current_uuid_remote_handle.await;
 
 
 
@@ -298,11 +404,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
+
+
+
+
+
+
+
+
+
+
+    
     
     
     
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
-    ///////                starting validators' actors for incoming regular transactions' bytes through a tcp stream 
+    ///////                     starting validator actors for incoming transactions' bytes through a tcp streamer 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
     while let Ok((stream, addr)) = listener.accept().await{ //-- await suspends the accept() function execution to solve the future but allows other code blocks to run  
         info!("-> {} - connection stablished from {}", chrono::Local::now().naive_local(), addr);
@@ -362,6 +479,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
     ///////                                 waiting to receive stream and other setups asynchronously 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
     while let Some((mut stream, generated_uuid, cloned_arc_mutex_runtime_info_object, cloned_arc_mutex_validator_actor)) = stream_receiver.recv().await.take(){ //-- waiting for the stream, the generated uuid of the runtime info object and the runtime info object itself to become available to the down side of channel (receiver) to change the started validator actor for every incoming connection - stream must be mutable for reading and writing from and to socket
         info!("-> {} - receiving the stream setups", chrono::Local::now().naive_local());
         let mempool_sender = mempool_sender.clone(); //-- cloning mempool_sender to send signed transaction through the channel to the receiver for mining process
@@ -416,12 +534,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         deserialized_transaction_borsh.signed = Some(chrono::Local::now().naive_local().timestamp()); //-- signing the incoming transaction with the current server time
                         // ----------------------------------------------------------------------
                         //         CODING SIGNED TRANSACTION THEN SENDING BACK TO THE PEER
-                        // ----------------------------------------------------------------------
-                        //  ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ 
-                        //       unsafe block for serializing doesn't work like serde          
-                        //       due to the need of padding and memory mapping operations      
-                        //       which borsh and serde are handling                            
-                        //  ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈ ------- ⚈  
+                        // ---------------------------------------------------------------------- 
+                        // NOTE - unsafe block for serializing doesn't work like serde due to the need of padding and memory mapping operations which borsh and serde are handling                            
                         // NOTE - encoding or serializing process is converting struct object into utf8 bytes
                         // NOTE - decoding or deserializing process is converting utf8 bytes into the struct object
                         // NOTE - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
@@ -490,9 +604,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
+
+
+
+
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
     ///////   waiting to receive signed transactions asynchronously from the sender to push them inside the current block - this buffer zone is the transaction mempool channel
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+
     while let Some((transaction, validator)) = mempool_receiver.recv().await{ //-- waiting for each transaction to become available to the down side of channel (receiver) for mining process cause sending is done asynchronously 
         info!("-> {} - receiving new transaction and its related validator to push inside the current block", chrono::Local::now().naive_local());
         let mutex_transaction = transaction.lock().unwrap().clone();
@@ -500,7 +619,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         let mutex_validator_actor = validator.lock().unwrap().clone();
         info!("-> {} - validator actor in mempool at time : {:#?}", chrono::Local::now().naive_local(), mutex_validator_actor);
         // ----------------------------------------------------------------------
-        //                            TRANSACTION TYPES
+        //            COMMUNICATE WITH THE VALIDATOR BASED ON TX TYPE
         // ----------------------------------------------------------------------
         if mutex_transaction.ttype == 0x00{ //-- regular transaction
             ///// tell the validator actor from the main that we have the message of type Contract with the 0x00 ttype
@@ -516,7 +635,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x03}, None);
         }
         // ----------------------------------------------------------------------
-        //                             CONSENSUS PROCESS
+        //                  CONSENSUS AND BUILDING BLOCKS PROCESS
         // ----------------------------------------------------------------------
         while std::mem::size_of_val(&current_block) <= max_block_size{ //-- returns the dynamically-known size of the pointed-to value in bytes by passing a reference or pointer to the value to this method - push incoming transaction into the current_block until the current block size is smaller than the max_block_size
             current_block.push_transaction(mutex_transaction.clone()); //-- cloning transaction object in every iteration to prevent ownership moving and loosing ownership - adding pending transaction from the mempool channel into the current block for validating that block
@@ -539,13 +658,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             info!("-> {} - adding the created block to the chain", chrono::Local::now().naive_local());
             blockchain.clone().add(current_block.clone()); //-- adding the cloned of current block to the coiniXerr parachain blockchain - cloning must be done to prevent current_block and the blockchain parachain from moving in every iteration mempool_receiver loop; we can also use as_ref() method instead of clone() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
         }
+        // ----------------------------------------------------------------------
+        //                 INSERTING THE PARACHAIN INTO THE DB
+        // ----------------------------------------------------------------------
+        let parachains = db_instance.clone().database(&db_name).collection::<schemas::InsertParachainInfo>("parachains");
+        let parachain_info = schemas::InsertParachainInfo{
+            //// we're cloning each field since we're inside the loop and we want to prevent ownership moving
+            id: Uuid::new_v4(),
+            slot: Some(current_slot.clone()),
+            blockchain: Some(blockchain.clone()),
+            next_parachain_id: Some(default_parachain_uuid.clone()),
+            current_block: Some(current_block.clone()),
+        };
+        match parachains.insert_one(parachain_info, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
+            Ok(insert_result) => info!("-> {} - inserted new parachain into db with uuid [{}] and mongodb id [{}]", chrono::Local::now().naive_local(), default_parachain_uuid.clone(), insert_result.inserted_id.as_object_id().unwrap()),
+            Err(e) => error!("-> {} - error inserting parachain with id [{}]: {}", chrono::Local::now().naive_local(), default_parachain_uuid, e)
+        }
+
+
     }
 
 
 
 
 
+    
     Ok(()) //// everything went well
+
+
 
 
 

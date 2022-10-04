@@ -277,8 +277,7 @@ pub async fn process_payment_request(req: Request<Body>) -> GenericResult<hyper:
 
 
     
-    // TODO
-    // https://github.com/hyperium/hyper/blob/master/examples/params.rs
+    // TODO - 
     // get all (un)successful payments for an event with admin or God access
     // get all (un)successful payments for a user with user access
 

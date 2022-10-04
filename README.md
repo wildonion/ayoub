@@ -26,6 +26,8 @@
 
 # 📌 TODOs
 
+* read `DEV.info` refs
+
 * coiniXerr TODOs
 
 * Ayoub PaaS TODOs

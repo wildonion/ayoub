@@ -36,6 +36,7 @@ pub enum Cmd{
     GetBlockchain, //// utf8 encoded variant is 2
     GetNextParachain, //// utf8 encoded variant is 3
     GetGenesis, //// utf8 encoded variant is 4
+    GetParachainUuid, //// utf8 encoded variant is 5
 
 }
 
@@ -59,13 +60,17 @@ pub struct Parachain {
     pub current_block: Option<Block>,
 }
 
-impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network which is an actor
+impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network which is a shard actor
     
-    pub fn health(){
+    pub fn heart_beat(){
 
         // TODO - check the parachain health
         // ...
     
+    }
+
+    pub fn get_uuid(&self) -> Option<Uuid>{
+        Some(self.id.clone())
     }
 
     pub fn get_current_block(&self) -> Option<Block>{
@@ -124,7 +129,7 @@ impl ActorFactoryArgs<(Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parac
 
     fn create_args((id, slot, blockchain, next_parachain, current_block): (Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parachain as Actor>::Msg>>, Option<Block>)) -> Self{
         
-        Self { id, slot, blockchain, next_parachain, current_block }
+        Self { id, slot, blockchain, next_parachain, current_block } //// initiate an instance of the Parachain with the passed in args
     
     }
 
@@ -187,6 +192,17 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
             Cmd::GetGenesis => {
                 info!("-> {} - getting the genesis block of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
                 let genesis_block = self.get_genesis();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        genesis_block, //// sending the genesis_block as the response message 
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            Cmd::GetParachainUuid => {
+                info!("-> {} - getting the parachain uuid", chrono::Local::now().naive_local());
+                let genesis_block = self.get_uuid();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()

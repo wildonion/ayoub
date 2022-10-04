@@ -79,7 +79,7 @@ type Job = Box<dyn FnOnce() + Send + 'static>; //-- a job is of type closure whi
 
 struct Worker{
     id: Uuid,
-    thread: Option<thread::JoinHandle<()>>,
+    thread: Option<thread::JoinHandle<()>>, //// thread is of type JoinHandld struct which return nothing or ()
 }
 
 pub struct ThreadPool {

@@ -18,62 +18,13 @@ use crate::*; // loading all defined crates, structs and functions from the root
 
 
 
-pub mod manager{
-    
-    use uuid::Uuid;
-
-    // TODO - vector of || async move{} of events for an event manager struct 
-    // TODO - call new event every 5 seconds from vector of event of closures 
-    
-    pub struct Event{
-        id: Uuid,
-        last_call: i64, // last call timestamp  
-    }
-
-
-}
-
-
-
-pub type Wildonion = String;
-pub trait Void{
-    type Input;
-    type Output;
-
-}
-
-impl Void for Wildonion{
-
-    type Input = u8;
-    type Output = u64;
-}
-
-pub fn BoundTypeToTrait(name: Wildonion) where Wildonion: Void + 'static{ //-- name param lifetime will be valid as long as the receiver which is the Done function is alive
-
-}
-
-
-
-#[cfg(test)]
-pub mod tests{
-
-    #[test]
-    fn staking(){
-        
-    }
-}
 
 
 
 
-
-
-
-
-
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                        Stake Info Schema                      
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 #[derive(Debug, Clone)]
 pub struct Staker{
     pub id: Uuid,
@@ -82,8 +33,8 @@ pub struct Staker{
     pub rewards: Option<i32>,
     pub signed_at: Option<i64>,
 }
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 
 
@@ -98,10 +49,10 @@ pub struct Staker{
 
 
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-//                                                        Vote Info Schema                      
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-#[derive(Debug, Clone)]
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+//                                                        Voter Info Schema                      
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Voter{
     pub parachain_id: Uuid, //-- voter will vote in this parachain using delegator stakes
     pub owner: Validator, //-- owner is a Validator
@@ -109,8 +60,8 @@ pub struct Voter{
     pub signed_at: Option<i64>,
     pub staker_id: Uuid, //-- delegator id who staked his/her money for this voter
 }
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 
 
@@ -127,18 +78,18 @@ pub struct Voter{
 
 
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                  Parachain Slot Schema                      
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-#[derive(Debug, Clone)]
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Slot{ //-- pool of validators for slot auctions
     pub id: Uuid,
     pub name: String,
     pub validators: Vec<Voter>, //-- auction voters for this slot
     pub epoch: u32, //-- number of created blocks to generate new slot auction process 
 } 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 
 
@@ -159,9 +110,9 @@ pub struct Slot{ //-- pool of validators for slot auctions
 
 
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                         Chain Schema
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 #[derive(Serialize, Deserialize, Clone, Debug)] //-- encoding or serializing process is converting struct object into utf8 bytes - decoding or deserializing process is converting utf8 bytes into the struct object
 pub struct Chain{
     pub branch_id: Uuid, //-- chain id
@@ -222,8 +173,8 @@ impl Chain{
         }
     }
 }
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 
 
@@ -240,10 +191,35 @@ impl Chain{
 
 
 
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+//                                                   Parachain mongodb schema
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct InsertParachainInfo{
+    pub id: Uuid,
+    pub slot: Option<Slot>,
+    pub blockchain: Option<Chain>,
+    pub next_parachain_id: Option<Uuid>, //-- next parachain uuid
+    pub current_block: Option<Block>,
+}
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+
+
+
+
+
+
+
+
+
+
+
+
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                         Block Schema
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 #[derive(Serialize, Deserialize, Clone, Debug)] //-- encoding or serializing process is converting struct object into utf8 bytes - decoding or deserializing process is converting utf8 bytes into the struct object
 pub struct Block{
     pub id: Uuid,
@@ -289,8 +265,8 @@ impl Default for Block{
         }
     }
 }
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 
 
@@ -304,7 +280,7 @@ impl Default for Block{
 
 
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                      Merkle Tree Schema
 // https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
 // https://doc.rust-lang.org/book/ch15-06-reference-cycles.html
@@ -314,7 +290,7 @@ impl Default for Block{
 // NOTE - Rc is a smart pointer used for counting the incoming references to the type which shared its ownership using &
 //        and see how many owners the borrowed type has in its entire scope as long as its lifetime is not dropped also 
 //        it has nothing to do with the garbage collection rule cause rust doesn't have it.
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 #[derive(Debug)]
 pub struct Node{
     pub id: Uuid,
@@ -341,8 +317,8 @@ impl Node{
         }
     }
 }
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 
 
@@ -358,9 +334,9 @@ impl Node{
 
 
 
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                        Transaction Schema
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 // NOTE - all fields of a union share common storage and writes to one field of a union can overwrite its other fields, and size of a union is determined by the size of its largest field
 // NOTE - there is no way for the compiler to guarantee that you always read the correct type (that is, the most recently written type) from the union
 // NOTE - enums use some extra memory to keep track of the enum variant, with unions we keep track of the current active field ourself
@@ -409,5 +385,89 @@ impl Transaction{ //-- a transaction decoder or deserializer using union
         }
     }
 }
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
-// ==========--------------==========--------------==========--------------==========--------------==========--------------
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+//                                                      Db and Storage Schemas
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+#[derive(Clone, Debug)] //-- can't bound Copy trait cause engine and url are String which are heap data structure 
+pub struct Db{
+    pub mode: Mode,
+    pub engine: Option<String>,
+    pub url: Option<String>,
+    pub instance: Option<Client>,
+}
+
+impl Default for Db{
+    fn default() -> Db {
+        Db{
+            mode: self::Mode::Off,
+            engine: None,
+            url: None,
+            instance: None,
+        }
+    }
+}
+
+impl Db{
+    
+    pub async fn new() -> Result<Db, Box<dyn std::error::Error>>{
+        Ok(
+            Db{ //-- building an instance with generic type C which is the type of the db client instance
+                mode: Mode::On, //-- 1 means is on 
+                engine: None, 
+                url: None,
+                instance: None,
+            }
+        )
+    }
+    
+    pub async fn GetMongoDbInstance(&self) -> Client{ //-- it'll return an instance of the mongodb client - we set the first argument to &self in order to have the instance of the object later on after calling this method and prevent ownership moving
+        Client::with_uri_str(self.url.as_ref().unwrap()).await.unwrap() //-- building mongodb client instance
+    }
+
+}
+
+
+
+#[derive(Clone, Debug)]
+pub struct Storage{
+    pub id: Uuid,
+    pub db: Option<Db>, //-- we could have no db at all
+}
+
+impl Storage{
+    pub async fn get_db(&self) -> Option<&Client>{
+        match self.db.as_ref().unwrap().mode{
+            Mode::On => self.db.as_ref().unwrap().instance.as_ref(), //-- return the db if it wasn't detached from the server - instance.as_ref() will return the Option<&Client> or Option<&T>
+            Mode::Off => None, //-- no db is available cause it's off
+        }
+    }
+}
+
+
+
+#[derive(Copy, Clone, Debug)]
+pub enum Mode{ //-- enum uses 8 bytes (usize which is 64 bits on 64 bits arch) tag which is a pointer pointing to the current variant - the total size of this enum is 8 bytes tag + the largest variant size = 8 + 0 = 8 bytes; cause in our case On and Off variant both have 0 size
+    On, //-- zero byte size
+    Off, //-- zero byte size
+}
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈

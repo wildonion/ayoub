@@ -71,7 +71,7 @@ impl CRC20 for Validator{ //-- issuing a FT (fungible token) contract for a vali
 //                  Messages and enums
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
-#[derive(BorshDeserialize, BorshSerialize, Default, Clone, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize ,Default, Clone, Debug)]
 pub enum Mode{
     #[default] //// enum data types can only have one field as the default value
     Mine, //// Mine field is the default value; utf8 encoded variant is 1
@@ -104,7 +104,7 @@ pub struct UpdateTx { //-- update transaction message to tell the actor to updat
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 #[actor(Contract, UpdateTx)] //-- Validator actor will receive a message of type Contract and UpdateTx
-#[derive(Debug, Clone)] //-- trait Clone is required to prevent the object of this struct from moving
+#[derive(Debug, Clone, Serialize, Deserialize)] //-- trait Clone is required to prevent the object of this struct from moving
 pub struct Validator {
     pub id: Uuid,
     pub addr: SocketAddr,

@@ -182,9 +182,6 @@ impl Db{
 
 
 
-
-
-
 #[derive(Clone, Debug)]
 pub struct Storage{
     pub id: Uuid,
@@ -206,14 +203,6 @@ impl Storage{
 pub enum Mode{ //-- enum uses 8 bytes (usize which is 64 bits on 64 bits arch) tag which is a pointer pointing to the current variant - the total size of this enum is 8 bytes tag + the largest variant size = 8 + 0 = 8 bytes; cause in our case On and Off variant both have 0 size
     On, //-- zero byte size
     Off, //-- zero byte size
-}
-
-
-
-#[derive(Clone, Debug)]
-pub struct Cli{ // https://rust-cli.github.io/book/index.html
-    pub service_name: String, // TODO - service_name argument
-    pub port: u16, // TODO - port argument
 }
 
 
