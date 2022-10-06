@@ -1082,8 +1082,25 @@ pub fn unsafer(){
     let mut a = &var_a; //-- a is a pointer with a valid lifetime to the location of var_a type and it contains the address and the data of that type
     let mut b = &var_b; //-- b is a pointer with a valid lifetime to the location of var_b type and it contains the address and the data of that type
     ///// inline swapping : a, b = b, a -> a = b; b = a and under the hood : a = &var_b, b = &var_a
-    a = &var_b; //-- pointer of var_a must points to the location of var_b and after that it can have the data inside var_b 
-    b = &var_a; //-- pointer of var_b must points to the location of var_a and after that it can have the data inside var_a
+    a = &var_b; //-- pointer of var_a must points to the location of var_b and after that it can access the data inside var_b 
+    b = &var_a; //-- pointer of var_b must points to the location of var_a and after that it can access the data inside var_a
+
+
+
+
+    ///// ------------------------------------------------------------------------ /////
+    //          encoding an instance into utf8 using unsafe from_raw_parts
+    ///// ------------------------------------------------------------------------ /////
+    // NOTE - unsafe block for serializing doesn't work like serde due to the need of padding and memory mapping operations which borsh and serde are handling                            
+    // NOTE - encoding or serializing process is converting struct object into utf8 bytes
+    // NOTE - decoding or deserializing process is converting utf8 bytes into the struct object
+    // NOTE - from_raw_parts() forms a slice or &[u8] from the pointer and the length and mutually into_raw_parts() returns the raw pointer to the underlying data, the length of the vector (in elements), and the allocated capacity of the data (in elements)
+    // let signed_transaction_serialized_into_bytes: &[u8] = unsafe { //-- encoding process of new transaction by building the &[u8] using raw parts of the struct - serializing a new transaction struct into &[u8] bytes
+    //     //-- converting a const raw pointer of an object and its length into the &[u8], the len argument is the number of elements, not the number of bytes
+    //     //-- the total size of the generated &[u8] is the number of elements (each one has 1 byte size) * mem::size_of::<Transaction>() and it must be smaller than isize::MAX
+    //     //-- here number of elements or the len for a struct is the size of the total struct which is mem::size_of::<Transaction>()
+    //     slice::from_raw_parts(deserialized_transaction_borsh as *const Transaction as *const u8, mem::size_of::<Transaction>()) //-- it'll form a slice from the pointer to the struct and the total size of the struct which is the number of elements inside the constructed &[u8] array; means number of elements in constructing a &[u8] from a struct is the total size of the struct allocated in the memory
+    // };
     
     
     

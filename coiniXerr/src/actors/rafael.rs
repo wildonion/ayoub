@@ -155,7 +155,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     #[derive(Clone, Debug)]
     pub struct MetaData{ 
         pub id: Uuid,
-        pub actor: ActorRef<<actors::peer::Validator as Actor>::Msg>, //-- validator actor with the mailbox of type Msg; aslo Validator actor should implements the Debug and Clone trait also
+        pub actor: ActorRef<<Validator as Actor>::Msg>, //-- validator actor with the mailbox of type Msg; aslo Validator actor should implements the Debug and Clone trait also
         pub link_to_server: Option<LinkToService>, //-- we've just saved the location address of the current service inside the memory
         pub error: Option<AppError>, //-- any runtime error caused either by the runtime itself or the storage crash
         pub node_addr: Option<SocketAddr>, //-- socket address of this node
@@ -165,7 +165,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     impl MetaData{
         pub fn update_validator_transaction(&mut self, transaction: Option<Transaction>){ //-- updating the recent_transaction field of the validator actor is done using a mutable borrower (pointer) as the parameter of the update_validator_transaction() method 
-            self.actor.tell(actors::peer::UpdateTx{id: Uuid::new_v4(), tx: transaction}, None); //-- telling the validator actor that we want to update the last transaction of this validator
+            self.actor.tell(UpdateTx{id: Uuid::new_v4(), tx: transaction}, None); //-- telling the validator actor that we want to update the last transaction of this validator
         }
     }
     
@@ -273,10 +273,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         fn schedule(&self) -> Self{
 
-            // NOTE - shared data state between threads: always borrow in iterating and passing into new scope since rust doesn’t obey any garbage collection rule And In order to pass and share a reference of the encoded type (borsh/serde) between threads the type must be send sync and static across threads
-            // NOTE - actors are objects that contains busty threads inside to solve incoming tasks in multiple threads and send message between other actors asyncly
-            // NOTE - based on Mutext concept we can borrow the data multiple times (multiple immutable ownership) by passing it through mpsc channel but mutate it only once at a time inside a thread
-            // NOTE - actors inside a single code base can communicate through a none socket message passing channel like mpsc but in two different system can communicate with each other through a p2p json rpc (over http2, ws and tcp) calls like near protocol
+            // TODO - message scheduling in another actor
             // TODO - use multithreading, channels (oneshot and mpsc) and cryptography algos and also types must be send + sync + static across threads and .awaits
             // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 
@@ -284,37 +281,35 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // TODO - scheduling a promise of future object contains the method call (ActionReceipt) and get the resolved of the pending DataReceipt object from the executed future object inside a callback inside where we've scheduled the call
             // TODO - try different IO streaming and future traits on a defined buffer from the following crates like mpsc and Mutex data structures
             // TODO - consider every service a shard which can communicate (like executing each other's methods asyncly) with each other using their actors which has been implemented for each service through mpsc channels  
-            // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service 
-            //        to be executed and triggered inside the second service and get the response inside a callback method using .then()
-            // TODO - incoming scheduled event from a thread of the first service actor inside a free thread of the second service actor 
-            //        must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
+            // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service to be executed and triggered inside the second service and get the response inside a callback method using .then()
+            // TODO - incoming scheduled event from a thread of the first service actor inside a free thread of the second service actor must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
             // TODO - build a protocol based on binary address to transmit data between actors using mpsc tunnel like onionary://0001010101:2349
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
-            // ....  
-            // ....
-            // let message = Arc::new( //-- we can send this message asyncly between each services actors threads using mpsc channel since mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
-            //     Mutex::new(
-            //             utils::Storagekey::ByNFTContractIdInner{ 
-            //                 account_id_hash: [23, 24] 
-            //             }
-            //         )
-            //     );
-            // let resp = Schedule::on(service_address)
-            //                  .data(message) //-- this is the data that must be executed on second service and it can be the name of a method inside that service 
-            //                  .run_in_parallel()
-            //                  .then(self.callback()); //-- wait to solve the future
-            // NOTE - scheduling a promise object which will call the built-in method of the near protocol the transfer() method which will be executed later asyncly to transfer Ⓝ to the creator contract acctor account
-            // let resp = Schedule::on(service_address) //-- scheduling a future object in here on another service which must gets executed later asyncly to run the scheduled method which in our case is the transfer() method
-            //                  .transfer(3) //-- this is the amount that must gets transferred to the second service
-            //                  .run_in_parallel()
-            //                  .then(self.callback()); //-- wait to solve the future
-            // NOTE - calling between two wasm files (since every wasm file is a service) is done like the following since every wasm file is an actor which can send message through mpsc channel to another actor or wasm file or service based on their unique address
-            // let resp = self.current_service.send(msg).to(another_serivce).await; //-- msg must be a json stringified in form "{ \"key\": \"value\" }" like "{ \"storage_cost\": \"5\" }" which can be decoded in destination service 
+            // ...
+            /*
+                let message = Arc::new( //-- we can send this message asyncly between each services actors threads using mpsc channel since mpsc means multiple thread can access the Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) but only one of them can mutate the T out of the Arc by locking on the Mutex
+                    Mutex::new(
+                            utils::Storagekey::ByNFTContractIdInner{ 
+                                account_id_hash: [23, 24] 
+                            }
+                        )
+                    );
+                let resp = Schedule::on(service_address)
+                                .data(message) //-- this is the data that must be executed on second service and it can be the name of a method inside that service 
+                                .run_in_parallel()
+                                .then(self.callback()); //-- wait to solve the future
+                NOTE - scheduling a promise object which will call the built-in method of the near protocol the transfer() method which will be executed later asyncly to transfer Ⓝ to the creator contract acctor account
+                let resp = Schedule::on(service_address) //-- scheduling a future object in here on another service which must gets executed later asyncly to run the scheduled method which in our case is the transfer() method
+                                .transfer(3) //-- this is the amount that must gets transferred to the second service
+                                .run_in_parallel()
+                                .then(self.callback()); //-- wait to solve the future
+                NOTE - calling between two wasm files (since every wasm file is a service) is done like the following since every wasm file is an actor which can send message through mpsc channel to another actor or wasm file or service based on their unique address
+                let resp = self.current_service.send(msg).to(another_serivce).await; //-- msg must be a json stringified in form "{ \"key\": \"value\" }" like "{ \"storage_cost\": \"5\" }" which can be decoded in destination service 
+            */
 
             todo!()
-
 
         }
 

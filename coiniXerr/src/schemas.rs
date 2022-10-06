@@ -58,7 +58,7 @@ pub struct Voter{
     pub owner: Validator, //-- owner is a Validator
     pub rewards: Option<i32>,
     pub signed_at: Option<i64>,
-    pub staker_id: Uuid, //-- delegator id who staked his/her money for this voter
+    pub staker_id: Option<Uuid>, //-- delegator id who staked his/her money for this voter
 }
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
@@ -81,13 +81,49 @@ pub struct Voter{
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 //                                                  Parachain Slot Schema                      
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Slot{ //-- pool of validators for slot auctions
     pub id: Uuid,
     pub name: String,
-    pub validators: Vec<Voter>, //-- auction voters for this slot
+    pub voters: Vec<Voter>, //-- auction voters for this slot
     pub epoch: u32, //-- number of created blocks to generate new slot auction process 
 } 
+
+impl Slot{
+
+    //// we've cloned the self.validators and current_validators to prevent ownership moving
+    pub fn get_validator(&self, validator_addr: SocketAddr) -> Option<Validator>{
+        let current_voters = self.voters.clone();
+        let index = current_voters.iter().position(|v| v.owner.addr == validator_addr); //-- this user has already participated in this event
+        if index != None{
+            Some(current_voters[index.unwrap()].clone().owner) //// returning the validator of the passed in socket address
+        } else{
+            None
+        }
+    }
+
+    pub fn add_validator(&mut self, pid: Uuid, validator_addr: SocketAddr) -> Self{
+        
+        //// building a new voter to push into the voters 
+        let new_voter = Voter{
+            parachain_id: pid,
+            owner: Validator{
+                id: Uuid::new_v4(),
+                addr: validator_addr,
+                recent_transaction: None, //// it must be filled inside the stream channel the receiver side once the his/her incoming transaction gets signed
+                mode: ValidatorMode::Mine,
+                ttype_request: None, //// it must be filled inside the transaction mempool channel the receiver side once the transaction arrived
+            },
+            rewards: Some(0),
+            signed_at: Some(chrono::Local::now().naive_local().timestamp()),
+            staker_id: None,
+        };
+
+        self.voters.push(new_voter);
+        Self { id: self.id, name: self.name.clone(), voters: self.voters.clone(), epoch: self.epoch }
+    }
+
+}
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 

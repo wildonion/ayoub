@@ -84,6 +84,8 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                         created_at: Some(now),
                                         updated_at: Some(now),
                                         last_login_time: Some(now),
+                                        wallet_address: Some("0x0000000000000000000000000000000000000000".to_string()),
+                                        balance: Some(0)
                                     };
                                     match users.insert_one(user_doc, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
                                         Ok(insert_result) => {
@@ -243,6 +245,8 @@ pub async fn register_god(req: Request<Body>) -> GenericResult<hyper::Response<B
                                                 created_at: user_doc.created_at,
                                                 updated_at: Some(now), // NOTE - updated
                                                 last_login_time: user_doc.last_login_time,
+                                                wallet_address: user_doc.wallet_address,
+                                                balance: user_doc.balance
                                             };
                                             let response_body = ctx::app::Response::<schemas::auth::UserUpdateResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is UserUpdateResponse struct
                                                 data: Some(user_info),

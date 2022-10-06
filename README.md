@@ -6,15 +6,11 @@
 
 > coiniXerr: ```cargo run --bin coiniXerr```
 
-> onion: ```cargo run --bin onion```
-
 # ☣️ Build for Production
 
 > ayoub PaaS: ```cargo build --bin ayoub --release```
 
 > coiniXerr: ```cargo build --bin coiniXerr --release```
-
-> onion: ```cargo build --bin onion --release```
 
 # 🗒 Notes
 

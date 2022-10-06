@@ -72,6 +72,8 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                     created_at: user_doc.created_at,
                                                     updated_at: user_doc.updated_at,
                                                     last_login_time: Some(now),
+                                                    wallet_address: user_doc.wallet_address,
+                                                    balance: user_doc.balance
                                                 };
                                                 let response_body = ctx::app::Response::<schemas::auth::LoginResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is LoginResponse struct
                                                     data: Some(user_response),

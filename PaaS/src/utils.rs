@@ -80,6 +80,45 @@ pub mod jwt{
 
 
 
+pub mod otp{
+
+    pub struct OTPSuccess;
+    pub struct OTPErr;
+    pub struct PhoneNumber;
+    pub struct Auth;
+
+    pub trait Otp{
+
+        type Message;
+
+        fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>;
+
+    }
+
+    impl Otp for Auth{
+
+        type Message = String;
+        
+        fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>{
+
+            todo!()
+
+        }
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct UploadFile{
     pub name: Option<String>, //-- we've used Option since it might be no path at all
@@ -303,51 +342,6 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---------------------------------------- interfaces
-// -----------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------
-
-pub struct OTPSuccess;
-pub struct OTPErr;
-pub struct PhoneNumber;
-pub struct Auth;
-
-pub trait Otp{
-
-    type Message;
-
-    fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>;
-
-}
-
-impl Otp for Auth{
-
-    type Message = String;
-    
-    fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>{
-
-        todo!()
-
-    }
-
-}
 
 
 

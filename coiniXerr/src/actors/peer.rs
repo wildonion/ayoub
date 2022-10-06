@@ -68,7 +68,7 @@ impl CRC20 for Validator{ //-- issuing a FT (fungible token) contract for a vali
 
 
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-//                  Messages and enums
+//                  messages events
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize ,Default, Clone, Debug)]
@@ -86,12 +86,50 @@ pub struct Contract { //-- Contract event between two validators on the coiniXer
     pub ttype: u8,
 }
 
-
 #[derive(Clone, Debug)] //-- bounding to Clone and the Debug trait
 pub struct UpdateTx { //-- update transaction message to tell the actor to update the last transaction with the new one
     pub id: Uuid,
     pub tx: Option<Transaction>,
 }
+
+#[derive(Clone, Debug)] //-- bounding to Clone and the Debug trait
+pub struct UpdateMode { //-- update mode message to tell the actor to update the validator mode with the new one
+    pub id: Uuid,
+    pub mode: Option<ValidatorMode>,
+}
+
+#[derive(Clone, Debug)] //-- bounding to Clone and the Debug trait
+pub struct Communicate{
+    pub id: Uuid,
+    pub cmd: Cmd,
+}
+
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, Default)]
+pub enum Cmd{
+    #[default] //// enum data types can only have one field as the default value
+    GetValidatorUuid, //// Mine field is the default value; utf8 encoded variant is 0
+    GetAddr, //// utf8 encoded variant is 1
+    GetRecentTx, //// utf8 encoded variant is 2
+    GetMode, //// utf8 encoded variant is 3
+}
+
+#[derive(Clone, Debug)]
+pub struct ValidatorJoined(pub Uuid); //// a message event to broadcast it by the channel to all validator subscriber actors about joining a new validator - first element of this struct is the validator uuid
+
+#[derive(Clone, Debug)]
+pub struct ValidatorUpdated(pub Uuid); //// a message event to broadcast it by the channel to all validator subscriber actors about udpating a validator - first element of this struct is the validator uuid
+
+#[derive(Clone, Debug)]
+pub struct UpdateValidatorAboutMempoolTx(pub Uuid); //// a message event to broadcast it by the channel to all validator subscriber actors about incoming a new transaction inside the mempool - first element of this struct is the transaction uuid
+
+#[derive(Clone, Debug)]
+pub struct UpdateValidatorAboutMiningProcess(pub Uuid); //// a message event to broadcast it by the channel to all validator subscriber actors about mining process - first element of this struct is the block uuid
+
+
+
+
+
+
 
 
 
@@ -103,7 +141,7 @@ pub struct UpdateTx { //-- update transaction message to tell the actor to updat
 //                 Validator type actor
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
-#[actor(Contract, UpdateTx)] //-- Validator actor will receive a message of type Contract and UpdateTx
+#[actor(Communicate, Contract, UpdateTx, UpdateMode, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess)] //-- Validator actor will receive a message from other actors or a channel to subscribe to of type Communicate, Contract, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx and UpdateValidatorAboutMiningProcess
 #[derive(Debug, Clone, Serialize, Deserialize)] //-- trait Clone is required to prevent the object of this struct from moving
 pub struct Validator {
     pub id: Uuid,
@@ -116,8 +154,28 @@ pub struct Validator {
 
 impl Validator{
 
-    pub fn update_transaction(&mut self, transaction: Option<Transaction>){
+    pub fn set_transaction(&mut self, transaction: Option<Transaction>){
         self.recent_transaction = transaction;
+    }
+
+    pub fn set_mode(&mut self, mode: ValidatorMode){
+        self.mode = mode;
+    }
+
+    pub fn get_uuid(&self) -> Option<Uuid>{
+        Some(self.id.clone())
+    }
+
+    pub fn get_mode(&self) -> Option<ValidatorMode>{
+        Some(self.mode.clone())
+    }
+
+    pub fn get_recent_transaction(&self) -> Option<Transaction>{
+        self.recent_transaction.clone()
+    }
+
+    pub fn get_addr(&self) -> Option<SocketAddr>{
+        Some(self.addr.clone())
     }
 
 }
@@ -128,15 +186,23 @@ impl Validator{
 
 
 
+
+
+
+
+
+
+
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-//    implementing the Actors for the Validator type
+//    implementing the Actor for the Validator type
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 impl Actor for Validator{
 
+    //// Validator actor must support the message type of the channels related to the validator message events (ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess) that they want to subscribe to
     //// When using the #[actor()] attribute, the actor's Msg associated type should be set to '[DataType]Msg'. 
     //// E.g. if an actor is a struct named MyActor, then the Actor::Msg associated type will be MyActorMsg.
-    type Msg = ValidatorMsg; //// Msg associated type is the actor mailbox type and is of type ValidatorMsg which is the Validator type itself; actors can communicate with each other by sending message to each other
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess //// Msg associated type is the actor mailbox type and is of type ValidatorMsg which is the Validator type itself; actors can communicate with each other by sending message to each other
 
     fn recv(&mut self, 
             ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
@@ -164,12 +230,17 @@ impl ActorFactoryArgs<(Uuid, SocketAddr, Option<Transaction>, Mode, Option<u8>)>
 
 
 
-// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-//    implementing the Receive types for our actor
-// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+
+
+
+//// we must first define the event then impl its handler for our actor
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈  
+//      message event receive handlers for the Validator actor
+// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 impl Receive<Contract> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type Contract
-    type Msg = ValidatorMsg;
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
 
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
@@ -185,7 +256,7 @@ impl Receive<Contract> for Validator{ //// implementing the Receive trait for th
 
 
 impl Receive<UpdateTx> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type UpdateTx
-    type Msg = ValidatorMsg;
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
 
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
@@ -193,9 +264,158 @@ impl Receive<UpdateTx> for Validator{ //// implementing the Receive trait for th
                 _sender: Sender){
     
         info!("-> {} - message info received with id [{}] and new transaction [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.tx.as_ref().unwrap()); //// calling as_ref() method on the _msg.tx to prevent ownership moving
-        self.update_transaction(_msg.tx); //// updating the last transaction of a specific validator using the incoming message of type UpdateTx 
+        self.set_transaction(_msg.tx); //// updating the last transaction of a specific validator using the incoming message of type UpdateTx 
                     
     }
 
+}
 
+
+impl Receive<UpdateMode> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type UpdateMode
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: UpdateMode, //-- _msg is of type UpdateMode since we're implementing the Receive trait for the UpdateMode type
+                _sender: Sender){
+    
+        info!("-> {} - message info received with id [{}] and new transaction [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.mode.as_ref().unwrap()); //// calling as_ref() method on the _msg.tx to prevent ownership moving
+        self.set_mode(_msg.mode.unwrap()); //// updating the last transaction of a specific validator using the incoming message of type UpdateMode 
+                    
+    }
+    
+}
+
+
+impl Receive<Communicate> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type Communicate
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: Communicate, //-- _msg is of type Communicate since we're implementing the Receive trait for the Communicate type
+                _sender: Sender){
+    
+        info!("-> {} - message info received with id [{}] and command [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.cmd);
+        match _msg.cmd{
+            Cmd::GetAddr => {
+                info!("-> {} - getting validator address with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let validator_address = self.get_addr();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        validator_address, //// sending the validator_address as the response message from this actor (not tha main() function)
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            Cmd::GetMode => {
+                info!("-> {} - getting validator mode with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let validator_mode = self.get_mode();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        validator_mode, //// sending the validator_mode as the response message from this actor (not tha main() function)
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            Cmd::GetRecentTx => {
+                info!("-> {} - getting the recent transaction of the validator with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let validator_recent_transaction = self.get_recent_transaction();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        validator_recent_transaction, //// sending the validator_recent_transaction as the response message from this actor (not tha main() function)
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            },
+            _ => { //// Get Uuid
+                info!("-> {} - getting the slot of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                let validator_uuid = self.get_uuid();
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell(
+                        validator_uuid, //// sending the validator_uuid as the response message from this actor (not tha main() function)
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                    );
+            }
+        }
+                    
+    }
+    
+}
+
+
+impl Receive<ValidatorJoined> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type ValidatorJoined
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: ValidatorJoined, //-- _msg is of type ValidatorJoined since we're implementing the Receive trait for the ValidatorJoined type
+                _sender: Sender){
+    
+        info!("-> {} - new validator joined with id [{}]", chrono::Local::now().naive_local(), _msg.0); //// ValidatorJoined is a tuple like struct so we have to get the first elem of it using .0
+        
+        
+        // other logics goes here
+        // ...
+                    
+    }
+    
+}
+
+
+impl Receive<ValidatorUpdated> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type ValidatorUpdated
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: ValidatorUpdated, //-- _msg is of type ValidatorUpdated since we're implementing the Receive trait for the ValidatorUpdated type
+                _sender: Sender){
+    
+        info!("-> {} - validator with id [{}] updated", chrono::Local::now().naive_local(), _msg.0); //// ValidatorJoined is a tuple like struct so we have to get the first elem of it using .0
+        
+        
+        // other logics goes here
+        // ...
+                    
+    }
+}
+
+
+impl Receive<UpdateValidatorAboutMempoolTx> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type UpdateValidatorAboutMempoolTx
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: UpdateValidatorAboutMempoolTx, //-- _msg is of type UpdateValidatorAboutMempoolTx since we're implementing the Receive trait for the UpdateValidatorAboutMempoolTx type
+                _sender: Sender){
+    
+        info!("-> {} - new transaction with id [{}] slided into the mempool", chrono::Local::now().naive_local(), _msg.0); //// UpdateValidatorAboutMempoolTx is a tuple like struct so we have to get the first elem of it using .0
+        
+        
+        // other logics goes here
+        // ...
+                    
+    }
+}
+
+
+impl Receive<UpdateValidatorAboutMiningProcess> for Validator{ //// implementing the Receive trait for the Validator actor to handle the incoming message of type UpdateValidatorAboutMiningProcess
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess
+
+    fn receive(&mut self,
+                _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
+                _msg: UpdateValidatorAboutMiningProcess, //-- _msg is of type UpdateValidatorAboutMiningProcess since we're implementing the Receive trait for the UpdateValidatorAboutMiningProcess type
+                _sender: Sender){
+    
+        info!("-> {} - start mining process of block with id [{}]", chrono::Local::now().naive_local(), _msg.0); //// UpdateValidatorAboutMiningProcess is a tuple like struct so we have to get the first elem of it using .0
+        
+        
+        // other logics goes here
+        // ...
+                    
+    }
 }
