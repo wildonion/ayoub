@@ -94,11 +94,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     env::set_var("RUST_LOG", "trace");
     pretty_env_logger::init();
     dotenv().expect("⚠️ .env file not found");
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
-    let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
     let io_buffer_size = env::var("IO_BUFFER_SIZE").expect("⚠️ no io buffer size variable set").parse::<u32>().unwrap() as usize; //-- usize is the minimum size in os which is 32 bits
     let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
     let host = env::var("HOST").expect("⚠️ no host variable set");
@@ -124,13 +120,6 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     // -------------------------------- app storage setup
     //
     // ---------------------------------------------------------------------
-    let db_addr = if environment == "dev"{
-        format!("{}://{}:{}", db_engine, db_host, db_port)
-    } else if environment == "prod"{
-        format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
-    } else{
-        "".to_string()
-    };
     let empty_app_storage = Some( //-- putting the Arc-ed db inside the Option
         Arc::new( //-- cloning app_storage to move it between threads
             ctx::app::Storage{ //-- defining db context 
@@ -147,7 +136,21 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
         )
     );
     let app_storage = if db_engine.as_str() == "mongodb"{
-        info!("switching to mongodb - {}", chrono::Local::now().naive_local());
+        info!("switching to mongodb");
+        
+        let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+        let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
+        let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
+        let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
+        
+        let db_addr = if environment == "dev"{
+            format!("{}://{}:{}", db_engine, db_host, db_port)
+        } else if environment == "prod"{
+            format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
+        } else{
+            "".to_string()
+        };
+        
         match ctx::app::Db::new().await{
             Ok(mut init_db) => {
                 init_db.engine = Some(db_engine);
@@ -170,10 +173,28 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
                 )
             },
             Err(e) => {
-                error!("init db error {} - {}", e, chrono::Local::now().naive_local());
+                error!("init db error - {}", e);
                 empty_app_storage //-- whatever the error is we have to return and empty app storage instance 
             }
         }
+    } else if db_engine.as_str() == "postgres"{
+        
+        let db_host = env::var("POSTGRES_HOST").expect("⚠️ no db host variable set");
+        let db_port = env::var("POSTGRES_PORT").expect("⚠️ no db port variable set");
+        let db_username = env::var("POSTGRES_USERNAME").expect("⚠️ no db username variable set");
+        let db_password = env::var("POSTGRES_PASSWORD").expect("⚠️ no db password variable set");
+        
+        let db_addr = if environment == "dev"{
+            format!("{}://{}:{}", db_engine, db_host, db_port)
+        } else if environment == "prod"{
+            format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
+        } else{
+            "".to_string()
+        };
+
+        // TODO 
+        todo!();
+    
     } else{
         empty_app_storage
     };

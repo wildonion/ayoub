@@ -28,23 +28,35 @@ Coded by
 
 
 
-                    ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-                          coiniXerr node design pattern explained
-                    ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+        ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+               coiniXerr node design pattern explained
+        ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
-a transaction of a transfer event might be send either using the http api or through
-a tcp stream to the coiniXerr server handled each one in parallel by a multithreading based scheduler; 
-10 threads has been spawned in overall for all incoming socket connections to handle each task inside each opened stream. 
-an actor will be started on successful connection from every peer only in tcp mode. 
-once the transaction has received asynchronously and simultaneously they must be signed in order to send them 
-through the mpsc job queue channel to down side of the channel for mining process 
-and relatively for all users to have a successful transfer. they can only be signed 
-as long as the receiver of the transaction channel is waiting for the new transaction 
-and if the receiver was not able to receive caused by a sudden shutdown, dropped sender 
-(caused by joining the thread contains sender to stop the task from being processed in background) and 
-timeout or deadline issue that transaction will not be signed and the transfer process won't be 
-a successful event. of course if the transaction is not signed means there will be no mining process 
-cause the receiver is not waiting to receive anything from the sender to put them in a block for mining.
+        a transaction might be send through a tcp stream to the coiniXerr server and each of which will be handled in parallel
+        an actor will be started on successful connection from every peer only in tcp mode. once the transaction has received 
+        asynchronously and simultaneously they must be signed in order to send them through the mpsc job queue channel to 
+        down side of the mempool channel for mining process and relatively for all users to have a successful transfer. 
+        They can only be signed as long as the receiver of the transaction channel or the mempool is waiting for 
+        the new transaction and if the receiver was not able to receive caused by a sudden shutdown, dropped sender 
+        (caused by joining the thread contains sender to stop the task from being processed in background) and 
+        timeout or deadline issue that transaction will not be signed and the transfer process won't be a successful event. 
+        of course if the transaction is not signed means there will be no mining process cause the receiver is not waiting 
+        to receive anything from the sender to put them in a block for mining.
+        The main structure of the coiniXerr network is its parachains in which every parachain has its own blockchain stuffs and an
+        special field called slot in which every 5 seconds a reset task will be scheduled to be executed on the selected parachain to 
+        reset all its feilds by a successful auction process by the coiniXerr validators. 
+        Also there are channels related to parachain and validator actors used to broadcast new transaction income, update a specific validator 
+        and parachain state, new validator and parachain joined and block mining process message events to related subscribers.
+        All subscribers of the mentioned channels which are interested on specific topic must support the meesage event of the topic 
+        in order to be able subscribe to that topic.
+      
+
+
+        Concepts:
+            - broadcasting (like mpsc channel)
+            - streaming protocols (like tpc, webrtc, websocket, grpc and socks)
+            - multithreading (like tokio and riker)
+            - scheduling
 
 
 
@@ -113,7 +125,7 @@ cause the receiver is not waiting to receive anything from the sender to put the
 // #![allow(unused)] //-- will let the unused vars be there - we have to put this on top of everything to affect the whole crate
 #![macro_use] //-- apply the macro_use attribute to the root cause it's an inner attribute and will be effect on all things inside this crate
 
-use log::{info, error};
+use log::{info, error, LevelFilter};
 use tokio::net::{TcpListener, TcpStream}; //-- async tcp listener and stream
 use tokio::io::{AsyncReadExt, AsyncWriteExt}; //-- read from the input and write to the output - AsyncReadExt and AsyncWriteExt are traits which are implemented for an object of type TcpStream and based on orphan rule we must use them here to use the read() and write() method asyncly which has been implemented for the object of TcpStream (these trait have been implemented for TcpStream structure)
 use tokio::sync::mpsc; //-- to share values between multiple async tasks spawned by the tokio spawner which is based on green threads so shared state can be change only one at a time inside a thread 
@@ -128,12 +140,13 @@ use std::net::SocketAddr; //-- these structures are not async; to be async in re
 use std::collections::{HashMap, HashSet};
 use dotenv::dotenv;
 use riker::actors::*;
+use riker::system::ActorSystem;
 use riker_patterns::ask::*; //// used to ask any actor to give us the info about or update the state of its guarded type 
 use crate::actors::{
                     parathread::{Parachain, Communicate as ParachainCommunicate, Cmd as ParachainCmd, UpdateParachainEvent, ParachainCreated, ParachainUpdated}, 
                     peer::{Validator, Contract, Mode as ValidatorMode, Communicate as ValidatorCommunicate, Cmd as ValidatorCmd, UpdateMode, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess}, 
-                    rafael::env::{Serverless, MetaData, Runtime as RafaelRt}
-                }; //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
+                    rafael::env::{Serverless, MetaData, Runtime as RafaelRt} //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
+                }; 
 use crate::schemas::{Transaction, Block, Slot, Chain, Staker, Db, Storage, Mode};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
 use mongodb::{Client, bson::oid::ObjectId};
@@ -141,7 +154,11 @@ use futures::{Future, StreamExt, executor::block_on, future::RemoteHandle}; //--
 use serde::{Deserialize, Serialize};
 use rand::Rng;
 use borsh::{BorshDeserialize, BorshSerialize};
+use log4rs::append::console::ConsoleAppender;
+use log4rs::config::{Appender, Root};
+use log4rs::Config;
 use old; //// import lib.rs methods
+
 
 
 
@@ -178,8 +195,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     
 
+    
 
 
+    
 
 
     
@@ -187,32 +206,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     ///////                  env vars setup
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈     
     
-    env_logger::init();
+    let stdout = ConsoleAppender::builder().build();
+    let config = Config::builder()
+                                    .appender(Appender::builder().build("stdout", Box::new(stdout)))
+                                    .build(Root::builder().appender("stdout").build(LevelFilter::Trace))
+                                    .unwrap();
+    let _handle = log4rs::init_config(config).unwrap();
     dotenv().expect("⚠️ .env file not found");
 
-    let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
-    let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
-    let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
-    let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let mut run_time_info = RafaelRt(HashMap::new());
     let runtime_instance = run_time_info.run(); //-- run() method is the method of the Rafael serverless trait
     let arc_mutex_runtime_info_object = Arc::new(Mutex::new(runtime_instance)); //-- we can clone the runtime_instance without using Arc cause Clone trait is implemented for RafaelRt -> MetaData -> Validator actor
-    let buffer_size = env::var("BUFFER_SIZE").expect("⚠️ please set buffer size in .env").parse::<usize>().unwrap();
-    let max_block_size = env::var("BUFFER_SIZE").expect("⚠️ please set block size in .env").parse::<usize>().unwrap();
+    let buffer_size = env::var("IO_BUFFER_SIZE").expect("⚠️ please set buffer size in .env").parse::<usize>().unwrap();
+    let max_block_size = env::var("IO_BUFFER_SIZE").expect("⚠️ please set block size in .env").parse::<usize>().unwrap();
     let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
     let host = env::var("HOST").expect("⚠️ please set host in .env");
-    let coiniXerr_http_port = env::var("COINIXERR_HTTP_PORT").expect("⚠️ please set coiniXerr http port in .env");
     let coiniXerr_tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
     let pool = utils::scheduler::ThreadPool::new(10); //-- spawning 10 threads in overall per incoming stream to handle all incoming transactions from every stream concurrently and simultaneously
-    let (simd_sender, mut simd_receiver) = mpsc::channel::<u8>(buffer_size); //-- defining sender and receiver of the simd ops
     let (stream_sender, mut stream_receiver) = mpsc::channel::<(
                                                                                                                                 TcpStream, 
                                                                                                                                 Uuid, 
                                                                                                                                 Arc<Mutex<RafaelRt>>, 
-                                                                                                                                Arc<Mutex<ActorRef<<Validator as Actor>::Msg>>>,
-                                                                                                                                Arc<Mutex<ActorRef<ChannelMsg<ValidatorUpdated>>>>, //// each channels are actors and actors in riker are of type ActorRef which can be cloned and send across threads since they are send sync and have a valid lifetime 
+                                                                                                                                Arc<Mutex<ActorRef<<Validator as Actor>::Msg>>>, //// we're getting the mailbox type of Validator actor first by casting it into an Actor then getting its Msg mailbox which is of type ValidatorMsg  
+                                                                                                                                Arc<Mutex<ActorRef<ChannelMsg<ValidatorUpdated>>>>, //// each channels are actors and actors in riker are of type ActorRef which can be cloned and send across threads since they are send sync and have a valid lifetime to share between threads
                                                                                                                                 //// passing the coiniXerr actor system through the mpsc channel since tokio::spawn(async move{}) inside the loop will move all vars, everything from its behind to the new scope and takes the ownership of them in first iteration and it'll gets stucked inside the second iteration since there is no var outside the loop so we can use it! hence we have to pass the var through the channel to have it inside every iteration of the `waiting-on-channel-process` loop
                                                                                                                                 //// no need to put ActorSystem inside the Arc since it's bounded to Clone trait itself and also we don't want to change it thus there is no Mutex guard is needed
                                                                                                                                 ActorSystem 
@@ -220,7 +238,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                                                                                                             )>(buffer_size); //-- mpsc channel to send the incoming stream, the generated uuid of the runtime info object and the runtime info object itself to multiple threads through the channel for each incoming connection from the socket
     let (mempool_sender, mut mempool_receiver) = mpsc::channel::<(
                                                                                                                                 Arc<Mutex<Transaction>>, 
-                                                                                                                                Arc<Mutex<ActorRef<<Validator as Actor>::Msg>>>,
+                                                                                                                                Arc<Mutex<ActorRef<<Validator as Actor>::Msg>>>, //// we're getting the mailbox type of Validator actor first by casting it into an Actor then getting its Msg mailbox which is of type ValidatorMsg  
                                                                                                                                 //// passing the coiniXerr actor system through the mpsc channel since tokio::spawn(async move{}) inside the loop will move all vars, everything from its behind to the new scope and takes the ownership of them in first iteration and it'll gets stucked inside the second iteration since there is no var outside the loop so we can use it! hence we have to pass the var through the channel to have it inside every iteration of the `waiting-on-channel-process` loop
                                                                                                                                 //// no need to put ActorSystem inside the Arc since it's bounded to Clone trait itself and also we don't want to change it thus there is no Mutex guard is needed
                                                                                                                                 ActorSystem 
@@ -245,13 +263,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     ///////                 app storage setup
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
     
-    let db_addr = if environment == "dev"{
-        format!("{}://{}:{}", db_engine, db_host, db_port)
-    } else if environment == "prod"{
-        format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
-    } else{
-        "".to_string()
-    };
     let empty_app_storage = Some( //-- putting the Arc-ed db inside the Option
         Arc::new( //-- cloning app_storage to move it between threads
             Storage{ //-- defining db context 
@@ -268,7 +279,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         )
     );
     let app_storage = if db_engine.as_str() == "mongodb"{
-        info!("switching to mongodb - {}", chrono::Local::now().naive_local());
+        info!("🛢️ switching to mongodb");
+        
+        let db_host = env::var("MONGODB_HOST").expect("⚠️ no db host variable set");
+        let db_port = env::var("MONGODB_PORT").expect("⚠️ no db port variable set");
+        let db_username = env::var("MONGODB_USERNAME").expect("⚠️ no db username variable set");
+        let db_password = env::var("MONGODB_PASSWORD").expect("⚠️ no db password variable set");
+        
+        let db_addr = if environment == "dev"{
+            format!("{}://{}:{}", db_engine, db_host, db_port)
+        } else if environment == "prod"{
+            format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
+        } else{
+            "".to_string()
+        };
+        
         match Db::new().await{
             Ok(mut init_db) => {
                 init_db.engine = Some(db_engine);
@@ -291,10 +316,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                 )
             },
             Err(e) => {
-                error!("init db error {} - {}", e, chrono::Local::now().naive_local());
+                error!("😕 init db error - {}", e);
                 empty_app_storage //-- whatever the error is we have to return and empty app storage instance 
             }
         }
+    } else if db_engine.as_str() == "postgres"{
+        
+        let db_host = env::var("POSTGRES_HOST").expect("⚠️ no db host variable set");
+        let db_port = env::var("POSTGRES_PORT").expect("⚠️ no db port variable set");
+        let db_username = env::var("POSTGRES_USERNAME").expect("⚠️ no db username variable set");
+        let db_password = env::var("POSTGRES_PASSWORD").expect("⚠️ no db password variable set");
+        
+        let db_addr = if environment == "dev"{
+            format!("{}://{}:{}", db_engine, db_host, db_port)
+        } else if environment == "prod"{
+            format!("{}://{}:{}@{}:{}", db_engine, db_username, db_password, db_host, db_port)
+        } else{
+            "".to_string()
+        };
+
+        // TODO 
+        todo!();
+    
     } else{
         empty_app_storage
     };
@@ -328,11 +371,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let coiniXerr_sys = SystemBuilder::new()
                                                     .name("coiniXerr")
                                                     .create()
-                                                    .unwrap(); //// unwrapping the last functional method
-    let app_name = coiniXerr_sys.config()
-                                        .get_str("app.name")
-                                        .unwrap(); 
-    info!("-> {} - [{}] actor system, server and storage are set up", chrono::Local::now().naive_local(), app_name);
+                                                    .unwrap(); //// unwrapping the last functional method 
+    info!("🟢 actor system, server and storage are set up");
 
 
 
@@ -355,12 +395,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     ///////                        building coiniXerr events channels 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
-    let validator_joined_channel: ChannelRef<ValidatorJoined>              = channel("validator-joined-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by all validator actors) must subscribe to all topics (like joining a new validator) of this event for validator_joined_channel channel actor
-    let validator_updated_channel: ChannelRef<ValidatorUpdated>            = channel("validator-updated-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by all validator actors) must subscribe to all topics (like updating a validator) of this event for validator_updated_channel channel actor
-    let parachain_created_channel: ChannelRef<ParachainCreated>            = channel("parachain-created-channel", &coiniXerr_sys).unwrap(); //// parachain actors which are interested in this message event (the message type is supported by all parachain actors) must subscribe to all topics (like creating a new parachain) of this event for parachain_created_channel channel actor
-    let parachain_updated_channel: ChannelRef<ParachainUpdated>            = channel("parachain-updated-channel", &coiniXerr_sys).unwrap(); //// parachain actors which are interested in this message event (the message type is supported by all parachain actors) must subscribe to all topics (like updating a parachain) of this event for parachain_updated_channel channel actor
-    let mempool_updated_channel: ChannelRef<UpdateValidatorAboutMempoolTx> = channel("mempool-transaction-joined-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by all validator actors) must subscribe to all topics (like incoming a new transaction inside the mempool channel) of this event for mempool_updated_channel channel actor
-    let mining_channel: ChannelRef<UpdateValidatorAboutMiningProcess>      = channel("mining-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by all validator actors) must subscribe to all topics (like starting mining process) of this event for mining_channel channel actor
+    let validator_joined_channel: ChannelRef<ValidatorJoined>              = channel("validator-joined-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by and implemented for all validator actors) must subscribe to all topics (like joining a new validator) of this event for validator_joined_channel channel actor
+    let validator_updated_channel: ChannelRef<ValidatorUpdated>            = channel("validator-updated-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by and implemented for all validator actors) must subscribe to all topics (like updating a validator) of this event for validator_updated_channel channel actor
+    let parachain_created_channel: ChannelRef<ParachainCreated>            = channel("parachain-created-channel", &coiniXerr_sys).unwrap(); //// parachain actors which are interested in this message event (the message type is supported by and implemented for all parachain actors) must subscribe to all topics (like creating a new parachain) of this event for parachain_created_channel channel actor
+    let parachain_updated_channel: ChannelRef<ParachainUpdated>            = channel("parachain-updated-channel", &coiniXerr_sys).unwrap(); //// parachain actors which are interested in this message event (the message type is supported by and implemented for all parachain actors) must subscribe to all topics (like updating a parachain) of this event for parachain_updated_channel channel actor
+    let mempool_updated_channel: ChannelRef<UpdateValidatorAboutMempoolTx> = channel("mempool-transaction-joined-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by and implemented for all validator actors) must subscribe to all topics (like incoming a new transaction inside the mempool channel) of this event for mempool_updated_channel channel actor
+    let mining_channel: ChannelRef<UpdateValidatorAboutMiningProcess>      = channel("mining-channel", &coiniXerr_sys).unwrap(); //// validator actors which are interested in this message event (the message type is supported by and implemented for all validator actors) must subscribe to all topics (like starting mining process) of this event for mining_channel channel actor
+
+
+
+
 
 
 
@@ -382,18 +426,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
     ///////                   starting coiniXerr parachain networks 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
-    //// the ask model is used from main and for communicating between actors, because main 
-    //// itself is not an actor and cannot receive messages, this pattern is useful in context 
-    //// of an HTTP server handler, where you need to wait for a response from the actor system 
-    //// before you can send back the response to the client, it also works well when you are 
-    //// using any kind of function which can map on that future without having to explicitly 
-    //// block on the response and it can be solved using `.await`.
+    //// the ask model which is using a oneshot channel on behalf and all actors use 
+    //// message passing channel algos on behalf is used from main() to communicating 
+    //// between actors and allows values to be sent by actors to outside of the actor 
+    //// system because main() itself is not an actor and cannot receive messages, 
+    //// this pattern is useful in context of an HTTP server handler, where you need to 
+    //// wait for a response from the actor system before you can send back the response 
+    //// to the client, it also works well when you are using any kind of function which 
+    //// can map on that future without having to explicitly block on the response 
+    //// which can be solved using `.await`.
+    // 
+    //
+    //// sender param must be None inside the tell() method if we're sending message to the actor from the main()
+    //// sender param must be the actor caller iteself if we're returning a future objectr as a response from the result of calling the ask() function 
 
     // ----------------------------------------------------------------------
     //                      BUILDING THE SECOND PARACHAIN
     // ----------------------------------------------------------------------
     
-    info!("-> {} - building second parachain", chrono::Local::now().naive_local());
+    info!("🔗 building second parachain");
     let parachain_1_props = Props::new_args::<actors::parathread::Parachain, _>(
                                                                                                                             (Uuid::new_v4(), 
                                                                                                                             None, //// empty slot for now
@@ -407,10 +458,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //                GETTING THE UUID OF THE SECOND PARACHAIN
     // ----------------------------------------------------------------------
     
-    info!("-> {} - getting uuid of the second parachain", chrono::Local::now().naive_local());
-    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the uuid event cause the parachain is guarded by the ActorRef
+    info!("🎫 getting uuid of the second parachain");
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the uuid event cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_1, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetParachainUuid}); //// asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
+    let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_1, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetParachainUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
     let second_parachain_uuid = current_uuid_remote_handle.await;
 
     // ---------------------------------------------------------------------------------
@@ -422,16 +473,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                     msg: ParachainCreated(second_parachain_uuid.clone()), //// publishing the ParachainCreated message event to the parachain_created_channel channel 
                                     topic: "<second parachain created>".into(), //// setting the topic to <second parachain created> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
                                 }, 
-                                None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None 
+                                None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None 
                             );
 
     // ----------------------------------------------------------------------
     //                     BUILDING THE DEFAULT PARACHAIN
     // ----------------------------------------------------------------------
     
-    info!("-> {} - starting default parachain", chrono::Local::now().naive_local());
+    info!("🔗 starting default parachain");
     let mut chain = Some(Chain::default());
-    let current_slot_for_default_parachain = Slot::default(); //// default slot for the first run of the coiniXerr network; this field will be updated every 5 seconds for default and second parachain 
+    let current_slot_for_default_parachain = Slot::default(); //// default slot on the first run of the coiniXerr network; this field will be updated every 5 seconds for default and second parachain 
     let parachain_0_props = Props::new_args::<actors::parathread::Parachain, _>(
                                                                                                                             (Uuid::new_v4(), 
                                                                                                                             Some(current_slot_for_default_parachain),
@@ -445,40 +496,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //     GETTING THE CURRENT BLOCK OF THE DEFAULT PARACHAIN BLOCKCHAIN
     // ----------------------------------------------------------------------
 
-    info!("-> {} - getting current block from the default parachain", chrono::Local::now().naive_local());
-    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the current block event cause the parachain is guarded by the ActorRef
+    info!("🧊 getting current block from the default parachain");
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the current block event cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let current_block_remote_handle: RemoteHandle<Block> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetCurrentBlock}); //// asking the coiniXerr system to return the current block of the passed in parachain actor as a future object
+    let current_block_remote_handle: RemoteHandle<Block> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetCurrentBlock}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the current block of the passed in parachain actor as a future object
     let mut current_block = current_block_remote_handle.await;
 
     // ----------------------------------------------------------------------
     //            GETTING THE BLOCKCHAIN OF THE DEFAULT PARACHAIN
     // ----------------------------------------------------------------------
 
-    info!("-> {} - getting blockchain from the default parachain", chrono::Local::now().naive_local());
-    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the current blockchain event cause the parachain is guarded by the ActorRef
+    info!("🔗🧊 getting blockchain from the default parachain");
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the current blockchain event cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let blockchain_remote_handle: RemoteHandle<Chain> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetBlockchain}); //// asking the coiniXerr system to return the blockchain of the passed in parachain actor as a future object
+    let blockchain_remote_handle: RemoteHandle<Chain> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetBlockchain}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the blockchain of the passed in parachain actor as a future object
     let blockchain = blockchain_remote_handle.await;
 
     // ----------------------------------------------------------------------
     //           GETTING THE CURRENT SLOT OF THE DEFAULT PARACHAIN
     // ----------------------------------------------------------------------
 
-    info!("-> {} - getting current slot from the default parachain", chrono::Local::now().naive_local());
-    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the current slot event cause the parachain is guarded by the ActorRef
+    info!("🎟️ getting current slot from the default parachain");
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the current slot event cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let current_slot_remote_handle: RemoteHandle<Slot> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetSlot}); //// asking the coiniXerr system to return the current slot of the passed in parachain actor as a future object
+    let current_slot_remote_handle: RemoteHandle<Slot> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetSlot}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the current slot of the passed in parachain actor as a future object
     let mut current_slot = current_slot_remote_handle.await;
 
     // ----------------------------------------------------------------------
     //                  GETTING THE UUID OF THE PARACHAIN
     // ----------------------------------------------------------------------
     
-    info!("-> {} - getting uuid of the default parachain", chrono::Local::now().naive_local());
-    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like getting the uuid event cause the parachain is guarded by the ActorRef
+    info!("🎫 getting uuid of the default parachain");
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the uuid event cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetSlot}); //// asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
+    let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetParachainUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
     let default_parachain_uuid = current_uuid_remote_handle.await;
 
     // ---------------------------------------------------------------------------------
@@ -490,19 +541,124 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                     msg: ParachainCreated(default_parachain_uuid.clone()), //// publishing the ParachainCreated message event to the parachain_created_channel channel 
                                     topic: "<default parachain created>".into(), //// setting the topic to <default parachain created> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
                                 }, 
-                                None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None
+                                None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                             );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+    ///////                updating coiniXerr parachain networks' state 
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
     // ---------------------------------------------------------------------------------
     //         RESETTING THE NEXT PARACHAIN SLOT FIELD OF THE DEFAULT PARACHAIN
-    // ---------------------------------------------------------------------------------
-    //// calling between actors : updating the next parachain actor of the default parachain 
+    // --------------------------------------------------------------------------------- 
     
-    info!("-> {} - resetting next parachain slot field of the default parachain", chrono::Local::now().naive_local());
-    //// we have to ask the actor that hey we want some info about the parachain by sending the related message like resetting the slot field of the next parachain cause the parachain is guarded by the ActorRef
+    info!("🔁 resetting next parachain slot field of the default parachain");
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like resetting the slot field of the next parachain cause the parachain is guarded by the ActorRef
     //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-    let update_next_parachain_slot_remote_handle: RemoteHandle<Parachain> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::WaveSlotToNextParachainActor}); //// asking the coiniXerr system to wave to the next parachain of the passed in parachain actor and return the result or response as a future object
+    let update_next_parachain_slot_remote_handle: RemoteHandle<Parachain> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::WaveSlotToNextParachainActor}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to wave to the next parachain of the passed in parachain actor and return the result or response as a future object
     let update_next_parachain_slot = update_next_parachain_slot_remote_handle.await; //// next parachain field of the default parachain is the second parachain that we've just built earlier 
+
+    // ------------------------------------------------------------------------------------------
+    //      SCHEDULING EVERY 5 SECONDS TO RESET THE SLOT IN THE DEFAULT AND SECOND PARACHAIN
+    // ------------------------------------------------------------------------------------------
+
+    let delay = Duration::from_secs(1); //// run for the first time after passing 1 second
+    let interval = Duration::from_secs(5); //// run every 5 seconds
+    coiniXerr_sys.schedule( //// scheduling a message
+                            delay, //// after 1 second delay
+                            interval, //// to be executed every 5 seconds 
+                            parachain_1.clone(), //// on parachain_1 actor
+                            None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+                            ParachainCommunicate{ //// the message event is the WaveResetSlotFromSystem variant in which the slot field of the passed in parachain will be updated
+                                id: Uuid::new_v4(),
+                                cmd: ParachainCmd::WaveResetSlotFromSystem //// that default parachain wants to reset the slot
+                            },
+                        );
+    coiniXerr_sys.schedule( //// scheduling a message
+                            delay, //// after 1 second delay
+                            interval, //// to be executed every 5 seconds 
+                            parachain_0.clone(), //// on parachain_0 actor
+                            None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+                            ParachainCommunicate{ //// the message event is the WaveResetSlotFromSystem variant in which the slot field of the passed in parachain will be updated
+                                id: Uuid::new_v4(),
+                                cmd: ParachainCmd::WaveResetSlotFromSystem //// that default parachain wants to reset the slot
+                            },
+                        );
+    
+    // ----------------------------------------------------------------------------------------------------------------
+    //       BROADCASTING THE UPDATING PARACHAIN MESSAGE TO THE RELATED CHANNEL SO ALL PARACHAIN ACTORS CAN SEE
+    // ----------------------------------------------------------------------------------------------------------------
+
+    info!("🔃 updating parachains' state since slot field has been rest");
+
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the uuid event cause the parachain is guarded by the ActorRef
+    //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
+    let parachain_0_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_0, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetParachainUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
+    let parachain_0_uuid = parachain_0_uuid_remote_handle.await;
+
+    //// we have to ask the actor that hey we want to return some info as a future object about the parachain by sending the related message like getting the uuid event cause the parachain is guarded by the ActorRef
+    //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
+    let parachain_1_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_1, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetParachainUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
+    let parachain_1_uuid = parachain_1_uuid_remote_handle.await;
+
+    parachain_updated_channel.tell(
+        Publish{
+            msg: ParachainUpdated(parachain_0_uuid.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
+            topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
+        }, 
+        None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+    );
+    
+    parachain_updated_channel.tell(
+        Publish{
+            msg: ParachainUpdated(parachain_1_uuid.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
+            topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
+        }, 
+        None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+    );
+
+    // ---------------------------------------------------------------------------------
+    //        SENDING RESET MESSAGE FROM DEFAULT PARACHAIN TO SECOND PARACHAIN
+    // --------------------------------------------------------------------------------- 
+    
+    //// calling between actors using send_msg() method
+    parachain_0.clone().send_msg(actors::parathread::ParachainMsg::Communicate( //// sending message from parachain_0 to parachain_1
+        ParachainCommunicate{
+            id: Uuid::new_v4(),
+            cmd: ParachainCmd::WaveResetSlotFrom(default_parachain_uuid.to_string()) //// that default parachain wants to reset the slot  
+        }),
+        parachain_1.clone()); //// of the parachain_1 (second parachain)
+    
+    //// calling between actors using tell() method which is inside the main() and select() method which is 
+    ///// inside WaveSlotToParachainActor variant to wave reset slot to second parachain (parachain_1).
+    parachain_0.tell( //// we're telling the default parachain from the main()
+                    ParachainCommunicate{
+                        id: Uuid::new_v4(),
+                        cmd: ParachainCmd::WaveSlotToParachainActor("/user/select-actor/parachain_1".to_string()) //// to tell the parachain_1 (second parachain) that default parachain wants to reset your slot  
+                    },
+                    None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+                );
     
 
 
@@ -524,12 +680,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     
     
     
-    
+
+
+
+
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
     ///////                     starting validator actors for incoming transactions' bytes through a tcp streamer 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
     while let Ok((stream, addr)) = listener.accept().await{ //-- await suspends the accept() function execution to solve the future but allows other code blocks to run  
-        info!("-> {} - connection stablished from {}", chrono::Local::now().naive_local(), addr);
+        info!("🪢 connection stablished from {}", addr);
         let cloned_arc_mutex_runtime_info_object = Arc::clone(&arc_mutex_runtime_info_object); //-- cloning (making a deep copy of) runtime info object to prevent ownership moving in every iteration between threads
         let stream_sender = stream_sender.clone(); //-- we're using mpsc channel to send data between tokio tasks and each task or stream needs its own sender; based on multi producer and single consumer pattern we can achieve this by cloning (making a deep copy of) the sender for each incoming stream means sender can be owned by multiple threads but only one of them can have the receiver at a time to acquire the mutex lock
         
@@ -573,7 +732,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             }
         };
 
-        info!("-> {} - building validator actor for this peer", chrono::Local::now().naive_local());
+        info!("👷🏼‍♂️ building validator actor for this peer");
         let validator_props = Props::new_args::<Validator, _>((validator.id.clone(), validator.addr, validator.recent_transaction, validator.mode, validator.ttype_request));
         let validator_actor = coiniXerr_sys.clone().actor_of_props::<Validator>("validator", validator_props.clone()).unwrap(); //-- initializing the validator actor with its props; ActorRef is of type ValidatorMsg means that we can communicate with another actor or the actor itself by sending Validator iteself as a message - props are Clone and Send and we can share them between threads
         let validator_actor = validator_actor.clone(); //-- cloning (making a deep copy of) the validator actor will prevent the object from moving in every iteration - trait Clone is implemented for Validator actor struct since the type is Send + Sync across threads
@@ -588,14 +747,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                         msg: ValidatorJoined(validator.id.clone()), //// publishing the ValidatorJoined message event to the validator_joined_channel channel 
                                         topic: "<new validator joined>".into(), //// setting the topic to <new validator joined> so all subscribers of this channel (all validator actors) can subscribe and react to this topic of this message event
                                     }, 
-                                    None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None
+                                    None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                 );
 
         // ----------------------------------------------------------------------
         //                  SAVING RUNTIME INFO FOR THIS STREAM
         // ----------------------------------------------------------------------
         
-        info!("-> {} - saving runtime info", chrono::Local::now().naive_local());
+        info!("💾 saving runtime info");
         let meta_data_uuid = {
                 let mut runtime_info = cloned_arc_mutex_runtime_info_object.lock().unwrap().to_owned(); //-- in order to use the to_owned() method we have to implement the Clone trait for the Runtime struct since this method will make a clone from the instance - unlocking, unwrapping and cloning (by using to_ownded() method) the runtim_info object in every iteration of incoming stream inside the local thread to convert it to an instance of the RafaelRt struct
                 RafaelRt::add( //-- locking on runtime info object (mutex) must be done in order to prevent other threads from mutating it at the same time 
@@ -623,7 +782,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         let arc_mutex_validator_update_channel = Arc::new(Mutex::new(validator_updated_channel));
         let cloned_arc_mutex_validator_update_channel = Arc::clone(&arc_mutex_validator_update_channel);   
 
-        info!("-> {} - sending stream setups through the channel", chrono::Local::now().naive_local());
+        info!("📼 sending stream setups through the channel");
         stream_sender.send((stream, 
                             meta_data_uuid, 
                             cloned_arc_mutex_runtime_info_object, 
@@ -649,6 +808,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
+
+
+
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
     ///////                                 waiting to receive stream and other setups asynchronously 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
@@ -662,7 +824,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                     coiniXerr_actor_system
                 )) = stream_receiver.recv().await.take(){ //-- waiting for the stream and other setups to become available to the down side of channel (receiver) to change the started validator actor's transaction for every incoming connection - stream must be mutable for reading and writing from and to socket
         
-        info!("-> {} - receiving the stream setups", chrono::Local::now().naive_local());
+        info!("📥 receiving the stream setups");
         let mempool_sender = mempool_sender.clone(); //-- cloning mempool_sender to send signed transaction through the channel to the receiver for mining process
         
         //// ... move will move everything from its behind to the new scope and take their ownership so there is not a single var after moving in second iteration of the loop thus we've passed all the requirements that might be moved by doing that we can make sure that we have them again after first iteration 
@@ -720,7 +882,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         //              SIGNING THE INCOMING TRANSACTION WITH SERVER TIME
                         // ----------------------------------------------------------------------
                         
-                        info!("-> {} - signing incoming transaction", chrono::Local::now().naive_local());
+                        info!("✍️ signing incoming transaction");
                         deserialized_transaction_borsh.signed = Some(chrono::Local::now().naive_local().timestamp()); //-- signing the incoming transaction with the current server time
                         
                         // ----------------------------------------------------------------------
@@ -737,14 +899,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         let utf8_bytes_using_casting: &[u8] = &signed_transaction_serialized_into_vec_bytes_using_borsh; //-- since the Vec<u8> will be coerced to &'a [u8] with a valid lifetime at compile time we can borrow the ownership of sms_response_serialized_into_vec_bytes_using_serede using & which by doing this we're borrowing a slice of Ve<u8> from the heap memory which will be coerced to &'a [u8] since we've specified the type of sms_response_serialized_into_utf8_bytes_using_serede which is &[u8]
                         let boxed_utf8_bytes_using_box_slcie = signed_transaction_serialized_into_vec_bytes_using_borsh.into_boxed_slice(); //-- converting the Vec<u8> to Box<u8> using into_boxed_slice() method 
                         let utf_bytes_dereference_from_box = &*boxed_utf8_bytes_using_box_slcie; //-- borrow the ownership of the dereferenced boxed_utf8_bytes_using_box_slcie using & to convert it to &[u8] with a valid lifetime since the dereferenced boxed_utf8_bytes_using_box_slcie has unknown size at compile time thus working with u8 slice needs to borrow them from the heap memory to have their location address due to implemented ?Sized for [u8]
-                        info!("-> {} - sending signed transaction back to the peer", chrono::Local::now().naive_local());
+                        info!("sending signed transaction back to the peer");
                         stream.write(&utf_bytes_dereference_from_box).await.unwrap(); //-- sending the signed transaction back to the peer - since Vec<u8> will be coerced to &'a [u8] with valid lifetime at compile time we can also send the signed_transaction_serialized_into_vec_bytes_using_borsh directly through the socket even though the write() method takes &'a [u8] param with a valid lifetime 
                         
                         // ----------------------------------------------------------------------
                         //       UPDATING VALIDATOR ACTOR WITH THE LATEST SIGNED TRANSACTION
                         // ----------------------------------------------------------------------
 
-                        info!("-> {} - updating validator actor with the recent signed transaction", chrono::Local::now().naive_local());
+                        info!("👷🏼‍♂️🔃 updating validator actor with the recent signed transaction");
                         for (id, md) in cloned_arc_mutex_runtime_info_object.lock().unwrap().0.iter_mut(){ //-- id and md are &mut Uuid and &mut MetaData respectively - we have to iterate over our info_dict mutably and borrowing the key and value in order to update the validator actor transaction of our matched meta_data id with the incoming uuid
                             if id == &generated_uuid{
                                 let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&utf_bytes_dereference_from_box).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
@@ -758,21 +920,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
                         let validator_update_channel = cloned_arc_mutex_validator_update_channel.lock().unwrap().clone(); //// cloning will return the T from MutexGuard
                         let current_validator = cloned_arc_mutex_validator_actor.lock().unwrap().clone(); //// cloning will return the T from MutexGuard
-                        let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_actor_system, &current_validator, ValidatorCommunicate{id: Uuid::new_v4(), cmd: ValidatorCmd::GetValidatorUuid}); //// asking the coiniXerr system to return the uuid of the passed in validator actor and return the result or response as a future object
+                        let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_actor_system, &current_validator, ValidatorCommunicate{id: Uuid::new_v4(), cmd: ValidatorCmd::GetValidatorUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in validator actor and return the result or response as a future object
                         let current_validator_uuid = current_uuid_remote_handle.await; //// getting the uuid of the current validator which has passed in to the stream mpsc channel
                         validator_update_channel.tell(
                                                     Publish{
                                                         msg: ValidatorUpdated(current_validator_uuid.clone()), //// publishing the ValidatorUpdated message event to the validator_updated_channel channel 
                                                         topic: "<validator state updated with recent transaction>".into(), //// setting the topic to <validator state updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
                                                     }, 
-                                                    None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None
+                                                    None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                                 );
                         
                         // ---------------------------------------------------------------------------------------
                         //      SENDING SIGNED TRANSACTION TO DOWN SIDE OF THE CHANNEL FOR CONSENSUS PROCESS
                         // ---------------------------------------------------------------------------------------
                         
-                        info!("-> {} - sending signed transaction to down side of the channel for consensus process", chrono::Local::now().naive_local());
+                        info!("📼✍️ sending signed transaction to down side of the channel for consensus process");
                         let signed_transaction_deserialized_from_bytes = serde_json::from_slice::<Transaction>(&utf_bytes_dereference_from_box).unwrap(); //-- deserializing signed transaction bytes into the Transaction struct cause deserialized_transaction_serde is a mutable pointer (&mut) to the Transaction struct
                         let arc_mutex_transaction = Arc::new(Mutex::new(signed_transaction_deserialized_from_bytes)); //-- putting the signed_transaction_deserialized_from_bytes inside a Mutex to borrow it as mutable inside Arc by locking the current thread 
                         let cloned_arc_mutex_transaction = Arc::clone(&arc_mutex_transaction); //-- cloning the arc_mutex_transaction to send it through the mpsc job queue channel 
@@ -784,13 +946,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         //       REJECTING THE INCOMING TRANSACTION BACK TO THE VALIDATOR
                         // ----------------------------------------------------------------------
                         
-                        info!("-> {} - rejecting incoming transaction caused by unavailable mempool channel", chrono::Local::now().naive_local());
+                        info!("🙅 rejecting incoming transaction caused by unavailable mempool channel");
                         stream.write(&transaction_buffer_bytes[0..size]).await.unwrap(); //-- rejecting the transaction back to the peer
                         true
                     }
                 },
                 Err(e) => {
-                    info!("-> {} - terminating connection with validator {}", chrono::Local::now().naive_local(), stream.peer_addr().unwrap());
+                    info!("🔚 terminating connection with validator {}", stream.peer_addr().unwrap());
                     stream.shutdown().await.unwrap(); //-- shuts down the output stream
                     false
                 }
@@ -820,29 +982,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
 
     while let Some((transaction, validator, coiniXerr_actor_system)) = mempool_receiver.recv().await{ //-- waiting for each transaction to become available to the down side of channel (receiver) for mining process cause sending is done asynchronously 
-        info!("-> {} - receiving new transaction and its related validator to push inside the current block", chrono::Local::now().naive_local());
+        info!("📥 receiving new transaction and its related validator to push inside the current block");
         let mutex_transaction = transaction.lock().unwrap().clone();
-        info!("-> {} - new transaction in mempool at time : {:#?}", chrono::Local::now().naive_local(), mutex_transaction);
+        info!("🪙 new transaction {:?} in mempool", mutex_transaction);
         let mutex_validator_actor = validator.lock().unwrap().clone();
-        info!("-> {} - validator actor in mempool at time : {:#?}", chrono::Local::now().naive_local(), mutex_validator_actor);
+
+        let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_actor_system, &mutex_validator_actor, ValidatorCommunicate{id: Uuid::new_v4(), cmd: ValidatorCmd::GetValidatorUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in validator actor and return the result or response as a future object
+        let current_validator_uuid = current_uuid_remote_handle.await; //// getting the uuid of the current validator which has passed in to the stream mpsc channel
+        info!("👷🏼‍♂️ validator actor with id [{}] and info {:?} in mempool", current_validator_uuid, mutex_validator_actor);
         
         // ----------------------------------------------------------------------
         //            COMMUNICATE WITH THE VALIDATOR BASED ON TX TYPE
         // ----------------------------------------------------------------------
 
-        //// since we're not sending following messages from another actor actually we're sending from the main() and main is not an actor thus the sender in tell() method must be None
+        //// since we're not sending following messages from another actor actually we're sending from the main() and main() is not an actor thus the sender in tell() method must be None
         if mutex_transaction.ttype == 0x00{ //-- regular transaction
-            ///// tell the validator actor from the main that we have the message of type Contract with the 0x00 ttype
-            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x00}, None);
+            ///// tell the validator actor from the main() that we have the message of type Contract with the 0x00 ttype
+            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x00}, None); //// 0x00 means regular transaction like transferring tokens
         } else if mutex_transaction.ttype == 0xFF{ //-- CRC21 smart contract transaction
-            ///// tell the validator actor from the main that we have the message of type Contract with the 0xFF ttype 
-            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0xFF}, None);
+            ///// tell the validator actor from the main() that we have the message of type Contract with the 0xFF ttype 
+            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0xFF}, None); //// 0xFF means CRC21 transaction like minting NFT 
         } else if mutex_transaction.ttype == 0x02{ //-- CRC20 smart contract transaction
-            ///// tell the validator actor from the main that we have the message of type Contract with the 0x02 ttype 
-            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x02}, None);
+            ///// tell the validator actor from the main() that we have the message of type Contract with the 0x02 ttype 
+            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x02}, None); //// 0x02 means CRC20 transaction like minting FT
         } else if mutex_transaction.ttype == 0x03{ //-- CRC22 smart contract transaction
-            ///// tell the validator actor from the main that we have the message of type Contract with the 0x02 ttype 
-            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x03}, None);
+            ///// tell the validator actor from the main() that we have the message of type Contract with the 0x02 ttype 
+            mutex_validator_actor.tell(Contract{id: Uuid::new_v4(), ttype: 0x03}, None); //// 0x03 means CRC22 transaction which supports FN and NFT methods
         }
         
         // ------------------------------------------------------------------------------------------
@@ -854,7 +1019,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                         msg: UpdateValidatorAboutMempoolTx(mutex_transaction.id.clone()), //// publishing the UpdateValidatorAboutMempoolTx message event to the mempool_updated_channel channel 
                                         topic: "<new transaction slided into the mempool>".into(), //// setting the topic to <new transaction slided into the mempool> so all subscribers of this channel (all validator actors) can subscribe and react to this topic of this message event
                                     }, 
-                                    None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None
+                                    None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                 );
 
         // ----------------------------------------------------------------------
@@ -865,9 +1030,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             current_block.push_transaction(mutex_transaction.clone()); //-- cloning transaction object in every iteration to prevent ownership moving and loosing ownership - adding pending transaction from the mempool channel into the current block for validating that block
             if std::mem::size_of_val(&current_block) > max_block_size{
                 // TODO - calculate the block and merkle_root hash
-                // TODO - consensus process here
+                // TODO - consensus and block validation process here
                 // ...
-                info!("-> {} - shaping a new block to add transactions", chrono::Local::now().naive_local());
+                info!("⚒️🧊 shaping a new block to add transactions");
                 let (prev, last) = {
                     let current_blockchain = blockchain.clone(); //-- creating longer lifetime - can't have blockchain.clone().blocks.iter().rev() cause blockchain.clone() lifetime will be ended beforer reach the blocks field
                     let mut rev_iter = current_blockchain.blocks.iter().rev(); //-- cloning (making a deep copy of) the blockchain of the parachain actor will prevent the object from moving and loosing ownership - we can also use as_ref() method instead of clone() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -877,10 +1042,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             }
         }
         if let (Some(merkle_root), Some(block_hash)) = (current_block.clone().merkle_root, current_block.clone().hash){ //-- checking the block's hash and merkle_root hash for transactions finality
-            info!("-> {} - validating process has been started for block [{}]", chrono::Local::now().naive_local(), current_block.id);
+            info!("🥑 block with id [{}] is valid", current_block.id);
             current_block.is_valid = true;
-            info!("-> {} - adding the created block to the chain", chrono::Local::now().naive_local());
+            info!("🧣 adding the created block to the chain");
             blockchain.clone().add(current_block.clone()); //-- adding the cloned of current block to the coiniXerr parachain blockchain - cloning must be done to prevent current_block and the blockchain parachain from moving in every iteration mempool_receiver loop; we can also use as_ref() method instead of clone() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+        } else{
+            info!("⛔ block with id [{}] is invalid", current_block.id);
+            current_block.is_valid = false;
         }
 
         // ---------------------------------------------------------------------
@@ -892,17 +1060,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                 msg: UpdateValidatorAboutMiningProcess(current_block.id.clone()), //// publishing the UpdateValidatorAboutMiningProcess message event to the mining_channel channel 
                                 topic: "<new block has mined>".into(), //// setting the topic to <new block has mined> so all subscribers of this channel (all validator actors) can subscribe and react to this topic of this message event
                             }, 
-                            None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None
+                            None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                         );
         
         // ------------------------------------------------------------------------
         //          UPDATING PARACHAIN ACTOR STATE AT THE END OF THE LOOP
         // ------------------------------------------------------------------------
 
-        info!("-> {} - updating default parachain state", chrono::Local::now().naive_local());
+        info!("🔃 updating default parachain state");
         //// we have to ask the actor that hey we want to update some info about the parachain by sending the related message cause the parachain is guarded by the ActorRef
         //// ask returns a future object which can be solved using block_on() method or by awaiting on it 
-        let update_parachain_remote_handle: RemoteHandle<Parachain> = ask(&coiniXerr_actor_system, &parachain_0, UpdateParachainEvent{slot: Some(current_slot.clone()), blockchain: Some(blockchain.clone()), current_block: Some(current_block.clone())}); //// asking the coiniXerr system to update the state of the passed in parachain actor and return the result or response as a future object
+        let update_parachain_remote_handle: RemoteHandle<Parachain> = ask(&coiniXerr_actor_system, &parachain_0, UpdateParachainEvent{slot: Some(current_slot.clone()), blockchain: Some(blockchain.clone()), current_block: Some(current_block.clone())}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to update the state of the passed in parachain actor and return the result or response as a future object
         let update_default_parachain = update_parachain_remote_handle.await;
 
         // --------------------------------------------------------------------------------
@@ -914,7 +1082,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                         msg: ParachainUpdated(update_default_parachain.id.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
                                         topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
                                     }, 
-                                    None, //// since we're not sending this message from another actor actually we're sending from the main() and main is not an actor thus the sender param must be None
+                                    None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                 );
 
         // ----------------------------------------------------------------------
@@ -927,12 +1095,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             id: Uuid::new_v4(),
             slot: Some(current_slot.clone()),
             blockchain: Some(blockchain.clone()),
-            next_parachain_id: Some(default_parachain_uuid.clone()),
+            next_parachain_id: Some(default_parachain_uuid.clone()), //// this is the uuid of the next parachain which is linked to this parachain since connected parachains form a circular pattern
             current_block: Some(current_block.clone()),
         };
         match parachains.insert_one(parachain_info, None).await{ //-- serializing the user doc which is of type RegisterRequest into the BSON to insert into the mongodb
-            Ok(insert_result) => info!("-> {} - inserted new parachain into db with uuid [{}] and mongodb id [{}]", chrono::Local::now().naive_local(), default_parachain_uuid.clone(), insert_result.inserted_id.as_object_id().unwrap()),
-            Err(e) => error!("-> {} - error inserting parachain with id [{}]: {}", chrono::Local::now().naive_local(), default_parachain_uuid, e)
+            Ok(insert_result) => info!("🛢️🧣 inserted new parachain into db with uuid [{}] and mongodb id [{}]", default_parachain_uuid.clone(), insert_result.inserted_id.as_object_id().unwrap()),
+            Err(e) => error!("😕 error inserting parachain with id [{}]: {}", default_parachain_uuid, e)
         }
 
 

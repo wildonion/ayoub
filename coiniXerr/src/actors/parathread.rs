@@ -48,7 +48,10 @@ pub enum Cmd{
     GetNextParachain, //// borsh utf8 encoded variant is 3
     GetGenesis, //// borsh utf8 encoded variant is 4
     GetParachainUuid, //// borsh utf8 encoded variant is 5
-    WaveSlotToNextParachainActor, //// borsh utf8 encoded variant is 6
+    WaveResetSlotFrom(String), //// borsh utf8 encoded variant is 6 - Uuid is the id of the parachain that waved a hi
+    WaveSlotToNextParachainActor, //// borsh utf8 encoded variant is 7
+    WaveSlotToParachainActor(String), //// borsh utf8 encoded variant is 8 - String is the path of the selected parachain actor
+    WaveResetSlotFromSystem, //// borsh utf8 encoded variant is 9
 }
 
 #[derive(Clone, Debug)]
@@ -216,8 +219,8 @@ impl Receive<UpdateParachainEvent> for Parachain{ //// implementing the Receive 
     fn receive(&mut self, 
                 _ctx: &Context<Self::Msg>, 
                 _msg: UpdateParachainEvent, 
-                _sender: Sender){
-        info!("-> {} - update parachain message info received", chrono::Local::now().naive_local());
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
+        info!("🔃 update parachain message info received");
     
         //// updating the state of the parachain with passed in message
         let updated_parachain = Self{
@@ -242,7 +245,7 @@ impl Receive<UpdateParachainEvent> for Parachain{ //// implementing the Receive 
             .unwrap()
             .try_tell(
                 updated_parachain, //// sending the updated parachain as the response message 
-                Some(_ctx.myself().into()) //// to the actor or the caller itself
+                Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
             );
     }
 
@@ -254,98 +257,146 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: Communicate, //-- _msg is of type Communicate since we're implementing the Receive trait for the Communicate type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - message info received with id [{}] and command [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.cmd);
+        info!("📩 message info received with id [{}] and command [{:?}]", _msg.id, _msg.cmd);
         match _msg.cmd{
             Cmd::GetCurrentBlock => {
-                info!("-> {} - getting current block of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning current block of the parachain with id [{}]", self.id);
                 let current_block = self.get_current_block();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         current_block, //// sending the current_block as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::GetNextParachain => {
-                info!("-> {} - getting the next parachain of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning the next parachain of the parachain with id [{}]", self.id);
                 let next_parachain = self.get_next_parachain();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         next_parachain, //// sending the next_parachain as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::GetBlockchain => {
-                info!("-> {} - getting the blockchain of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning the blockchain of the parachain with id [{}]", self.id);
                 let blockchain = self.get_blockchain();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         blockchain, //// sending the blockchain as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::GetGenesis => {
-                info!("-> {} - getting the genesis block of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning the genesis block of the parachain with id [{}]", self.id);
                 let genesis_block = self.get_genesis();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         genesis_block, //// sending the genesis_block as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::GetParachainUuid => {
-                info!("-> {} - getting the parachain uuid", chrono::Local::now().naive_local());
+                info!("🔙 returning the parachain uuid");
                 let genesis_block = self.get_uuid();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         genesis_block, //// sending the genesis_block as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::WaveSlotToNextParachainActor => {
-                info!("-> {} - waving from parachain with id [{}] to its next parachain", chrono::Local::now().naive_local(), self.id);
+                info!("👋🏼 waving from parachain with id [{}] to its next parachain", self.id);
                 
                 let next_parachain = self.get_next_parachain().unwrap(); //// getting the next parachain field
                 let actor_system = &_ctx.system; //// getting the borrowed form of the actor system from the _ctx
-                let delay = Duration::from_secs(1);
 
+                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
+                // ....
+                
                 //// resetting the slot field of the next parachain but untouched other fields using ask() function 
                 //// since the parachain is guared by ActorRef thus in order to access its field we have to ask the guardian :)
                 //// passing other fields as the None won't update them to None they will be remained as their last value
                 //// we can also put the instance of the UpdateParachainEvent inside the ParachainMsg::UpdateParachainEvent() tuple struct
+                //// the receiver must be an actor of type ActorRef since Tell<Msg> the trait `riker::actor::Tell<T>` is implemented for `riker::actor::ActorRef<M>` 
                 let update_next_parachain_remote_handle: RemoteHandle<Parachain> = ask(actor_system, &next_parachain, ParachainMsg::UpdateParachainEvent(UpdateParachainEvent{slot: Some(Slot::default()), current_block: None, blockchain: None})); //// asking the coiniXerr system to update the state of the passed in parachain actor as a future object
                 let update_next_parachain_future = update_next_parachain_remote_handle;
-                let update_next_parachain = block_on(update_next_parachain_future);
+                let update_next_parachain = block_on(update_next_parachain_future); //// we can't use .await here since we're not inside an async function
 
-                //// sending the updated next parachain (slot field) to the caller or the first actor
+                //// sending the updated next parachain (slot field) to the caller or the previous actor 
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         update_next_parachain, //// sending the update_next_parachain as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
+                    );
+
+            },
+            Cmd::WaveSlotToParachainActor(parachain_path) => {
+                info!("👋🏼 waving from parachain with id [{}] to parachain [{}]", self.id, parachain_path);
+
+                let path = parachain_path.as_str();
+                let selected_parachain = _ctx.select(path).unwrap(); //// selecting the passed in parachain to wave reset slot from this parachain to it - calling between actors by selecting the desired actor using select() method
+                let waver_id = self.id.to_string(); //// getting the uuid string of this parachain
+                
+                //// waving a reset slot message from this parachain to the selected_parachain
+                selected_parachain.try_tell( //// try to tell the selected_parachain
+                                    ParachainMsg::Communicate(Communicate{id: Uuid::new_v4(), cmd: Cmd::WaveResetSlotFrom(waver_id)}), //// that you will have a wave reset slot message from this parachain 
+                                    None, //// there is no need to pass a sender since we're communicating with selected_parachain itself and not returning a response (not this parachain or the caller of this Cmd arm) to tell a message that we've just gotten from this parachain 
+                                );
+            
+            },
+            Cmd::WaveResetSlotFrom(waver_id) => {
+
+                //// logging the incoming wave reset slot from the waver parachain to this parachain
+                info!("⭕ got a reset wave sent from parachain with id [{}] to this parachain with id [{}]", waver_id, self.id);
+
+                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
+                // ....
+                
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell( //// try to tell this parachain
+                        ParachainMsg::UpdateParachainEvent(UpdateParachainEvent{slot: Some(Slot::default()), current_block: None, blockchain: None}), //// that we want to update the slot field
+                        None //// there is no need to pass a sender since we're communicating with this parachain itself and not returning a response (not the caller of this Cmd arm) to tell a message that we've just gotten from this parachain
+                    );
+            },
+            Cmd::WaveResetSlotFromSystem => {
+                info!("⭕ got a reset wave sent from system to this parachain with [{}]", self.id);
+
+                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
+                // ....
+
+                _sender
+                    .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
+                    .unwrap()
+                    .try_tell( //// try to tell this parachain
+                        ParachainMsg::UpdateParachainEvent(UpdateParachainEvent{slot: Some(Slot::default()), current_block: None, blockchain: None}), //// that we want to update the slot field
+                        None //// there is no need to pass a sender since we're communicating with this parachain itself and not returning a response (not the caller of this Cmd arm) to tell a message that we've just gotten from this parachain
                     );
             },
             _ => { //// GetSlot
-                info!("-> {} - getting the slot of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning the slot of the parachain with id [{}]", self.id);
                 let current_slot = self.get_slot();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         current_slot, //// sending the current_slot as the response message 
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             }
         }            
@@ -362,9 +413,9 @@ impl Receive<ParachainCreated> for Parachain{ //// implementing the Receive trai
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: ParachainCreated, //-- _msg is of type ParachainCreated since we're implementing the Receive trait for the ParachainCreated type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - new parachain created with id [{}]", chrono::Local::now().naive_local(), _msg.0); //// ParachainCreated is a tuple like struct so we have to get the first elem of it using .0
+        info!("🥳 new parachain created with id [{}]", _msg.0); //// ParachainCreated is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here
@@ -380,9 +431,9 @@ impl Receive<ParachainUpdated> for Parachain{ //// implementing the Receive trai
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: ParachainUpdated, //-- _msg is of type ParachainUpdated since we're implementing the Receive trait for the ParachainUpdated type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - new parachain updated with id [{}]", chrono::Local::now().naive_local(), _msg.0); //// ParachainUpdated is a tuple like struct so we have to get the first elem of it using .0
+        info!("🥳 parachain updated with id [{}]", _msg.0); //// ParachainUpdated is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here

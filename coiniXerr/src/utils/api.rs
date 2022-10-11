@@ -1,6 +1,15 @@
 
 
 
+use crate::*;
+
+
+
+
+
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+///////                fetching user data from the ayoub auth server 
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
 #[macro_export]
 macro_rules! user_data {
@@ -67,3 +76,34 @@ macro_rules! user_data {
         }
     };
 }
+
+
+
+
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+///////             sending fake transaction to the coiniXerr tcp server  
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+
+// use tokio::spawn(async move{}); and pool.execute(|| async move{}); to send encoded tx to the tcp server
+
+
+/*
+
+    let mut time:u64 = 0;
+    let sleep = Duration::from_millis(env::args().nth(2).unwrap_or("0".to_string()).parse::<u64>().unwrap());
+    loop {
+        time+=1;
+        thread::spawn(move|| {
+            match TcpStream::connect(env::args().nth(1).unwrap()) {
+                Ok(mut tcp) => {
+                    tcp.write(&[0]).unwrap();
+                    print!("\r{}", time);
+                    io::stdout().flush().ok().expect("Could not flush stdout");
+                },
+                _ => {}
+            };
+        });
+        thread::sleep(sleep);
+    }
+    
+*/

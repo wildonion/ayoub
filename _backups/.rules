@@ -332,4 +332,10 @@ Sugar Memories:
 -> Derive macro generates an impl of the trait with that name for the type that is bounded to
 -> always pass by reference or the borrowed form of the type
 -> clone is impelented for Option thus we can clone the wrapped type with Option
--> if the type is send and sync thus there is no need to put it inside Arc<Mutex<...>> since it can be cloned and shared safely between threads using mpsc channel or pub/sub channels
+-> if the type is send and sync thus there is no need to put it inside Arc<Mutex<...>> since it can be cloned and shared safely between threads using mpsc channel or pub/sub channels otherwise it must be inside Arc<Mutex<T>> to share between threads safely and mutate it
+-> since everything in rust has its own lifetime (rust don't have gc) thus in order to return a pointer from function it must have a valid lifetime which can be done by defining a sepecific lifetime in function signature or use the lifetime of the self which is a shared reference and is using by other methods of the struct
+-> to avoid lifetimes in scopes and function signatures we can put the type inside the Box which has its own lifetime and can be dereferenced using * like Box<[u8]>
+-> since [u8] doesn't have fix sized at compile time we must take a reference to it or put it inside the Box
+-> in order to borrow the heap data structures we must take a reference to them and every reference needs a valid lifetime so either we must define their lifetime or put them inside the Box 
+-> pass heap data allocated structure by reference to other scopes to prevent ownership moving since copy trait is not implemented for them and reference contains the address of that heap type and the value in itself
+-> if the type is not Send Sync and also Clone trait is not implemented for that we have to impl Send and Sync trait for that

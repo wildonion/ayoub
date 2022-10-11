@@ -384,6 +384,7 @@ pub fn trash(){
     // =============================================================================================================================
     // =============================================================================================================================
     //                                                 GENERIC AND LIFETIMES
+    // we can return the reference from function with the lifetime of the passed in args or with a static ref
 	// =============================================================================================================================
     // =============================================================================================================================
     // =============================================================================================================================
@@ -502,9 +503,9 @@ pub fn trash(){
 	    }
 
 	    // NOTE - first param can also be &mut self; a mutable reference to the instance and its fields
-	    pub fn ref_to_str_other_self_lifetime(&self) -> &str{ //-- in this case we're good to return the pointer from the function or send a copy to the caller's space since we can use the lifetime of the first param which is &self which is a borrowed type of the instance and its fields (since we don't want to lose the lifetime of the created instance from the contract struct after calling each method) and have a valid lifetime (as long as the instance of the type is valid) which is generated from the caller scope by the compiler to return the pointer from the function
+	    pub fn ref_to_str_other_self_lifetime(&self) -> &str{ //-- in this case we're good to return the pointer from the function or send a copy to the caller's space since we can use the lifetime of the first param which is &self which is a borrowed type (it's a shared reference means that other methods are using it in their scopes) of the instance and its fields (since we don't want to lose the lifetime of the created instance from the contract struct after calling each method) and have a valid lifetime (as long as the instance of the type is valid) which is generated from the caller scope by the compiler to return the pointer from the function
             let name = "wildonion";
-            name //-- name has a lifetime as valid as the first param lifetime which is a borrowed type of the instance itself and its fields and will borrow the instance when we want to call the instance methods
+            name //-- name has a lifetime as valid as the first param lifetime which is a borrowed type (it's a shared reference means that other methods are using it in their scopes) of the instance itself and its fields and will borrow the instance when we want to call the instance methods
 	    }
 
 	    // NOTE - 'a lifetime has generated from the caller scope by the compiler

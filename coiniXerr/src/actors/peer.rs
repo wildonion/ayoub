@@ -245,9 +245,9 @@ impl Receive<Contract> for Validator{ //// implementing the Receive trait for th
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: Contract, //-- _msg is of type Contract since we're implementing the Receive trait for the Contract type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - message info received with id [{}] and ttype [{}]", chrono::Local::now().naive_local(), _msg.id, _msg.ttype);
+        info!("📩 message info received with id [{}] and ttype [{}]", _msg.id, _msg.ttype);
         self.ttype_request = Some(_msg.ttype); //// updating the transaction type request using the incoming message of type Contract 
                     
     }
@@ -261,9 +261,9 @@ impl Receive<UpdateTx> for Validator{ //// implementing the Receive trait for th
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: UpdateTx, //-- _msg is of type UpdateTx since we're implementing the Receive trait for the UpdateTx type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - message info received with id [{}] and new transaction [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.tx.as_ref().unwrap()); //// calling as_ref() method on the _msg.tx to prevent ownership moving
+        info!("📩 message info received with id [{}] and new transaction [{:?}]", _msg.id, _msg.tx.as_ref().unwrap()); //// calling as_ref() method on the _msg.tx to prevent ownership moving
         self.set_transaction(_msg.tx); //// updating the last transaction of a specific validator using the incoming message of type UpdateTx 
                     
     }
@@ -277,9 +277,9 @@ impl Receive<UpdateMode> for Validator{ //// implementing the Receive trait for 
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: UpdateMode, //-- _msg is of type UpdateMode since we're implementing the Receive trait for the UpdateMode type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - message info received with id [{}] and new transaction [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.mode.as_ref().unwrap()); //// calling as_ref() method on the _msg.tx to prevent ownership moving
+        info!("📩 message info received with id [{}] and new transaction [{:?}]", _msg.id, _msg.mode.as_ref().unwrap()); //// calling as_ref() method on the _msg.tx to prevent ownership moving
         self.set_mode(_msg.mode.unwrap()); //// updating the last transaction of a specific validator using the incoming message of type UpdateMode 
                     
     }
@@ -293,52 +293,52 @@ impl Receive<Communicate> for Validator{ //// implementing the Receive trait for
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: Communicate, //-- _msg is of type Communicate since we're implementing the Receive trait for the Communicate type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - message info received with id [{}] and command [{:?}]", chrono::Local::now().naive_local(), _msg.id, _msg.cmd);
+        info!("📩 message info received with id [{}] and command [{:?}]", _msg.id, _msg.cmd);
         match _msg.cmd{
             Cmd::GetAddr => {
-                info!("-> {} - getting validator address with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning validator address with id [{}]", self.id);
                 let validator_address = self.get_addr();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         validator_address, //// sending the validator_address as the response message from this actor (not tha main() function)
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::GetMode => {
-                info!("-> {} - getting validator mode with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning validator mode with id [{}]", self.id);
                 let validator_mode = self.get_mode();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         validator_mode, //// sending the validator_mode as the response message from this actor (not tha main() function)
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             Cmd::GetRecentTx => {
-                info!("-> {} - getting the recent transaction of the validator with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning the recent transaction of the validator with id [{}]", self.id);
                 let validator_recent_transaction = self.get_recent_transaction();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         validator_recent_transaction, //// sending the validator_recent_transaction as the response message from this actor (not tha main() function)
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             },
             _ => { //// Get Uuid
-                info!("-> {} - getting the slot of the parachain with id [{}]", chrono::Local::now().naive_local(), self.id);
+                info!("🔙 returning the slot of the parachain with id [{}]", self.id);
                 let validator_uuid = self.get_uuid();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
                     .unwrap()
                     .try_tell(
                         validator_uuid, //// sending the validator_uuid as the response message from this actor (not tha main() function)
-                        Some(_ctx.myself().into()) //// to the actor or the caller itself
+                        Some(_ctx.myself().into()) //// to the actor or the caller itself - sender is the caller itself which the passed in message will be sent back to this actor
                     );
             }
         }
@@ -354,9 +354,9 @@ impl Receive<ValidatorJoined> for Validator{ //// implementing the Receive trait
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: ValidatorJoined, //-- _msg is of type ValidatorJoined since we're implementing the Receive trait for the ValidatorJoined type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - new validator joined with id [{}]", chrono::Local::now().naive_local(), _msg.0); //// ValidatorJoined is a tuple like struct so we have to get the first elem of it using .0
+        info!("new validator joined with id [{}]", _msg.0); //// ValidatorJoined is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here
@@ -373,9 +373,9 @@ impl Receive<ValidatorUpdated> for Validator{ //// implementing the Receive trai
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: ValidatorUpdated, //-- _msg is of type ValidatorUpdated since we're implementing the Receive trait for the ValidatorUpdated type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - validator with id [{}] updated", chrono::Local::now().naive_local(), _msg.0); //// ValidatorJoined is a tuple like struct so we have to get the first elem of it using .0
+        info!("👷🏼‍♂️ validator with id [{}] updated", _msg.0); //// ValidatorJoined is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here
@@ -391,9 +391,9 @@ impl Receive<UpdateValidatorAboutMempoolTx> for Validator{ //// implementing the
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: UpdateValidatorAboutMempoolTx, //-- _msg is of type UpdateValidatorAboutMempoolTx since we're implementing the Receive trait for the UpdateValidatorAboutMempoolTx type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - new transaction with id [{}] slided into the mempool", chrono::Local::now().naive_local(), _msg.0); //// UpdateValidatorAboutMempoolTx is a tuple like struct so we have to get the first elem of it using .0
+        info!("🪙 new transaction with id [{}] slided into the mempool", _msg.0); //// UpdateValidatorAboutMempoolTx is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here
@@ -409,9 +409,9 @@ impl Receive<UpdateValidatorAboutMiningProcess> for Validator{ //// implementing
     fn receive(&mut self,
                 _ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
                 _msg: UpdateValidatorAboutMiningProcess, //-- _msg is of type UpdateValidatorAboutMiningProcess since we're implementing the Receive trait for the UpdateValidatorAboutMiningProcess type
-                _sender: Sender){
+                _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("-> {} - start mining process of block with id [{}]", chrono::Local::now().naive_local(), _msg.0); //// UpdateValidatorAboutMiningProcess is a tuple like struct so we have to get the first elem of it using .0
+        info!("⚒️ start mining process of block with id [{}]", _msg.0); //// UpdateValidatorAboutMiningProcess is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here

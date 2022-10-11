@@ -25,7 +25,8 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     // https://crates.io/crates/rayon
     // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module for promises or futures
     // TODO - a register contains the current buffer inside the ram related to the passed in id means we have to read the buffer from inside of it related to the passed in id
-    // TODO - we have to read the content of a specific register and save it inside a buffer 
+    // TODO - we have to read the content of a specific register and save it inside a buffer
+    // TODO - rafael serverless runtime must be like #[rafael::main] on top of a server instance  
 
 
 
@@ -188,26 +189,6 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
 
 
-    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    //                      RAFAEL ACTOR
-    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
-    
-    impl Actor for Runtime{
-        
-        type Msg = Vec<u8>; 
-
-        fn recv(&mut self, ctx: &Context<Self::Msg>, msg: Self::Msg, sender: Sender){ //// ctx is the actor system which we can build child actors with it also sender is another actor 
-        
-            todo!();        
-        
-        }
-    
-    }
-
-
-
 
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
     // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
@@ -284,7 +265,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service to be executed and triggered inside the second service and get the response inside a callback method using .then()
             // TODO - incoming scheduled event from a thread of the first service actor inside a free thread of the second service actor must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
             // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
-            // TODO - vector of || async move{} of events for an event manager struct like event loop schema and call new event every 5 seconds from vector of event of closures 
+            // TODO - vector of || async move{} of events for an event manager struct like riker scheduling logic and vector clock schemas and call new event every 5 seconds from vector of event of closures 
             // TODO - build a protocol based on binary address to transmit data between actors using mpsc tunnel like onionary://0001010101:2349
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
             // ...

@@ -24,6 +24,7 @@ pub mod scheduler;
 // ------------------------------ heavy computational calculation using async and multithreading design patterns
 // ----------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------
+// TODO - use simd logic of rayon for matrix multiplication
 // ----------------------------------------------------------------------------------------------------------------------
 pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would be an associated function not a method
     
@@ -176,20 +177,20 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
 
 
+// ------------------------------ simd (vectorization) using mpsc channel + tokio + native thread
+// ------------------------------------------------------------------------------------------------------
+// https://stackoverflow.com/questions/35091979/why-is-vectorization-faster-in-general-than-loops
+// ------------------------------------------------------------------------------------------------------
+// simd ops means that dividing the vector of events or tasks into multiple parts in such a way that all parts will be executed concurrently
+// ------------------------------------------------------------------------------------------------------
 
-
-
-
-
-// ------------------------------ using mpsc channel + tokio + native thread
-// -----------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------
 
 pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8) -> u8 + std::marker::Send + 'static + Clone{ //-- in order to move the F between threads it must be bounded to Send trait
-        
-        
-    let threads = 4; //-- the total number of all packs or chunks containing 8 bits which in this case is 4 cause our number is of type u32
+    
+    
+    // simd on a 32 bits number means solving 4 packs or operations like multiplication of 8 bits or 4 bytes in parallel
+    // simd on a 256 bits number means solving 4 packs or operations like multiplication of 64 bits (4 * 8 bytes = 256 bits) or 8 packs of 32 bits (8 * 4 bytes = 256 bits) 
+    let threads = 4; //-- the total number of all packs or chunks containing 8 bits is 4 cause our number is of type u32
     let (sender, receiver) = std_mpsc::channel::<u8>();
     let big_end_bytes = number.to_be_bytes(); //-- network bytes which is in form utf8 or big endian bytes - since there are 4 chunks of 8 bits in the context of u32 bits there will be 4 chunks of 8 bits each chunk between 0 up to 255 
     let mut index = 0;
@@ -235,6 +236,7 @@ pub async fn simd<F>(number: u32, ops: F) -> Result<u32, String> where F: Fn(u8)
 
 
 
+
 // ------------------------------ into box method
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
@@ -250,6 +252,16 @@ pub async fn into_box_slice(u8_vector: &Vec<u8>) -> Result<Box<[u8; 4]>, String>
 
 
 
+
+
+
+// ------------------------------ String to static str
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of the return str is static and is valid as long as the entire lifetime of the app
+    Box::leak(s.into_boxed_str())
+}
 
 
 
@@ -294,7 +306,7 @@ pub async fn into_box_slice(u8_vector: &Vec<u8>) -> Result<Box<[u8; 4]>, String>
         NOTE - by setting a unique storage key for each collection actually we're putting all the keys and entries of that collection inside a unique storage in memory which has a unique key or flag to avoid data collision for each collection's keys
         NOTE - since two different collections might have same key we'll set a prefix key for each collection using enum variant serialized to utf8 to avoid collection collision with same key in their entries, by doing this every collection will have a unique identifier and will be separated from other collection in which a same version of a key exists
         NOTE - every instascne of ByOwnerIdInner, ByNFTContractIdInner and ByNFTTokenTypeInner will have a new memory location address thus we can use it as an storage key since the hash of this key will be different and unique each time due to different memory location address of each instacne which won't be the same even if we create a new instance with a same field each time
-        NOTE - enum has an extra size like 8 bytes, a 64 bits pointer which is big enough to store the current vairant address for its tag which tells use which variant we have right now, but rust uses null pointer optimization instead of allocating 8 bytes tag  
+        NOTE - enum has an extra size like 8 bytes, a 64 bits pointer which is big enough (64 bit arch os) to store the current vairant address for its tag which tells use which variant we have right now, but rust uses null pointer optimization instead of allocating 8 bytes tag  
         NOTE - null pointer optimization means a reference can never be null such as Option<&T> which is a pinter with 8 bytes length thus rust uses that reference or pointer as the tag with 8 bytes length for the current variant  
         NOTE - none struct variants in Storagekey enum allocates zero byte for the current persistent storage once the tag point to their address at a time
         NOTE - the enum size with zero byte for each variants would be the largest size of its variant + 8 bytes tag which would be 8 bytes in overall
@@ -336,19 +348,25 @@ pub enum Storagekey{ //-- defining an enum based unique storage key for every ou
 
 
 
-
-
-
-
-
-
-
 // ------------------------------ utility macros
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 // https://doc.rust-lang.org/reference/procedural-macros.html
+// https://blog.jetbrains.com/rust/2022/03/18/procedural-macros-under-the-hood-part-i/
+// https://dev.to/dandyvica/rust-procedural-macros-step-by-step-tutorial-36n8
+// https://doc.rust-lang.org/rust-by-example/macros.html
+// https://doc.rust-lang.org/book/ch19-06-macros.html
+// https://doc.rust-lang.org/reference/procedural-macros.html
+// https://danielkeep.github.io/practical-intro-to-macros.html
+// https://blog.logrocket.com/macros-in-rust-a-tutorial-with-examples/
+// https://www.youtube.com/watch?v=j0zDvzQr7WE&ab_channel=CodingTech
+// https://steveklabnik.com/writing/an-overview-of-macros-in-rust
+// https://hub.packtpub.com/creating-macros-in-rust-tutorial/
+// https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/macros.html
+// https://blog.logrocket.com/procedural-macros-in-rust/
+// https://danielkeep.github.io/tlborm/book/mbe-macro-rules.html
 // TODO - build function like macro like query!() and custom inner and outter trait like proc macro attributes and derive like; on structs, fields, modules and functions like #[near_bindgen] and #[borsh_skip] proc macro attribute, #[custom(token_stream)] and #[derive(Clone)] style 
 // TODO - write proc macro attributes and derives with TokenStream arg using proc_macro2 crate and proc-macro = true flag inside the lib.rs file by using #[proc_macro], #[proc_macro_attribute] and #[proc_macro_derive] attributes  
 // TODO - a proc macro attribute to convert a trait into a module and its methods into static methods of that module and add extra args like the ones for nft_on_transfer() and nft_on_approve() methods when the user is implementing these methods
@@ -462,6 +480,9 @@ pub mod macros{
             }
         }
     }
+    //////
+    /// wowasm!{bindgen, id} //-- bindgen is the name of the struct and id is the name of the field
+    //////
     
     
     #[macro_export]

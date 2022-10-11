@@ -179,14 +179,6 @@ pub fn gen_random_idx(idx: usize) -> usize{
 
 
 
-pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of the return str is static and is valid as long as the entire lifetime of the app
-    Box::leak(s.into_boxed_str())
-}
-
-
-
-
-
 pub async fn upload_asset(path: &str, mut payload: Multipart<'_>, doc_id: &String) -> Option<String>{ //-- parsing the incoming file stream into MultipartItem instances - Multipart struct takes a lifetime and we've passed an unnamed lifetime to that
     
     fs::create_dir_all(path).unwrap(); //-- creating the directory which must be contains the file
@@ -269,6 +261,9 @@ pub async fn get_random_doc(storage: Option<&Client>) -> Option<schemas::game::R
     let roles = storage.clone().unwrap().database(&db_name).collection::<schemas::game::RoleInfo>("roles");
     let random_record_setup = doc!{"$sample": {"size": 1}};
     let pipeline = vec![random_record_setup];
+
+    ////////////////////////////////// DB Ops
+    
     match roles.aggregate(pipeline, None).await{
         Ok(mut cursor) => {
             while let Some(random_doc) = cursor.try_next().await.unwrap(){
@@ -280,6 +275,9 @@ pub async fn get_random_doc(storage: Option<&Client>) -> Option<schemas::game::R
         },
         Err(e) => None,
     }
+
+    //////////////////////////////////
+
 }
 
 
