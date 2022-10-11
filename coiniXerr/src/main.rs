@@ -86,7 +86,8 @@ Coded by
         a reference to object safe traits which are not bounded to Sized and Copy traits.
 
     [🚨] when an actor is created, it gets its own mailbox for receiving messages and other interested actors are notified 
-        about the new actor joining the system also riker actors are Futures and run as Futures on the underlying thread pool.
+        about the new actor joining the system also riker actors are Futures and run as Futures on the underlying thread pool
+        also all riker data structures are Send Sync and have a valid lifetimes across threads.
 
     [🚨] ActorRef is a lightweight type that is inexpensive to clone and can be used to interact with its underlying Actor, 
         such as sending messages to it also is a reference to the actor.
@@ -133,7 +134,7 @@ use uuid::Uuid;
 use std::{fmt::Write, num::ParseIntError};
 use std::sync::{Arc, Mutex, mpsc as std_mpsc, mpsc::channel as heavy_mpsc}; //-- communication between threads is done using mpsc job queue channel and end of the channel can only be owned by one thread at the time to avoid dead lock, however the sender half can be cloned and through such cloning the conceptual sender part of a channel can be shared among threads which is how you do the multi-producer, single-consumer part
 use std::time::{Instant, Duration};
-use std::{env, slice, mem, thread::{self, JoinHandle}};
+use std::{env, thread::{self, JoinHandle}};
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 use std::net::SocketAddr; //-- these structures are not async; to be async in reading and writing from and to socket we must use tokio::net 
@@ -195,8 +196,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     
 
-    
 
+
+
+
+
+    
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+    ///////            start transaction emulator
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈     
+    
+    utils::api::tx_emulator().await;
 
     
 

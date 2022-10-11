@@ -84,26 +84,37 @@ macro_rules! user_data {
 ///////             sending fake transaction to the coiniXerr tcp server  
 /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
 
-// use tokio::spawn(async move{}); and pool.execute(|| async move{}); to send encoded tx to the tcp server
+pub async fn tx_emulator(){
+    
+    let mut time: u64 = 0;
+    let tcp_host = env::var("HOST").expect("⚠️ please set host in .env");
+    let tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
+    let ip_port = format!("{}:{}", tcp_host, tcp_port);
+    let pool = utils::scheduler::ThreadPool::new(10);
+    let sleep = Duration::from_secs("3".to_string().parse::<u64>().unwrap());
 
-
-/*
-
-    let mut time:u64 = 0;
-    let sleep = Duration::from_millis(env::args().nth(2).unwrap_or("0".to_string()).parse::<u64>().unwrap());
-    loop {
+    loop{ //-- simulating a transaction emulator by sending infinite tx to the coiniXerr tcp server
+        
         time+=1;
-        thread::spawn(move|| {
-            match TcpStream::connect(env::args().nth(1).unwrap()) {
-                Ok(mut tcp) => {
-                    tcp.write(&[0]).unwrap();
-                    print!("\r{}", time);
-                    io::stdout().flush().ok().expect("Could not flush stdout");
-                },
-                _ => {}
-            };
-        });
+        let ip_port = ip_port.clone();
+        pool.execute(move || { //-- a closure with a async block in its return type
+            tokio::spawn(async move{ //-- an async block or future object is the param of the tokio::spawn()
+                match TcpStream::connect(ip_port.as_str()).await{
+                    Ok(mut stream) => { //-- stream must be muatble in order to write on it
+
+                        let random_tx = Transaction::default(); //-- creating a default transaction
+                        let encoded_tx = random_tx.try_to_vec().unwrap(); //-- encoding using borsh; we can convert a Vec<u8> to &[u8] by taking a reference to it since &[u8] which will be on the stack is an slice of the Vec<u8> which is inside the heap 
+                        stream.write_all(&encoded_tx).await.unwrap(); //-- writing the buffer into the stream to send back to the server
+
+                    },
+                    Err(e) => {
+                        error!("😕 : {}", e);
+                    }
+                }
+            });
+        });  
+
         thread::sleep(sleep);
     }
     
-*/
+}

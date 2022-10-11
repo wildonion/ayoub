@@ -153,7 +153,6 @@ NOTE - the task or event (divided using simd) which must be sent between threads
 =========================================================
                 RIKER ACTOR BASED PROJECTS 
 =========================================================
-TASK - build ddos tool using hyper and tokio
 TASK - build an ssl based proxy server/client like v2ray protocols, softether and tor snowflake using hyper and tokio on layer4 based on tcp/udp/grpc/websocket and riker actors to bypass the cencorship using cryptography and networking (ipatables) concepts
 TASK - build a load balancer like k8s using cpu task scheduling algos like round robin, vector clock, simd and weighted round robin for ayoub using hyper and tokio on layer 1 and 2 based on and riker actors (every server instance can handle 144000 requests per second so with our load balance we must be able to spread the requests between each server node efficiently)
 TASK - object storage like MinIO and S3
@@ -168,7 +167,6 @@ TASK - an event streaming platform like VoD and FoD protocol like arvancloud bas
         - create an endpoint api to point where the hls is
         - call the api to load in html5 video tag
         - a file on demand protocol to upload files and return their id
-
 
 
 

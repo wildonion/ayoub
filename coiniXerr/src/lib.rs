@@ -3,6 +3,7 @@
 
 use std::mem::size_of_val;
 use std::str;
+use std::{slice, mem};
 use std::collections::HashMap;
 use std::{cmp::Eq, hash::Hash};
 use std::fmt::Display;
