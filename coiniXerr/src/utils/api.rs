@@ -83,35 +83,31 @@ macro_rules! user_data {
 /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
 ///////             sending fake transaction to the coiniXerr tcp server  
 /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+//// can't use .await inside the pool.execute(move || {}); since it's a sync task scheduler and unlike tokio it's body won't return an async block future object 
 
-pub async fn tx_emulator(){
+pub async fn tx_emulator() -> (){
     
-    let mut time: u64 = 0;
     let tcp_host = env::var("HOST").expect("⚠️ please set host in .env");
     let tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
     let ip_port = format!("{}:{}", tcp_host, tcp_port);
-    let pool = utils::scheduler::ThreadPool::new(10);
     let sleep = Duration::from_secs("3".to_string().parse::<u64>().unwrap());
 
     loop{ //-- simulating a transaction emulator by sending infinite tx to the coiniXerr tcp server
-        
-        time+=1;
+    
         let ip_port = ip_port.clone();
-        pool.execute(move || { //-- a closure with a async block in its return type
-            tokio::spawn(async move{ //-- an async block or future object is the param of the tokio::spawn()
-                match TcpStream::connect(ip_port.as_str()).await{
-                    Ok(mut stream) => { //-- stream must be muatble in order to write on it
+        tokio::spawn(async move{ //-- an async block or future object is the param of the tokio::spawn()
+            match TcpStream::connect(ip_port.as_str()).await{
+                Ok(mut stream) => { //-- stream must be muatble in order to write on it
 
-                        let random_tx = Transaction::default(); //-- creating a default transaction
-                        let encoded_tx = random_tx.try_to_vec().unwrap(); //-- encoding using borsh; we can convert a Vec<u8> to &[u8] by taking a reference to it since &[u8] which will be on the stack is an slice of the Vec<u8> which is inside the heap 
-                        stream.write_all(&encoded_tx).await.unwrap(); //-- writing the buffer into the stream to send back to the server
+                    let random_tx = Transaction::default(); //-- creating a default transaction
+                    let encoded_tx = random_tx.try_to_vec().unwrap(); //-- encoding using borsh; we can convert a Vec<u8> to &[u8] by taking a reference to it since &[u8] which will be on the stack is an slice of the Vec<u8> which is inside the heap 
+                    stream.write_all(&encoded_tx).await.unwrap(); //-- writing the buffer, the encoded transaction, into the stream to send back to the server
 
-                    },
-                    Err(e) => {
-                        error!("😕 : {}", e);
-                    }
+                },
+                Err(e) => {
+                    error!("😕 : {}", e);
                 }
-            });
+            }
         });  
 
         thread::sleep(sleep);

@@ -20,7 +20,7 @@ use crate::contexts::{app, scheduler::ThreadPool};
 use serde::{Serialize, Deserialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 use routerify_multipart::Multipart;
-
+use hyper::{Client as HyperClient, Response, Body, Uri};
 
 
 
@@ -82,26 +82,75 @@ pub mod jwt{
 
 pub mod otp{
 
-    pub struct OTPSuccess;
-    pub struct OTPErr;
-    pub struct PhoneNumber;
-    pub struct Auth;
+
+    use super::*; //-- loading all the loaded crates inside the utils (super) itself
+
+
+    
+    
+    pub struct OtpSuccess(pub Response<Body>, pub OtpInput); //-- OtpSuccess is a tuple like struct with two inputs
+
+
+    #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+    pub struct OtpInput{
+        pub code: Option<String>,
+        pub exp_time: Option<u8>, //-- this is the expiration time of the otp message in mins
+        pub phone: Option<String>,
+    }
+
+    #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+    pub struct Auth{
+        pub token: String,
+        pub template: String,
+        pub otp_input: OtpInput
+    }
+
+    impl Auth{
+
+        //// in order to bound the Otp to what we're returning from the function the trait Otp must be implemented for the type that we're returning its instance from the function
+        //// returning impl Otp from function means we're implementing the trait for the object that is returning from the function regardless of its type that we're returning from the function cause compiler will detect the correct type in compile time and implement or bound the trait for that type
+        pub fn new(token: String, template: String, otp_input: OtpInput) -> impl Otp{ //// since traits don't have fix size at compile time thus when we want to return them from the function we have to return an instance of the type that the trait has been implemented for since the trait size will be the size of that type which is bounded to the trait  
+            Self{
+                token,
+                template,
+                otp_input
+            }
+        }
+
+    }
 
     pub trait Otp{
 
-        type Message;
-
-        fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>;
+        fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>; //-- the error part is of type hyper::Error which will be returned automatically if the success part gets failed
+        fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error>; //-- we must first fetch the otp info from the database then pass it to this method to check it
 
     }
 
     impl Otp for Auth{
-
-        type Message = String;
         
-        fn send_code(&mut self, recipient: PhoneNumber, message: Self::Message) -> Result<OTPSuccess, OTPErr>{
+        fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>{
 
-            todo!()
+            let code: String = (0..4).map(|_|{
+            let idx = gen_random_idx(random::<u8>() as usize); //-- idx is one byte cause it's of type u8
+                CHARSET[idx] as char //-- CHARSET is of type utf8 bytes thus we can index it which it's length is 10 bytes (0-9)
+            }).collect();
+
+            self.otp_input.code = Some(code.clone());
+            let recipient = self.otp_input.phone.clone().unwrap();
+            let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", self.token, recipient, code, self.template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
+            let client = HyperClient::new();
+            let sms_response_stream = block_on(client.get(uri)).unwrap(); //-- since we can't use .await inside trait methods thus we have to solve the future using block_on() function
+            
+            Ok( //// return the sms response stream and the otp inputs back to where this method has called to decode the content
+                OtpSuccess(sms_response_stream, self.otp_input.clone()) //-- we have to clone the self.otp_input to prevent its ownership moving since by moving it into the field of a structure it'll lose its ownership 
+            )
+
+        }
+
+        fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error> {
+            
+            // TODO  
+            todo!();
 
         }
 

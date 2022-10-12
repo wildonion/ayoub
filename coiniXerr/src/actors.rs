@@ -9,3 +9,4 @@ pub mod peer;
 pub mod parathread;
 pub mod rafael;
 pub mod unixerr;
+pub mod ddos;

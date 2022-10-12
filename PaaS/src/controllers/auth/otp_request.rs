@@ -7,7 +7,7 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
-use crate::utils::gen_random_idx;
+use crate::utils::otp::{Auth as OTPAuth, Otp, OtpInput}; //-- based on orphan rule Otp trait must be imported here to use its methods on an instance of OTPAuth which returns impl Otp
 use std::{mem, slice, env, io::{BufWriter, Write}};
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -71,22 +71,24 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     let phone = otp_req.phone;
                     let sms_api_token = env::var("SMS_API_TOKEN").expect("⚠️ no sms api token variable set");
                     let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms template variable set");
+
                     
                     
 
-                    
-
-                    
                     // --------------------------------------------------------------------
                     //         GENERATING RANDOM CODE TO SEND IT TO THE RECEPTOR
                     // --------------------------------------------------------------------
-                    let code: String = (0..4).map(|_|{
-                        let idx = gen_random_idx(random::<u8>() as usize); //-- idx is one byte cause it's of type u8
-                        CHARSET[idx] as char //-- CHARSET is of type utf8 bytes thus we can index it 
-                    }).collect();
-                    let uri = format!("http://api.kavenegar.com/v1/{}/verify/lookup.json?receptor={}&token={}&template={}", sms_api_token, phone, code, sms_template).as_str().parse::<Uri>().unwrap(); //-- parsing it to hyper based uri
-                    let client = Client::new();
-                    let mut sms_response_stream = client.get(uri).await.unwrap();
+                    let otp_input = OtpInput{
+                        phone: Some(phone.clone()),
+                        code: None, //-- will be filled later by the Otp trait
+                        exp_time: Some(2), //-- 2 mins expiration time 
+                    };
+                    let mut otp_auth = OTPAuth::new(sms_api_token, sms_template, otp_input); //// the return type is impl Otp trait - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
+                    let otp_response = otp_auth.send_code().unwrap();
+                    let mut sms_response_stream = otp_response.0;
+                    let otp_info = otp_response.1;
+                    let generated_code = otp_info.code.unwrap();  
+                    
                     if sms_response_stream.status() == 200{ /////// the status of the OTP career is 200 means the code has been sent successfully to the receiver
                         
 
@@ -157,7 +159,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     let updated_at = Some(now.timestamp());
                                     let serialized_updated_at = bson::to_bson(&updated_at).unwrap(); //-- we have to serialize the updated_at to BSON Document object in order to update the mentioned field inside the collection
                                     let otp_info = db.clone().database(&db_name).collection::<schemas::auth::OTPInfo>("otp_info"); //-- using OTPInfo struct to find and update an otp info inside the otp_info collection
-                                    match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, Some(update_option)).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
+                                    match otp_info.find_one_and_update(doc!{"phone": phone.clone()}, doc!{"$set": {"code": generated_code.clone(), "exp_time": two_mins_later, "updated_at": updated_at}}, Some(update_option)).await.unwrap(){ //-- updated_at is of type i64 thus we don't need to serialize it to bson in order to insert into the collection
                                         Some(otp_info) => { //-- once we get here means that the user is already exists in the collection and we have to save the generated new otp code along with a new expiration time for him/her
 
 
@@ -187,7 +189,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                             let now = Local::now();
                                             let new_otp_info = schemas::auth::SaveOTPInfo{
                                                 exp_time: two_mins_later,
-                                                code, //-- no need to clone the code cause we won't use it inside other scope and this is the final place when we use it
+                                                code: generated_code, //-- no need to clone the code cause we won't use it inside other scope and this is the final place when we use it
                                                 phone, //-- no need to clone the phone cause we won't use it inside other scope and this is the final place when we use it
                                                 created_at: Some(now.timestamp()),
                                                 updated_at: Some(now.timestamp()),

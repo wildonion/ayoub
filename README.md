@@ -22,7 +22,7 @@
 
 # 📌 TODOs
 
-* read `DEV.info` refs to complete all TODOs
+* `DEV.info` refs and tasks
 
 * coiniXerr TODOs
 

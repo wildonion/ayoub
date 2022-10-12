@@ -408,7 +408,7 @@ pub fn trash(){
 	pub struct Pack; //-- we've allocated some space inside the stack for this struct when defining it which has long enough lifetime to initiate an instance from it using struct declaration and return a reference to that instance inside any function 
 	pub trait Interface{}
 
-	impl Interface for Pack{} //-- is required for return_box_trait() function
+	impl Interface for Pack{} //-- is required for return_box_trait(), return_impl_trait() and return_none_trait() functions in order to work
 
 	fn return_none_trait<T>() -> () where T: Interface{ // NOTE - `T` type must be bound to Interface trait
 

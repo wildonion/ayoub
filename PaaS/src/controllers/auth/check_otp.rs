@@ -88,7 +88,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                     };
                                                     let response_body = ctx::app::Response::<schemas::auth::CheckOTPResponse>{ //-- we have to specify a generic type for data field in Response struct which in our case is CheckOTPResponse struct
                                                         data: Some(check_otp_response), //-- use CheckOTPResponse struct to serialize user info and otp info from bson into the json to send back to the user
-                                                        message: ACCESS_DENIED,
+                                                        message: ACCESS_GRANTED,
                                                         status: 200,
                                                     };
                                                     let response_body_json = serde_json::to_string(&response_body).unwrap(); //-- converting the response body object into json stringify to send using hyper body

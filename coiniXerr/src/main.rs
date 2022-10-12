@@ -181,10 +181,9 @@ pub mod utils;
 
 
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //// bounding the type that is caused to error to Error, Send and Sync traits to be shareable between threads and have static lifetime across threads and awaits
+#[tokio::main(flavor="multi_thread", worker_threads=10)] //// use the tokio multi threaded runtime by spawning 10 threads
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>{ //// bounding the type that is caused to error to Error, Send and Sync traits to be shareable between threads and have static lifetime across threads and awaits; Box is an smart pointer which has valid lifetime for what's inside of it, we're putting the error part of the Result inside the Box since we have no idead about the size of the error at compile time thus we have to take a reference to it but without defining a specific lifetime
     
-
 
     
 
@@ -201,12 +200,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
-    
-    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-    ///////            start transaction emulator
-    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈     
-    
-    utils::api::tx_emulator().await;
+
 
     
 
@@ -234,7 +228,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
     let host = env::var("HOST").expect("⚠️ please set host in .env");
     let coiniXerr_tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
-    let pool = utils::scheduler::ThreadPool::new(10); //-- spawning 10 threads in overall per incoming stream to handle all incoming transactions from every stream concurrently and simultaneously
+    let pool = utils::scheduler::ThreadPool::new(10); //-- building a sync task scheduler thread pool with 10 threads 
     let (stream_sender, mut stream_receiver) = mpsc::channel::<(
                                                                                                                                 TcpStream, 
                                                                                                                                 Uuid, 
@@ -387,6 +381,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
+
+
+
+
+
+
+
+
+
+// if dotenv initialization is before the starting the emulator process means we're ok since the whole env file will be loaded into the ram and 
+// when we want to load vars it's ok but if we put the starting the emulator process before loading dotenv we'll face error since dotenv doesn't initialize yet
+
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+    ///////            start transaction emulator
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈     
+    
+    utils::api::tx_emulator().await;
 
 
 
