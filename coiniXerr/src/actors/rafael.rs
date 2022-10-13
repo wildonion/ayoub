@@ -20,8 +20,6 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     
     
     // https://procmarco.netlify.app/blog/2021-05-04-a-story-about-async-rust-and-using-send-types/
-    // https://ryhl.io/blog/actors-with-tokio/
-    // https://ryhl.io/blog/async-what-is-blocking/
     // https://crates.io/crates/rayon
     // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module for promises or futures
     // TODO - a register contains the current buffer inside the ram related to the passed in id means we have to read the buffer from inside of it related to the passed in id
@@ -254,7 +252,6 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         fn schedule(&self) -> Self{
 
-            // TODO - message scheduling in another actor
             // TODO - use multithreading, channels (oneshot and mpsc) and cryptography algos and also types must be send + sync + static across threads and .awaits
             // TODO - use Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in multithreaded env and RefCell<Rc<T>> in single threaded env
             // TODO - actors will send encoded data through the mpsc channel from their free thread, so we have to deserialize them when we resolve them outside of the fulfilled future object 

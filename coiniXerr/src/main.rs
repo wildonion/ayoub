@@ -228,7 +228,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
     let host = env::var("HOST").expect("⚠️ please set host in .env");
     let coiniXerr_tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
-    let pool = utils::scheduler::ThreadPool::new(10); //-- building a sync task scheduler thread pool with 10 threads 
     let (stream_sender, mut stream_receiver) = mpsc::channel::<(
                                                                                                                                 TcpStream, 
                                                                                                                                 Uuid, 
@@ -708,6 +707,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
     ///////                     starting validator actors for incoming transactions' bytes through a tcp streamer 
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+    
     while let Ok((stream, addr)) = listener.accept().await{ //-- await suspends the accept() function execution to solve the future but allows other code blocks to run  
         info!("🪢 connection stablished from {}", addr);
         let cloned_arc_mutex_runtime_info_object = Arc::clone(&arc_mutex_runtime_info_object); //-- cloning (making a deep copy of) runtime info object to prevent ownership moving in every iteration between threads
@@ -894,6 +894,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                     let mut transaction_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&deserialized_transaction_serde).unwrap(); //-- converting the deserialized_transaction_serde object into vector of utf8 bytes using serde
                     let mut transaction_serialized_into_vec_bytes_using_borsh = deserialized_transaction_borsh.try_to_vec().unwrap(); //-- converting the transaction object into vector of utf8 bytes using borsh
                     // TODO - only if the downside of the mpsc job queue channel was available the transaction will be signed and sent through the mempool channel to be pushed inside a block for mining process
+                    // TODO - make sure that the receiver is not dropped
                     // ...
                     let now = chrono::Local::now().naive_local().timestamp();
                     let must_be_signed = true;

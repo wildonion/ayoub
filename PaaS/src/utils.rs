@@ -16,7 +16,7 @@ use mongodb::options::{FindOneAndUpdateOptions, ReturnDocument};
 use rand::prelude::*;
 use routerify::Error;
 use crate::{constants::*, schemas};
-use crate::contexts::{app, scheduler::ThreadPool};
+use crate::contexts::app;
 use serde::{Serialize, Deserialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 use routerify_multipart::Multipart;

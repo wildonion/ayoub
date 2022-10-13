@@ -138,7 +138,7 @@ pub async fn role(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                                                 Err(e) => { println!("error in inserting new player role ability at time {} - {}", chrono::Local::now().naive_local(), e); },
                                                             }        
                                                         },
-                                                        None => {}, //-- TODO - means we didn't find any document related to this user_id and simply we return the unmatched player info
+                                                        None => {},
                                                     }                                                
                                                     
                                                     updated_players.push(p); //-- pushing the updated players field for this event into the updated_players vector
