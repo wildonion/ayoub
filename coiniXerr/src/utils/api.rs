@@ -87,18 +87,21 @@ macro_rules! user_data {
 
 pub async fn tx_emulator() -> (){
     
+    let mut time = 0;
     let tcp_host = env::var("HOST").expect("⚠️ please set host in .env");
     let tcp_port = env::var("COINIXERR_TCP_PORT").expect("⚠️ please set coiniXerr tcp port in .env");
     let ip_port = format!("{}:{}", tcp_host, tcp_port);
     let sleep = Duration::from_secs("3".to_string().parse::<u64>().unwrap());
 
     loop{ //-- simulating a transaction emulator by sending infinite tx to the coiniXerr tcp server
-    
+        
+        time+=1;
         let ip_port = ip_port.clone();
         tokio::spawn(async move{ //-- an async block or future object is the param of the tokio::spawn()
             match TcpStream::connect(ip_port.as_str()).await{
                 Ok(mut stream) => { //-- stream must be muatble in order to write on it
 
+                    info!("🪙 sending transaction {}", time);
                     let random_tx = Transaction::default(); //-- creating a default transaction
                     let encoded_tx = random_tx.try_to_vec().unwrap(); //-- encoding using borsh; we can convert a Vec<u8> to &[u8] by taking a reference to it since &[u8] which will be on the stack is an slice of the Vec<u8> which is inside the heap 
                     stream.write_all(&encoded_tx).await.unwrap(); //-- writing the buffer, the encoded transaction, into the stream to send back to the server
