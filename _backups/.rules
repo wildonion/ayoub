@@ -341,6 +341,7 @@ Sugar Memories:
 -> if the type is not Send Sync and also Clone trait is not implemented for that we have to impl Send and Sync trait for that
 -> futures must be Send in multi thread contexts but it's not required in single thread ones
 -> each task needs its own cloned form to be shared between threads means we have to clone the data to share it between threads
+-> traits can't have async method since they are not sized and in order to have async blocks they must be pinned into the memory 
 
 
 

@@ -27,6 +27,12 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     // TODO - rafael serverless runtime must be like #[rafael::main] on top of a server instance  
 
 
+    // cloudflare like near is serverless since
+    //      - write in rust then comile to wasm
+    //      - deploy using near cli to the near runtime
+    //      - load the deployed file in js and call its methods
+
+
 
     pub use crate::*;
     pub use std::{fmt, env, sync::{Arc, Mutex}};
@@ -184,6 +190,26 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
         }
     }
 
+
+
+    
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    //                      RAFAEL ACTOR
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+    // ‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡‡
+
+    impl Actor for Runtime{
+
+        type Msg = Vec<u8>; 
+
+        fn recv(&mut self, ctx: &Context<Self::Msg>, msg: Self::Msg, sender: Sender){ //// ctx is the actor system which we can build child actors with it also sender is another actor 
+
+            todo!();        
+
+        }
+
+    }
 
 
 
