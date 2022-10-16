@@ -31,6 +31,20 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
 
     /*  
 
+    
+
+        ➔ The three causes of data races
+            • Two or more pointers access the same data at the same time.
+            • At least one of the pointers is being used to write to the data.
+            • There’s no mechanism being used to synchronize access to the data
+        ➔ The three rules of ownership
+            • Each value in Rust has a variable that’s called its owner.
+            • There can only be one owner at a time.
+            • When the owner goes out of scope, the value will be dropped.
+        ➔ The two rules of references
+            • At any given time, you can have either one mutable reference or any number of immutable references.
+            • References must always be valid.
+
 
         ➔ types bounded to Sync and Send:
             Arc

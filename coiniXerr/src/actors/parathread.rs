@@ -220,7 +220,7 @@ impl Receive<UpdateParachainEvent> for Parachain{ //// implementing the Receive 
                 _ctx: &Context<Self::Msg>, 
                 _msg: UpdateParachainEvent, 
                 _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
-        info!("🔃 update parachain message info received");
+        info!("➔ 🔃 update parachain message info received");
     
         //// updating the state of the parachain with passed in message
         let updated_parachain = Self{
@@ -259,10 +259,10 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                 _msg: Communicate, //-- _msg is of type Communicate since we're implementing the Receive trait for the Communicate type
                 _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("📩 message info received with id [{}] and command [{:?}]", _msg.id, _msg.cmd);
+        info!("➔ 📩 message info received with id [{}] and command [{:?}]", _msg.id, _msg.cmd);
         match _msg.cmd{
             Cmd::GetCurrentBlock => {
-                info!("🔙 returning current block of the parachain with id [{}]", self.id);
+                info!("➔ 🔙 returning current block of the parachain with id [{}]", self.id);
                 let current_block = self.get_current_block();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -273,7 +273,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             Cmd::GetNextParachain => {
-                info!("🔙 returning the next parachain of the parachain with id [{}]", self.id);
+                info!("➔ 🔙 returning the next parachain of the parachain with id [{}]", self.id);
                 let next_parachain = self.get_next_parachain();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -284,7 +284,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             Cmd::GetBlockchain => {
-                info!("🔙 returning the blockchain of the parachain with id [{}]", self.id);
+                info!("➔ 🔙 returning the blockchain of the parachain with id [{}]", self.id);
                 let blockchain = self.get_blockchain();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -295,7 +295,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             Cmd::GetGenesis => {
-                info!("🔙 returning the genesis block of the parachain with id [{}]", self.id);
+                info!("➔ 🔙 returning the genesis block of the parachain with id [{}]", self.id);
                 let genesis_block = self.get_genesis();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -306,7 +306,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             Cmd::GetParachainUuid => {
-                info!("🔙 returning the parachain uuid");
+                info!("➔ 🔙 returning the parachain uuid");
                 let genesis_block = self.get_uuid();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -317,7 +317,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             Cmd::WaveSlotToNextParachainActor => {
-                info!("👋🏼 waving from parachain with id [{}] to its next parachain", self.id);
+                info!("➔ 👋🏼 waving from parachain with id [{}] to its next parachain", self.id);
                 
                 let next_parachain = self.get_next_parachain().unwrap(); //// getting the next parachain field
                 let actor_system = &_ctx.system; //// getting the borrowed form of the actor system from the _ctx
@@ -345,7 +345,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
 
             },
             Cmd::WaveSlotToParachainActor(parachain_path) => {
-                info!("👋🏼 waving from parachain with id [{}] to parachain [{}]", self.id, parachain_path);
+                info!("➔ 👋🏼 waving from parachain with id [{}] to parachain [{}]", self.id, parachain_path);
 
                 let path = parachain_path.as_str();
                 let selected_parachain = _ctx.select(path).unwrap(); //// selecting the passed in parachain to wave reset slot from this parachain to it - calling between actors by selecting the desired actor using select() method
@@ -361,7 +361,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
             Cmd::WaveResetSlotFrom(waver_id) => {
 
                 //// logging the incoming wave reset slot from the waver parachain to this parachain
-                info!("⭕ got a reset wave sent from parachain with id [{}] to this parachain with id [{}]", waver_id, self.id);
+                info!("➔ ⭕ got a reset wave sent from parachain with id [{}] to this parachain with id [{}]", waver_id, self.id);
 
                 // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
                 // ....
@@ -375,7 +375,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             Cmd::WaveResetSlotFromSystem => {
-                info!("⭕ got a reset wave sent from system to this parachain with [{}]", self.id);
+                info!("➔ ⭕ got a reset wave sent from system to this parachain with [{}]", self.id);
 
                 // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
                 // ....
@@ -389,7 +389,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                     );
             },
             _ => { //// GetSlot
-                info!("🔙 returning the slot of the parachain with id [{}]", self.id);
+                info!("➔ 🔙 returning the slot of the parachain with id [{}]", self.id);
                 let current_slot = self.get_slot();
                 _sender
                     .as_ref() //// convert to Option<&T> - we can also use clone() method instead of as_ref() method in order to borrow the content inside the Option to prevent the content from moving and loosing ownership
@@ -415,7 +415,7 @@ impl Receive<ParachainCreated> for Parachain{ //// implementing the Receive trai
                 _msg: ParachainCreated, //-- _msg is of type ParachainCreated since we're implementing the Receive trait for the ParachainCreated type
                 _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("🥳 new parachain created with id [{}]", _msg.0); //// ParachainCreated is a tuple like struct so we have to get the first elem of it using .0
+        info!("➔ 🥳 new parachain created with id [{}]", _msg.0); //// ParachainCreated is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here
@@ -433,7 +433,7 @@ impl Receive<ParachainUpdated> for Parachain{ //// implementing the Receive trai
                 _msg: ParachainUpdated, //-- _msg is of type ParachainUpdated since we're implementing the Receive trait for the ParachainUpdated type
                 _sender: Sender){ //// _sender is a BasicActorRef that can setup a message that must be sent to an actor using try_tell() method
     
-        info!("🥳 parachain updated with id [{}]", _msg.0); //// ParachainUpdated is a tuple like struct so we have to get the first elem of it using .0
+        info!("➔ 🥳 parachain updated with id [{}]", _msg.0); //// ParachainUpdated is a tuple like struct so we have to get the first elem of it using .0
         
         
         // other logics goes here

@@ -27,9 +27,9 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     // TODO - rafael serverless runtime must be like #[rafael::main] on top of a server instance  
 
 
-    // cloudflare like near is serverless since
+    // cloudflare like near is serverless:
     //      - write in rust then comile to wasm
-    //      - deploy using near cli to the near runtime
+    //      - deploy using near cli to the a runtime which will balance requests using a high performence proxy 
     //      - load the deployed file in js and call its methods
 
 

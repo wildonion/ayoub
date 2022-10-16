@@ -38,7 +38,7 @@ mongodb = "2"
 # we need lib.rs and crate type of cdylib for none binary like .wasm, .so, .dylib and .dll files
 crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
-name = "old"
+name = "ex"
 
 
 
