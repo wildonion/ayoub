@@ -286,7 +286,8 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
         
         
-        
+    tokio::signal::ctrl_c().await?;
+    println!("ctrl-c received");
         
         
         
