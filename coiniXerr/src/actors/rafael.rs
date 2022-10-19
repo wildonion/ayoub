@@ -29,7 +29,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     // near, cloudflare and shuttle are serverless:
     //      - write in rust then compile to wasm32-wasi
-    //      - deploy using cli to the runtime which will balance requests using a high performence proxy like k8s or like krustlet 
+    //      - deploy using cli to the runtime which will balance requests using a high performence proxy like pingora, k8s and krustlet 
     //      - load the deployed file in js and call its methods
 
 
