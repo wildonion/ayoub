@@ -275,6 +275,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let ayoub_server = Server::bind(&server_addr).serve(ayoub_service);
     let ayoub_graceful = ayoub_server.with_graceful_shutdown(ctx::app::shutdown_signal(receiver));
     if let Err(e) = ayoub_graceful.await{ //-- awaiting on the server to receive the shutdown signal
+        unwrapped_storage.db.clone().unwrap().mode = ctx::app::Mode::Off; //-- set the db mode of the app storage to off
         error!("ayoub server error {} - {}", e, chrono::Local::now().naive_local());
     }
 

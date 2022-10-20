@@ -141,7 +141,7 @@ pub mod otp{
             let client = HyperClient::new();
             let sms_response_stream = block_on(client.get(uri)).unwrap(); //-- since we can't use .await inside trait methods thus we have to solve the future using block_on() function
             
-            Ok( //// return the sms response stream and the otp inputs back to where this method has called to decode the content
+            Ok(
                 OtpSuccess(sms_response_stream, self.otp_input.clone()) //-- we have to clone the self.otp_input to prevent its ownership moving since by moving it into the field of a structure it'll lose its ownership 
             )
 
@@ -153,6 +153,8 @@ pub mod otp{
             todo!();
 
         }
+
+        
 
     }
 

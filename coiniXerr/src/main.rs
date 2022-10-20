@@ -144,9 +144,9 @@ use riker::actors::*;
 use riker::system::ActorSystem;
 use riker_patterns::ask::*; //// used to ask any actor to give us the info about or update the state of its guarded type 
 use crate::actors::{
-                    parathread::{Parachain, Communicate as ParachainCommunicate, Cmd as ParachainCmd, UpdateParachainEvent, ParachainCreated, ParachainUpdated}, 
-                    peer::{Validator, Contract, Mode as ValidatorMode, Communicate as ValidatorCommunicate, Cmd as ValidatorCmd, UpdateMode, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess}, 
-                    rafael::env::{Serverless, MetaData, Runtime as RafaelRt} //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
+                    parathread::{Parachain, Communicate as ParachainCommunicate, Cmd as ParachainCmd, UpdateParachainEvent, ParachainCreated, ParachainUpdated}, //// parathread message evenrs
+                    peer::{Validator, Contract, Mode as ValidatorMode, Communicate as ValidatorCommunicate, Cmd as ValidatorCmd, UpdateMode, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess}, //// peer message events
+                    rafael::env::{Serverless, MetaData, Runtime as RafaelRt, LinkToService} //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
                 }; 
 use crate::schemas::{Transaction, Block, Slot, Chain, Staker, Db, Storage, Mode};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
@@ -774,17 +774,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // ----------------------------------------------------------------------
         //                  SAVING RUNTIME INFO FOR THIS STREAM
         // ----------------------------------------------------------------------
-        
         info!("➔ 💾 saving runtime info");
         let meta_data_uuid = {
-                let mut runtime_info = cloned_arc_mutex_runtime_info_object.lock().unwrap().to_owned(); //-- in order to use the to_owned() method we have to implement the Clone trait for the Runtime struct since this method will make a clone from the instance - unlocking, unwrapping and cloning (by using to_ownded() method) the runtim_info object in every iteration of incoming stream inside the local thread to convert it to an instance of the RafaelRt struct
+            let listener_address = format!("{:p}", &listener);
+            let mut runtime_info = cloned_arc_mutex_runtime_info_object.lock().unwrap().to_owned(); //-- in order to use the to_owned() method we have to implement the Clone trait for the Runtime struct since this method will make a clone from the instance - unlocking, unwrapping and cloning (by using to_ownded() method) the runtim_info object in every iteration of incoming stream inside the local thread to convert it to an instance of the RafaelRt struct
                 RafaelRt::add( //-- locking on runtime info object (mutex) must be done in order to prevent other threads from mutating it at the same time 
                     runtime_info, //-- passing the mutable runtime_info object for adding new metadata into its hash map field
                     MetaData{
                         id: Uuid::new_v4(),
-                        node_addr: Some(addr),
+                        node_addr: Some(addr), //-- the ip address of the validator node 
                         actor: validator_actor.clone(), //-- cloning (making a deep copy of) the validator actor will prevent the object from moving in every iteration
-                        link_to_server: None,
+                        link_to_server: Some(LinkToService(listener_address)), //-- this is the location address of the tcp listener inside the ram 
                         last_crash: None,
                         first_init: Some(chrono::Local::now().naive_local().timestamp()),
                         error: None,
