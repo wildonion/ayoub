@@ -3,11 +3,13 @@
 
 
 
-use crate::{constants::*, schemas};
+use std::sync::Arc;
+use crate::{constants::*, schemas, utils};
 use futures::Future;
 use mongodb::Client;
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
+use borsh::{BorshDeserialize, BorshSerialize};
 use tokio::sync::oneshot::Receiver;
 use hyper::Body;
 use log::{info, error};
@@ -31,7 +33,7 @@ type Callback = Box<dyn 'static + FnMut(hyper::Request<Body>, hyper::http::respo
 type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
 
 unsafe impl Send for Api{}
-unsafe impl Sync for Api {}
+unsafe impl Sync for Api{}
 
 
 
@@ -213,6 +215,15 @@ pub struct Response<'m, T>{
     pub message: &'m str,
     pub status: u16,
 }
+
+
+
+
+pub struct OtpInfo{
+    pub otp_auth: Box<dyn utils::otp::Otp + Send + Sync + 'static>, //// otp_auth is a trait of type Otp which must be Send Sync and static to be shareable between routers' threads - since we can't have a trait as a struct field directly due to its unknown size at compile time thus  we've put the Otp trait inside the Box since the Box has its own lifetime which avoid us using references and lifetimes inside the struct fields
+    pub otp_input: utils::otp::OtpInput,
+}
+
 
 
 

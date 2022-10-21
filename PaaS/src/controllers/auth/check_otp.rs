@@ -10,6 +10,7 @@ use routerify::prelude::*;
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
+use crate::utils::otp::{Otp, OtpInput}; //-- based on orphan rule Otp trait must be imported here to use its methods on an instance of OTPAuth which returns impl Otp
 use futures::{executor::block_on, TryFutureExt, TryStreamExt}; //-- futures is used for reading and writing streams asyncly from and into buffer using its traits and based on orphan rule TryStreamExt trait is required to use try_next() method on the future object which is solved by .await - try_next() is used on futures stream or chunks to get the next future IO stream and returns an Option in which the chunk might be either some value or none
 use bytes::Buf; //-- it'll be needed to call the reader() method on the whole_body buffer and is used for manipulating coming network bytes from the socket
 use hyper::{header, StatusCode, Body, Response, Request};
@@ -18,6 +19,9 @@ use mongodb::bson::doc;
 use mongodb::Client;
 use chrono::Utc;
 use std::env;
+use std::sync::Arc;
+use tokio::sync::Mutex; //-- async Mutex will be used inside async methods since the trait Send is not implement for std::sync::Mutex 
+
 
 
 
@@ -35,7 +39,9 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
 
     let res = Response::builder();
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
-    let db = &req.data::<Client>().unwrap().to_owned();
+    let request_data = &req.data::<(Client, Arc<Mutex<ctx::app::OtpInfo>>)>().unwrap().to_owned(); //-- getting the request data from the incoming request
+    let db = &request_data.0;
+    let request_otp_info = &request_data.1;
 
     let whole_body_bytes = hyper::body::to_bytes(req.into_body()).await?; //-- to read the full body we have to use body::to_bytes or body::aggregate to collect all tcp IO stream of future chunk bytes or chunks which is of type utf8 bytes to concatenate the buffers from a body into a single Bytes asynchronously
     match serde_json::from_reader(whole_body_bytes.reader()){ //-- read the bytes of the filled buffer with hyper incoming body from the client by calling the reader() method from the Buf trait
@@ -52,6 +58,17 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     let time = otp_info.time;
 
                     
+                    let otp_input = OtpInput{
+                        code: Some(code.clone()),
+                        phone: Some(phone.clone()),
+                        exp_time: Some(time),
+                    };
+                    let otp_auth = &mut request_otp_info.lock().await.otp_auth;
+                    // otp_auth.check_code(otp_input, db.clone()).await
+
+
+
+
                     
                     ////////////////////////////////// DB Ops
 

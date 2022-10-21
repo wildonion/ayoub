@@ -443,7 +443,7 @@ pub struct DeleteEventRequest{
 
 
 
-impl EventInfo{
+impl EventInfo{ //// methods without &self takes the ownership of their instances and will move their lifetime
 
     pub async fn add_voter(self, voter: Voter) -> Vec<Voter>{ //-- we don't take a reference to self cause we can't dereference a shared reference (&T) and if we do that then cannot borrow `*voters` as mutable, cause it is behind a `&` reference and `voters` is a `&` reference, so the data it refers to cannot be borrowed as mutable cause we have to define the first argument as &mut self
         let mut voters = self.voters.unwrap();

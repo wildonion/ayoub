@@ -2033,17 +2033,17 @@
 	"variable": [
 		{
 			"key": "auth",
-			"value": "https://api.conse.app:7439",
+			"value": "https://api.ayoub.app:7439",
 			"type": "string"
 		},
 		{
 			"key": "event",
-			"value": "https://api.conse.app:7439",
+			"value": "https://api.ayoub.app:7439",
 			"type": "string"
 		},
 		{
 			"key": "game",
-			"value": "https://api.conse.app:7439",
+			"value": "https://api.ayoub.app:7439",
 			"type": "string"
 		},
 		{

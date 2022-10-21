@@ -21,7 +21,7 @@ use serde::{Serialize, Deserialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 use routerify_multipart::Multipart;
 use hyper::{Client as HyperClient, Response, Body, Uri};
-
+use async_trait::async_trait;
 
 
 
@@ -94,14 +94,14 @@ pub mod otp{
     #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
     pub struct OtpInput{
         pub code: Option<String>,
-        pub exp_time: Option<u8>, //-- this is the expiration time of the otp message in mins
+        pub exp_time: Option<i64>, //-- this is the expiration time of the otp message in timestamps
         pub phone: Option<String>,
     }
 
     #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
     pub struct Auth{
-        pub token: String,
-        pub template: String,
+        token: String,
+        template: String,
         pub otp_input: OtpInput
     }
 
@@ -119,16 +119,20 @@ pub mod otp{
 
     }
 
+   #[async_trait] 
     pub trait Otp{
 
-        fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>; //-- the error part is of type hyper::Error which will be returned automatically if the success part gets failed
-        fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error>; //-- we must first fetch the otp info from the database then pass it to this method to check it
+        async fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>; //-- the error part is of type hyper::Error which will be returned automatically if the success part gets failed
+        async fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error>; //-- we must first fetch the otp info from the database then pass it to this method to check it
+        async fn get_otp_input(&self) -> Option<OtpInput>;
+        async fn set_otp_input(&mut self, otp_info: OtpInput) -> Option<OtpInput>;
 
     }
 
+    #[async_trait]
     impl Otp for Auth{
         
-        fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>{
+        async fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>{
 
             let code: String = (0..4).map(|_|{
             let idx = gen_random_idx(random::<u8>() as usize); //-- idx is one byte cause it's of type u8
@@ -147,13 +151,25 @@ pub mod otp{
 
         }
 
-        fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error> {
+        async fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error> {
             
             // TODO  
             todo!();
 
         }
 
+        async fn get_otp_input(&self) -> Option<OtpInput>{
+            Some(
+                self.otp_input.clone()
+            )
+        }
+
+        async fn set_otp_input(&mut self, otp_info: OtpInput) -> Option<OtpInput>{
+            self.otp_input = otp_info;
+            Some(
+                self.otp_input.clone()
+            )
+        }
         
 
     }

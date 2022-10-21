@@ -43,6 +43,7 @@ use dotenv::dotenv;
 use uuid::Uuid;
 use log::{info, error};
 use tokio::sync::oneshot;
+use tokio::sync::Mutex; //-- async Mutex will be used inside async methods since the trait Send is not implement for std::sync::Mutex
 use hyper::server::Server;
 use self::contexts as ctx; // use crate::contexts as ctx;
 
@@ -99,6 +100,8 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let environment = env::var("ENVIRONMENT").expect("⚠️ no environment variable set");
     let host = env::var("HOST").expect("⚠️ no host variable set");
     let port = env::var("AYOUB_PORT").expect("⚠️ no port variable set");
+    let sms_api_token = env::var("SMS_API_TOKEN").expect("⚠️ no sms api token variable set");
+    let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms template variable set");
     let (sender, receiver) = oneshot::channel::<u8>(); //-- oneshot channel for handling server signals - we can't clone the receiver of the oneshot channel
     let server_addr = format!("{}:{}", host, port).as_str().parse::<SocketAddr>().unwrap();
     
@@ -250,11 +253,39 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
+    
+    // -------------------------------- initializing the otp info instance
+    //
+    // ---------------------------------------------------------------------------------------
+    let otp_input = utils::otp::OtpInput{
+        phone: None,
+        code: None,
+        exp_time: None, 
+    };
+    let mut otp_auth = utils::otp::Auth::new(sms_api_token, sms_template, otp_input.clone()); //// the return type is impl Otp trait which we can only access the trait methods on the instance - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
+    let otp_info = ctx::app::OtpInfo{
+        otp_auth: Box::new(otp_auth), 
+        otp_input: otp_input.clone(), 
+    };
+    let arced_mutexd_otp_info = Arc::new( //// in order the OtpInput to be shareable between routers' threads it must be sendable or cloneable and since the Clone trait is not implemented for the OtpInput we're putting it inside the Arc
+                                                        Mutex::new( //// in order the OtpInput to be mutable between routers' threads it must be syncable thus we have to put it inside the Mutex which based on mpsc rule means that only one thread can mutate it at a time 
+                                                            otp_info
+                                                        )
+                                                    );
+    
 
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
     
     // -------------------------------- building the ayoub server from the router
     //
@@ -263,7 +294,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let unwrapped_storage = app_storage.unwrap(); //-- unwrapping the app storage to create a db instance
     let db_instance = unwrapped_storage.get_db().await; //-- getting the db inside the app storage; it might be None
     let api = Router::builder()
-        .data(db_instance.unwrap().clone()) //-- shared state which will be available to every route handlers is the db_instance which must be Send + Syn + 'static to share between threads
+        .data((db_instance.unwrap().clone(), arced_mutexd_otp_info.clone())) //-- shared state which will be available to every route handlers is the db_instance which must be Send + Syn + 'static to share between threads
         .scope("/auth", routers::auth::register().await)
         .scope("/event", routers::event::register().await)
         .scope("/game", routers::game::register().await)

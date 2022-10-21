@@ -63,7 +63,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
           not bounded to Sync (cause &Receiver is not bouned to Send cause there is no clone trait implemented for the Receiver thus it can't be copy 
           thus we can't have &Receiver and can't be clone) therefore we can't move it between threads due to the fact that the type T (Receiver in our case) 
           must be used by only one consumer or thread at a time by blocking threads waiting for the lock to become available.
-       ➔ based on the rust ownership and borrowing rule we can have multiple immutable references to a type but only one mutable pointer at a time must be exists
+       ➔ based on the rust ownership and borrowing rule which removes the need of garabe collection rule we can have multiple immutable references to a type but only one mutable pointer at a time must be exists
           and due to this rule we can have a safe concurrency in such a way that multiple threads can be the owner of a type to read its content but only on of them
           can mutate the content of the type (like reading from the receiver which is a mutable operation) therefore we can have mpsc message passing channel based on this rule
           the sender of the channel is Send but not Sync and can be cloned to send data between threads for reading (multiple producer) but the receiver is not Send and Sync and can't be cloned 
