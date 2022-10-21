@@ -157,8 +157,9 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     let now = Local::now();
                                     let two_mins_later = (now + Duration::seconds(120)).naive_local().timestamp(); //-- generating a timestamp from now till the two mins later
                                     let mut otp_info = otp_auth.get_otp_input().await.unwrap();
-                                    otp_info.exp_time = Some(two_mins_later);
-                                    
+                                    otp_info.exp_time = Some(two_mins_later); //-- updating the exp_time field of the generated otp info
+
+
                                     
 
 
