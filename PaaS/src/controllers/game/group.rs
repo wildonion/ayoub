@@ -590,7 +590,7 @@ pub async fn god_all_groups(req: Request<Body>) -> GenericResult<hyper::Response
                             let data: serde_json::Value = value;
                             let json = serde_json::to_string(&data).unwrap(); //-- converting data into a json string
                             match serde_json::from_str::<schemas::game::GetGodGroupsRequest>(&json){ //-- the generic type of from_str() method is UpdateGroupRequest struct - mapping (deserializing) the json string into the UpdateGroupRequest struct
-                                Ok(update_info) => { //-- we got the username and password inside the login route
+                                Ok(group_info) => { //-- we got the username and password inside the login route
                                 
 
                                     

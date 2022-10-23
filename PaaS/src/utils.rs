@@ -123,7 +123,7 @@ pub mod otp{
     pub trait Otp{
 
         async fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>; //-- the error part is of type hyper::Error which will be returned automatically if the success part gets failed
-        async fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error>; //-- we must first fetch the otp info from the database then pass it to this method to check it
+        async fn check_code(&self, otp_info: OtpInput) -> (); //-- we must first fetch the otp info from the database then pass it to this method to check it
         async fn get_otp_input(&self) -> Option<OtpInput>;
         async fn set_otp_input(&mut self, otp_info: OtpInput) -> Option<OtpInput>;
 
@@ -151,10 +151,12 @@ pub mod otp{
 
         }
 
-        async fn check_code(&self, otp_info: OtpInput) -> Result<OtpSuccess, hyper::Error> {
+        async fn check_code(&self, otp_info: OtpInput){
             
-            // TODO  
-            todo!();
+            
+            
+            
+            
 
         }
 

@@ -46,7 +46,7 @@ pub struct GetPlayerInfoRequest{ //-- we don't need _id field in this struct cau
 */
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct GetGodGroupsRequest{ //-- we don't need _id field in this struct cause it'll be generated when we want to insert role info into the mongodb 
-    pub _id: String, //-- this is the id of the player took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
+    pub _id: String, //-- this is the id of the god took from the mongodb users collection and will be stored as String later we'll serialize it into bson mongodb ObjectId
 }
 
 

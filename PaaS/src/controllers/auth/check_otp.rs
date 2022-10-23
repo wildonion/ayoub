@@ -67,7 +67,7 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                         exp_time: Some(time),
                     };
                     let otp_auth = &mut request_otp_info.lock().await.otp_auth;
-                    // otp_auth.check_code(otp_input, db.clone()).await // TODO
+                    // otp_auth.check_code(otp_input).await // TODO
 
 
 
