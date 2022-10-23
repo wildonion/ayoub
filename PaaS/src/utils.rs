@@ -119,7 +119,7 @@ pub mod otp{
 
     }
 
-   #[async_trait] 
+    #[async_trait] 
     pub trait Otp{
 
         async fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>; //-- the error part is of type hyper::Error which will be returned automatically if the success part gets failed
