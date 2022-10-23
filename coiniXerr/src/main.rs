@@ -146,7 +146,7 @@ use riker_patterns::ask::*; //// used to ask any actor to give us the info about
 use crate::actors::{
                     parathread::{Parachain, Communicate as ParachainCommunicate, Cmd as ParachainCmd, UpdateParachainEvent, ParachainCreated, ParachainUpdated}, //// parathread message evenrs
                     peer::{Validator, Contract, Mode as ValidatorMode, Communicate as ValidatorCommunicate, Cmd as ValidatorCmd, UpdateMode, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess}, //// peer message events
-                    rafael::env::{Serverless, MetaData, Runtime as RafaelRt, LinkToService} //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
+                    rafael::env::{Serverless, MetaData, Runtime as RafaelRt, EventLog, EventVariant, RuntimeLog, LinkToService} //-- loading Serverless trait to use its method on Runtime instance (based on orphan rule) since the Serverless trait has been implemented for the Runtime type
                 }; 
 use crate::schemas::{Transaction, Block, Slot, Chain, Staker, Db, Storage, Mode};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
@@ -778,19 +778,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         let meta_data_uuid = {
             let listener_address = format!("{:p}", &listener);
             let mut runtime_info = cloned_arc_mutex_runtime_info_object.lock().unwrap().to_owned(); //-- in order to use the to_owned() method we have to implement the Clone trait for the Runtime struct since this method will make a clone from the instance - unlocking, unwrapping and cloning (by using to_ownded() method) the runtim_info object in every iteration of incoming stream inside the local thread to convert it to an instance of the RafaelRt struct
-                RafaelRt::add( //-- locking on runtime info object (mutex) must be done in order to prevent other threads from mutating it at the same time 
-                    runtime_info, //-- passing the mutable runtime_info object for adding new metadata into its hash map field
-                    MetaData{
-                        id: Uuid::new_v4(),
-                        node_addr: Some(addr), //-- the ip address of the validator node 
-                        actor: validator_actor.clone(), //-- cloning (making a deep copy of) the validator actor will prevent the object from moving in every iteration
-                        link_to_server: Some(LinkToService(listener_address)), //-- this is the location address of the tcp listener inside the ram 
-                        last_crash: None,
-                        first_init: Some(chrono::Local::now().naive_local().timestamp()),
-                        error: None,
-                    }
+            RafaelRt::add( //-- locking on runtime info object (mutex) must be done in order to prevent other threads from mutating it at the same time 
+                runtime_info, //-- passing the mutable runtime_info object for adding new metadata into its hash map field
+                MetaData{
+                    id: Uuid::new_v4(),
+                    node_addr: Some(addr), //-- the ip address of the validator node 
+                    actor: validator_actor.clone(), //-- cloning (making a deep copy of) the validator actor will prevent the object from moving in every iteration
+                    link_to_server: Some(LinkToService(listener_address)), //-- this is the location address of the tcp listener inside the ram 
+                    last_crash: None,
+                    first_init: Some(chrono::Local::now().naive_local().timestamp()),
+                    error: None,
+                }
             )
         };
+        
+        // ----------------------------------------------------------------------
+        //                    LOGGING RAFAEL RUNTIME INSTANCE
+        // ----------------------------------------------------------------------
+
+        let rafael_event_log = EventLog{
+            time: Some(chrono::Local::now().timestamp_nanos()),
+            event: EventVariant::Runime(vec![
+                RuntimeLog{
+                    id: 0, // TODO
+                    path: "/var/log/rafael.log".to_string(), // TODO - save the log in /var/log
+                    requested_at: Some(chrono::Local::now().timestamp_nanos()),
+                    content: Box::new([]), // TODO - log content 
+ 
+                }
+            ])
+        };
+        info!("➔ 🎞️ rafael runtime instance log {}", rafael_event_log); //-- it'll log to the console like RAFAEL_EVENT_JSON:{"time": 167836438974, "event": "event name, "data": [{...RuntimeLog_instance...}] or [{...ServerlessLog_instance...}]}
 
         // --------------------------------------------------------------------------------------------------------------------------------------------
         //                 SENDING THE STREAM, RUNTIME, VALIDATOR, VALIDATOR UPDATE CHANNEL AND ACTOR SYSTEM TO DOWN SIDE OF THE CHANNEL 
@@ -921,7 +939,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         let utf8_bytes_using_casting: &[u8] = &signed_transaction_serialized_into_vec_bytes_using_borsh; //-- since the Vec<u8> will be coerced to &'a [u8] with a valid lifetime at compile time we can borrow the ownership of sms_response_serialized_into_vec_bytes_using_serede using & which by doing this we're borrowing a slice of Ve<u8> from the heap memory which will be coerced to &'a [u8] since we've specified the type of sms_response_serialized_into_utf8_bytes_using_serede which is &[u8]
                         let boxed_utf8_bytes_using_box_slcie = signed_transaction_serialized_into_vec_bytes_using_borsh.into_boxed_slice(); //-- converting the Vec<u8> to Box<u8> using into_boxed_slice() method 
                         let utf_bytes_dereference_from_box = &*boxed_utf8_bytes_using_box_slcie; //-- borrow the ownership of the dereferenced boxed_utf8_bytes_using_box_slcie using & to convert it to &[u8] with a valid lifetime since the dereferenced boxed_utf8_bytes_using_box_slcie has unknown size at compile time thus working with u8 slice needs to borrow them from the heap memory to have their location address due to implemented ?Sized for [u8]
-                        info!("➔ sending signed transaction back to the peer");
+                        info!("➔ 🪙✍️ sending signed transaction back to the peer");
                         stream.write(&utf_bytes_dereference_from_box).await.unwrap(); //-- sending the signed transaction back to the peer - since Vec<u8> will be coerced to &'a [u8] with valid lifetime at compile time we can also send the signed_transaction_serialized_into_vec_bytes_using_borsh directly through the socket even though the write() method takes &'a [u8] param with a valid lifetime 
                         
                         // ----------------------------------------------------------------------
