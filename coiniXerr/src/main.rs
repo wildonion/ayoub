@@ -150,7 +150,7 @@ use crate::actors::{
                 }; 
 use crate::schemas::{Transaction, Block, Slot, Chain, Staker, Db, Storage, Mode};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
-use mongodb::{Client, bson::oid::ObjectId};
+use mongodb::Client;
 use futures::{Future, StreamExt, executor::block_on, future::RemoteHandle}; //-- StreamExt is a trait for streaming utf8 bytes data - RemoteHandle is a handler for future objects which are returned by the remote_handle() method
 use serde::{Deserialize, Serialize};
 use rand::Rng;
@@ -800,7 +800,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             time: Some(chrono::Local::now().timestamp_nanos()),
             event: EventVariant::Runime(vec![
                 RuntimeLog{
-                    id: 0, // TODO
+                    id: Uuid::new_v4().to_string(),
                     path: "/var/log/rafael.log".to_string(), // TODO - save the log in /var/log
                     requested_at: Some(chrono::Local::now().timestamp_nanos()),
                     content: Box::new([]), // TODO - log content 

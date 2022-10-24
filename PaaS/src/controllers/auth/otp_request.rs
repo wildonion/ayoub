@@ -7,7 +7,7 @@
 use crate::contexts as ctx;
 use crate::schemas;
 use crate::constants::*;
-use crate::utils::otp::{Otp, OtpInput}; //-- based on orphan rule Otp trait must be imported here to use its methods on an instance of OTPAuth which returns impl Otp
+use crate::utils::otp::{Otp, Auth, OtpInput}; //-- based on orphan rule Otp trait must be imported here to use its methods on an instance of OTPAuth which returns impl Otp
 use std::{mem, slice, env, io::{BufWriter, Write}};
 use borsh::BorshDeserialize;
 use borsh::BorshSerialize;
@@ -25,7 +25,7 @@ use chrono::prelude::*;
 use serde::{Serialize, Deserialize}; //-- to use the deserialize() and serialize() methods on struct we must use these traits
 use std::sync::Arc;
 use tokio::sync::Mutex; //-- async Mutex will be used inside async methods since the trait Send is not implement for std::sync::Mutex 
-
+use uuid::Uuid;
 
 
 
@@ -66,13 +66,15 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     ///////////////////////////
                     // let schemas::auth::SendOTPRequest{phone} = serde_json::from_str(&json);
 
-
-
-
                     
+
+
+
                     let phone = otp_req.phone;
+                    let sms_api_token = env::var("SMS_API_TOKEN").expect("⚠️ no sms api token variable set");
+                    let sms_template = env::var("SMS_TEMPLATE").expect("⚠️ no sms template variable set");
 
-                    
+
                     
 
 
@@ -80,14 +82,16 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     //         GENERATING RANDOM CODE TO SEND IT TO THE RECEPTOR
                     // --------------------------------------------------------------------
                     let otp_input = OtpInput{
+                        id: Uuid::new_v4().to_string(),
                         phone: Some(phone.clone()),
                         code: None, //-- will be filled later by the Otp trait
-                        exp_time: Some(2), //-- 2 mins expiration time 
                     };
                     
-                    //// Send is not implement for Mutex since Mutex will block the thread and we should avoid using it in async functions
+                    //// Send is not implement for Mutex since Mutex will block the thread and we should avoid using it in async functions since async methods won't block the thread to get their job done
                     //// thus we can use tokio Mutex which is an async one : https://stackoverflow.com/a/67277503
-                    let otp_auth = &mut request_otp_info.lock().await.otp_auth; //// the return type is &Box<Otp + Send + Sync> which is a reference (trat Clone is not implemented for ctx::app::OtpInfo thus we have to take a reference to the Box) to a Box contains a shareable trait (between threads) with static lifetime and we can only access the trait methods on the instance - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
+                    // let otp_auth = &mut request_otp_info.lock().await.otp_auth; //// the return type is &Box<Otp + Send + Sync> which is a reference (trat Clone is not implemented for ctx::app::OtpInfo thus we have to take a reference to the Box) to a Box contains a shareable trait (between threads) with static lifetime and we can only access the trait methods on the instance - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
+                    
+                    let mut otp_auth = Auth::new(sms_api_token, sms_template);
                     otp_auth.set_otp_input(otp_input).await;
                     let otp_response = otp_auth.send_code().await.unwrap();
                     let mut sms_response_stream = otp_response.0;
@@ -156,9 +160,6 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                                     // --------------------------------------------------------------------
                                     let now = Local::now();
                                     let two_mins_later = (now + Duration::seconds(120)).naive_local().timestamp(); //-- generating a timestamp from now till the two mins later
-                                    let mut otp_info = otp_auth.get_otp_input().await.unwrap();
-                                    otp_info.exp_time = Some(two_mins_later); //-- updating the exp_time field of the generated otp info
-
 
                                     
 

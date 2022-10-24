@@ -371,7 +371,8 @@ NOTE - actors inside a single code base can communicate through a none socket me
 NOTE - multi threading (job queue) means sharing Arc<Mutex<T>> (Send + Sync + 'static) which T can also be Receiver<T> between threads to avoid race condition and deadlocks
 NOTE - the task or event (divided using simd) which must be sent between threads or processes must be Arc<Mutex<Task>> or Send Sync static or have valid lifetime acrorss threads or processes
 NOTE - when we want to put traits inside smart pointer we have to use the dyn keyword like Arc<dyn Trait> or Box<dyn Trait>
-
+NOTE - heap data allocated must be passed by reference (no runtime cost) or clone (runtime cost) to other scope and every reference must have its own lifetime thus we should define a valid lifetime for each reference or put them inside the Box like traits which are heap allocated data structure
+NOTE - self in method must be referenced otherwise the instance will be moved by the first method call 
 
 
 

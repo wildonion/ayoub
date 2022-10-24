@@ -21,7 +21,7 @@ use chrono::Utc;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::Mutex; //-- async Mutex will be used inside async methods since the trait Send is not implement for std::sync::Mutex 
-
+use uuid::Uuid;
 
 
 
@@ -57,17 +57,6 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     let code = otp_info.code;
                     let phone = otp_info.phone;
                     let time = otp_info.time;
-
-
-
-                    
-                    let otp_input = OtpInput{
-                        code: Some(code.clone()),
-                        phone: Some(phone.clone()),
-                        exp_time: Some(time),
-                    };
-                    let otp_auth = &mut request_otp_info.lock().await.otp_auth;
-                    // otp_auth.check_code(otp_input).await // TODO
 
 
 

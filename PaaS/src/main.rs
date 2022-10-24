@@ -254,18 +254,14 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
     
+
+
     // -------------------------------- initializing the otp info instance
     //
     // ---------------------------------------------------------------------------------------
-    let otp_input = utils::otp::OtpInput{
-        phone: None,
-        code: None,
-        exp_time: None, 
-    };
-    let mut otp_auth = utils::otp::Auth::new(sms_api_token, sms_template, otp_input.clone()); //// the return type is impl Otp trait which we can only access the trait methods on the instance - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
+    let mut otp_auth = utils::otp::Auth::new(sms_api_token, sms_template); //// the return type is impl Otp trait which we can only access the trait methods on the instance - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
     let otp_info = ctx::app::OtpInfo{
         otp_auth: Box::new(otp_auth), 
-        otp_input: otp_input.clone(), 
     };
     let arced_mutexd_otp_info = Arc::new( //// in order the OtpInput to be shareable between routers' threads it must be sendable or cloneable and since the Clone trait is not implemented for the OtpInput we're putting it inside the Arc
                                                         Mutex::new( //// in order the OtpInput to be mutable between routers' threads it must be syncable thus we have to put it inside the Mutex which based on mpsc rule means that only one thread can mutate it at a time 
@@ -283,6 +279,8 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
 
 
 
+
+                                                    
 
 
 

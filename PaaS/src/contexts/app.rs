@@ -221,7 +221,6 @@ pub struct Response<'m, T>{
 
 pub struct OtpInfo{
     pub otp_auth: Box<dyn utils::otp::Otp + Send + Sync + 'static>, //// otp_auth is a trait of type Otp which must be Send Sync and static to be shareable between routers' threads - since we can't have a trait as a struct field directly due to its unknown size at compile time thus  we've put the Otp trait inside the Box since the Box has its own lifetime which avoid us using references and lifetimes inside the struct fields
-    pub otp_input: utils::otp::OtpInput,
 }
 
 

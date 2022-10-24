@@ -91,10 +91,10 @@ pub mod otp{
     pub struct OtpSuccess(pub Response<Body>, pub OtpInput); //-- OtpSuccess is a tuple like struct with two inputs
 
 
-    #[derive(BorshDeserialize, BorshSerialize, Clone, Debug)]
+    #[derive(BorshDeserialize, BorshSerialize, Clone, Debug, Default)]
     pub struct OtpInput{
+        pub id: String, //-- the stringified of the Uuid
         pub code: Option<String>,
-        pub exp_time: Option<i64>, //-- this is the expiration time of the otp message in timestamps
         pub phone: Option<String>,
     }
 
@@ -109,11 +109,11 @@ pub mod otp{
 
         //// in order to bound the Otp to what we're returning from the function the trait Otp must be implemented for the type that we're returning its instance from the function
         //// returning impl Otp from function means we're implementing the trait for the object that is returning from the function regardless of its type that we're returning from the function cause compiler will detect the correct type in compile time and implement or bound the trait for that type
-        pub fn new(token: String, template: String, otp_input: OtpInput) -> impl Otp{ //// since traits don't have fix size at compile time thus when we want to return them from the function we have to return an instance of the type that the trait has been implemented for since the trait size will be the size of that type which is bounded to the trait  
+        pub fn new(token: String, template: String) -> impl Otp{ //// since traits don't have fix size at compile time thus when we want to return them from the function we have to return an instance of the type that the trait has been implemented for since the trait size will be the size of that type which is bounded to the trait  
             Self{
                 token,
                 template,
-                otp_input
+                otp_input: OtpInput::default(),
             }
         }
 
@@ -123,7 +123,6 @@ pub mod otp{
     pub trait Otp{
 
         async fn send_code(&mut self) -> Result<OtpSuccess, hyper::Error>; //-- the error part is of type hyper::Error which will be returned automatically if the success part gets failed
-        async fn check_code(&self, otp_info: OtpInput) -> (); //-- we must first fetch the otp info from the database then pass it to this method to check it
         async fn get_otp_input(&self) -> Option<OtpInput>;
         async fn set_otp_input(&mut self, otp_info: OtpInput) -> Option<OtpInput>;
 
@@ -148,15 +147,6 @@ pub mod otp{
             Ok(
                 OtpSuccess(sms_response_stream, self.otp_input.clone()) //-- we have to clone the self.otp_input to prevent its ownership moving since by moving it into the field of a structure it'll lose its ownership 
             )
-
-        }
-
-        async fn check_code(&self, otp_info: OtpInput){
-            
-            
-            
-            
-            
 
         }
 

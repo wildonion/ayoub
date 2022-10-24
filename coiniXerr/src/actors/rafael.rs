@@ -102,7 +102,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
     pub struct RuntimeLog{ // TODO - initialize this inside the main() function
-        pub id: u16, //-- since serde traits is not satisfied for Uuid we've used u8 as the id 
+        pub id: String, //-- since serde traits is not satisfied for Uuid we've used the stringified of the Uuid as the id 
         pub path: String, //-- the path of the log file in server
         #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
         pub requested_at: Option<i64>, //-- the time of the log request
@@ -113,7 +113,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     #[derive(Serialize, Deserialize, Clone, Debug)] // NOTE - Copy trait is not implemented for Box-ed types since the Box is a smart pointer to a heap allocated type and heap types have unknown size at compile time since they're not bounded to Sized trait
     pub struct ServerlessLog{ // TODO - initialize this inside the main() function
-        pub id: u16, //-- since serde traits is not satisfied for Uuid we've used u8 as the id 
+        pub id: String, //-- since serde traits is not satisfied for Uuid we've used the stringified of the Uuid as the id 
         pub path: String, //-- the path of the log file in server
         pub method: String, //-- the method name that the log data is captured for
         #[serde(skip_serializing_if="Option::is_none")] //-- skip serializing this field if it was None
@@ -122,7 +122,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     }
     
     #[derive(Serialize, Deserialize, Clone, Debug)]
-    pub struct LinkToService(pub String); // NOTE - LinkToService contains the address of the current service located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
+    pub struct LinkToService(pub String); // NOTE - LinkToService contains the address of the socket service located inside the memory with usize as its size, u64 bits or 8 bytes or 32 btis or 4 bytes (based on arch)
     
 
 
@@ -142,11 +142,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     }
 
     
-    
-    #[derive(Clone, Debug)]
-    pub struct LoadBalancer; // TODO - clients -request-> middleware server -spread request-> main servers
 
-    
     
     #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
     pub enum FutureResult{
@@ -161,7 +157,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
     pub struct MetaData{ 
         pub id: Uuid,
         pub actor: ActorRef<<Validator as Actor>::Msg>, //-- validator actor with the mailbox of type Msg; aslo Validator actor should implements the Debug and Clone trait also
-        pub link_to_server: Option<LinkToService>, //-- we've just saved the location address of the current service inside the memory
+        pub link_to_server: Option<LinkToService>, //-- we've just saved the location address of the socket service inside the memory
         pub error: Option<AppError>, //-- any runtime error caused either by the runtime itself or the storage crash
         pub node_addr: Option<SocketAddr>, //-- socket address of this node
         pub last_crash: Option<i64>, //-- last crash timestamp
@@ -223,7 +219,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         type Service; //-- the service type; game, auth, nft & etc...
         type App;
-        type Cost; //-- storage cost of api calls or the total cost of the serverless trait method calls during an especific period of time based on amount of CPU, network, and IO, and the amount of data already stored in runtime storage which is the VPS ram 
+        type Cost; //-- current storage cost of runtime socket calls or the total cost of the serverless trait method calls during an especific period of time based on amount of CPU, network, and IO, and the amount of data already stored in runtime storage which is the VPS ram and has determined by the load balancer
 
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +241,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
         fn health(&self) -> Self;
         fn caller(&self) -> SocketAddr; //-- the current caller of one of the Serverless trait methods
         fn future_result(&self, idx: u64) -> FutureResult; //-- getting the result of the passed in future id
+        fn make_tx(&mut self) -> schemas::Transaction;
 
     }
 
@@ -287,7 +284,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // TODO - consider every service a shard which can communicate (like executing each other's methods asyncly) with each other using their actors which has been implemented for each service through mpsc channels  
             // TODO - scheduling an event which is a future object contains an async message like calling one of the method of the second service to be executed and triggered inside the second service and get the response inside a callback method using .then()
             // TODO - incoming scheduled event from a thread of the first service actor inside a free thread of the second service actor must be of type Arc<Mutex<T>> (use Arc::new(&Arc<Mutex<T>>) to clone the arced and mutexed T which T can also be Receiver<T>) in order to avoid data races and dead locks 
-            // TODO - sending async message from the current service to another serivce using actor that has been implemented for each service
+            // TODO - sending async message from the socket service to another serivce using actor that has been implemented for each service
             // TODO - vector of || async move{} of events for an event manager struct like riker scheduling logic and vector clock schemas and call new event every 5 seconds from vector of event of closures 
             // TODO - build a protocol based on binary address to transmit data between actors using mpsc tunnel like onionary://0001010101:2349
             // TODO - use functional programming design pattern to call nested method on a return type of a struct method: events.iter().skip().take().map().collect()
@@ -421,6 +418,17 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
             // }
             
             todo!()
+        }
+
+        fn make_tx(&mut self) -> schemas::Transaction{
+            
+            
+            // TODO -
+            // make a transaction from the runtime socket calls with their cost
+            // ...
+            
+            todo!()
+
         }
 
     }

@@ -29,6 +29,8 @@ rust-argon2 = "1"
 rand = "0.8"
 clap = "4"
 mongodb = "2"
+async-trait = "0.1.57"
+
 
 
 
