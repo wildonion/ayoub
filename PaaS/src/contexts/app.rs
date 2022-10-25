@@ -3,7 +3,7 @@
 
 
 
-use std::sync::Arc;
+use std::{pin::Pin, sync::{Arc, Mutex}};
 use crate::{constants::*, schemas, utils};
 use futures::Future;
 use mongodb::Client;
@@ -30,7 +30,8 @@ use log::{info, error};
 //// future objects must be Send and static and types that must be shared between threads must be send sync and static 
 //// Box<dyn Future<Output=Result<u8, 8u>> + Send + Sync + 'static> means this future can be sharead acorss threads and .awaits safely
 type Callback = Box<dyn 'static + FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> CallbackResponse>; //-- capturing by mut T - the closure inside the Box is valid as long as the Callback is valid due to the 'static lifetime and will never become invalid until the variable that has the Callback type drop
-type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
+type CallbackResponse = Box<dyn Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static>; //-- CallbackResponse is a future object which will be returned by the closure and has bounded to Send to move across threads and .awaits - the future inside the Box is valid as long as the CallbackResponse is valid due to the 'static lifetime and will never become invalid until the variable that has the CallbackResponse type drop
+type SafeShareAsync = Arc<Mutex<Pin<Box<dyn Future<Output=u8> + Send + Sync + 'static>>>>; //-- this type is a future object which has pinned to the ram inside a Box pointer and can be shared between thread safely also it can be mutated by threads - pinning the Boxed future object into the ram to prevent from being moved (cause rust don't have gc and each type will be dropped once it goes out of its scope) since that future object must be valid across scopes and in the entire lifetime of the app until we await on it 
 
 unsafe impl Send for Api{}
 unsafe impl Sync for Api{}
@@ -97,7 +98,7 @@ impl Api{
     
     pub async fn post<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api; since we didn't borrow the self (the instance itself) using & we can't call this method for the second call cause the ownership of the instance will be moved in first call  
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C + Send + Sync + 'static, //-- capturing by mut T - generic type C can be bounded to Send + Sync + 'static traits and lifetime to be shreable, safe to send and valid across threads and .awaits
-                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
+                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads and .awaits
     {
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();
@@ -109,7 +110,7 @@ impl Api{
 
     pub async fn get<F, C>(mut self, endpoint: &str, mut cb: F) -> GenericResult<hyper::Response<Body>, hyper::Error> //-- defining self (an instance of the object) as mutable cause we want to assign the name of the api; since we didn't borrow the self (the instance itself) using & we can't call this method for the second call cause the ownership of the instance will be moved in first call  
                         where F: FnMut(hyper::Request<Body>, hyper::http::response::Builder) -> C + Send + Sync + 'static, //-- capturing by mut T - generic type C can be bounded to Send + Sync + 'static traits and lifetime to be shreable, safe to send and valid across threads and .awaits
-                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads
+                        C: Future<Output=GenericResult<hyper::Response<Body>, hyper::Error>> + Send + Sync + 'static, //-- C is a future object which will be returned by the closure and has bounded to Send to move across threads and .awaits
     {
         self.name = endpoint.to_string(); //-- setting the api name to the current endpoint
         let req = self.req.unwrap();

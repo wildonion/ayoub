@@ -91,6 +91,8 @@ pub async fn main(req: Request<Body>) -> GenericResult<hyper::Response<Body>, hy
                     //// thus we can use tokio Mutex which is an async one : https://stackoverflow.com/a/67277503
                     // let otp_auth = &mut request_otp_info.lock().await.otp_auth; //// the return type is &Box<Otp + Send + Sync> which is a reference (trat Clone is not implemented for ctx::app::OtpInfo thus we have to take a reference to the Box) to a Box contains a shareable trait (between threads) with static lifetime and we can only access the trait methods on the instance - it must be defined as mutable since later we want to get the sms response stream to decode the content, cause reading it is a mutable process
                     
+                    /////// we've commented above line which is getting the otp_auth from the request data
+                    /////// since we wanto have one otp request instance to the career per user.
                     let mut otp_auth = Auth::new(sms_api_token, sms_template);
                     otp_auth.set_otp_input(otp_input).await;
                     let otp_response = otp_auth.send_code().await.unwrap();
