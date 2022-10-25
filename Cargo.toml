@@ -1,8 +1,7 @@
 [workspace]
 
 members = [
-    "coiniXerr/src/wasi/",
-    "coiniXerr/src/wasi/src/client/",
+    "coiniXerr/src/wallet/",
     "PaaS",
     "coiniXerr",
 ]

@@ -19,8 +19,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
     
     
-    // https://procmarco.netlify.app/blog/2021-05-04-a-story-about-async-rust-and-using-send-types/
-    // https://crates.io/crates/rayon
+    // load wasm file => https://procmarco.netlify.app/blog/2021-05-04-a-story-about-async-rust-and-using-send-types/
     // TODO - use some kinda register setup process to get and mutate the vars of the env like near registers in its env module for promises or futures
     // TODO - a register contains the current buffer inside the ram related to the passed in id means we have to read the buffer from inside of it related to the passed in id
     // TODO - we have to read the content of a specific register and save it inside a buffer
@@ -230,6 +229,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         fn run(&mut self) -> Self; // NOTE - the type that this trait which must be implemented for must be defined as mutable - the return type is the type that this trait will be implemented for
         fn stop(&mut self) -> Self; 
+        fn build(&mut self) -> Self; //-- building a wasm file from the rust code (yew and wasi)
         fn schedule(&self) -> Self; 
         fn callback(&self) -> Self;
         fn refund(&mut self) -> Self; //-- &mut self is because we want to mutate the state if the runtime by refunding an account
@@ -267,6 +267,16 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
             todo!()
 
+        }
+
+        fn build(&mut self) -> Self {
+            
+            // TODO - execute build.sh script codes in wasi folder
+            // build the wasm file from the rust code
+            // ...
+            
+            todo!()
+        
         }
 
         fn stop(&mut self) -> Self{
