@@ -410,6 +410,19 @@ pub enum Storagekey{ //-- defining an enum based unique storage key for every ou
     literal   ➔ matches -?LiteralExpression
 
 
+
+
+
+//// event manager macro
+
+list![func1, func2, func3] => {
+    // first run event func2 then func1 and finally func3
+    func2();
+    func1();
+    func3();
+};
+
+
 */
 
 
