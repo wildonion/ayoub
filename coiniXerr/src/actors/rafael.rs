@@ -271,8 +271,7 @@ pub mod env{ //-- rafael env which contains runtime functions and actors to muta
 
         fn build(&mut self) -> Self {
             
-            // TODO - execute build.sh script codes in wasi folder
-            // build the wasm file from the rust code
+            // TODO - build the walleXerr app using build.sh script  
             // ...
             
             todo!()
