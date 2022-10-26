@@ -6,7 +6,6 @@
 use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
 pub mod api;
 pub mod hexy;
-pub mod scheduler;
 
 
 
@@ -17,6 +16,76 @@ pub mod scheduler;
 
 
 
+
+
+
+
+// ------------------------------ heavy computational calculation using async and rayon multithreading simd
+// ----------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------
+pub fn forward1(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would be an associated function not a method
+    
+
+    let mat = x_train; //-- the data that we want to do some heavy computational on it
+    let NJOBS: usize = mat.len(); //-- number of tasks of the process (incoming x_train matrix) to share each one between threads inside the pool
+    let (sender, receiver) = heavy_mpsc::<f64>();
+    let mut mult_of_all_sum = 1.0;
+    let mut rayon_workers = Vec::new();
+
+    
+    /* ----------------------------------------------------------------------------------- */
+    /* ------------------------ JOBQ CHANNEL + RAYON THREADPOOL -------------------------- */
+    /* ----------------------------------------------------------------------------------- */
+    let future_res = async { //-- we can also use tokio::spawn() to run the async task in the background using tokio event loop and green threads
+        
+        for i in 0..NJOBS{ //-- iterating through all the jobs of the process - this can be an infinite loop like waiting for a tcp connection
+            
+            let cloned_sender = sender.clone(); //-- cloning the sender since it's multiple producer and Clone trait is implemented for that
+            let cloned_mat = mat.clone(); //-- Vec is a heap data structure thus we must clone it
+            rayon_workers.push( //-- pushing a rayon::spawn() handler into the vector - rayon::spawn() will solve the task inside its threadpool safely since it uses mpsc as the message passing protocol between threads to avoid being in deadlock and race condition situations 
+                rayon::spawn(move || {
+                    let sum_cols = cloned_mat[0][i] + cloned_mat[1][i] + cloned_mat[2][i];
+                    cloned_sender.send(sum_cols).unwrap(); //-- sending the data to the downside of the channel 
+                })
+            );
+
+            info!("job {} finished!", i);    
+        
+        }
+
+        rayon::spawn(move ||{
+            while let Ok(data) = receiver.recv(){ //-- receiving the data from the asyncly inside rayon worker threadpool 
+                mult_of_all_sum *= data;
+            }
+        });
+
+        mult_of_all_sum
+
+    };
+    /* ----------------------------------------------------------------------------------- */
+
+
+    /* ---------------------------------------------------------------------------- */
+    /* ------------------------ RAYON PARALLEL ITERATION -------------------------- */
+    /* ----------------------------------------------------------------------------- */
+    mat
+        .par_iter() //-- iterate over the mat parallely using based on simd pattern
+        .for_each(|row| {
+            println!("row is {:?}", row) 
+        });
+    /* ---------------------------------------------------------------------------- */
+    
+
+    let res = block_on(future_res); //-- will block the current thread to run the future to completion
+    // let res = future_res.await; //-- .awaiting a future will suspend the current function's execution until the executor has run the future to completion means doesn't block the current thread, allowing other tasks to run if the future is currently unable to make progress
+    // let res = join!(future_res); //-- join! only allowed inside `async` functions and blocks and is like .await but can wait for multiple futures concurrently
+    println!("multiplication cols sum {:?}", res);
+    let loss = 0.3535;
+    loss
+
+
+}
 
 
 
@@ -24,7 +93,6 @@ pub mod scheduler;
 // ------------------------------ heavy computational calculation using async and multithreading design patterns
 // ----------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------
-// TODO - use simd logic of rayon for matrix multiplication
 // ----------------------------------------------------------------------------------------------------------------------
 pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would be an associated function not a method
     
@@ -107,7 +175,6 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     let mat = x_train; //-- the data that we want to do some heavy computational on it
     let NTHREADS: usize = 4; //-- number of threads inside the pool
     let NJOBS: usize = mat.len(); //-- number of tasks of the process (incoming x_train matrix) to share each one between threads inside the pool
-    let pool = utils::scheduler::ThreadPool::new(NTHREADS);
     let (sender, receiver) = heavy_mpsc::<f64>();
 
 
@@ -115,7 +182,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     let arced_mutexed_receiver = Arc::new(mutexed_receiver); //-- putting the &mutexed_receiver in its borrowed form inside the Arc
     pub static mut MULT_OF_ALL_SUM: f64 = 1.0;
     let mut mult_of_all_sum: &'static f64 = &1.0;
-    let mut children = Vec::new();
+    let mut rayon_workers = Vec::new();
 
     
     let future_res = async { //-- we can also use tokio::spawn() to run the async task in the background using tokio event loop and green threads
@@ -124,8 +191,8 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
             let cloned_arced_mutexed_receiver = Arc::clone(&arced_mutexed_receiver); //-- in order to move the receiver between threads we must have it in Arc<Mutex<Receiver<T>>> form and clone the &arced_mutexed_receiver which is the borrowed form of the arced and mutexed of the receiver or we can have arced_mutexed_receiver.clone()
             let cloned_sender = sender.clone(); //-- cloning the sender since it's multiple producer and Clone trait is implemented for that
             let cloned_mat = mat.clone();
-            children.push(
-                pool.execute(move || { //-- pool.execute() will spawn threads or workers to solve the incoming job inside a free thread - incoming job can be an async task spawned using tokio::spawn() method
+            rayon_workers.push( //-- pushing a rayon::spawn() handler into the vector - rayon::spawn() will solve the task inside its threadpool safely since it uses mpsc as the message passing protocol between threads to avoid being in deadlock and race condition situations 
+                rayon::spawn(move || {
                     let sum_cols = cloned_mat[0][i] + cloned_mat[1][i] + cloned_mat[2][i];
                     cloned_sender.send(sum_cols).unwrap();
                 })
