@@ -6,7 +6,7 @@
 use crate::*; // loading all defined crates, structs and functions from the root crate which is lib.rs in our case
 pub mod api;
 pub mod hexy;
-
+pub mod scheduler;
 
 
 
@@ -243,7 +243,7 @@ pub fn forward(x_train: Arc<Vec<Vec<f64>>>) -> f64{ //-- without &mut self would
     
 
     let res = block_on(future_res); //-- will block the current thread to run the future to completion
-    // let res = future_res.await; //-- .awaiting a future will suspend the current function's execution until the executor has run the future to completion means doesn't block the current thread, allowing other tasks to run if the future is currently unable to make progress
+    // let res = future_res.await; //-- .awaiting a future will suspend the current function's execution until the executor has run the future to completion means doesn't block the current thread, allowing other tasks to run if the future is currently unable to make progress and log the result later whenever the future has completed
     // let res = join!(future_res); //-- join! only allowed inside `async` functions and blocks and is like .await but can wait for multiple futures concurrently
     println!("multiplication cols sum {:?}", res);
     let loss = 0.3535;
@@ -344,6 +344,27 @@ pub async fn into_box_slice(u8_vector: &Vec<u8>) -> Result<Box<[u8; 4]>, String>
 pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of the return str is static and is valid as long as the entire lifetime of the app
     Box::leak(s.into_boxed_str())
 }
+
+
+
+
+
+
+
+pub fn gen_chars(size: u32) -> String{
+    let mut rng = rand::thread_rng();
+    (0..size).map(|_|{
+        char::from_u32(rng.gen_range(65..91)).unwrap() // generating a char from the random output of type u32 using from_u32() method
+    }).collect()
+}
+
+
+pub fn gen_random_number(from: u32, to: u32) -> u32{
+    let mut rng = rand::thread_rng(); // we can't share this between threads and across .awaits
+    rng.gen_range(from..to)
+} 
+
+
 
 
 

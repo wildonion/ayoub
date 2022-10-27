@@ -398,6 +398,7 @@ dependencies = [
  "futures",
  "futures-util",
  "hex",
+ "is_type",
  "log",
  "log4rs",
  "mongodb",
@@ -1077,6 +1078,12 @@ name = "ipnet"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "879d54834c8c76457ef4293a689b2a8c59b076067ad77b15efafbb05f92a592b"
+
+[[package]]
+name = "is_type"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fee7cda167bfafe6eb1c70926de545028f3169c9a8bcfa6db9d53f67aab2f3ec"
 
 [[package]]
 name = "itoa"

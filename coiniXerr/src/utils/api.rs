@@ -117,3 +117,48 @@ pub async fn tx_emulator() -> (){
     }
     
 }
+
+
+
+
+
+
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+///////             sending fake transaction to the coiniXerr tcp server  
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+// since the UDP protocol doesn't have any capabilities to detect a broken connection 
+// the server needs to be run first, otherwise the client will block forever.
+    
+pub async fn tx_emulator_udp() -> (){
+        
+    let mut time = 0;
+    let tcp_host = env::var("HOST").expect("⚠️ please set host in .env");
+    let tcp_port = env::var("COINIXERR_UDP_PORT").expect("⚠️ please set coiniXerr udp port in .env");
+    let ip_port = format!("{}:{}", tcp_host, tcp_port);
+    let sleep = Duration::from_secs("3".to_string().parse::<u64>().unwrap());
+
+
+    loop{ //-- simulating a transaction emulator by sending infinite tx to the coiniXerr udp server
+        
+        time+=1;
+        let ip_port = ip_port.clone();
+        tokio::spawn(async move{
+            let socket = UdpSocket::bind("0.0.0.0:0").await.unwrap(); // binding to any available address and any port selected by the os for outbound packets
+            match socket.connect(ip_port.clone().as_str()).await{
+                Ok(_) => {
+
+                    info!("🪙 sending transaction {}", time);
+                    let random_tx = Transaction::default(); //-- creating a default transaction
+                    let encoded_tx = random_tx.try_to_vec().unwrap(); //-- encoding using borsh; we can convert a Vec<u8> to &[u8] by taking a reference to it since &[u8] which will be on the stack is an slice of the Vec<u8> which is inside the heap 
+                    socket.send(&encoded_tx).await.unwrap(); //-- send the buffer, the encoded transaction to the remote address that this socket is connected to or we can send to another address 
+
+                },
+                Err(e) => eprintln!(": {} at {}", e, chrono::Local::now()),
+            }
+        });
+
+        thread::sleep(sleep);
+
+    }        
+
+}
