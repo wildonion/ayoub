@@ -124,7 +124,7 @@ pub async fn tx_emulator() -> (){
 
 
 /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
-///////             sending fake transaction to the coiniXerr tcp server  
+///////             sending fake transaction to the coiniXerr udp server  
 /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
 // since the UDP protocol doesn't have any capabilities to detect a broken connection 
 // the server needs to be run first, otherwise the client will block forever.
