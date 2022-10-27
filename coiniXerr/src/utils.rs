@@ -351,6 +351,12 @@ pub fn string_to_static_str(s: String) -> &'static str { //-- the lifetime of th
 
 
 
+
+
+// ------------------------------ utility methods and structs
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------
 pub fn gen_chars(size: u32) -> String{
     let mut rng = rand::thread_rng();
     (0..size).map(|_|{
@@ -363,7 +369,6 @@ pub fn gen_random_number(from: u32, to: u32) -> u32{
     let mut rng = rand::thread_rng(); // we can't share this between threads and across .awaits
     rng.gen_range(from..to)
 } 
-
 
 
 
@@ -403,6 +408,9 @@ impl fmt::Display for AppError{ // implementing the formatter Display trait for 
     }
 
 }
+
+
+
 
 
 
