@@ -14,34 +14,6 @@
 // ...  
 
 
-pub struct Actor; // https://ryhl.io/blog/actors-with-tokio/
-    
-impl Actor{
+use crate::*;
+use utils::scheduler::_async::Actor as uniXerrActor;
 
-    pub fn schedule<T>(){
-
-        todo!() // ➔ schedule attack every 40 seconds after any error
-
-    }
-
-
-    pub fn broadcast(){
-        
-        todo!() // ➔ use tokio::sync::broadcast
-    
-    }
-    
-    pub fn run(){
-
-        todo!()
-
-    }
-
-    pub fn handle_message(){
-
-        todo!()
-
-    }
-
-
-}

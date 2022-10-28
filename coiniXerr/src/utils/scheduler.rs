@@ -3,76 +3,63 @@
 
 
 
+
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+///////               worker threadpool implementations from scratch  
+/////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+
+
 /*  
 
 
 
-    let mut async_worker = AsyncWorker::new();
-    let native_sync_worker = NativeSyncWorker::spawn(n_workers);
-    let rayon_sync_worker = RayonSyncWorker::new();
-    
 
-    ----------------
-    sync threadpools
-    ----------------
+    let mut tokio_async_worker = AsyncWorker::new();
+    let mut native_sync_worker = NativeSyncWorker::spawn(n_workers);
+    let mut rayon_sync_worker  = RayonSyncWorker::new();
+    
     native_sync_worker.execute(move ||{
         block_on(async_heavy_method());
     });
-
-
-    There is no guaranteed order of execution for spawns, 
-    given that other threads may steal tasks at any time. 
-    However, they are generally prioritized in a LIFO order 
-    on the thread from which they were spawned. Other threads 
-    always steal from the other end of the deque, like FIFO order. 
-    The idea is that "recent" tasks are most likely to be fresh 
-    in the local CPU's cache, while other threads can steal older "stale" tasks.
+    
     rayon_sync_worker.spawn(move ||{
         block_on(async_heavy_method()); 
     });
 
-
-    ----------------------
-    async threadpool worker
-    ----------------------
-    async_worker.spawn(async move{
+    tokio_async_worker.spawn(async move{
         async_heavy_method().await;
         Ok(())
-    }) // if Ok(()) and worker spawn() method went wrong error would be Box<dyn std::err::Error + Send + Sync 'static>
-
-
-    async_worker.execute().await // wait for all the workers of this worker to complete if there were any
-
+    })
+    tokio_async_worker.execute().await // wait for all the workers of this worker to complete if there were any
 
 
 
 
 
+ 
 
-
-    ----------------
-    types of workers
-    ---------------- 
-    ➔ async worker : tokio::spawn() threadpool
-    ➔ sync worker  : rayon::spawn() threadpool and native threadpool
-
-
-    ➔ we use actors which use channels like mpsc to avoid race conditions to build multithreading jobq apps like rabbitmq
+    ➔ there is no guaranteed order of execution for spawns, given that other threads may steal tasks at any time, however, they are generally prioritized in a LIFO order 
+       on the thread from which they were spawned, other threads always steal from the other end of the deque, like FIFO order, the idea is that recent tasks are most likely to be fresh 
+       in the local CPU's cache, while other threads can steal older stale tasks.
+    ➔ spawning native threads are too slow since thread handling in rust is depends on user base context switching means that based on the load of the IO in the app rust might solve the data load inside another cpu core and use multiprocessing approach:
+        • https://www.reddit.com/r/rust/comments/az9ogy/help_am_i_doing_something_wrong_or_do_threads/
+        • https://www.reddit.com/r/rust/comments/cz4bt8/is_there_a_simple_way_to_create_lightweight/
     ➔ in building multithreading apps sending data between threads must be done by using jobq channels like mpsc to avoid being in deadlock and race condition situations
     ➔ actors are workers which uses jobq channels to send message events asyncly between other actors and the system to execute them inside their free thread from the thread pool
     ➔ messages must be Send Sync static and Arc<Mutex<Message>> to share between actor threads
     ➔ mpsc means multiple threads can read the data which is Send + Sync + 'static or multiple sender can be cloned but only one thread or receiver can mutate the data
-    ➔ The three causes of data races
+    ➔ the three causes of data races
         • Two or more pointers access the same data at the same time.
         • At least one of the pointers is being used to write to the data.
         • There’s no mechanism being used to synchronize access to the data
-    ➔ The three rules of ownership
+    ➔ the three rules of ownership
         • Each value in Rust has a variable that’s called its owner.
         • There can only be one owner at a time.
         • When the owner goes out of scope, the value will be dropped.
-    ➔ The two rules of references
+    ➔ the two rules of references
         • At any given time, you can have either one mutable reference or any number of immutable references.
         • References must always be valid.
+
 
 
 
@@ -90,8 +77,42 @@
 pub mod _async{
 
 
+    pub struct Actor; // https://ryhl.io/blog/actors-with-tokio/
+    
+    impl Actor{
+
+        pub fn schedule<T>(){
+
+            todo!() // ➔ schedule attack every 40 seconds after any error
+
+        }
+
+
+        pub fn broadcast(){
+            
+            todo!() // ➔ use tokio::sync::broadcast
+        
+        }
+        
+        pub fn run(){
+
+            todo!()
+
+        }
+
+        pub fn handle_message(){
+
+            todo!()
+
+        }
+
+
+    }
+
+
+
     // async worker pool scheduler using tokio based on mpsc jobq channel protocol
-    // this scheduler is used for asynchronous IO by not blocking the thread using tokio
+    // this scheduler is used for asynchronous IO by not blocking the thread using tokio green threads
 
 
     use crate::*;
@@ -100,19 +121,19 @@ pub mod _async{
 
 
 
-    pub struct Worker<E>{
+    pub struct AsyncWorker<E>{
         count: usize, // number of workers
         sender: mpsc::UnboundedSender<Result<(), E>>, // sender async side with no byte limitation
         receiver: mpsc::UnboundedReceiver<Result<(), E>>, // receiver async side with no byte limitation
     }
 
 
-    impl<E: Send + 'static> Worker<E>{ // E can be shared between threads
+    impl<E: Send + 'static> AsyncWorker<E>{ // E can be shared between threads
 
         pub fn new() -> Self{
             let (sender, 
                 receiver) = mpsc::unbounded_channel(); // async mpsc jobq channel channel with no byte limitation to avoid deadlocks and race conditions
-            Worker{
+            AsyncWorker{
                 count: 0, // will be equaled to the number of workers by solving all the jobs which are comming to the downside of the mpsc jobq channel
                 sender,
                 receiver
@@ -181,11 +202,8 @@ pub mod _async{
 
 pub mod sync{
 
-    // spawning native threads are too slow since thread handling in rust is depends on user base context switching 
-    // means based on the load of IO in the app rust can solve the data load inside another cpu core.
-    //   
-    // https://www.reddit.com/r/rust/comments/az9ogy/help_am_i_doing_something_wrong_or_do_threads/
-    // https://www.reddit.com/r/rust/comments/cz4bt8/is_there_a_simple_way_to_create_lightweight/
+
+
     // a sync task scheduler (worker pool) with mpsc as the jobq channel protocol
     // this scheduler is used for synchronous IO by blocking the thread using rust native std thread - alternative to this is rayon
 
@@ -194,23 +212,25 @@ pub mod sync{
 
 
 
+
+
     type Job = Box<dyn FnOnce() + Send + 'static>; // a job is of type closure which must be Send and static across all threads inside a Box on the heap
 
 
 
-    pub struct Pool{
+    pub struct RayonSyncWorker{
         count: usize, // number of workers
         sender: mpsc::UnboundedSender<Job>, // sender async side with no byte limitation
         receiver: mpsc::UnboundedReceiver<Job>, // receiver async side with no byte limitation
     }
 
 
-    impl Pool{
+    impl RayonSyncWorker{
 
         pub fn new() -> Self{
             let (sender, 
                 receiver) = mpsc::unbounded_channel(); // async mpsc jobq channel channel with no byte limitation to avoid deadlocks and race conditions
-            Pool{
+            RayonSyncWorker{
                 count: 0, // will be equaled to the number of workers by solving all the jobs which are comming to the downside of the mpsc jobq channel
                 sender,
                 receiver
@@ -260,7 +280,7 @@ pub mod sync{
         thread: Option<thread::JoinHandle<()>>, //// thread is of type JoinHandld struct which return nothing or ()
     }
 
-    pub struct ThreadPool {
+    pub struct NativeSyncWorker {
         workers: Vec<Worker>,
         sender: std_mpsc::Sender<Message>, // all sends will be asynchronous and they never block
     }
@@ -270,9 +290,9 @@ pub mod sync{
         Terminate,
     }
 
-    impl ThreadPool{
+    impl NativeSyncWorker{
         
-        pub fn spawn(size: usize) -> ThreadPool {
+        pub fn spawn(size: usize) -> NativeSyncWorker {
             assert!(size > 0);
             let (sender, receiver) = std_mpsc::channel();
             let receiver = Arc::new(Mutex::new(receiver)); // reading and writing from an IO must be mutable thus the receiver must be inside a Mutex cause data inside Arc can't be borrows as mutable since the receiver read operation is a mutable process
@@ -280,7 +300,7 @@ pub mod sync{
             for _ in 0..size { // since the receiver is not bounded to trait Clone we must clone it using Arc in each iteration cause we want to share it between multiple threads to get what the sender has sent 
                 workers.push(Worker::new(Uuid::new_v4(), Arc::clone(&receiver)));
             }
-            ThreadPool{workers, sender}
+            NativeSyncWorker{workers, sender}
         }
 
         pub fn execute<F>(&self, f: F) where F: FnOnce() + Send + 'static { // calling this method means send the incoming task from the process through the mpsc sender to down side of the channel in order to block a free thread using the receiver on locking the mutex
@@ -289,8 +309,8 @@ pub mod sync{
         }
     }
 
-    impl Drop for ThreadPool{ // hitting CTRL + C can drop the lifetime also
-        fn drop(&mut self) { // destructor for ThreadPool struct 
+    impl Drop for NativeSyncWorker{ // hitting CTRL + C can drop the lifetime also
+        fn drop(&mut self) { // destructor for NativeSyncWorker struct 
             info!("Sending terminate message to all workers.");
             for _ in &self.workers {
                 self.sender.send(Message::Terminate).unwrap();

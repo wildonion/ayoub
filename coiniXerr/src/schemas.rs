@@ -188,13 +188,6 @@ impl Chain{
         genesis
     }
 
-    pub fn store(&mut self) -> Self{
-        // TODO - save the whole chain state inside a db or a persistence storage like bigchain db
-        // ...
-        todo!();
-
-    }
-
     pub fn build_raw_block(&self, prev_block: &Block) -> Block{ //-- this method get an immutable pointer to the block (borrowed) as its second argument 
         Block{
             id: Uuid::new_v4(),

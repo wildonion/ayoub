@@ -172,7 +172,7 @@ pub mod schemas;
 pub mod actors;
 pub mod engine;
 pub mod utils;
-
+pub mod protocols;
 
 
 
@@ -804,7 +804,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
             event: EventVariant::Runime(vec![
                 RuntimeLog{
                     id: Uuid::new_v4().to_string(),
-                    path: "/var/log/rafael.log".to_string(), // TODO - save the log in /var/log
+                    path: "/var/log/coiniXerr/runtime/rafael.log".to_string(), // TODO - save the log in /var/log/coiniXerr/runtime/
                     requested_at: Some(chrono::Local::now().timestamp_nanos()),
                     content: Box::new([]), // TODO - log content 
  
