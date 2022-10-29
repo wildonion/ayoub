@@ -373,7 +373,9 @@ NOTE - the task or event (divided using simd) which must be sent between threads
 NOTE - when we want to put traits inside smart pointer we have to use the dyn keyword like Arc<dyn Trait> or Box<dyn Trait>
 NOTE - heap data allocated must be passed by reference (no runtime cost) or clone (runtime cost) to other scope and every reference must have its own lifetime thus we should define a valid lifetime for each reference or put them inside the Box like traits which are heap allocated data structure
 NOTE - self in method must be referenced otherwise the instance will be moved by the first method call 
-
+NOTE - to return a reference from the function we must have a valid lifetime for that reference since rust doesn't allow us to return a variable which is owned by the function cause it might be a dangling pointer   
+NOTE - in rust lifetimes help to avoid having double free and dangling pointers issue since rust don't have gc
+NOTE - dynamic allocation means that an interface or trait can be implemented for one or multiple types at runtime and can be specified by the dyn keyword inside a Box 
 
 
 
