@@ -12,7 +12,7 @@
 //  - likes
 //  - broadcast or publish to whole hoopoe app
 
-
+// get new and old hoops when the consumer is back on line from the hoops queue
 
 
 
