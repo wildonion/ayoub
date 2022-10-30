@@ -2,4 +2,6 @@
 
 
 
-pub mod app;
+
+
+pub mod publishers;

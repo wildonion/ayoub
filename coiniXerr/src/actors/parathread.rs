@@ -120,9 +120,9 @@ impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network wh
         self.blockchain.clone()
     }
 
-    pub fn set_slot(&mut self, slot: Slot) -> Self{
+    pub fn set_slot(&mut self, slot: Slot) -> Self{ //// Self referes to the Parachain struct
         self.slot = Some(slot);
-        Self{ 
+        Self{ //// Self referes to the Parachain struct 
             id: self.id, 
             slot: self.slot.clone(), 
             blockchain: self.blockchain.clone(), 
@@ -131,9 +131,9 @@ impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network wh
         }
     }
 
-    pub fn set_blockchain(&mut self, blockchain: Chain) -> Self{
+    pub fn set_blockchain(&mut self, blockchain: Chain) -> Self{ //// Self referes to the Parachain struct
         self.blockchain = Some(blockchain);
-        Self{ 
+        Self{ //// Self referes to the Parachain struct 
             id: self.id, 
             slot: self.slot.clone(), 
             blockchain: self.blockchain.clone(), 
@@ -142,9 +142,9 @@ impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network wh
         }
     }
 
-    pub fn set_current_block(&mut self, block: Block) -> Self{
+    pub fn set_current_block(&mut self, block: Block) -> Self{ //// Self referes to the Parachain struct
         self.current_block = Some(block);
-        Self{ 
+        Self{ //// Self referes to the Parachain struct 
             id: self.id, 
             slot: self.slot.clone(), 
             blockchain: self.blockchain.clone(), 
@@ -173,9 +173,9 @@ impl Parachain{ //// Parachain is the parallel chain of the coiniXerr network wh
 impl Actor for Parachain{
 
     //// Parachain actor must support the message type of the channels related to the parachain message events (ParachainCreated, ParachainUpdated) that they want to subscribe to
-    //// When using the #[actor()] attribute, the actor's Msg associated type should be set to '[DataType]Msg'. 
-    //// E.g. if an actor is a struct named MyActor, then the Actor::Msg associated type will be MyActorMsg.
-    type Msg = ParachainMsg; //// we can access all the message event actors which has defined for Parachain using ParachainMsg::   //// Msg associated type is the actor mailbox type and is of type ParachainMsg which is the Parachain type itself; actors can communicate with each other by sending message to each other
+    //// When using the #[actor()] attribute, the actor's Msg generic associated type (GAT) should be set to '[DataType]Msg'. 
+    //// E.g. if an actor is a struct named MyActor, then the Actor::Msg generic associated type (GAT) will be MyActorMsg.
+    type Msg = ParachainMsg; //// we can access all the message event actors which has defined for Parachain using ParachainMsg::   //// Msg generic associated type (GAT) is the actor mailbox type and is of type ParachainMsg which is the Parachain type itself; actors can communicate with each other by sending message to each other
 
     fn recv(&mut self, 
             ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 
@@ -190,7 +190,7 @@ impl Actor for Parachain{
 
 impl ActorFactoryArgs<(Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parachain as Actor>::Msg>>, Option<Block>)> for Parachain{
 
-    fn create_args((id, slot, blockchain, next_parachain, current_block): (Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parachain as Actor>::Msg>>, Option<Block>)) -> Self{
+    fn create_args((id, slot, blockchain, next_parachain, current_block): (Uuid, Option<Slot>, Option<Chain>, Option<ActorRef<<Parachain as Actor>::Msg>>, Option<Block>)) -> Self{ //// Self referes to the Parachain struct
         
         Self { id, slot, blockchain, next_parachain, current_block } //// initiate an instance of the Parachain with the passed in args
     
@@ -223,7 +223,7 @@ impl Receive<UpdateParachainEvent> for Parachain{ //// implementing the Receive 
         info!("➔ 🔃 update parachain message info received");
     
         //// updating the state of the parachain with passed in message
-        let updated_parachain = Self{
+        let updated_parachain = Self{ //// Self referes to the Parachain struct
             id: self.id,
             slot: match _msg.slot{
                 Some(slot) => Some(slot),
@@ -322,7 +322,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                 let next_parachain = self.get_next_parachain().unwrap(); //// getting the next parachain field
                 let actor_system = &_ctx.system; //// getting the borrowed form of the actor system from the _ctx
 
-                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
+                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators like when we reach 600k blocks inside a slot then we have to reset the slot 
                 // ....
                 
                 //// resetting the slot field of the next parachain but untouched other fields using ask() function 
@@ -363,7 +363,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
                 //// logging the incoming wave reset slot from the waver parachain to this parachain
                 info!("➔ ⭕ got a reset wave sent from parachain with id [{}] to this parachain with id [{}]", waver_id, self.id);
 
-                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
+                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators like when we reach 600k blocks inside a slot then we have to reset the slot
                 // ....
                 
                 _sender
@@ -377,7 +377,7 @@ impl Receive<Communicate> for Parachain{ //// implementing the Receive trait for
             Cmd::WaveResetSlotFromSystem => {
                 info!("➔ ⭕ got a reset wave sent from system to this parachain with [{}]", self.id);
 
-                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators
+                // TODO - update the default parachain slot using a successful auction process by the coiniXerr validators like when we reach 600k blocks inside a slot then we have to reset the slot
                 // ....
 
                 _sender

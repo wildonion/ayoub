@@ -34,35 +34,6 @@
 
 
 
-
-
- 
-
-    ➔ there is no guaranteed order of execution for spawns, given that other threads may steal tasks at any time, however, they are generally prioritized in a LIFO order 
-       on the thread from which they were spawned, other threads always steal from the other end of the deque, like FIFO order, the idea is that recent tasks are most likely to be fresh 
-       in the local CPU's cache, while other threads can steal older stale tasks.
-    ➔ spawning native threads are too slow since thread handling in rust is depends on user base context switching means that based on the load of the IO in the app rust might solve the data load inside another cpu core and use multiprocessing approach:
-        • https://www.reddit.com/r/rust/comments/az9ogy/help_am_i_doing_something_wrong_or_do_threads/
-        • https://www.reddit.com/r/rust/comments/cz4bt8/is_there_a_simple_way_to_create_lightweight/
-    ➔ in building multithreading apps sending data between threads must be done by using jobq channels like mpsc to avoid being in deadlock and race condition situations
-    ➔ actors are workers which uses jobq channels to send message events asyncly between other actors and the system to execute them inside their free thread from the thread pool
-    ➔ messages must be Send Sync static and Arc<Mutex<Message>> to share between actor threads
-    ➔ mpsc means multiple threads can read the data which is Send + Sync + 'static or multiple sender can be cloned but only one thread or receiver can mutate the data
-    ➔ the three causes of data races
-        • Two or more pointers access the same data at the same time.
-        • At least one of the pointers is being used to write to the data.
-        • There’s no mechanism being used to synchronize access to the data
-    ➔ the three rules of ownership
-        • Each value in Rust has a variable that’s called its owner.
-        • There can only be one owner at a time.
-        • When the owner goes out of scope, the value will be dropped.
-    ➔ the two rules of references
-        • At any given time, you can have either one mutable reference or any number of immutable references.
-        • References must always be valid.
-
-
-
-
         
 */
 
@@ -100,7 +71,7 @@ pub mod _async{
 
         }
 
-        pub fn handle_message(){
+        fn handle_message(){
 
             todo!()
 

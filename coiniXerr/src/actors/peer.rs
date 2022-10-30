@@ -141,7 +141,7 @@ pub struct UpdateValidatorAboutMiningProcess(pub Uuid); //// a message event to 
 //                 Validator type actor
 // ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
 
-#[actor(Communicate, Contract, UpdateTx, UpdateMode, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess)] //-- Validator actor will receive a message from other actors or a channel to subscribe to of type Communicate, Contract, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx and UpdateValidatorAboutMiningProcess
+#[actor(Communicate, Contract, UpdateTx, UpdateMode, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess)] //-- Validator actor will receive a message from other actors or a channel to subscribe to of type Communicate, Contract, UpdateTx, ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx and UpdateValidatorAboutMiningProcess
 #[derive(Debug, Clone, Serialize, Deserialize)] //-- trait Clone is required to prevent the object of this struct from moving
 pub struct Validator {
     pub id: Uuid,
@@ -200,9 +200,9 @@ impl Validator{
 impl Actor for Validator{
 
     //// Validator actor must support the message type of the channels related to the validator message events (ValidatorJoined, ValidatorUpdated, UpdateValidatorAboutMempoolTx, UpdateValidatorAboutMiningProcess) that they want to subscribe to
-    //// When using the #[actor()] attribute, the actor's Msg associated type should be set to '[DataType]Msg'. 
-    //// E.g. if an actor is a struct named MyActor, then the Actor::Msg associated type will be MyActorMsg.
-    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess //// Msg associated type is the actor mailbox type and is of type ValidatorMsg which is the Validator type itself; actors can communicate with each other by sending message to each other
+    //// When using the #[actor()] attribute, the actor's Msg generic associated type (GAT) should be set to '[DataType]Msg'. 
+    //// E.g. if an actor is a struct named MyActor, then the Actor::Msg generic associated type (GAT) will be MyActorMsg.
+    type Msg = ValidatorMsg; //// we can access all the message event actors which has defined for Validator using ValidatorMsg::Communicate, ValidatorMsg::Contract, ValidatorMsg::UpdateTx, ValidatorMsg::UpdateMode, ValidatorMsg::UpdateValidatorAboutMempoolTx, ValidatorMsg::UpdateValidatorAboutMiningProcess //// Msg generic associated type (GAT) is the actor mailbox type and is of type ValidatorMsg which is the Validator type itself; actors can communicate with each other by sending message to each other
 
     fn recv(&mut self, 
             ctx: &Context<Self::Msg>, //// ctx is the actor system which we can build child actors with it also sender is another actor 

@@ -376,7 +376,9 @@ NOTE - self in method must be referenced otherwise the instance will be moved by
 NOTE - to return a reference from the function we must have a valid lifetime for that reference since rust doesn't allow us to return a variable which is owned by the function cause it might be a dangling pointer   
 NOTE - in rust lifetimes help to avoid having double free and dangling pointers issue since rust don't have gc
 NOTE - dynamic allocation means that an interface or trait can be implemented for one or multiple types at runtime and can be specified by the dyn keyword inside a Box 
-
+NOTE - Box is a smart pointer contains a referece with a valid lifetime to the value inside of it by allocating a section inside the heap for that value 
+NOTE - when putting inside the Box the type will be moved thus we can take a reference to that or clone it
+NOTE - usually we can use Box to avoid using lifetimes directly for the heap data types like traits since they must be passed into other scopes like struct fields either by cloning or by taking a reference to them  
 
 
 

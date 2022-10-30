@@ -44,19 +44,14 @@ Coded by
         to receive anything from the sender to put them in a block for mining.
         The main structure of the coiniXerr network is its parachains in which every parachain has its own blockchain stuffs and an
         special field called slot in which every 5 seconds a reset task will be scheduled to be executed on the selected parachain to 
-        reset all its feilds by a successful auction process by the coiniXerr validators. 
-        Also there are channels related to parachain and validator actors used to broadcast new transaction income, update a specific validator 
+        reset all its feilds by a successful auction process by the coiniXerr validators.
+        It must be mentioned that each parachain and validator is an actor that can communicate with each other by sending message,  
+        also there are channels related to parachain and validator actors used to broadcast new transaction income, update a specific validator 
         and parachain state, new validator and parachain joined and block mining process message events to related subscribers.
         All subscribers of the mentioned channels which are interested on specific topic must support the meesage event of the topic 
         in order to be able subscribe to that topic.
       
 
-
-        Concepts:
-            - broadcasting (like mpsc channel)
-            - streaming protocols (like tpc, webrtc, websocket, grpc and socks)
-            - multithreading (like tokio and riker)
-            - scheduling
 
 
 
@@ -89,18 +84,18 @@ Coded by
         about the new actor joining the system also riker actors are Futures and run as Futures on the underlying thread pool
         also all riker data structures are Send Sync and have a valid lifetimes across threads.
 
-    [🚨] ActorRef is a lightweight type that is inexpensive to clone and can be used to interact with its underlying Actor, 
+    [🚨] ActorRef is a lightweight type that is inexpensive to clone and can be used to interact with its underlying Actor or the struct itself, 
         such as sending messages to it also is a reference to the actor.
 
     [🚨] ActorRef always refers to a specific instance of an actor, when two instances of the same Actor are started, 
         they're still considered separate actors, each with different ActorRefs.
 
-    [🚨] ActorRef are inexpensive and can be cloned alos they can be sent as a message to another actor.
+    [🚨] ActorRefs are inexpensive and they contain a reference to the actor struct itself also can be cloned and sent as a message to another actor.
 
     [🚨] remote_handle() method turns this future into a future that yields () on completion and sends its output to another future on a separate task
         and can be used with spawning executors to easily retrieve the result of a future executing on a separate task or thread.
 
-    [🚨] actors can communicate with each other asyncly only by sending defined message events since they are isolated and never expose their state or behavior, 
+    [🚨] actors can communicate with each other asyncly only by sending defined message events since they are isolated inside the ActorRef and never expose their state or behavior, 
         they can solve incoming task in their threadpool (inside a free thread) also an actor which might be a channel can broadcast message events 
         inside the channel so other subscriber actors which are interested to that message event can subscribe to that event. 
 
@@ -108,6 +103,38 @@ Coded by
         inside the loop through the mpsc channel cause async move{} will move all vars from its behind to the new scope
 
     [🚨] calling between actors and broadcasting message events id sone by calling tell() method on actors
+
+    [🚨] there is no guaranteed order of execution for spawns, given that other threads may steal tasks at any time, however, they are generally prioritized in a LIFO order 
+          on the thread from which they were spawned, other threads always steal from the other end of the deque, like FIFO order, the idea is that recent tasks are most likely to be fresh 
+          in the local CPU's cache, while other threads can steal older stale tasks.
+    
+    [🚨] spawning native threads are too slow since thread handling in rust is depends on user base context switching means that 
+          based on the load of the IO in the app rust might solve the data load inside another cpu core and use multiprocessing approach:
+            • https://www.reddit.com/r/rust/comments/az9ogy/help_am_i_doing_something_wrong_or_do_threads/
+            • https://www.reddit.com/r/rust/comments/cz4bt8/is_there_a_simple_way_to_create_lightweight/
+    
+    [🚨] in building multithreading apps sending data between threads must be done by using jobq channels like mpsc to avoid being in deadlock and race condition situations
+    
+    [🚨] actors are workers which uses jobq algos like mpsc channels to send message events asyncly between other 
+          actors and the system to execute them inside their free thread from the thread pool
+    
+    [🚨] messages must be Send Sync static and Arc<Mutex<Message>> to share between actor threads
+    
+    [🚨] mpsc means multiple threads can read the data which is Send + Sync + 'static or multiple sender can be cloned but only one thread or receiver can mutate the data
+    
+    [🚨] the three causes of data races
+            • Two or more pointers access the same data at the same time.
+            • At least one of the pointers is being used to write to the data.
+            • There’s no mechanism being used to synchronize access to the data
+    
+    [🚨] the three rules of ownership
+            • Each value in Rust has a variable that’s called its owner.
+            • There can only be one owner at a time.
+            • When the owner goes out of scope, the value will be dropped.
+    
+    [🚨] the two rules of references
+            • At any given time, you can have either one mutable reference or any number of immutable references.
+            • References must always be valid.
 
 
 
@@ -399,7 +426,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     ///////            start transaction emulator
     /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈     
     
-    utils::api::tx_emulator().await;
+    // utils::api::tx_emulator().await;
 
 
 
@@ -468,7 +495,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     // ----------------------------------------------------------------------
     
     info!("➔ 🔗 building second parachain");
-    let parachain_1_props = Props::new_args::<actors::parathread::Parachain, _>(
+    let parachain_1_props = Props::new_args::<actors::parathread::Parachain, _>( //// prop types are inside Arc and Mutex thus we can clone them and move them between threads
                                                                                                                             (Uuid::new_v4(), 
                                                                                                                             None, //// empty slot for now
                                                                                                                             None, 
@@ -491,7 +518,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //         BROADCASTING SECOND PARACHAIN ACTOR TO OTHER PARACHAIN ACTORS
     // ---------------------------------------------------------------------------------
 
-    parachain_created_channel.tell(
+    parachain_created_channel.tell( //// telling the channel that we want to publish something
                                 Publish{
                                     msg: ParachainCreated(second_parachain_uuid.clone()), //// publishing the ParachainCreated message event to the parachain_created_channel channel 
                                     topic: "<second parachain created>".into(), //// setting the topic to <second parachain created> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
@@ -506,7 +533,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     info!("➔ 🔗 starting default parachain");
     let mut chain = Some(Chain::default());
     let current_slot_for_default_parachain = Slot::default(); //// default slot on the first run of the coiniXerr network; this field will be updated every 5 seconds for default and second parachain 
-    let parachain_0_props = Props::new_args::<actors::parathread::Parachain, _>(
+    let parachain_0_props = Props::new_args::<actors::parathread::Parachain, _>( //// prop types are inside Arc and Mutex thus we can clone them and move them between threads
                                                                                                                             (Uuid::new_v4(), 
                                                                                                                             Some(current_slot_for_default_parachain),
                                                                                                                             chain, 
@@ -559,7 +586,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     //         BROADCASTING DEFAULT PARACHAIN ACTOR TO OTHER PARACHAIN ACTORS
     // ---------------------------------------------------------------------------------
 
-    parachain_created_channel.tell(
+    parachain_created_channel.tell( //// telling the channel that we want to publish something
                                 Publish{
                                     msg: ParachainCreated(default_parachain_uuid.clone()), //// publishing the ParachainCreated message event to the parachain_created_channel channel 
                                     topic: "<default parachain created>".into(), //// setting the topic to <default parachain created> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
@@ -569,6 +596,58 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+    ///////                           parachain subscribers 
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈
+
+    parachain_updated_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                                Subscribe{ 
+                                    actor: Box::new(parachain_1.clone()), //// parachain_1 wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                    topic: "<default parachain updated>".into() //// <default parachain updated> topic
+                                },
+                                None
+    );
+
+    parachain_updated_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                                Subscribe{ 
+                                    actor: Box::new(parachain_0.clone()), //// parachain_0 wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                    topic: "<second parachain updated>".into() //// <second parachain updated> topic
+                                },
+                                None
+    );
+
+    parachain_created_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                                Subscribe{ 
+                                    actor: Box::new(parachain_1.clone()), //// parachain_1 wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                    topic: "<default parachain created>".into() //// <default parachain created> topic
+                                },
+                                None
+    );
+
+    parachain_created_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                                Subscribe{ 
+                                    actor: Box::new(parachain_0.clone()), //// parachain_0 wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                    topic: "<second parachain created>".into() //// <second parachain created> topic
+                                },
+                                None
+    );
 
 
 
@@ -645,20 +724,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let parachain_1_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_sys, &parachain_1, ParachainCommunicate{id: Uuid::new_v4(), cmd: ParachainCmd::GetParachainUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in parachain actor as a future object
     let parachain_1_uuid = parachain_1_uuid_remote_handle.await;
 
-    parachain_updated_channel.tell(
-        Publish{
-            msg: ParachainUpdated(parachain_0_uuid.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
-            topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
-        }, 
-        None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+    parachain_updated_channel.tell( //// telling the channel that we want to publish something
+                                Publish{
+                                    msg: ParachainUpdated(parachain_0_uuid.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
+                                    topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
+                                }, 
+                                None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
     );
     
-    parachain_updated_channel.tell(
-        Publish{
-            msg: ParachainUpdated(parachain_1_uuid.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
-            topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
-        }, 
-        None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
+    parachain_updated_channel.tell( //// telling the channel that we want to publish something
+                                Publish{
+                                    msg: ParachainUpdated(parachain_1_uuid.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
+                                    topic: "<second parachain updated>".into(), //// setting the topic to <second parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
+                                }, 
+                                None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
     );
 
     // ---------------------------------------------------------------------------------
@@ -721,16 +800,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         // ----------------------------------------------------------------------
         
         let default_parachain_slot = current_slot.clone();
-        let stream_validator = default_parachain_slot.clone().get_validator(addr.clone());
+        let stream_validator = default_parachain_slot.clone().get_validator(addr.clone()); // TODO - validator uniqueness
         
         //// means we don't find any validator inside the default parachain slot  
         if let None = stream_validator{ 
             current_slot = default_parachain_slot
-                                        .clone()
-                                        .add_validator(
-                                            default_parachain_uuid, 
-                                            addr.clone()
-                                        );
+                                                .clone()
+                                                .add_validator( //// this method will return the updated slot
+                                                    default_parachain_uuid, 
+                                                    addr.clone()
+                                                );
         }
         
         let validator = Validator{ //// we have to clone the stream_validator in each arm to prevent ownership moving since we're lossing the ownership in each arm
@@ -757,7 +836,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         };
 
         info!("➔ 👷🏼‍♂️ building validator actor for this peer");
-        let validator_props = Props::new_args::<Validator, _>((validator.id.clone(), validator.addr, validator.recent_transaction, validator.mode, validator.ttype_request));
+        let validator_props = Props::new_args::<Validator, _>( //// prop types are inside Arc and Mutex thus we can clone them and move them between threads  
+                                                                                                            (
+                                                                                                                validator.id.clone(), 
+                                                                                                                validator.addr, 
+                                                                                                                validator.recent_transaction, 
+                                                                                                                validator.mode, 
+                                                                                                                validator.ttype_request
+                                                                                                            )
+                                                                                                        );
         let validator_actor = coiniXerr_sys.clone().actor_of_props::<Validator>("validator", validator_props.clone()).unwrap(); //-- initializing the validator actor with its props; ActorRef is of type ValidatorMsg means that we can communicate with another actor or the actor itself by sending Validator iteself as a message - props are Clone and Send and we can share them between threads
         let validator_actor = validator_actor.clone(); //-- cloning (making a deep copy of) the validator actor will prevent the object from moving in every iteration - trait Clone is implemented for Validator actor struct since the type is Send + Sync across threads
         let validator_updated_channel = validator_updated_channel.clone();  //-- cloning (making a deep copy of) the channel actor will prevent the object from moving in every iteration - trait Clone is implemented for channel actor struct since the type is Send + Sync across threads
@@ -766,13 +853,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         //              BROADCASTING NEW VALIDATOR TO OTHER VALIDATOR ACTORS
         // ---------------------------------------------------------------------------------
 
-        validator_joined_channel.tell(
+        validator_joined_channel.tell( //// telling the channel that we want to publish something
                                     Publish{
                                         msg: ValidatorJoined(validator.id.clone()), //// publishing the ValidatorJoined message event to the validator_joined_channel channel 
                                         topic: "<new validator joined>".into(), //// setting the topic to <new validator joined> so all subscribers of this channel (all validator actors) can subscribe and react to this topic of this message event
                                     }, 
                                     None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                 );
+        
+        // ---------------------------------------------------------------------------------
+        //                 CREATED VALIDATOR SUBSCRIBES TO NEW VALIDATOR TOPIC
+        // ---------------------------------------------------------------------------------
+
+        validator_joined_channel.tell( //// telling the channel that an actor wants to subscribe to a topic - whenever a validator join current validator can subscribe to the related topic
+                                    Subscribe{ 
+                                        actor: Box::new(validator_actor.clone()), //// validator_actor wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                        topic: "<new validator joined>".into() //// <new validator joined> topic
+                                    },
+                                    None
+        );
 
         // ----------------------------------------------------------------------
         //                  SAVING RUNTIME INFO FOR THIS STREAM
@@ -958,14 +1057,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         }
 
                         // ---------------------------------------------------------------------------------
-                        //             BROADCASTING VALIDATOR UPDATE TO OTHER VALIDATOR ACTORS
+                        //              BROADCASTING VALIDATOR UPDATE TO OTHER VALIDATOR ACTORS
                         // ---------------------------------------------------------------------------------
 
                         let validator_update_channel = cloned_arc_mutex_validator_update_channel.lock().unwrap().clone(); //// cloning will return the T from MutexGuard
                         let current_validator = cloned_arc_mutex_validator_actor.lock().unwrap().clone(); //// cloning will return the T from MutexGuard
                         let current_uuid_remote_handle: RemoteHandle<Uuid> = ask(&coiniXerr_actor_system, &current_validator, ValidatorCommunicate{id: Uuid::new_v4(), cmd: ValidatorCmd::GetValidatorUuid}); //// no need to clone the passed in parachain since we're passing it by reference - asking the coiniXerr system to return the uuid of the passed in validator actor and return the result or response as a future object
                         let current_validator_uuid = current_uuid_remote_handle.await; //// getting the uuid of the current validator which has passed in to the stream mpsc channel
-                        validator_update_channel.tell(
+                        validator_update_channel.tell( //// telling the channel that we want to publish something
                                                     Publish{
                                                         msg: ValidatorUpdated(current_validator_uuid.clone()), //// publishing the ValidatorUpdated message event to the validator_updated_channel channel 
                                                         topic: "<validator state updated with recent transaction>".into(), //// setting the topic to <validator state updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
@@ -973,6 +1072,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                                     None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                                 );
                         
+                        // ---------------------------------------------------------------------------------
+                        //               CURRENT VALIDATOR SUBSCRIBES TO VALIDATOR UPDATE TOPIC
+                        // ---------------------------------------------------------------------------------
+
+                        validator_update_channel.tell( //// telling the channel that an actor wants to subscribe to a topic - whenever a validator status update current validator can subscribe to the related topic
+                                                    Subscribe{ 
+                                                        actor: Box::new(current_validator.clone()), //// current_validator wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                                        topic: "<validator state updated with recent transaction>".into() //// <validator state updated with recent transaction> topic
+                                                    },
+                                                    None
+                        );
+
                         // ---------------------------------------------------------------------------------------
                         //      SENDING SIGNED TRANSACTION TO DOWN SIDE OF THE CHANNEL FOR CONSENSUS PROCESS
                         // ---------------------------------------------------------------------------------------
@@ -989,7 +1100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         //       REJECTING THE INCOMING TRANSACTION BACK TO THE VALIDATOR
                         // ----------------------------------------------------------------------
                         
-                        info!("➔ 🙅 rejecting incoming transaction caused by unavailable mempool channel");
+                        info!("➔ 🙅 rejecting incoming transaction caused by Unavailable Mempool Channel issue");
                         stream.write(&transaction_buffer_bytes[0..size]).await.unwrap(); //-- rejecting the transaction back to the peer
                         true
                     }
@@ -1057,14 +1168,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         //      BROADCASTING NEW INCOMING TRANSACTION INTO THE MEMPOOL TO OTHER VALIDATOR ACTORS
         // ------------------------------------------------------------------------------------------
 
-        mempool_updated_channel.tell(
+        mempool_updated_channel.tell( //// telling the channel that we want to publish something
                                     Publish{
                                         msg: UpdateValidatorAboutMempoolTx(mutex_transaction.id.clone()), //// publishing the UpdateValidatorAboutMempoolTx message event to the mempool_updated_channel channel 
                                         topic: "<new transaction slided into the mempool>".into(), //// setting the topic to <new transaction slided into the mempool> so all subscribers of this channel (all validator actors) can subscribe and react to this topic of this message event
                                     }, 
                                     None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                 );
+        
+        
+        // ---------------------------------------------------------------------------------
+        //              CURRENT VALIDATOR SUBSCRIBES TO NEW BLOCK MINED TOPIC
+        // ---------------------------------------------------------------------------------
 
+        mempool_updated_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                                    Subscribe{ 
+                                        actor: Box::new(mutex_validator_actor.clone()), //// mutex_validator_actor wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                        topic: "<new transaction slided into the mempool>".into() //// <new transaction slided into the mempool> topic
+                                    },
+                                    None
+        );
+        
         // ----------------------------------------------------------------------
         //                  CONSENSUS AND BUILDING BLOCKS PROCESS
         // ----------------------------------------------------------------------
@@ -1098,7 +1222,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         //              BROADCASTING MINING PROCESS TO ALL ACTORS
         // ---------------------------------------------------------------------
 
-        mining_channel.tell(
+        mining_channel.tell( //// telling the channel that we want to publish something
                             Publish{
                                 msg: UpdateValidatorAboutMiningProcess(current_block.id.clone()), //// publishing the UpdateValidatorAboutMiningProcess message event to the mining_channel channel 
                                 topic: "<new block has mined>".into(), //// setting the topic to <new block has mined> so all subscribers of this channel (all validator actors) can subscribe and react to this topic of this message event
@@ -1106,6 +1230,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                             None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                         );
         
+        // ---------------------------------------------------------------------------------
+        //              CURRENT VALIDATOR SUBSCRIBES TO NEW BLOCK MINED TOPIC
+        // ---------------------------------------------------------------------------------
+
+        mining_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                            Subscribe{ 
+                                actor: Box::new(mutex_validator_actor.clone()), //// mutex_validator_actor wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                topic: "<new block has mined>".into() //// <new block has mined> topic
+                            },
+                            None
+        );
+
         // ------------------------------------------------------------------------
         //          UPDATING PARACHAIN ACTOR STATE AT THE END OF THE LOOP
         // ------------------------------------------------------------------------
@@ -1120,13 +1256,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         //         BROADCASTING DEFAULT PARACHAIN UPDATE TO OTHER PARACHAIN ACTORS
         // --------------------------------------------------------------------------------
 
-        parachain_updated_channel.tell(
+        parachain_updated_channel.tell( //// telling the channel that we want to publish something
                                     Publish{
                                         msg: ParachainUpdated(update_default_parachain.id.clone()), //// publishing the ParachainUpdated message event to the parachain_updated_channel channel 
                                         topic: "<default parachain updated>".into(), //// setting the topic to <default parachain updated> so all subscribers of this channel (all parachain actors) can subscribe and react to this topic of this message event
                                     }, 
                                     None, //// since we're not sending this message from another actor actually we're sending from the main() (main() is the sender) and main() is not an actor thus the sender param must be None
                                 );
+        
+        // ---------------------------------------------------------------------------------
+        //           SECOND PARACHAIN SUBSCRIBES TO UPDATE DEFAULT PARACHAIN TOPIC
+        // ---------------------------------------------------------------------------------
+
+        parachain_updated_channel.tell( //// telling the channel that an actor wants to subscribe to a topic
+                                    Subscribe{ 
+                                        actor: Box::new(parachain_1.clone()), //// parachain_1 wants to subscribe to - since in subscribing a message the subscriber or the actor must be bounded to Send trait thus we must either take a reference to it like &dyn Tell<Msg> + Send or put it inside the Box like Box<dyn Tell<Msg> + Send> to avoid using lifetime directly since the Box is a smart pointer and has its own lifetime     
+                                        topic: "<default parachain updated>".into() //// <default parachain updated> topic
+                                    },
+                                    None
+        );
 
         // ----------------------------------------------------------------------
         //                 INSERTING THE PARACHAIN INTO THE DB
