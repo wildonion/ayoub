@@ -379,6 +379,7 @@ NOTE - dynamic allocation means that an interface or trait can be implemented fo
 NOTE - Box is a smart pointer contains a referece with a valid lifetime to the value inside of it by allocating a section inside the heap for that value 
 NOTE - when putting inside the Box the type will be moved thus we can take a reference to that or clone it
 NOTE - usually we can use Box to avoid using lifetimes directly for the heap data types like traits since they must be passed into other scopes like struct fields either by cloning or by taking a reference to them  
+NOTE - use Box instead of taking a direct reference to that type since Box has its own reference and lifetime 
 
 
 
