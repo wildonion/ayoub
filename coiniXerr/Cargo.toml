@@ -31,6 +31,8 @@ clap = "4"
 mongodb = "2"
 async-trait = "0.1.57"
 is_type = "0.2.1"
+rabbitmq-stream-client = "*"
+
 
 
 
