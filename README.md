@@ -18,4 +18,4 @@
 
 * To update a user access level to dev first signup the user using `/auth/signup` API inside the `PaaS` then run the binary like so: `./ayoub wildonion 0`
 
-* To Run and Setup Ayoub: ```./ayoub.sh```
+* To Run and Setup Ayoub: ```sudo chmod +x ayoub.sh && ./ayoub.sh```

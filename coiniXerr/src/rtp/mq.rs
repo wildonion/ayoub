@@ -9,17 +9,17 @@
 
 
 
-    client
+    clients
         | 
-        -------- rtp mq pub/sub app -------- hoopoe hyper server 
+        -------- rtp mq pub/sub actor streamer -------- hyper server 
                         |                             |
                         |                             -------- mongodb
                         |
-                        producer/publisher actor 
-                                |
-                                ---tcp socket--> |broker actor exchanges <---route--> queue buffers like mpsc| 
-                                                                    |    
-                                                                    ---tcp socket--> consumers/subscribers actors
+                        <---tcp socket--> |broker actor streamer exchanges <---route like mpsc--> queue buffer actor streamers| 
+                                                            |    
+                                                            |
+                                                            |
+                                                            <---tcp socket--> consumers/subscribers actor streamers
 
 
 
@@ -41,10 +41,22 @@
 
 
 
+    mq is actually a tcp socket channel based on actor desing pattern that will send and receive buffers like any other socket channels
+    but the only difference between others is it can manage incoming payloads in a specific manner like:
+        • receiving only a specific message on a specific topic (receivers can only subscribe to a specific topic)
+        • schduling a message to be sent later
+        • schduling a message to be received at a specific condition
+        • sending and broadcasting message only to specific receivers 
+        • handle (send and receive) tasks and messages asyncly inside a threadpool
+        • buffering messages inside a queue to send them once the receiver gets backed online
+
+
+
+
 
 */
 
 
 
-pub mod publishers;
-pub mod consumers;
+pub mod hoopoe;
+pub mod wallexerr;

@@ -105,18 +105,18 @@ Coded by
     [🚨] calling between actors and broadcasting message events id sone by calling tell() method on actors
 
     [🚨] there is no guaranteed order of execution for spawns, given that other threads may steal tasks at any time, however, they are generally prioritized in a LIFO order 
-          on the thread from which they were spawned, other threads always steal from the other end of the deque, like FIFO order, the idea is that recent tasks are most likely to be fresh 
-          in the local CPU's cache, while other threads can steal older stale tasks.
+        on the thread from which they were spawned, other threads always steal from the other end of the deque, like FIFO order, the idea is that recent tasks are most likely to be fresh 
+        in the local CPU's cache, while other threads can steal older stale tasks.
     
     [🚨] spawning native threads are too slow since thread handling in rust is depends on user base context switching means that 
-          based on the load of the IO in the app rust might solve the data load inside another cpu core and use multiprocessing approach:
+        based on the load of the IO in the app rust might solve the data load inside another cpu core and use multiprocessing approach:
             • https://www.reddit.com/r/rust/comments/az9ogy/help_am_i_doing_something_wrong_or_do_threads/
             • https://www.reddit.com/r/rust/comments/cz4bt8/is_there_a_simple_way_to_create_lightweight/
     
     [🚨] in building multithreading apps sending data between threads must be done by using jobq channels like mpsc to avoid being in deadlock and race condition situations
     
     [🚨] actors are workers which uses jobq algos like mpsc channels to send message events asyncly between other 
-          actors and the system to execute them inside their free thread from the thread pool
+        actors and the system to execute them inside their free thread from the thread pool
     
     [🚨] messages must be Send Sync static and Arc<Mutex<Message>> to share between actor threads
     
@@ -136,7 +136,13 @@ Coded by
             • At any given time, you can have either one mutable reference or any number of immutable references.
             • References must always be valid.
 
+    
+    [🚨] a jobq uses channels to share data between threads and one of them is mpsc which means that multiple 
+        sender can be shared between threads but only one consumer can be used by a thread 
+        at a time since the consumer in mpsc is not shareable and cloneable.
 
+    [🚨] we can pass a mutex through the mpsc channel to other threads to allow the thread mutate the content of that 
+        type by locking on that type which prevent other threads from mutating the type.
 
 
 
@@ -156,6 +162,7 @@ Coded by
 use std::fmt;
 use is_type::Is;
 use rayon::prelude::*;
+use rabbitmq_stream_client::{Environment, types::Message, Producer, Dedup, Consumer};
 use log::{info, error, LevelFilter};
 use tokio::net::{TcpListener, TcpStream, UdpSocket}; //-- async tcp listener and stream
 use tokio::io::{AsyncReadExt, AsyncWriteExt}; //-- read from the input and write to the output - AsyncReadExt and AsyncWriteExt are traits which are implemented for an object of type TcpStream and based on orphan rule we must use them here to use the read() and write() method asyncly which has been implemented for the object of TcpStream (these trait have been implemented for TcpStream structure)
@@ -180,6 +187,7 @@ use crate::actors::{
                 }; 
 use crate::schemas::{Transaction, Block, Slot, Chain, Staker, Db, Storage, Mode};
 use crate::engine::contract::token::CRC20; //-- based on orphan rule we must use CRC20 here to use the mint() and other methods implemented for the validator actor
+use crate::rtp::mq::hoopoe::{Account, Topic};
 use mongodb::Client;
 use futures::{Future, StreamExt, executor::block_on, future::RemoteHandle}; //-- StreamExt is a trait for streaming utf8 bytes data - RemoteHandle is a handler for future objects which are returned by the remote_handle() method
 use serde::{Deserialize, Serialize};
@@ -248,6 +256,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     let _handle = log4rs::init_config(config).unwrap();
     dotenv().expect("⚠️ .env file not found");
 
+    let hoopoe_environment = Environment::builder().build().await?; 
     let db_engine = env::var("DB_ENGINE").expect("⚠️ no db engine variable set");
     let db_name = env::var("DB_NAME").expect("⚠️ no db name variable set");
     let mut run_time_info = RafaelRt(HashMap::new());
@@ -383,6 +392,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
 
     
+
+
+
+
+
+
+
+
+
+
+    
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈ 
+    ///////                 starting hoopoe mq
+    /////// ⚈ --------- ⚈ --------- ⚈ --------- ⚈ --------- ⚈  
+    
+    let sample_account_id = Uuid::new_v4().to_string();
+    let account_publisher = Account::new(hoopoe_environment, sample_account_id).await;
+    account_publisher
+        .build_producer().await
+        .publish(Topic::Hoop, "new hoop from wildonion!".to_string()).await;
+    
+    
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -808,7 +850,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                                                 .clone()
                                                 .add_validator( //// this method will return the updated slot
                                                     default_parachain_uuid, 
-                                                    addr.clone()
+                                                    addr.clone() //// socket address can be a unique identifier for the connected validator since it has a unique port each time that a validator gets slided into the network 
                                                 );
         }
         
@@ -968,12 +1010,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
         info!("➔ 📥 receiving the stream setups");
         let mempool_sender = mempool_sender.clone(); //-- cloning mempool_sender to send signed transaction through the channel to the receiver for mining process
         
+        //// ... the following will handle the the incoming stream inside a threadpool of the tokio green threads
         //// ... move will move everything from its behind to the new scope and take their ownership so there is not a single var after moving in second iteration of the loop thus we've passed all the requirements that might be moved by doing that we can make sure that we have them again after first iteration 
         //// ... beacuse in the first iteration async move{} will move the everything and takes the ownership from its behind thus in second iteration we don't have them and to solve this issue we have to pass them in the channel to have them in every iteration  
         tokio::spawn(async move { //-- this is an async task related to updating a validator actor on every incoming message from the sender which is going to be solved in the background on a single (without having to work on them in parallel) thread using green thread pool of tokio runtime and message passing channels like mpsc job queue channel protocol
-            let mut transaction_buffer_bytes = vec![0 as u8; buffer_size]; //-- using [0 as u8; buffer_size] gives us the error of `attempt to use a non-constant value in a constant` cause [u8] doesn't implement the Sized trait
+            let mut transaction_buffer_bytes = vec![0 as u8; buffer_size]; //-- using [0 as u8; buffer_size] gives us the error of `attempt to use a non-constant value in a constant` cause [u8] array doesn't implement the Sized trait
             while match stream.read(&mut transaction_buffer_bytes).await{ //-- streaming over the incoming bytes from the socket - reading is the input and writing is the output
-                Ok(size) if size == 0 => false, //-- socket closed
+                Ok(size) if size == 0 => false, //-- socket closed since zero bytes data are here!
                 Ok(size) => {
                     
                     // ----------------------------------------------------------------------
@@ -1007,10 +1050,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                     // ---------------------------------------------------------------------------------------
                     //          SERDING INCOMING IO STREAM OF TRANSACTION CHUNKS USING serde & borsh
                     // ---------------------------------------------------------------------------------------
-                    
-                    let deserialized_transaction_union = Transaction::new(&transaction_buffer_bytes[0..size]).unwrap(); //-- decoding process of incoming transaction - deserializing a new transaction bytes into the Transaction struct object using TransactionMem union
-                    let deserialized_transaction_serde = &mut serde_json::from_slice::<Transaction>(&transaction_buffer_bytes[0..size]).unwrap(); //-- decoding process of incoming transaction - deserializing a new transaction bytes coming from the steamer into a mutable Transaction object using serde_json::from_slice to mutate the signed field 
-                    let deserialized_transaction_borsh = &mut Transaction::try_from_slice(&transaction_buffer_bytes[0..size]).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method; since we want to sign the transaction thus we must define it as mutable
+                    // NOTE - ..size means from the beginning to the limit - 1, we could also use 0..size
+
+                    let deserialized_transaction_union = Transaction::new(&transaction_buffer_bytes[..size]).unwrap(); //-- decoding process of incoming transaction - deserializing a new transaction bytes into the Transaction struct object using TransactionMem union
+                    let deserialized_transaction_serde = &mut serde_json::from_slice::<Transaction>(&transaction_buffer_bytes[..size]).unwrap(); //-- decoding process of incoming transaction - deserializing a new transaction bytes coming from the steamer into a mutable Transaction object using serde_json::from_slice to mutate the signed field 
+                    let deserialized_transaction_borsh = &mut Transaction::try_from_slice(&transaction_buffer_bytes[..size]).unwrap(); //-- passing the vector of utf8 bytes into the try_from_slice() method to deserialize into the SMSResponse struct - since Vec<u8> will be coerced to &'a [u8] at compile time we've passed Vec<u8> type into the try_from_slice() method; since we want to sign the transaction thus we must define it as mutable
                     let mut transaction_serialized_into_vec_bytes_using_serede = serde_json::to_vec(&deserialized_transaction_serde).unwrap(); //-- converting the deserialized_transaction_serde object into vector of utf8 bytes using serde
                     let mut transaction_serialized_into_vec_bytes_using_borsh = deserialized_transaction_borsh.try_to_vec().unwrap(); //-- converting the transaction object into vector of utf8 bytes using borsh
                     // TODO - only if the downside of the mpsc job queue channel was available the transaction will be signed and sent through the mempool channel to be pushed inside a block for mining process
@@ -1101,7 +1145,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                         // ----------------------------------------------------------------------
                         
                         info!("➔ 🙅 rejecting incoming transaction caused by Unavailable Mempool Channel issue");
-                        stream.write(&transaction_buffer_bytes[0..size]).await.unwrap(); //-- rejecting the transaction back to the peer
+                        stream.write(&transaction_buffer_bytes[..size]).await.unwrap(); //-- rejecting the transaction back to the peer
                         true
                     }
                 },

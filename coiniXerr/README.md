@@ -1,6 +1,6 @@
 
 # 💰 coiniXerr
-An Actor and Sharded Based Design Pattern Runtime, Blockchain and Engine for uniXerr Cryptocurrency Coin, CRC20, CRC21 and CRC22 Smart Contract; to Mint NFT and FT for Digital Assests inside uniXerr Protocol.
+An Actor and Sharded Based Design Pattern Runtime, Blockchain and Engine for uniXerr Cryptocurrency Coin, CRC20, CRC21 and CRC22 Smart Contract to Mint NFT and FT for Digital Assests inside uniXerr Protocol.
 
 
 ### Development Setup
@@ -10,7 +10,3 @@ An Actor and Sharded Based Design Pattern Runtime, Blockchain and Engine for uni
 ### Production Setup
 
 ```cargo build --bin coiniXerr --release```
-
-# 📌 TODOs
-
-`DEV.info` infos

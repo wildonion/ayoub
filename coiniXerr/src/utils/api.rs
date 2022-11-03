@@ -144,7 +144,7 @@ pub async fn tx_emulator_udp() -> (){
         let ip_port = ip_port.clone();
         tokio::spawn(async move{
             let socket = UdpSocket::bind("0.0.0.0:0").await.unwrap(); // binding to any available address and any port selected by the os for outbound packets
-            match socket.connect(ip_port.clone().as_str()).await{
+            match socket.connect(ip_port.clone().as_str()).await{ //-- let this user socket connect to the passed in address
                 Ok(_) => {
 
                     info!("🪙 sending transaction {}", time);
