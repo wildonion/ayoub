@@ -381,7 +381,7 @@ NOTE - when putting inside the Box the type will be moved thus we can take a ref
 NOTE - usually we can use Box to avoid using lifetimes directly for the heap data types like traits since they must be passed into other scopes like struct fields either by cloning or by taking a reference to them  
 NOTE - use Box instead of taking a direct reference to that type since Box has its own reference and lifetime 
 NOTE - sharing types between scopes and threads is done using channels but the type must be bounded to Send Sync and static means it must be cloneable or share and safe to send its reference or ownsership between threads and scopes and if the type is not clonable we must put it inside the Arc
-
+NOTE - if we put the first param as &self means we're borrowing the instance of the type (sharded referece) also putting the self will move the instance out of the scope and can't call other methods since the instance is no longer available
 
 
 

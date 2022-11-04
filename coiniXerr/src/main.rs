@@ -409,10 +409,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
     
     let sample_account_id = Uuid::new_v4().to_string();
     let account_publisher = Account::new(hoopoe_environment, sample_account_id).await;
-    account_publisher
-        .build_producer().await
-        .publish(Topic::Hoop, "new hoop from wildonion!".to_string()).await;
-    
+    account_publisher //// by calling the first method which has self the instance will be moved and its lifetime will be dropped since we didn't specify &self in first param methods to borrow the instance when we're calling the method 
+            .build_producer().await
+            .publish(Topic::Hoop, "new hoop from wildonion!".to_string()).await;
+            .close_producer().await;
     
 
 

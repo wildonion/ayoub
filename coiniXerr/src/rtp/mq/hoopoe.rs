@@ -42,8 +42,8 @@ pub enum Topic{
 pub struct Account{ 
     pub account_id: String, //// this is the _id of the account that wants to publish messages
     pub env: Environment,
-    pub producer: Option<Producer<Dedup>>,
-    pub consumer: Option<Consumer>,
+    pub producer: Arc<Option<Producer<Dedup>>>, //// Clone trait is not implemented for the DedUp thus we can't clone or copy this field
+    pub consumer: Arc<Option<Consumer>>,
 } 
 
 impl Account{
@@ -52,8 +52,8 @@ impl Account{
         Self{
             account_id: acc_id,
             env,
-            producer: None,
-            consumer: None,
+            producer: Arc::new(None),
+            consumer: Arc::new(None),
         }
     }
 
@@ -69,19 +69,18 @@ impl Account{
         Self{
             account_id: self.account_id.clone(), //// we're cloning the account_id since when we're creating the Self it'll move into a new instance scope
             env: self.env.clone(), //// we're cloning the env since when we're creating the Self it'll move into a new instance scope
-            producer: Some(prod),
+            producer: Arc::new(Some(prod)),
             consumer: self.consumer, //// since self is not a shared reference thus we can move it into new scope
         }
 
     }
 
-    pub async fn publish(self, topic: Topic, message: String){ //// we can't take a reference to self since the producer field can't be moved out the shared reference due to not-implemented-Clone-trait-for-self.producer issue 
+    pub async fn publish(&self, topic: Topic, message: String) -> Self{ //// we can't take a reference to self since the producer field can't be moved out the shared reference due to not-implemented-Clone-trait-for-self.producer issue 
 
 
         // TODO - schedule old and new ones (from the last offline time) 
         //        to be executed from the hoops queue buffer until the consumer is backed on line
         // ...
-
         let body = match topic{
             Hoop => format!("hooping: {}", message), 
             ReHoop => format!("rehooping: {}", message), 
@@ -90,20 +89,26 @@ impl Account{
             Like => format!("Liking: {}", message),
         };
 
-        
         //// if the first param of method was &self that means the instance is behind a shared reference
         //// but it can't be moved or cloned since Clone trait which is a supertrait of the Copy is not  
         //// implemented for DedUp thus we can't clone or move the self.producer out of the shared reference at all.
-        if let Some(mut prod) = self.producer{
+        if let Some(mut prod) = self.producer.clone(){
             prod
                 .send(Message::builder().body(body).build(), |_| async move{})
                 .await
                 .unwrap();            
         }
 
+        Self{
+            account_id: self.account_id,
+            env: self.env,
+            producer: self.producer.clone(),
+            consumer: self.consumer.clone(),
+        }
+
     }
 
-    pub async fn close_producer(self){
+    pub async fn close_producer(&self){
         self.producer
                 .unwrap()
                 .close().await
@@ -136,8 +141,9 @@ impl Account{
 
     pub async fn subscribe(self){
 
+        let mut consumer = self.consumer.unwrap(); //// defining the consumer as mutable since receiving and reading from the consumer is a mutable process and needs the futures::StreamExt trait to be imported 
         tokio::spawn(async move{
-            while let Some(delivery) = self.consumer.unwrap().next().await{ //// streaming over the consumer to receive all the messages comming from the producer while there is some delivery
+            while let Some(delivery) = consumer.next().await{ //// streaming over the consumer to receive all the messages comming from the producer while there is some delivery
                 info!("Received message {:?}", delivery);
             }
         });
