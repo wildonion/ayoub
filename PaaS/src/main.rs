@@ -292,7 +292,7 @@ async fn main() -> MainResult<(), Box<dyn std::error::Error + Send + Sync + 'sta
     let unwrapped_storage = app_storage.unwrap(); //-- unwrapping the app storage to create a db instance
     let db_instance = unwrapped_storage.get_db().await; //-- getting the db inside the app storage; it might be None
     let api = Router::builder()
-        .data((db_instance.unwrap().clone(), arced_mutexd_otp_info.clone())) //-- shared state which will be available to every route handlers is the db_instance which must be Send + Syn + 'static to share between threads
+        .data(db_instance.unwrap().clone()) //-- shared state which will be available to every route handlers is the db_instance which must be Send + Syn + 'static to share between threads
         .scope("/auth", routers::auth::register().await)
         .scope("/event", routers::event::register().await)
         .scope("/game", routers::game::register().await)
