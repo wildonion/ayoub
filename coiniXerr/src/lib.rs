@@ -123,12 +123,12 @@ async fn function_with_callback(cb: Box<dyn FnOnce(i32) -> i32>){
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 
-pub fn trash(){
+pub async fn trash(){
 	
 	   {
-            'outer: loop{
+            'outer: loop{ // outter labeled block 
                 println!("this is the outer loop");
-                'inner: loop{
+                'inner: loop{ // inner labeled block 
                     println!("this is the inner loop");
                     // break; // only the inner loop
 
@@ -414,6 +414,7 @@ pub fn trash(){
 
 	}
 
+    // by returning the impl Interface for the type that is being returned we can call the trait methods on the type when we're calling the following method since we're returning acutally kinda an instance of the type
 	fn return_impl_trait() -> impl Interface { // NOTE - returning impl Trait from function means we're implementing the trait for the object that is returning from the function regardless of its type that we're returning from the function cause compiler will detect the correct type in compile time and implement or bound the trait for that type
 	    Pack {}
 	}
@@ -609,6 +610,102 @@ pub fn trash(){
 
 	
 	
+    let res = 'labeled: {
+        loop{
+            if 10 % 5 > 2 {
+                break 'labeled false // it'll break the 'labeled block with a false return
+            }
+        }
+    };
+
+
+
+
+
+    
+    // =============================================================================================================================
+    //-------------------------- let else
+    fn get_count_item(s: &str) -> (u64, &str) {
+        let mut it = s.split(' ');
+        let (Some(count_str), Some(item)) = (it.next(), it.next()) else {
+            panic!("Can't segment count item pair: '{s}'");
+        };
+        let Ok(count) = u64::from_str_radix(count_str, 10) else {
+            panic!("Can't parse integer: '{count_str}'");
+        };
+        (count, item) // we can return them since their scopes didn't dropped when we're using let else
+        
+        // -------- using if let
+        // --------------------------------
+        // let (count_str, item) = match (it.next(), it.next()) {
+        //     (Some(count_str), Some(item)) => (count_str, item),
+        //     _ => panic!("Can't segment count item pair: '{s}'"),
+        // };
+        // let count = if let Ok(count) = u64::from_str(count_str) {
+        //     count
+        // } else {
+        //     panic!("Can't parse integer: '{count_str}'");
+        // };
+        // --------------------------------
+        
+    }
+    assert_eq!(get_count_item("3 chairs"), (3, "chairs"));
+    // =============================================================================================================================
+
+
+
+
+    let statement = |x: u32| Some(2);
+    let Some(3) = statement(3) else{
+        panic!("the else part");
+    };
+
+    
+    // =============================================================================================================================
+    // closure coding - trait must be inside Box or use with &dyn Trait if they want to be a type    
+    pub struct Complex{
+        pub callback: Box<dyn FnOnce(Option<String>) -> u8>,
+        pub callback_result: u8,
+    }
+    
+    let comp = Complex{
+        callback: Box::new(
+            |_: Option<String>| 13
+        ),
+        callback_result: ( // building and calling the closure at the same time inside the struct field
+            |_| 254
+        )(Some("wildonion".to_string())),
+    };
+
+    let Complex{ 
+        callback, 
+        callback_result 
+    } = comp; // struct unpacking
+
+    pub async fn do_it<F>(callback: F) where F: FnOnce(Option<String>) -> u8{
+        callback(Some("wildonion".to_string()));
+    }
+
+
+    let res = { // res doesn't have any type
+        ( // building and calling at the same time inside the res scope
+            |x| async move{
+                x
+            }
+        )(34).await; 
+    };
+    
+
+    let callback = |_| Some(1); // |_| means that the param name can be anything  
+    let (
+        |callback| callback // the return type is the callback which is a closure
+    ) = match callback(..){ // callback(..) means that it'll take anything as the range - when we're do a matching on the callback(..) means that by calling the callback(..) we should get a closure in its return type which this is not the case hence this code is unreachable 
+        |_| Some(2) => |_| Some(3), // |_| Some(2) is the other syntax for calling the x closure - the or pattern: it can also be _ | Some(2) since _ means the value can be anything thus one of side can only be executed (either _ or Some(2))  
+        |_| _ => unreachable!(), // |_| _ is the other syntax for calling the x closure - the or pattern: it can also be _ | _ since _ means the value can be anything thus one of side can only be executed (either _ or _)
+    };
+    // the return type of calling callback(..) is not a closure hence we can't do a matching on closures and because of that the code will be unreachabled
+    assert!(matches!(callback(..), |_| Some(4))); // it'll be unreachable since the first arm of the match is not match with this 
+    // =============================================================================================================================
 
 
 }
@@ -624,6 +721,19 @@ pub fn trash(){
 //////////////////////////////////////////////////////////////////////////////////////
 
 pub fn mactrait(){
+
+
+    
+    /////////////////////////////////////////////////////////
+    // gat example with lifetime
+    trait BorrowArray<T> where Self: Send + Sized{
+    
+        type Array<'x, const N: usize> where Self: 'x;
+    
+        fn borrow_array<'a, const N: usize>(&'a mut self) -> Self::Array<'a, N>;
+    }
+
+
 
     /////////////////////////////////////////////////////////
     // default type parameter example
@@ -739,6 +849,16 @@ pub fn mactrait(){
 
 pub fn unsafer(){
 
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // a constant function can only return a constant value
+    // const fn test(name: &String) -> String{
+        // "wildonion".to_string() // we can't return a non-const value inside the constant function
+    // }
+
+
+
     ///// -------------- changing the vaule in runtime using its pointer -------------- /////
     let v = vec![1, 2, 3];
     // let raw_parts = v.into_raw_parts(); //-- getting the pointer, len and capacity of the vector only in unstable rust! 
@@ -832,6 +952,7 @@ pub fn unsafer(){
 
     let c_const_pointer = 32 as *const i16;
     let c_mut_pointer = 64 as *mut i64;
+    let c_const_pointer = c_mut_pointer.cast_const(); // casting the c raw mutable pointer into a constant one
     let thing1: u8 = 89.0 as u8;
     assert_eq!('B' as u32, 66);
     assert_eq!(thing1 as char, 'Y');
@@ -1105,7 +1226,6 @@ pub fn unsafer(){
     //     slice::from_raw_parts(deserialized_transaction_borsh as *const Transaction as *const u8, mem::size_of::<Transaction>()) //-- it'll form a slice from the pointer to the struct and the total size of the struct which is the number of elements inside the constructed &[u8] array; means number of elements in constructing a &[u8] from a struct is the total size of the struct allocated in the memory
     // };
     
-    
-    
+
 
 }

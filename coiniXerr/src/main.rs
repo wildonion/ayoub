@@ -414,12 +414,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
                             ).await
                             .build_producer().await; //// by calling the first method which has self the instance will be moved and its lifetime will be dropped since we didn't specify &self in first param methods to borrow the instance when we're calling the method 
     let producer = Account::publish(account.producer, Topic::Hoop, "new hoop from wildonion!".to_string()).await;
-    
-
-
-
-
-
+    Account::close_producer(producer).await;
 
 
 

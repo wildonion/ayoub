@@ -26,6 +26,10 @@ use rtp::{
 
 
 
+
+
+
+
     
 pub enum Topic{
     Hoop,
@@ -149,19 +153,3 @@ impl Account{ //// we can't take a reference to self since the producer field ca
     }
 
 } 
-
-
-
-
-
-
-
-
-
-
-
-
-//// list of all hoopoe publishers
-pub struct HoopoePublishers{
-    pub account: Vec<Account>,
-}
