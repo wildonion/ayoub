@@ -118,7 +118,7 @@ Coded by
     [🚨] actors are workers which uses jobq algos like mpsc channels to send message events asyncly between other 
         actors and the system to execute them inside their free thread from the thread pool
     
-    [🚨] messages must be Send Sync static and Arc<Mutex<Message>> to share between actor threads
+    [🚨] messages or the data must be Send Sync static and Arc<Mutex<Message>> to share between actor threads for mutating
     
     [🚨] mpsc means multiple threads can read the data which is Send + Sync + 'static or multiple sender can be cloned but only one thread or receiver can mutate the data
     

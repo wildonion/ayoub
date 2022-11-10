@@ -397,7 +397,8 @@ pub async fn trash(){
 	    }
 	}
 
-
+    
+    pub const WO: &str = "widonion";
 	pub const SIZE: usize = 325;
 	pub type Context<'a, Pack> = Unpack<'a, Pack, SIZE>; //-- Pack type will be bounded to Interface trait and 'l lifetime 
 	pub struct Unpack<'l, T: Interface + 'l + Into<T>, const U: usize>{ //-- T is of type Pack struct which is bounded to 'l lifetime the Into and the Interface traits and U (constant generic) must be a constant usize type - Unpack takes a generic type of any kind which will be bounded to a trait and a lifetime but it must be referred to a field or be inside a PhantomData since T and the lifetime will be unused and reserved by no variables inside the ram
@@ -536,6 +537,10 @@ pub async fn trash(){
 
 	    }
 
+        pub const fn test(name: &String) -> &str{ // we can return &str in here sicne we're using the lifetime of the passed in param which is &String thus it's ok to use that reference (the reference to the passed in String) to return a &str (since its lifetime is valid as long as the passed in param is valid)
+            WO // we must return const value from the constant function
+        }
+
         pub fn run() -> impl std::future::Future<Output=u8>{ //-- implementing the Future trait for the return type of the function by doing this we have to return an async block from the function
             async move{ //-- returning an async block from the function
                 26
@@ -605,18 +610,13 @@ pub async fn trash(){
 
 
     fn run(id: u8) -> MyResult<u8, i32>{
-        MyResult::Result(1)
+        MyResult::Result(1) 
+        // if there was something went wrong we can return MyResult::Err(1);
+        // ...
     } 
 
 	
-	
-    let res = 'labeled: {
-        loop{
-            if 10 % 5 > 2 {
-                break 'labeled false // it'll break the 'labeled block with a false return
-            }
-        }
-    };
+    
 
 
 
@@ -655,16 +655,14 @@ pub async fn trash(){
 
 
 
-    let statement = |x: u32| Some(2);
-    let Some(3) = statement(3) else{
-        panic!("the else part");
-    };
+    
 
     
     // =============================================================================================================================
     // closure coding - trait must be inside Box or use with &dyn Trait if they want to be a type    
     pub struct Complex{
         pub callback: Box<dyn FnOnce(Option<String>) -> u8>,
+        pub labeled_block: bool,
         pub callback_result: u8,
     }
     
@@ -672,6 +670,13 @@ pub async fn trash(){
         callback: Box::new(
             |_: Option<String>| 13
         ),
+        labeled_block: 'block:{
+            if 22 % 2 == 0{
+                break 'block true; // it'll break the 'labeled block with a true return
+            } else{
+                break 'block false; // it'll break the 'labeled block with a false return
+            }
+        },
         callback_result: ( // building and calling the closure at the same time inside the struct field
             |_| 254
         )(Some("wildonion".to_string())),
@@ -679,13 +684,22 @@ pub async fn trash(){
 
     let Complex{ 
         callback, 
+        labeled_block,
         callback_result 
-    } = comp; // struct unpacking
+    } = comp else{ // the else part is not needed since the unpacking process will be matched always
+        panic!("can't unpack");
+    }; // struct unpacking
 
-    pub async fn do_it<F>(callback: F) where F: FnOnce(Option<String>) -> u8{
+    pub async fn do_it<F>(callback: F) // callback is of type F where F is a closure which is Send Sync and have a valid static lifetime
+        where F: FnOnce(Option<String>) -> u8 + Send + Sync + 'static{
         callback(Some("wildonion".to_string()));
     }
 
+
+    let statement = |x: u32| Some(2);
+    let Some(3) = statement(3) else{ // in else part there must be panic message
+        panic!("the else part");
+    };
 
     let res = { // res doesn't have any type
         ( // building and calling at the same time inside the res scope
@@ -850,12 +864,6 @@ pub fn mactrait(){
 pub fn unsafer(){
 
 
-
-    /////////////////////////////////////////////////////////////////////////
-    // a constant function can only return a constant value
-    // const fn test(name: &String) -> String{
-        // "wildonion".to_string() // we can't return a non-const value inside the constant function
-    // }
 
 
 

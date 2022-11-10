@@ -7,7 +7,7 @@ use crate::*; // loading all defined crates, structs and functions from the root
 pub mod api;
 pub mod hexy;
 pub mod scheduler;
-
+pub mod jobq;
 
 
 
